@@ -10,7 +10,7 @@ type Props = {}
 const Header = (props: Props) => {
 	return (
 		<div className=''>
-			<div className='flex justify-between p-4 bg-gray-300'>
+			<div className='flex justify-between p-4 px-8 bg-gray-300'>
 				<ul className=''>
 					<li>
 						<Link
@@ -19,8 +19,8 @@ const Header = (props: Props) => {
 							rel='noopener noreferrer'
 							className='flex items-center justify-center'
 						>
-							<Icon name='lucide/phone' className='w-5 h-5 mr-3 hover:text-orange-400' />
-							<Icon name='lucide/viber' className='w-5 h-5 mr-1 hover:text-orange-400' />
+							<Icon name='lucide/phone' className='w-5 h-5 mr-3 hover:text-primaryAccentColor' />
+							<Icon name='lucide/viber' className='w-5 h-5 mr-1 hover:text-primaryAccentColor' />
 							<span className='nav font-semibold'>+38 097 744 09 79</span>
 						</Link>
 					</li>
@@ -28,7 +28,7 @@ const Header = (props: Props) => {
 				<Menu />
 			</div>
 
-			<div className='flex justify-between items-center border border-b p-4'>
+			<div className='flex justify-between items-center border border-b p-4 px-8'>
 				<Logo />
 
 				<Search />
