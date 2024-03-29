@@ -18,7 +18,7 @@ export function Icon({
   children,
   ...props
 }: SVGProps<SVGSVGElement> & {
-  name: IconName;
+  name: IconName ;
   childClassName?: string;
 }) {
   if (children) {
