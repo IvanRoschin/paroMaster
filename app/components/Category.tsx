@@ -17,7 +17,7 @@ const category = [
 
 type Props = {}
 
-const Catalog = (props: Props) => {
+const Category = (props: Props) => {
 	return (
 		<ul>
 			{category.map((item, index) => {
@@ -31,4 +31,4 @@ const Catalog = (props: Props) => {
 	)
 }
 
-export default Catalog
+export default Category

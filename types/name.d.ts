@@ -2,7 +2,8 @@
 
 export type IconName =
 	| "lucide/catalog"
+	| "lucide/loop"
 	| "lucide/phone"
 	| "lucide/shopping-cart"
 	| "lucide/user"
-	| "simpleIcons/viber";
+	| "lucide/viber";
