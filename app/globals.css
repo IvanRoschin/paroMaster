@@ -6,10 +6,6 @@
 		@apply text-surface;
 		@apply bg-white;
 	}
-	html.dark {
-		@apply text-neutral-50;
-		@apply bg-body-dark;
-	}
 }
 @tailwind components;
 @tailwind utilities;
@@ -20,10 +16,20 @@ p {
 
 @layer components {
 	.nav {
-		@apply relative ml-10 tracking-[1px] hover:text-white;
+		@apply relative hover:text-white transition-all
+		duration-300;
 	}
 	.nav::after {
-		@apply content-[''] bg-orange-400 h-[3px] w-0 left-0 -bottom-1 rounded-xl absolute duration-300;
+		@apply content-[''] 
+		bg-orange-600 
+		h-[3px] 
+		w-0 
+		left-0 
+		-bottom-1 
+		rounded-xl 
+		absolute 
+		transition-all
+		duration-300;
 	}
 	.nav:hover::after {
 		@apply w-full;

@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
+import { Header } from './components'
+import Category from './components/Category'
 import "./globals.css"
 import PreloadedResourses from './utils/preloadedResourses'
 
@@ -18,8 +20,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="uk">
-      <PreloadedResourses/>
-      <body className={`${inter.className} flex justify-center items-center`}>
+      <body className={`${inter.className} mx-auto`}>
+      <PreloadedResourses />
+      <Header />
+      <Category/>
       {children}
       </body>
     </html>
