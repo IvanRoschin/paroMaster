@@ -20,11 +20,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="uk">
-      <body className={`${inter.className} mx-auto`}>
+      <body className={`${inter.className} primaryTextColor mx-auto`}>
       <PreloadedResourses />
-      <Header />
-      <Category/>
-      {children}
+        <Header />
+        <div className='flex justify-center items-start px-8'>
+        <Category/>
+       {children}
+        </div>
       </body>
     </html>
   );

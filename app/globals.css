@@ -1,17 +1,40 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900&display=swap');
 
 @tailwind base;
-@layer base {
-	html {
-		@apply text-surface;
-		@apply bg-white;
-	}
-}
 @tailwind components;
 @tailwind utilities;
 
-p {
-	@apply leading-[1.6];
+/*HEX => RGB*/
+/*
+#282828 => 40 40 40
+#000000 => 0 0 0
+#767676 => 118 118 118
+primaryTextColor #282828 => 40 40 40
+primaryAccentColor #ea580c => 234 88 12
+#FFFD84 => 255 255 216
+*/
+
+@layer base {
+	:root {
+		--color-primaryBackground: 0 0 0;
+		--color-secondaryBackground: 40 40 40;
+
+		--color-primaryTextColor: 40 40 40;
+		--color-secondaryTextColor: 118 118 118;
+		--color-thirdTextColor: 118 118 118;
+
+		--color-primaryAccentColor: 234 88 12;
+		--color-secondaryAccentColor: 255 255 216;
+
+		--color-sectionTitleColor: 255 255 255;
+		--color-iconColor: 255 255 255;
+
+		--color-primaryScrollbarTrack: 40 40 40;
+		--color-primaryScrollbarThumb: 255 255 50;
+
+		--font-mono: ui-monospace, Melno, Monaco, Consolas, 'Coscadia Mono', 'Roboto Mono',
+			'Oxygen Mono', 'Ubuntu Monosapce', 'Fira Mono', 'Droid Sans Mono', 'Courier Nem' monospace;
+	}
 }
 
 @layer components {
