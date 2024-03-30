@@ -3,6 +3,7 @@ import { Icon } from './Icon'
 
 const menu = [
 	{ menuItemName: 'Головна', menuItemLink: '/ ' },
+	{ menuItemName: 'Послуги', menuItemLink: '/ ' },
 	{ menuItemName: 'Доставка та оплата', menuItemLink: '/ ' },
 	{ menuItemName: 'Гарантія', menuItemLink: '/ ' },
 	{ menuItemName: 'Контакти', menuItemLink: '/ ' },
