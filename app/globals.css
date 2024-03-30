@@ -6,8 +6,8 @@
 
 /*HEX => RGB*/
 /*
-#282828 => 40 40 40
-#000000 => 0 0 0
+primaryBackground #ffffff => 255 255 255
+secondaryBackground #d1d5db => 209 213 219
 #767676 => 118 118 118
 primaryTextColor #282828 => 40 40 40
 primaryAccentColor #ea580c => 234 88 12
@@ -16,8 +16,8 @@ primaryAccentColor #ea580c => 234 88 12
 
 @layer base {
 	:root {
-		--color-primaryBackground: 0 0 0;
-		--color-secondaryBackground: 40 40 40;
+		--color-primaryBackground: 255 255 255;
+		--color-secondaryBackground: 209 213 219;
 
 		--color-primaryTextColor: 40 40 40;
 		--color-secondaryTextColor: 118 118 118;

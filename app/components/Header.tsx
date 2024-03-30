@@ -9,7 +9,7 @@ type Props = {}
 
 const Header = (props: Props) => {
 	return (
-		<div className=''>
+		<div className='mb-9'>
 			<div className='flex justify-between p-4 px-8 bg-gray-300'>
 				<ul className=''>
 					<li>
