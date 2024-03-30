@@ -30,7 +30,7 @@ interface Props {
 
 const Category = () => {
 	return (
-		<div className='p-4 text-sm'>
+		<div className='pt-0 mr-4 text-sm'>
 			<ul className='bg-secondaryBackground p-4'>
 				{category.map(({ categoryLink, iconName, categoryName }, index) => {
 					return (
