@@ -32,6 +32,9 @@ primaryAccentColor #ea580c => 234 88 12
 		--color-primaryScrollbarTrack: 40 40 40;
 		--color-primaryScrollbarThumb: 255 255 50;
 
+		--swiper-pagination-color: #ea580c;
+		--swiper-navigation-color: #ea580c;
+
 		--font-mono: ui-monospace, Melno, Monaco, Consolas, 'Coscadia Mono', 'Roboto Mono',
 			'Oxygen Mono', 'Ubuntu Monosapce', 'Fira Mono', 'Droid Sans Mono', 'Courier Nem' monospace;
 	}
@@ -39,7 +42,10 @@ primaryAccentColor #ea580c => 234 88 12
 
 @layer components {
 	.nav {
-		@apply relative hover:text-white transition-all
+		@apply relative 
+		hover:text-white hover:fill-orange-600
+		focus:text-white focus:fill-orange-600
+		transition-all
 		duration-300;
 	}
 	.nav::after {
@@ -56,5 +62,33 @@ primaryAccentColor #ea580c => 234 88 12
 	}
 	.nav:hover::after {
 		@apply w-full;
+	}
+	.nav:focus::after {
+		@apply w-full;
+	}
+
+	.swiper {
+		@apply mx-0
+			!important;
+	}
+	.swiper-slide {
+		@apply mr-0
+      !important;
+	}
+	.swiper-button-next,
+	.swiper-button-prev {
+		@apply w-0
+    !important;
+	}
+	.swiper-button-next::after,
+	.swiper-button-prev::after {
+		@apply content: ""
+		text-[rgb(234,88,12)]
+    text-base
+    !important;
+	}
+	.swiper-button-next.swiper-button-disabled,
+	.swiper-button-prev.swiper-button-disabled {
+		@apply opacity-0;
 	}
 }
