@@ -13,13 +13,15 @@ const ImagesBlock = ({ item }: ImagesBlockProps) => {
 
   return (
     <div className="mr-[50px] pb-[40px]">
-      <Image
-        src={item.imgUrl[index]}
-        alt="item_photo"
-        width={700}
-        height={700}
-        className="block self-center mb-[30px]"
-      />
+      <div className="w-[400px] h-[400px]">
+        <Image
+          src={item.imgUrl[index]}
+          alt="item_photo"
+          width={400}
+          height={400}
+          className="self-center mb-[30px]"
+        />
+      </div>
       <ul className="grid grid-cols-3 gap-3">
         {item.imgUrl.map((img: string, index) => (
           <li key={index}>
