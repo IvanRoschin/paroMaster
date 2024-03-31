@@ -1,7 +1,6 @@
 import Image from "next/image";
 import React from "react";
 import { IItem } from "types/item/IItem";
-import ItemImg from "../images/itemImg.webp";
 import Link from "next/link";
 
 interface ItemListCardProps {
@@ -10,13 +9,13 @@ interface ItemListCardProps {
 
 const ItemListCard = ({ item }: ItemListCardProps) => {
   return (
-    <li className="border border-gray-300 rounded-md p-4">
+    <li className="border border-gray-300 rounded-md p-4 hover:shadow-[10px_10px_15px_-3px_rgba(0,0,0,0.3)] hover:scale-105 transition-all">
       <Link href={`/item/${item._id}`} className="flex flex-col">
         <Image
-          src={ItemImg}
+          src={item.imgUrl[0]}
           alt="item_photo"
-          width={150}
-          height={150}
+          width={300}
+          height={300}
           className="block self-center mb-[30px]"
         />
         <h2 className="font-semibold mb-[20px]">{item.title}</h2>

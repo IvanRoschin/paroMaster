@@ -1,6 +1,6 @@
 export interface IItem {
   _id?: string;
-  imgUrl: string;
+  imgUrl: string[];
   brand: string;
   model: string;
   vendor: string;
