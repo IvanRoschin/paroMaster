@@ -36,7 +36,7 @@ export function Icon({
       {...props}
       className={className}
     >
-      <use href={`./icons/sprite.svg#${name}`} />
+    <use href={`${process.env.PUBLIC_URL}/icons/sprite.svg#${name}`} />
     </svg>
   );
 }

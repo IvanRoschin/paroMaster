@@ -20,10 +20,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="uk">
-      <body className={`${inter.className} primaryTextColor mx-auto`}>
+      <body className={`${inter.className} primaryTextColor`}>
       <PreloadedResourses />
         <Header />
-        <div className='flex justify-between items-start mx-auto px-8'>
+        <div className='container mx-auto flex justify-between items-start  px-8'>
         <Category/>
        {children}
         </div>
