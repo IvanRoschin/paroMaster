@@ -2,7 +2,7 @@
 
 export type IconName =
 	| 'lucide/catalog'
-	| 'lucide/loop'
+	| 'loop'
 	| 'lucide/phone'
 	| 'lucide/shopping-cart'
 	| 'lucide/user'
