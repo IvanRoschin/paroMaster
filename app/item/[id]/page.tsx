@@ -1,10 +1,9 @@
 import ImagesBlock from "@/components/ImagesBlock";
-import { items } from "@/components/items";
-import Image from "next/image";
+import { getGoodById } from "@/actions/getTest";
 import { IItem } from "types/item/IItem";
 
-export default function Item({ params }: { params: { id: string } }) {
-  const item = items.find((item: IItem) => item._id === params.id);
+export default async function Item({ params }: { params: { id: string } }) {
+  const item: IItem = await getGoodById(params.id);
 
   return (
     item && (
