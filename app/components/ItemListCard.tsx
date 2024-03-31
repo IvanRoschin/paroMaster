@@ -14,8 +14,8 @@ const ItemListCard = ({ item }: ItemListCardProps) => {
         <Image
           src={item.imgUrl[0]}
           alt="item_photo"
-          width={150}
-          height={150}
+          width={300}
+          height={300}
           className="block self-center mb-[30px]"
         />
         <h2 className="font-semibold mb-[20px]">{item.title}</h2>
