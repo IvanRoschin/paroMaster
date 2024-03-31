@@ -1,9 +1,8 @@
-import { ItemsList } from './components'
-import Slider from './components/Slider'
+import { ItemsList, Slider } from './components'
 
 export default function Home() {
 	return (
-		<div className='container mx-auto'>
+		<div className=''>
 			<Slider />
 			<ItemsList />
 		</div>

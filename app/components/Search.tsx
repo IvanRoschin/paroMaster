@@ -1,5 +1,3 @@
-'use client'
-
 import { Icon } from './Icon'
 
 type Props = {}
@@ -10,7 +8,7 @@ const Search = (props: Props) => {
 			<label className='mb-2 text-sm font-medium text-gray-900 sr-only'>Search</label>
 			<div className='relative w-full flex justify-center items-center'>
 				<div className='absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none'>
-					<Icon name='lucide/loop' className='w-4 h-4' />
+					<Icon name='loop' className='w-4 h-4' />
 				</div>
 				<input
 					type='search'
