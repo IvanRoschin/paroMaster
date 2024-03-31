@@ -8,7 +8,20 @@ export default async function Item({ params }: { params: { id: string } }) {
   return (
     item && (
       <div className="flex">
-        <ImagesBlock item={item} />
+        <ImagesBlock
+          item={{
+            imgUrl: item.imgUrl,
+            brand: item.brand,
+            model: item.model,
+            vendor: item.vendor,
+            title: item.title,
+            description: item.description,
+            price: item.price,
+            isAvailable: item.isAvailable,
+            isCompatible: item.isCompatible,
+            compatibility: item.compatibility,
+          }}
+        />
         <div className="pt-10">
           <h2 className="font-semibold text-2xl mb-[40px]">{item.title}</h2>
           <p className="mb-[20px]">{item.description}</p>
