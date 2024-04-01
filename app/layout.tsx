@@ -25,7 +25,7 @@ export default function RootLayout({
         <Header />
         <div className='container mx-auto flex justify-between items-start  px-8'>
         <Category/>
-       {children}
+        {children}
         </div>
       </body>
     </html>
