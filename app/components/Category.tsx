@@ -68,7 +68,7 @@ const Category = () => {
 					return (
 						<li key={index} className='mb-3 nav'>
 							<Link href={categoryLink} className='flex justify-start items-start '>
-								<Icon name={iconName} className='w-4 h-4  mr-3' />
+								<Icon name={iconName} className='w-5 h-5  mr-3' />
 								{categoryName}
 							</Link>
 						</li>
