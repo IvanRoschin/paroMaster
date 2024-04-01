@@ -13,13 +13,13 @@ const Search = (props: Props) => {
 				<input
 					type='search'
 					id='default-search'
-					className='py-1 block w-full ps-10 mr-4 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 '
+					className='py-1 block w-full ps-10 mr-4 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-primaryAccentColor focus:border-primaryAccentColor '
 					placeholder='Код товару, артикул або модель...'
 					required
 				/>
 				<button
 					type='submit'
-					className='text-white end-2.5 bottom-2.5 bg-gray-400 hover:bg-primaryAccentColor focus:ring-4 focus:outline-none focus:ring-gray-400 font-medium rounded-lg text-sm px-4 py-1'
+					className='text-white end-2.5 bottom-2.5 bg-primaryAccentColor hover:bg-secondaryBackground hover:text-black focus:text-black focus:ring-4 focus:outline-none focus:ring-secondaryBackground font-medium rounded-lg text-sm px-4 py-1'
 				>
 					Знайти
 				</button>
