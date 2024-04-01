@@ -1,60 +1,76 @@
 'use client'
 
 import Image from 'next/image'
+import { IoIosArrowDropleft, IoIosArrowDropright } from 'react-icons/io'
 import 'swiper/css'
+import 'swiper/css/autoplay'
+import 'swiper/css/effect-fade'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
-import 'swiper/css/scrollbar'
-import { Navigation, Pagination } from 'swiper/modules'
+
+import { Autoplay, EffectFade, Navigation, Pagination } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/react'
 
 type Props = {}
 
 const Slider = (props: Props) => {
 	return (
-		<div className='mb-9 '>
+		<div className='mb-9 swiper-container'>
 			<Swiper
-				navigation
-				pagination
-				modules={[Navigation, Pagination]}
+				modules={[Navigation, Pagination, EffectFade, Autoplay]}
+				navigation={{
+					nextEl: '.swiper-button-next',
+					prevEl: '.swiper-button-prev',
+				}}
+				pagination={{
+					clickable: true,
+				}}
+				className='h-[455px] max-w-[1050px] rounded-lg'
+				effect='fade'
+				speed={800}
+				autoplay={{ delay: 5000 }}
+				keyboard={{
+					enabled: true,
+				}}
 				slidesPerView={1}
-				loop={true}
-				className='h-[455px] w-full max-w-[1050px] rounded-lg swiper'
+				loop
 			>
-				<SwiperSlide className=''>
-					<div className='flex items-center justify-center h-full w-full'>
-						<Image
-							src='/slider/pic_01.webp'
-							alt='Designed by Freepik'
-							width={800}
-							height={600}
-							className='block h-full w-full object-cover'
-						/>
-					</div>
+				<SwiperSlide>
+					<Image
+						src='/slider/pic_01.webp'
+						alt='Designed by Freepik'
+						width={400}
+						height={300}
+						className='block h-full w-full object-cover'
+					/>
 				</SwiperSlide>
 				<SwiperSlide>
-					<div className='flex items-center justify-center h-full w-full'>
-						<Image
-							src='/slider/pic_02.webp'
-							alt='Designed by Freepik'
-							width={800}
-							height={600}
-							className='block h-full w-full object-cover'
-						/>
-					</div>
+					<Image
+						src='/slider/pic_02.webp'
+						alt='Designed by Freepik'
+						width={400}
+						height={300}
+						className='block h-full w-full object-cover'
+					/>
 				</SwiperSlide>
 				<SwiperSlide>
-					<div className='flex items-center justify-center h-full w-full'>
-						<Image
-							src='/slider/pic_03.webp'
-							alt='Designed by Freepik'
-							width={800}
-							height={600}
-							className='block h-full w-full object-cover'
-						/>
-					</div>
+					<Image
+						src='/slider/pic_03.webp'
+						alt='Designed by Freepik'
+						width={400}
+						height={300}
+						className='block h-full w-full object-cover'
+					/>
 				</SwiperSlide>
 			</Swiper>
+			<div className='button-arrangment flex justify-between'>
+				<div className='swiper-button-prev'>
+					<IoIosArrowDropleft />
+				</div>
+				<div className='swiper-button-next'>
+					<IoIosArrowDropright />
+				</div>
+			</div>
 		</div>
 	)
 }

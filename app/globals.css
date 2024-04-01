@@ -33,7 +33,7 @@ primaryAccentColor #ea580c => 234 88 12
 		--color-primaryScrollbarThumb: 255 255 50;
 
 		--swiper-pagination-color: #ea580c;
-		--swiper-navigation-color: #ea580c;
+		/* --swiper-navigation-color: #ea580c; */
 
 		--font-mono: ui-monospace, Melno, Monaco, Consolas, 'Coscadia Mono', 'Roboto Mono',
 			'Oxygen Mono', 'Ubuntu Monosapce', 'Fira Mono', 'Droid Sans Mono', 'Courier Nem' monospace;
@@ -75,20 +75,32 @@ primaryAccentColor #ea580c => 234 88 12
 		@apply mr-0
       !important;
 	}
-	.swiper-button-next,
-	.swiper-button-prev {
-		@apply w-0
-    !important;
+	.swiper-container {
+		@apply relative;
 	}
+	/* button arrangment	 */
+
+	.swiper-button-prev,
+	.swiper-button-next {
+		width: 32px !important;
+		height: 32px !important;
+		color: #ea580c !important;
+	}
+
+	.swiper-button-prev:hover,
+	.swiper-button-next:hover {
+		color: #d1d5db !important;
+		transition: all 1s ease-out;
+	}
+
+	.swiper-button-prev:focus,
+	.swiper-button-next:focus {
+		color: #d1d5db !important;
+		transition: all 1s ease-out;
+	}
+
 	.swiper-button-next::after,
 	.swiper-button-prev::after {
-		@apply content: ""
-		text-[rgb(234,88,12)]
-    text-base
-    !important;
-	}
-	.swiper-button-next.swiper-button-disabled,
-	.swiper-button-prev.swiper-button-disabled {
-		@apply opacity-0;
+		display: none;
 	}
 }
