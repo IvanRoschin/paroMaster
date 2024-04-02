@@ -1,59 +1,69 @@
-"use server";
+'use server'
 
-import { revalidatePath } from "next/cache";
-import { connectToDB } from "@/utils/dbConnect";
-import Good from "model/Good";
-import { IItem } from "@/types/item/IItem";
+import { IItem } from '@/types/item/IItem'
+import { connectToDB } from '@/utils/dbConnect'
+import Good from 'model/Good'
+import { revalidatePath } from 'next/cache'
 
-type Props = {};
+type Search = {
+	search?: string | null
+}
 
-export const getTest = (props: Props) => {
-  const db = connectToDB();
-  console.log(db);
-  return <div>getTest</div>;
-};
+export async function getAllGoods(props: Search) {
+	const search = props.search || ''
+	try {
+		connectToDB()
 
-export async function getAllGoods() {
-  try {
-    connectToDB();
+		//$regex
+		// const filter = { title: { $regex: search, $options: 'i' } }
 
-    const goods: IItem[] = await Good.find();
-    return goods;
-  } catch (error: unknown) {
-    console.log(error);
-  }
-  revalidatePath("/");
+		//$text
+		const filter = {
+			$text: {
+				$search: search,
+				$caseSensitive: false,
+				$diacriticSensitive: false,
+			},
+		}
+		const goods: IItem[] = await Good.find(filter).limit(10)
+		if (goods.length === 0) {
+			return null
+		} else return goods
+	} catch (error) {
+		console.log(error)
+	}
+	revalidatePath('/')
 }
 
 export async function getGoodById(id: string) {
-  try {
-    await connectToDB();
+	try {
+		await connectToDB()
 
-    const good = await Good.findById({ _id: id });
-    return good;
-  } catch (error) {
-    console.log(error);
-  }
+		const good = await Good.findById({ _id: id })
+		return good
+	} catch (error) {
+		console.log(error)
+	}
 }
 
 export async function addGood(values: IItem) {
-  try {
-    await connectToDB();
+	try {
+		await connectToDB()
 
-    await Good.create({
-      title: values.title,
-      brand: values.brand,
-      model: values.model,
-      price: values.price,
-      description: values.description,
-      imgUrl: values.imgUrl,
-      vendor: values.vendor,
-      isAvailable: values.isAvailable,
-      isCompatible: values.isCompatible,
-      compatibility: values.compatibility,
-    });
-  } catch (error) {
-    console.log(error);
-  }
-  revalidatePath("/");
+		await Good.create({
+			title: values.title,
+			brand: values.brand,
+			model: values.model,
+			price: values.price,
+			description: values.description,
+			imgUrl: values.imgUrl,
+			vendor: values.vendor,
+			isAvailable: values.isAvailable,
+			isCompatible: values.isCompatible,
+			compatibility: values.compatibility,
+		})
+	} catch (error) {
+		console.log(error)
+	}
+	revalidatePath('/')
 }
