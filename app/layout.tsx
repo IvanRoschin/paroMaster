@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { Header } from './components'
 import Category from './components/Category'
+import { Provider } from './components/context/Provider'
 import "./globals.css"
 import PreloadedResourses from './utils/preloadedResourses'
 
@@ -24,8 +25,8 @@ export default function RootLayout({
       <PreloadedResourses />
         <Header />
         <div className='container mx-auto flex justify-between items-start  px-8'>
-        <Category/>
-        {children}
+          <Category />
+          <Provider>{children}</Provider>
         </div>
       </body>
     </html>
