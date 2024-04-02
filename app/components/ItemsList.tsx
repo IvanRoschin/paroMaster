@@ -1,18 +1,24 @@
-import React from "react";
-import { IItem } from "types/item/IItem";
-import { ItemListCard } from ".";
-import { getAllGoods } from "@/actions/getTest";
+import { getAllGoods } from '@/actions/getTest'
+import { ISearchParams } from '@/types/searchParams'
+import { IItem } from 'types/item/IItem'
+import { ItemListCard } from '.'
 
-const ItemsList = async () => {
-  const goods = await getAllGoods();
+const ItemsList = async (props: ISearchParams) => {
+	const searchParams = props?.searchParams
 
-  return (
-    <ul className="grid grid-cols-4 gap-4">
-      {goods?.map((item: IItem) => (
-        <ItemListCard key={item._id} item={item} />
-      ))}
-    </ul>
-  );
-};
+	const goods = await getAllGoods(searchParams)
 
-export default ItemsList;
+	if (!goods) {
+		return <p>Товар не знайдений</p>
+	}
+
+	return (
+		<ul className='grid grid-cols-4 gap-4'>
+			{goods?.map((item: IItem) => (
+				<ItemListCard key={item._id} item={item} />
+			))}
+		</ul>
+	)
+}
+
+export default ItemsList
