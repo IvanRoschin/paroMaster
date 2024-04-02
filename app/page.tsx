@@ -1,10 +1,16 @@
 import { ItemsList, Slider } from './components'
 
-export default function Home() {
+type HomePageProps = {
+	searchParams: {
+		search?: string | undefined
+	}
+	params: any
+}
+export default function Home(props: HomePageProps) {
 	return (
 		<div className=''>
 			<Slider />
-			<ItemsList />
+			<ItemsList searchParams={props.searchParams} />
 		</div>
 	)
 }
