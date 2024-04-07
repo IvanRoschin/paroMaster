@@ -7,13 +7,14 @@ import { revalidatePath } from 'next/cache'
 
 type Search = {
 	search?: string | null
+	sort?: string | null
 }
 
-export async function getAllGoods(props: Search) {
-	const search = props.search || ''
+export async function getAllGoods(props?: Search) {
+	const search = props?.search || ''
+	const sort = props?.sort || 'createdAt'
 	try {
 		connectToDB()
-
 		//$regex
 		// const filter = { title: { $regex: search, $options: 'i' } }
 
@@ -25,7 +26,15 @@ export async function getAllGoods(props: Search) {
 				$diacriticSensitive: false,
 			},
 		}
-		const goods: IItem[] = await Good.find(filter).limit(10)
+		let goods = []
+		console.log('search:', search)
+		console.log('sort:', sort)
+
+		if (search === '' || sort === '') {
+			goods = await Good.find()
+		} else {
+			goods = await Good.find(filter).sort(sort)
+		}
 		if (goods.length === 0) {
 			return null
 		} else return goods

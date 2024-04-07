@@ -1,7 +1,20 @@
-type Props = {}
+'use client'
 
-const Sort = (props: Props) => {
-	return <div>Sort</div>
+import useCustomRouter from 'app/hooks/useCustomRouter'
+const Sort = () => {
+	const { pushQuery, query } = useCustomRouter()
+	return (
+		<div>
+			Sort:
+			<select
+				value={query.sort || 'createdAt'}
+				onChange={e => pushQuery({ search: null, sort: e.target.value })}
+			>
+				<option value={'createdAt'}>createdAt up</option>
+				<option value={'-createdAt'}>createdAt down</option>
+			</select>
+		</div>
+	)
 }
 
 export default Sort
