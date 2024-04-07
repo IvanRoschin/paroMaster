@@ -48,5 +48,6 @@ const goodSchema = new Schema(
 )
 
 goodSchema.index({ title: 'text' })
+goodSchema.index({ vendor: 'text' })
 
 export default mongoose.models.Good || mongoose.model('Good', goodSchema)
