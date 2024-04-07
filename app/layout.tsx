@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
-import { Header } from './components'
+import { Suspense } from 'react'
+import { Header, Loader } from './components'
 import Category from './components/Category'
 import { Provider } from './components/context/Provider'
 import "./globals.css"
@@ -22,12 +23,16 @@ export default function RootLayout({
   return (
     <html lang="uk">
       <body className={`${inter.className} primaryTextColor`}>
+        <Suspense fallback={<Loader />}>
+           <Provider>
       <PreloadedResourses />
         <Header />
         <div className='container mx-auto flex justify-between items-start  px-8'>
           <Category />
-          <Provider>{children}</Provider>
-        </div>
+         {children}
+            </div>
+            </Provider>
+      </Suspense>
       </body>
     </html>
   );
