@@ -41,6 +41,9 @@ const ItemListCard = ({ item }: ItemListCardProps) => {
 				<p className='font-light text-gray-500'>
 					Сумісність з брендами: {item.isCompatible ? 'так' : 'ні'}
 				</p>
+				<p className='font-light text-gray-500'>Brand: {item.brand}</p>
+				<p className='font-light text-gray-500'>Model: {item.model}</p>
+				<p className='font-light text-gray-500'>Сумісність з брендами: {item.compatibility}</p>
 			</div>
 		</li>
 	)
