@@ -7,8 +7,9 @@ const ItemsList = async (props: ISearchParams) => {
 	const searchParams = props?.searchParams
 
 	const goods = await getAllGoods(searchParams)
+	console.log('goods', goods)
 
-	if (!goods) {
+	if (goods?.length === 0) {
 		return <p>Товар не знайдений</p>
 	}
 
