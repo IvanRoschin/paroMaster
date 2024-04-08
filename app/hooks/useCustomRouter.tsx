@@ -1,5 +1,6 @@
 'use client'
 
+import { SortOrder } from 'mongoose'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 const useCustomRouter = () => {
@@ -8,28 +9,24 @@ const useCustomRouter = () => {
 	const query: { [key: string]: string } = {}
 
 	let search = searchParams.get('search') || ''
-	let sort = searchParams.get('sort')
+	let sort = searchParams.get('sort') || 'asc'
 
-	if (search) query.search = search
-	if (sort !== null && sort !== undefined) query.sort = sort
+	// if (search) query.search = search
+	// if (sort) query.sort = sort
 
 	const pushQuery = ({
 		search,
 		sort,
 	}: {
-		search: string | null | undefined
-		sort: string | null
+		search: string
+		sort: SortOrder | { $meta: any } | undefined
 	}) => {
 		if (search === '') {
 			delete query['search']
 		} else {
-			query['search'] = search ?? '' // Используйте оператор ?? для установки значения по умолчанию
+			query['search'] = search ?? ''
 		}
-		if (sort !== null && sort !== undefined) {
-			query['sort'] = sort ?? '' // Используйте оператор ?? для установки значения по умолчанию
-		} else {
-			delete query['sort']
-		}
+		query['sort'] = sort
 
 		const newQuery = new URLSearchParams(query).toString()
 		router.push(`?${newQuery}`)
