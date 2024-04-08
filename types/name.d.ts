@@ -17,3 +17,4 @@ export type IconName =
 	| 'category_korpusUtuga'
 	| 'category_rezervuarVoda'
 	| 'category_boiler'
+	| 'icon_close'
