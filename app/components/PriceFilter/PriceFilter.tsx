@@ -45,11 +45,20 @@ const PriceFilter = () => {
       "",
       `${window.location.pathname}?${params}`
     );
-    if (params.get("search") || params.get("sort")) {
+    if (params.get("search")) {
       router.push(
         `/${pathName}?low=${values[0].toString()}&high=${values[1].toString()}&search=${params.get(
           "search"
-        )}&sort=${params.get("sort")}`,
+        )}`,
+        {
+          scroll: false,
+        }
+      );
+    } else if (params.get("sort")) {
+      router.push(
+        `/${pathName}?low=${values[0].toString()}&high=${values[1].toString()}&sort=${params.get(
+          "sort"
+        )}`,
         {
           scroll: false,
         }
