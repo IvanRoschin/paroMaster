@@ -1,5 +1,6 @@
 export interface ISearchParams {
 	searchParams: {
-		search?: string | null
+		search: string
+		sort: string
 	}
 }

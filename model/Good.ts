@@ -47,6 +47,6 @@ const goodSchema = new Schema(
 	{ versionKey: false, timestamps: true },
 )
 
-goodSchema.index({ title: 'text' })
+goodSchema.index({ '$**': 'text' })
 
 export default mongoose.models.Good || mongoose.model('Good', goodSchema)
