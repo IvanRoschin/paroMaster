@@ -6,38 +6,59 @@ import Good from 'model/Good'
 import { revalidatePath } from 'next/cache'
 
 type Search = {
-	search?: string | null
-	sort?: string | null
+	search: string
+	sort: string
 }
 
+//** Category search: { "category": {$eq:"cateroryName" } } * /
+//** Vendor search: { "vendor": {$eq:"vendorName" } } * /
+
 export async function getAllGoods(props?: Search) {
-	const search = props?.search || ''
-	const sort = props?.sort || 'createdAt'
 	try {
 		connectToDB()
-		//$regex
-		// const filter = { title: { $regex: search, $options: 'i' } }
 
-		//$text
-		const filter = {
-			$text: {
-				$search: search,
-				$caseSensitive: false,
-				$diacriticSensitive: false,
-			},
+		let filter: any = {}
+		if (props?.search) {
+			// filter = { title: { $regex: props?.search } }
+			// filter = {
+			// 	$text: {
+			// 		$search: props.search,
+			// 		$caseSensitive: false,
+			// 		$diacriticSensitive: false,
+			// 	},
+			// }
+
+			filter = {
+				$or: [
+					{
+						title: {
+							$regex: props?.search,
+							$options: 'i',
+						},
+					},
+					{ vendor: props?.search },
+					{
+						brand: {
+							$regex: props?.search,
+							$options: 'i',
+						},
+					},
+				],
+			}
 		}
-		let goods = []
-		console.log('search:', search)
-		console.log('sort:', sort)
 
-		if (search === '' || sort === '') {
-			goods = await Good.find()
+		let sortOption: any = {}
+		if (props?.sort === 'desc') {
+			sortOption = { price: -1 }
 		} else {
-			goods = await Good.find(filter).sort(sort)
+			sortOption = { price: 1 }
 		}
-		if (goods.length === 0) {
-			return null
-		} else return goods
+
+		let goods: IItem[] = []
+
+		goods = await Good.find(filter).sort(sortOption)
+
+		return goods
 	} catch (error) {
 		console.log(error)
 	}
