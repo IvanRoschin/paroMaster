@@ -19,29 +19,30 @@ export async function getAllGoods(props?: Search) {
 
 		let filter: any = {}
 		if (props?.search) {
-			// filter = { title: { $regex: props?.search } }
-			// filter = {
-			// 	$text: {
-			// 		$search: props.search,
-			// 		$caseSensitive: false,
-			// 		$diacriticSensitive: false,
-			// 	},
-			// }
-
 			filter = {
-				$or: [
+				$and: [
 					{
-						title: {
-							$regex: props?.search,
-							$options: 'i',
-						},
-					},
-					{ vendor: props?.search },
-					{
-						brand: {
-							$regex: props?.search,
-							$options: 'i',
-						},
+						$or: [
+							{
+								title: {
+									$regex: props?.search,
+									$options: 'i',
+								},
+							},
+							{ vendor: props?.search },
+							{
+								brand: {
+									$regex: props?.search,
+									$options: 'i',
+								},
+							},
+							{
+								compatibility: {
+									$regex: props?.search,
+									$options: 'i',
+								},
+							},
+						],
 					},
 				],
 			}
