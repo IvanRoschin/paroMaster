@@ -1,37 +1,24 @@
 'use client'
-import useCustomRouter from 'app/hooks/useCustomRouter'
-import { useSearchParams } from 'next/navigation'
-import { FormEventHandler, useEffect, useState } from 'react'
+
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { CiSearch } from 'react-icons/ci'
+import { Icon } from './Icon'
 
 const Search = () => {
-	const { pushQuery, query } = useCustomRouter()
-	const params = useSearchParams()
-	const searchValue = params.get('search')
-
-	const [searchQuery, setSearchQuery] = useState<FormDataEntryValue | null>(' ')
-	const [inputValue, setInputValue] = useState<string | null>(searchValue)
+	const searchParams = useSearchParams()
+	let searchValue = searchParams.get('search') || ''
+	const pathname = usePathname()
+	const { replace } = useRouter()
+	const [inputValue, setInputValue] = useState<string>('')
 
 	useEffect(() => {
-		setInputValue(searchValue)
+		if (searchValue) setInputValue(searchValue)
 	}, [searchValue])
 
-	const handleSearch: FormEventHandler<HTMLFormElement> = async event => {
-		event.preventDefault()
-		const formData = new FormData(event.currentTarget)
-		const search = formData.get('search')
-
-		if (typeof search === 'string') {
-			pushQuery({ search, sort: null })
-		}
-		setSearchQuery(search)
-		console.log(typeof searchQuery)
-		console.log('searchQuery', searchQuery)
-	}
-
 	return (
-		<form className='w-full mx-7' onSubmit={handleSearch}>
-			<label className='mb-2 text-sm font-medium text-gray-900 sr-only'>Search</label>
+		<form className='w-full mx-7'>
+			<label className='mb-2 text-sm font-medium text-gray-900 sr-only'>Пошук</label>
 			<div className='relative w-full flex justify-center items-center'>
 				<div className='absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none'>
 					<CiSearch />
@@ -39,23 +26,37 @@ const Search = () => {
 				<input
 					type='text'
 					name='search'
-					className='relative py-1 block w-full ps-10 mr-4 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-primaryAccentColor focus:border-primaryAccentColor '
+					className=' relative py-1 block w-full ps-10 mr-4 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-primaryAccentColor focus:border-primaryAccentColor '
 					placeholder='Код товару, артикул або модель...'
 					required
 					value={inputValue || ''}
 					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+						const params = new URLSearchParams(searchParams)
+						if (e.target.value) {
+							params.set('search', e.target.value)
+						} else {
+							params.delete('search')
+						}
 						setInputValue(e.target.value)
+						replace(`${pathname}?${params.toString()}`, { scroll: false })
 					}}
 				/>
 				<button
 					type='button'
-					className='absolute top-0 right-0'
+					className={`absolute top-[15%] right-[120px] ${inputValue ? 'block' : 'hidden'}`}
+					style={{ display: inputValue ? 'block' : 'none' }}
 					onClick={() => {
-						console.log('Click')
-						pushQuery({ search: '', sort: null })
+						setInputValue('')
+						replace(`${pathname}`, { scroll: false })
 					}}
 				>
-					x
+					<Icon
+						name={'icon_close'}
+						className={`w-5 h-5 border border-primaryAccentColor  text-primaryAccentColor p-1 rounded-full 
+                hover:bg-primaryAccentColor focus:bg-[primaryAccentColor] ${
+									inputValue ? 'block' : 'hidden'
+								}`}
+					/>
 				</button>
 				<button
 					type='submit'

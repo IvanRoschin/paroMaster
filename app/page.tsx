@@ -1,19 +1,13 @@
 import { ItemsList, Slider } from './components'
 import Sort from './components/Sort'
 
-type HomePageProps = {
-	searchParams: {
-		search?: string | null
-		sort?: string | null
-	}
-	params: any
-}
-export default function Home(props: HomePageProps) {
+export default function Home({ searchParams }: { searchParams: { sort: string; search: string } }) {
+	console.log('searchParams', searchParams)
 	return (
 		<div className=''>
 			<Slider />
 			<Sort />
-			<ItemsList searchParams={props.searchParams} />
+			<ItemsList searchParams={searchParams} />
 		</div>
 	)
 }
