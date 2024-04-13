@@ -49,20 +49,21 @@ const PriceFilter = () => {
 					scroll: false,
 				},
 			)
-		} else if (params.get('sort')) {
-			router.push(
-				`/${pathName}?low=${values[0].toString()}&high=${values[1].toString()}&sort=${params.get(
-					'sort',
-				)}`,
-				{
-					scroll: false,
-				},
-			)
-		} else {
-			router.push(`/${pathName}?low=${values[0].toString()}&high=${values[1].toString()}`, {
-				scroll: false,
-			})
 		}
+		// else if ( params.get( 'sort' ) ) {
+		// 	router.push(
+		// 		`/${pathName}?low=${values[0].toString()}&high=${values[1].toString()}&sort=${params.get(
+		// 			'sort',
+		// 		)}`,
+		// 		{
+		// 			scroll: false,
+		// 		},
+		// 	)
+		// } else {
+		// 	router.push(`/${pathName}?low=${values[0].toString()}&high=${values[1].toString()}`, {
+		// 		scroll: false,
+		// 	})
+		// }
 		// } else {
 		//   params.delete("low");
 		//   params.delete("high");
@@ -71,7 +72,7 @@ const PriceFilter = () => {
 
 	return (
 		<div className='my-10 w-[250px] p-2'>
-			<h2 className='mb-[20px]'>Діапазон ціни</h2>
+			<h2 className='text-2xl text-primaryAccentColor mb-4 bold'>Ціна</h2>
 			<p className='mb-[20px]'>
 				<span className='inline-block w-[30px]'>
 					{/* {values.length > 0 ? values[0] : MIN} */}
