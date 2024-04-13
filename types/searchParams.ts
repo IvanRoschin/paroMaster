@@ -1,8 +1,7 @@
 export interface ISearchParams {
-  searchParams: {
-    search: string;
-    sort: string;
-    low: string;
-    high: string;
-  };
+	search?: string
+	sort?: string
+	low: string
+	high: string
+	category?: string
 }
