@@ -6,8 +6,8 @@ import { useState } from 'react'
 const Sort = () => {
 	const [sort, setSort] = useState('')
 	const searchParams = useSearchParams()
-	const pathname = usePathname()
-	const { replace } = useRouter()
+	const pathName = usePathname()
+	const { push } = useRouter()
 
 	return (
 		<div>
@@ -22,13 +22,13 @@ const Sort = () => {
 						params.delete('sort')
 					}
 					setSort(e.target.value)
-					replace(`${pathname}?${params.toString()}`, { scroll: false })
+					push(`${pathName}?${params.toString()}`, { scroll: false })
 				}}
 			>
 				<option value='' disabled>
 					Вибрати
 				</option>
-				<option value='asc'>Найдешевчі</option>
+				<option value='asc'>Найдешевші</option>
 				<option value='desc'>Найдорожчі</option>
 			</select>
 		</div>

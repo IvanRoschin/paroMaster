@@ -1,19 +1,11 @@
-import { ItemsList, Slider } from "./components";
-import PriceFilter from "./components/PriceFilter/PriceFilter";
-import Sort from "./components/Sort";
+import { ISearchParams } from '@/types/searchParams'
+import { ItemsList, Slider } from './components'
 
-export default function Home({
-  searchParams,
-}: {
-  searchParams: { sort: string; search: string; low: string; high: string };
-}) {
-  console.log("searchParams", searchParams);
-  return (
-    <div className="">
-      <Slider />
-      <Sort />
-      <PriceFilter />
-      <ItemsList searchParams={searchParams} />
-    </div>
-  );
+export default function Home({ searchParams }: { searchParams: ISearchParams }) {
+	return (
+		<div className=''>
+			<Slider />
+			<ItemsList searchParams={searchParams} />
+		</div>
+	)
 }
