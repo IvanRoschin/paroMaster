@@ -1,6 +1,6 @@
 import AdminForm from './AdminForm'
 import Cart from './Cart'
-import Catalog from './Category'
+import Category from './Category'
 import Header from './Header'
 import ImagesBlock from './ImagesBlock'
 import ImagesUpload from './ImagesUpload'
@@ -12,7 +12,7 @@ import Slider from './Slider'
 export {
 	AdminForm,
 	Cart,
-	Catalog,
+	Category,
 	Header,
 	ImagesBlock,
 	ImagesUpload,
