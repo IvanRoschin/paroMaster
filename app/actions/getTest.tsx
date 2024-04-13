@@ -6,6 +6,8 @@ import { connectToDB } from '@/utils/dbConnect'
 import Good from 'model/Good'
 import { revalidatePath } from 'next/cache'
 
+//** Vendor search: { "vendor": {$eq:"vendorName" } } * /
+
 export async function getAllGoods({ searchParams }: { searchParams: ISearchParams }) {
 	console.log(searchParams)
 	try {
