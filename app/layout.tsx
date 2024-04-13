@@ -2,7 +2,9 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { Suspense } from 'react'
 import { Header, Loader } from './components'
+import BrandFilter from './components/BrandFilter'
 import Category from './components/Category'
+import PriceFilter from './components/PriceFilter/PriceFilter'
 import Sort from './components/Sort'
 import { Provider } from './components/context/Provider'
 import "./globals.css"
@@ -20,7 +22,9 @@ export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
+}> ) {
+  
+
   return (
     <html lang="uk">
       <body className={`${inter.className} primaryTextColor`}>
@@ -31,7 +35,9 @@ export default function RootLayout({
             <div className='px-8 flex items-start'>
               <div>
                 <Category />
+                <PriceFilter/>
                 <Sort />
+                <BrandFilter />
               </div>
               <div className='w-full'>{children}</div>
        

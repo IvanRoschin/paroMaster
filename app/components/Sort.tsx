@@ -10,8 +10,8 @@ const Sort = () => {
 	const { push } = useRouter()
 
 	return (
-		<div>
-			Сортувати за ціною:
+		<div className='mb-4'>
+			<h2 className='text-2xl text-primaryAccentColor mb-4 bold'>Сортувати за ціною</h2>{' '}
 			<select
 				value={sort}
 				onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
