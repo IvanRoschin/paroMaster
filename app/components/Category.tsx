@@ -66,6 +66,7 @@ const Category = () => {
 
 	return (
 		<div className='pt-0 mr-4 text-sm w-[250px]'>
+			<h2 className='text-2xl text-primaryAccentColor mb-4 bold'>Категорії товарів</h2>
 			<ul className='bg-secondaryBackground p-4'>
 				{categoryList.map(({ iconName, categoryName }, index) => {
 					return (

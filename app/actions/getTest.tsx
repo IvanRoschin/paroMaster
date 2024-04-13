@@ -15,6 +15,7 @@ export async function getAllGoods({ searchParams }: { searchParams: ISearchParam
 
 		let filter: any = {}
 
+		// search string filter
 		if (searchParams?.search) {
 			filter.$and = [
 				// Wrap conditions in $and operator
@@ -28,15 +29,21 @@ export async function getAllGoods({ searchParams }: { searchParams: ISearchParam
 				},
 			]
 		}
-
+		// brand filter
+		if (searchParams?.brand) {
+			filter.brand = searchParams.brand
+		}
+		// category filter
 		if (searchParams?.category) {
 			filter.category = searchParams.category
 		}
 
+		// price filter
 		if (searchParams?.low && searchParams?.high) {
 			filter.price = { $gte: Number(searchParams.low), $lte: Number(searchParams.high) }
 		}
 
+		// sort by price
 		let sortOption: any = {}
 		if (searchParams?.sort === 'desc') {
 			sortOption = { price: -1 }
@@ -81,6 +88,17 @@ export async function addGood(values: IItem) {
 			isCompatible: values.isCompatible,
 			compatibility: values.compatibility,
 		})
+	} catch (error) {
+		console.log(error)
+	}
+	revalidatePath('/')
+}
+
+export async function uniqueBrands() {
+	try {
+		connectToDB()
+		const uniqueBrands = await Good.distinct('brand')
+		return uniqueBrands
 	} catch (error) {
 		console.log(error)
 	}
