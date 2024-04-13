@@ -4,4 +4,5 @@ export interface ISearchParams {
 	low: string
 	high: string
 	category?: string
+	brand?: string
 }
