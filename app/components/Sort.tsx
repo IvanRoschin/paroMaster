@@ -6,12 +6,12 @@ import { useState } from 'react'
 const Sort = () => {
 	const [sort, setSort] = useState('')
 	const searchParams = useSearchParams()
-	const pathname = usePathname()
-	const { replace } = useRouter()
+	const pathName = usePathname()
+	const { push } = useRouter()
 
 	return (
-		<div>
-			Сортувати за ціною:
+		<div className='mb-4'>
+			<h2 className='text-2xl text-primaryAccentColor mb-4 bold'>Сортувати за ціною</h2>{' '}
 			<select
 				value={sort}
 				onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -22,13 +22,13 @@ const Sort = () => {
 						params.delete('sort')
 					}
 					setSort(e.target.value)
-					replace(`${pathname}?${params.toString()}`, { scroll: false })
+					push(`${pathName}?${params.toString()}`, { scroll: false })
 				}}
 			>
 				<option value='' disabled>
 					Вибрати
 				</option>
-				<option value='asc'>Найдешевчі</option>
+				<option value='asc'>Найдешевші</option>
 				<option value='desc'>Найдорожчі</option>
 			</select>
 		</div>
