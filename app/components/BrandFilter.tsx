@@ -45,7 +45,7 @@ const BrandFilter = () => {
 		const selectedBrand = searchParams.get('brand')
 		const newBrand = selectedBrand === brand ? null : brand
 
-		push(pathname + '?' + createQueryString('brand', newBrand), { scroll: false })
+		push(pathname + '?' + createQueryString('brand', newBrand as string), { scroll: false })
 	}
 
 	return (
