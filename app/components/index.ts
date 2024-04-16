@@ -7,6 +7,7 @@ import ImagesUpload from './ImagesUpload'
 import ItemListCard from './ItemListCard'
 import ItemsList from './ItemsList'
 import Loader from './Loader'
+import Sidebar from './Sidebar'
 import Slider from './Slider'
 
 export {
@@ -19,5 +20,6 @@ export {
 	ItemListCard,
 	ItemsList,
 	Loader,
+	Sidebar,
 	Slider,
 }

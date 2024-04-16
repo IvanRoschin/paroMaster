@@ -29,10 +29,12 @@ export async function getAllGoods({ searchParams }: { searchParams: ISearchParam
 				},
 			]
 		}
+
 		// brand filter
 		if (searchParams?.brand) {
 			filter.brand = searchParams.brand
 		}
+
 		// category filter
 		if (searchParams?.category) {
 			filter.category = searchParams.category
@@ -101,6 +103,38 @@ export async function uniqueBrands() {
 		return uniqueBrands
 	} catch (error) {
 		console.log(error)
+	}
+	revalidatePath('/')
+}
+
+export async function getMinMaxPrice() {
+	try {
+		connectToDB()
+
+		const result = await Good.aggregate([
+			{
+				$group: {
+					_id: null,
+					minPrice: { $min: '$price' },
+					maxPrice: { $max: '$price' },
+				},
+			},
+			{
+				$project: {
+					_id: 0,
+					minPrice: 1,
+					maxPrice: 1,
+				},
+			},
+		]).exec()
+
+		if (result.length === 0) {
+			throw new Error('No goods found')
+		}
+
+		return result[0]
+	} catch (error) {
+		console.error(error)
 	}
 	revalidatePath('/')
 }
