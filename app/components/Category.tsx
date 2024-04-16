@@ -65,14 +65,14 @@ const Category = () => {
 	)
 
 	return (
-		<div className='pt-0 mr-4 text-sm w-[250px]'>
+		<div className='pt-0 mr-4 text-sm w-[250px] mb-4'>
 			<h2 className='text-2xl text-primaryAccentColor mb-4 bold'>Категорії товарів</h2>
-			<ul className='bg-secondaryBackground p-4'>
+			<ul className='bg-secondaryBackground p-4 rounded-lg'>
 				{categoryList.map(({ iconName, categoryName }, index) => {
 					return (
 						<li key={index} className='mb-3 nav'>
 							<Link
-								href={`/category?${createQueryString('category', categoryName)}`}
+								href={`/category/?${createQueryString('category', categoryName)}`}
 								className='flex justify-start items-start'
 							>
 								<Icon name={iconName} className='w-5 h-5  mr-3' />

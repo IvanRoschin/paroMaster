@@ -44,7 +44,6 @@ const BrandFilter = () => {
 	const handleBrandCheckboxClick = (brand: string) => {
 		const selectedBrand = searchParams.get('brand')
 		const newBrand = selectedBrand === brand ? null : brand
-
 		push(pathname + '?' + createQueryString('brand', newBrand as string), { scroll: false })
 	}
 
