@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { Suspense } from 'react'
 import { Header, Loader, Sidebar } from './components'
-import { Provider } from './components/context/Provider'
+import { ShoppingCartProvider } from './context/ShoppingCartContext'
 import "./globals.css"
 import PreloadedResourses from './utils/preloadedResourses'
 
@@ -24,16 +24,16 @@ export default function RootLayout({
   return (
     <html lang="uk">
       <body className={`${inter.className} primaryTextColor`}>
-        <Suspense fallback={<Loader />}>
-           <Provider>
-      <PreloadedResourses />
-        <Header />
+        <ShoppingCartProvider>
+          <Suspense fallback={<Loader />}>
+          <PreloadedResourses />
+          <Header />
             <div className='px-8 flex items-start'>
-                <Sidebar/>
+              <Sidebar/>
               <div className='w-full'>{children}</div>
-         </div>
-            </Provider>
-      </Suspense>
+            </div>
+          </Suspense>
+        </ShoppingCartProvider>
       </body>
     </html>
   );
