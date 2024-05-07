@@ -51,9 +51,6 @@ const PriceFilter = ({ minPrice, maxPrice }: { minPrice: number; maxPrice: numbe
 	// 	push(pathname + '?' + createQueryString('low', newBrand as string), { scroll: false })
 	// }
 
-	console.log('values[0]', values[0])
-	console.log('values[1]', values[1])
-
 	return (
 		<div className='double-slider-box'>
 			<h2 className='text-2xl text-primaryAccentColor mb-6 bold'>Ціна</h2>{' '}
