@@ -4,7 +4,7 @@ import { getGoodById } from '@/actions/getTest'
 import { Icon } from '@/components/Icon'
 import { useShoppingCart } from 'app/context/ShoppingCartContext'
 import useSWR from 'swr'
-import ImagesBlock from './ImagesBlock'
+import ImagesBlock from '../ImagesBlock'
 
 export default function ItemClient({ id }: { id: string }) {
 	const {

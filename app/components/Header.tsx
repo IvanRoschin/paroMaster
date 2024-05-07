@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import Cart from './Cart'
+import Cart from './Cart/Cart'
 import { Icon } from './Icon'
 import Logo from './Logo'
 import Menu from './Menu'
