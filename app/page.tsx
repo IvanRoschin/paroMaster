@@ -3,7 +3,7 @@ import { ItemsList, Slider } from './components'
 
 export default function Home({ searchParams }: { searchParams: ISearchParams }) {
 	return (
-		<div className=''>
+		<div className='container'>
 			<Slider />
 			<ItemsList searchParams={searchParams} />
 		</div>

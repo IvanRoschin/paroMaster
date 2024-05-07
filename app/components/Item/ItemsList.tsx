@@ -9,7 +9,7 @@ const ItemsList = (searchParams: { searchParams: ISearchParams }) => {
 	const { data: goods, error } = useSWR('goods', () => getAllGoods(searchParams))
 
 	if (error) {
-		console.error('Error fetching good:', error)
+		console.error('Error fetching goods:', error)
 	}
 	if (!goods) {
 		return <Loader />
@@ -22,7 +22,23 @@ const ItemsList = (searchParams: { searchParams: ISearchParams }) => {
 	return (
 		<ul className='grid grid-cols-4 gap-4'>
 			{goods?.map(item => (
-				<ItemListCard key={item._id} item={item} />
+				<ItemListCard
+					key={item._id}
+					item={{
+						_id: item._id,
+						category: item.category,
+						imgUrl: item.imgUrl,
+						brand: item.brand,
+						model: item.model,
+						vendor: item.vendor,
+						title: item.title,
+						description: item.description,
+						price: item.price,
+						isAvailable: item.isAvailable,
+						isCompatible: item.isCompatible,
+						compatibility: item.compatibility,
+					}}
+				/>
 			))}
 		</ul>
 	)
