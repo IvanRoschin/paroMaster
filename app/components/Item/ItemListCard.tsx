@@ -28,18 +28,19 @@ const ItemListCard = ({ item }: ItemListCardProps) => {
 		decreaseCartQuantity,
 		removeFromCart,
 	} = useShoppingCart()
+	console.log('ItemListCard:', item)
 
 	const quantity = getItemQuantity(item._id)
 	return (
 		<li className='flex flex-col justify-between border border-gray-300 rounded-md p-4 hover:shadow-[10px_10px_15px_-3px_rgba(0,0,0,0.3)] transition-all'>
 			<Link href={`/item/${item._id}`} className='flex flex-col h-full justify-between'>
 				<div>
-					<div className='w-[210px] h-[210px]'>
+					<div className='w-[200px] h-[200px]'>
 						<Image
 							src={item.imgUrl[0]}
 							alt='item_photo'
-							width={210}
-							height={210}
+							width={200}
+							height={200}
 							className='self-center mb-[30px]'
 						/>
 					</div>
