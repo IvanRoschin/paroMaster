@@ -5,6 +5,7 @@ import { Icon } from '@/components/Icon'
 import { useShoppingCart } from 'app/context/ShoppingCartContext'
 import useSWR from 'swr'
 import ImagesBlock from '../ImagesBlock'
+import Loader from '../Loader'
 
 export default function ItemClient({ id }: { id: string }) {
 	const {
@@ -14,6 +15,14 @@ export default function ItemClient({ id }: { id: string }) {
 		removeFromCart,
 	} = useShoppingCart()
 	const { data: item, error } = useSWR(id ? 'item' : null, () => getGoodById(id))
+	console.log('itemClient', item)
+
+	if (error) {
+		console.error('Error fetching item:', error)
+	}
+	if (!item) {
+		return <Loader />
+	}
 
 	const quantity = getItemQuantity(item?._id)
 
