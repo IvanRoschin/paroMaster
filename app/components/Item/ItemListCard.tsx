@@ -3,7 +3,7 @@
 import { useShoppingCart } from 'app/context/ShoppingCartContext'
 import Image from 'next/image'
 import Link from 'next/link'
-import Button from './Button'
+import Button from '../Button'
 
 interface ItemListCardProps {
 	item: {
@@ -30,7 +30,6 @@ const ItemListCard = ({ item }: ItemListCardProps) => {
 	} = useShoppingCart()
 
 	const quantity = getItemQuantity(item._id)
-	console.log('quantity', quantity)
 	return (
 		<li className='flex flex-col justify-between border border-gray-300 rounded-md p-4 hover:shadow-[10px_10px_15px_-3px_rgba(0,0,0,0.3)] transition-all'>
 			<Link href={`/item/${item._id}`} className='flex flex-col h-full justify-between'>

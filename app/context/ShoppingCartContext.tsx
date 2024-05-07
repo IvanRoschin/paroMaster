@@ -1,6 +1,6 @@
 'use client'
 
-import ShoppingCart from '@/components/ShoppingCart'
+import ShoppingCart from '@/components/Cart/ShoppingCart'
 import { createContext, useContext, useState } from 'react'
 
 type ShoppingCartProviderProps = {
@@ -105,7 +105,7 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
 			}}
 		>
 			{children}
-			<ShoppingCart />
+			<ShoppingCart isOpen={isOpen} />
 		</ShoppingCartContext.Provider>
 	)
 }

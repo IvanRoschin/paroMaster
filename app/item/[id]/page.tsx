@@ -11,7 +11,6 @@ export default async function Item({ params }: { params: { id: string } }) {
 				<ImagesBlock
 					item={{
 						category: item.category,
-
 						imgUrl: item.imgUrl,
 						brand: item.brand,
 						model: item.model,
