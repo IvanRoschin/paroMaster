@@ -1,36 +1,21 @@
 'use client'
 
+import { SItem } from '@/types/item/IItem'
 import { useShoppingCart } from 'app/context/ShoppingCartContext'
 import Image from 'next/image'
 import Link from 'next/link'
 import Button from '../Button'
 
-interface ItemListCardProps {
-	item: {
-		_id: string
-		category: string
-		imgUrl: string[]
-		brand: string
-		model: string
-		vendor: string
-		title: string
-		description: string
-		price: number
-		isAvailable: boolean
-		isCompatible: boolean
-		compatibility: string[]
-	}
-}
-const ItemListCard = ({ item }: ItemListCardProps) => {
+const ItemListCard = ({ item }: { item: SItem }) => {
 	const {
 		getItemQuantity,
 		increaseCartQuantity,
 		decreaseCartQuantity,
 		removeFromCart,
 	} = useShoppingCart()
-	console.log('ItemListCard:', item)
 
 	const quantity = getItemQuantity(item._id)
+
 	return (
 		<li className='flex flex-col justify-between border border-gray-300 rounded-md p-4 hover:shadow-[10px_10px_15px_-3px_rgba(0,0,0,0.3)] transition-all'>
 			<Link href={`/item/${item._id}`} className='flex flex-col h-full justify-between'>
@@ -65,7 +50,7 @@ const ItemListCard = ({ item }: ItemListCardProps) => {
 							<div className='flex items-center justify-center gap-20'>
 								<div className='flex items-center justify-between gap-2'>
 									<Button label='-' onClick={() => decreaseCartQuantity(item._id)} small outline />
-									<span className='text-xl'>{quantity}</span>корзина
+									<span className='text-xl'>{quantity}</span>в корзині
 									<Button label='+' onClick={() => increaseCartQuantity(item._id)} small outline />
 								</div>
 							</div>
