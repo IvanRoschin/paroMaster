@@ -2,6 +2,7 @@
 
 import { getGoodById } from '@/actions/getTest'
 import { Icon } from '@/components/Icon'
+import { SItem } from '@/types/item/IItem'
 import { useShoppingCart } from 'app/context/ShoppingCartContext'
 import useSWR from 'swr'
 import ImagesBlock from '../ImagesBlock'
@@ -14,17 +15,18 @@ export default function ItemClient({ id }: { id: string }) {
 		decreaseCartQuantity,
 		removeFromCart,
 	} = useShoppingCart()
-	const { data: item, error } = useSWR(id ? 'item' : null, () => getGoodById(id))
-	console.log('itemClient', item)
+	const { data, error } = useSWR(id ? 'data' : null, () => getGoodById(id))
 
 	if (error) {
 		console.error('Error fetching item:', error)
 	}
-	if (!item) {
+	if (!data) {
 		return <Loader />
 	}
 
-	const quantity = getItemQuantity(item?._id)
+	const item: SItem = JSON.parse(data)
+
+	const quantity = getItemQuantity(item._id)
 
 	return (
 		item && (

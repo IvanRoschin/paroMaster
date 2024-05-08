@@ -54,7 +54,7 @@ export async function getAllGoods({ searchParams }: { searchParams: ISearchParam
 
 		const goods: IItem[] = await Good.find(filter).sort(sortOption)
 
-		return goods
+		return JSON.stringify(goods)
 	} catch (error) {
 		console.log(error)
 	}
@@ -66,7 +66,7 @@ export async function getGoodById(id: string) {
 		await connectToDB()
 
 		const good = await Good.findById({ _id: id })
-		return good
+		return JSON.stringify(good)
 	} catch (error) {
 		console.log(error)
 	}
