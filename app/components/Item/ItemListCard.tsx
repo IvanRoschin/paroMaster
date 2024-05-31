@@ -1,12 +1,12 @@
 'use client'
 
-import { SItem } from '@/types/item/IItem'
+import { IItem } from '@/types/item/IItem'
 import { useShoppingCart } from 'app/context/ShoppingCartContext'
 import Image from 'next/image'
 import Link from 'next/link'
 import Button from '../Button'
 
-const ItemListCard = ({ item }: { item: SItem }) => {
+const ItemListCard = ({ item }: { item: IItem }) => {
 	const {
 		getItemQuantity,
 		increaseCartQuantity,
@@ -14,7 +14,7 @@ const ItemListCard = ({ item }: { item: SItem }) => {
 		removeFromCart,
 	} = useShoppingCart()
 
-	const quantity = getItemQuantity(item._id)
+	const quantity = getItemQuantity(item._id!)
 
 	return (
 		<li className='flex flex-col justify-between border border-gray-300 rounded-md p-4 hover:shadow-[10px_10px_15px_-3px_rgba(0,0,0,0.3)] transition-all'>
@@ -44,17 +44,17 @@ const ItemListCard = ({ item }: { item: SItem }) => {
 			<div>
 				<div>
 					{quantity === 0 ? (
-						<Button label='Купити' onClick={() => increaseCartQuantity(item._id)} />
+						<Button label='Купити' onClick={() => increaseCartQuantity(item._id!)} />
 					) : (
 						<div className='flex items-center flex-col gap-10'>
 							<div className='flex items-center justify-center gap-20'>
 								<div className='flex items-center justify-between gap-2'>
-									<Button label='-' onClick={() => decreaseCartQuantity(item._id)} small outline />
+									<Button label='-' onClick={() => decreaseCartQuantity(item._id!)} small outline />
 									<span className='text-xl'>{quantity}</span>в корзині
-									<Button label='+' onClick={() => increaseCartQuantity(item._id)} small outline />
+									<Button label='+' onClick={() => increaseCartQuantity(item._id!)} small outline />
 								</div>
 							</div>
-							<Button label='Видалити' onClick={() => removeFromCart(item._id)} />
+							<Button label='Видалити' onClick={() => removeFromCart(item._id!)} />
 						</div>
 					)}
 				</div>
