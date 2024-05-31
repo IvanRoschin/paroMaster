@@ -1,31 +1,18 @@
 'use client'
 
-import { getAllGoods } from '@/actions/getTest'
-import { SItem } from '@/types/item/IItem'
-import { ISearchParams } from '@/types/searchParams'
-import useSWR from 'swr'
-import { ItemListCard, Loader } from '..'
+import { IItem } from '@/types/item/IItem'
+import { ItemListCard } from '..'
 
-const ItemsList = (searchParams: { searchParams: ISearchParams }) => {
-	const { data, error } = useSWR('data', () => getAllGoods(searchParams))
+const ItemsList = ({ goods }: { goods: string }) => {
+	const newGoods = JSON.parse(goods)
 
-	if (error) {
-		console.error('Error fetching goods:', error)
-		return <div>Error fetching goods</div>
-	}
-
-	if (!data) {
-		return <Loader />
-	}
-	const goods: SItem[] = JSON.parse(data)
-
-	if (goods.length === 0) {
+	if (newGoods.length === 0) {
 		return <h2 className='text-4xl mb-4'>Товар не знайдений</h2>
 	}
 
 	return (
 		<ul className='grid grid-cols-4 gap-4'>
-			{goods?.map(item => (
+			{newGoods?.map((item: IItem) => (
 				<ItemListCard key={item._id} item={item} />
 			))}
 		</ul>

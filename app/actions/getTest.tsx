@@ -8,7 +8,7 @@ import { revalidatePath } from 'next/cache'
 
 //** Vendor search: { "vendor": {$eq:"vendorName" } } * /
 
-export async function getAllGoods({ searchParams }: { searchParams: ISearchParams }) {
+export async function getAllGoods(searchParams: ISearchParams) {
 	try {
 		connectToDB()
 
@@ -54,7 +54,7 @@ export async function getAllGoods({ searchParams }: { searchParams: ISearchParam
 
 		const goods: IItem[] = await Good.find(filter).sort(sortOption)
 
-		return JSON.stringify(goods)
+		return goods
 	} catch (error) {
 		console.log(error)
 	}

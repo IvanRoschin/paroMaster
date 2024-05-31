@@ -47,20 +47,20 @@ const Modal: React.FC<ModalProps> = ({
 	}, [disabled, onClose])
 
 	// useEffect(() => {
-	//   const handleClickOutside = (event: MouseEvent) => {
-	//     if (!ref.current?.contains(event.target as Node)) {
-	//       handleClose();
-	//     }
-	//   };
+	// 	const handleClickOutside = (event: MouseEvent) => {
+	// 		if (!ref.current?.contains(event.target as Node)) {
+	// 			handleClose()
+	// 		}
+	// 	}
 
-	//   if (showModal) {
-	//     document.addEventListener("mousedown", handleClickOutside);
-	//   }
+	// 	if (showModal) {
+	// 		document.addEventListener('mousedown', handleClickOutside)
+	// 	}
 
-	//   return () => {
-	//     document.removeEventListener("mousedown", handleClickOutside);
-	//   };
-	// }, [showModal, handleClose]);
+	// 	return () => {
+	// 		document.removeEventListener('mousedown', handleClickOutside)
+	// 	}
+	// }, [showModal, handleClose])
 
 	const handleSubmit = useCallback(() => {
 		if (disabled) {
@@ -103,10 +103,10 @@ const Modal: React.FC<ModalProps> = ({
           w-full 
           md:w-4/6 
           lg:w-3/6 
-          xl:w-2/5 
-          my-6 
-          mx-auto 
-          h-full 
+          xl:w-3/5 
+					mr-0
+          // mx-auto 
+          h-full
           lg:h-auto 
           md:h-auto
         '
@@ -114,13 +114,13 @@ const Modal: React.FC<ModalProps> = ({
 					{/* Content*/}
 					<div
 						className={`translate duration-300 h-full ${
-							showModal ? 'translate-y-0' : 'translate-y-full'
+							showModal ? 'translate-x-0' : 'translate-x-[50%]'
 						} ${showModal ? 'opacity-100' : 'opacity-0'}`}
 					>
 						<div
 							className='
             translate
-            h-full
+            min-h-full
             lg:h-auto
             md:h-auto
             border-0
@@ -139,12 +139,13 @@ const Modal: React.FC<ModalProps> = ({
 								className='
               flex 
               items-center 
-              p-6 
+              p-8
               border-nuatral:800 
               justify-center
               relative
               border-[1px]'
 							>
+								<div className='text-lg font-semibold'>{title}</div>
 								<button
 									onClick={handleClose}
 									className='
@@ -155,11 +156,12 @@ const Modal: React.FC<ModalProps> = ({
                   hover:opacity-70 
                   transition 
                   absolute 
-                  left-9'
+                  right-9
+									hover:border-primaryAccentColor
+									'
 								>
 									<IoMdClose size={18} />
 								</button>
-								<div className='text-lg font-semibold'>{title}</div>
 							</div>
 							{/*Body */}
 							<div className='relative p-6 flex-auto'>{body}</div>
@@ -171,7 +173,7 @@ const Modal: React.FC<ModalProps> = ({
                 flex-row 
                 items-center 
                 gap-4
-                w-ful'
+                w-full'
 								>
 									{secondaryAction && secondaryActionLabel && (
 										<Button
