@@ -7,7 +7,11 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import Button from '../Button'
 
-const ItemListCard = ({ item }: { item: IItem }) => {
+interface ItemListCardProps {
+	item: IItem
+}
+
+const ItemListCard: React.FC<ItemListCardProps> = ({ item }) => {
 	const [amount, setAmount] = useState(0)
 
 	const {
@@ -20,12 +24,10 @@ const ItemListCard = ({ item }: { item: IItem }) => {
 	const quantity = getItemQuantity(item._id!)
 
 	useEffect(() => {
-		if (item) {
-			const newAmount = item.price * quantity
-			setAmount(newAmount)
-			localStorage.setItem(`amount-${item._id}`, JSON.stringify(newAmount))
-		}
-	}, [item, item._id, quantity])
+		const newAmount = item.price * quantity
+		setAmount(newAmount)
+		localStorage.setItem(`amount-${item._id}`, JSON.stringify(newAmount))
+	}, [item.price, item._id, quantity])
 
 	return (
 		<li className='flex flex-col justify-between border border-gray-300 rounded-md p-4 hover:shadow-[10px_10px_15px_-3px_rgba(0,0,0,0.3)] transition-all'>
@@ -43,47 +45,80 @@ const ItemListCard = ({ item }: { item: IItem }) => {
 					<h2 className='font-semibold mb-[20px]'>{item.title}</h2>
 				</div>
 				<div>
-					{item.isAvailable ? (
-						<p className='text-green-600 mb-[20px]'>В наявності</p>
-					) : (
-						<p className='text-red-600 mb-[20px]'>Немає в наявності</p>
-					)}
+					<p className={`mb-[20px] ${item.isAvailable ? 'text-green-600' : 'text-red-600'}`}>
+						{item.isAvailable ? 'В наявності' : 'Немає в наявності'}
+					</p>
 					<p className='mb-[20px]'>Артикул: {item.vendor}</p>
 					<p className='text-2xl font-bold mb-[20px]'>{item.price} грн</p>
 				</div>
 			</Link>
-			<div>
-				<div>
-					{quantity === 0 ? (
-						<Button label='Купити' onClick={() => increaseCartQuantity(item._id!)} />
-					) : (
-						<div className='flex items-center flex-col gap-10'>
-							<div className='flex items-center justify-center gap-20'>
-								<div className='flex items-center justify-between gap-2'>
-									<Button label='-' onClick={() => decreaseCartQuantity(item._id!)} small outline />
-									<span className='text-xl'>{quantity}</span>в корзині
-									<Button label='+' onClick={() => increaseCartQuantity(item._id!)} small outline />
-								</div>
-							</div>
-							<Button
-								label='Видалити'
-								onClick={() => {
-									removeFromCart(item._id!)
-									localStorage.removeItem(`amount-${item._id}`)
-								}}
-							/>
-						</div>
-					)}
-				</div>
-
-				<p className='font-light text-gray-500'>
-					Сумісність з брендами: {item.isCompatible ? 'так' : 'ні'}
-				</p>
-				<p className='font-light text-gray-500'>Brand: {item.brand}</p>
-				<p className='font-light text-gray-500'>Model: {item.model}</p>
-				<p className='font-light text-gray-500'>Сумісність з брендами: {item.compatibility}</p>
-			</div>
+			<CartActions
+				itemId={item._id!}
+				quantity={quantity}
+				increaseCartQuantity={increaseCartQuantity}
+				decreaseCartQuantity={decreaseCartQuantity}
+				removeFromCart={removeFromCart}
+			/>
+			{/* <ItemDetails item={item} /> */}
 		</li>
+	)
+}
+
+interface CartActionsProps {
+	itemId: string
+	quantity: number
+	increaseCartQuantity: (id: string) => void
+	decreaseCartQuantity: (id: string) => void
+	removeFromCart: (id: string) => void
+}
+
+const CartActions: React.FC<CartActionsProps> = ({
+	itemId,
+	quantity,
+	increaseCartQuantity,
+	decreaseCartQuantity,
+	removeFromCart,
+}) => {
+	return (
+		<div>
+			{quantity === 0 ? (
+				<Button label='Купити' onClick={() => increaseCartQuantity(itemId)} />
+			) : (
+				<div className='flex items-center flex-col gap-10'>
+					<div className='flex items-center justify-center gap-20'>
+						<div className='flex items-center justify-between gap-2'>
+							<Button label='-' onClick={() => decreaseCartQuantity(itemId)} small outline />
+							<span className='text-xl'>{quantity}</span>в корзині
+							<Button label='+' onClick={() => increaseCartQuantity(itemId)} small outline />
+						</div>
+					</div>
+					<Button
+						label='Видалити'
+						onClick={() => {
+							removeFromCart(itemId)
+							localStorage.removeItem(`amount-${itemId}`)
+						}}
+					/>
+				</div>
+			)}
+		</div>
+	)
+}
+
+interface ItemDetailsProps {
+	item: IItem
+}
+
+const ItemDetails: React.FC<ItemDetailsProps> = ({ item }) => {
+	return (
+		<>
+			<p className='font-light text-gray-500'>
+				Сумісність з брендами: {item.isCompatible ? 'так' : 'ні'}
+			</p>
+			<p className='font-light text-gray-500'>Brand: {item.brand}</p>
+			<p className='font-light text-gray-500'>Model: {item.model}</p>
+			<p className='font-light text-gray-500'>Сумісність з брендами: {item.compatibility}</p>
+		</>
 	)
 }
 
