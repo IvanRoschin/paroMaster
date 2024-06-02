@@ -1,11 +1,8 @@
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
-import { Suspense } from 'react'
-import { Header, Loader, Sidebar } from './components'
-import { ShoppingCartProvider } from './context/ShoppingCartContext'
+import { Header, Sidebar } from './components'
 import "./globals.css"
-import PreloadedResourses from './utils/preloadedResourses'
-
+import { Providers } from './providers/providers'
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,16 +21,13 @@ export default function RootLayout({
   return (
     <html lang="uk">
       <body className={`${inter.className} primaryTextColor`}>
-        <ShoppingCartProvider>
-          <Suspense fallback={<Loader />}>
-          <PreloadedResourses />
+        <Providers>
           <Header />
             <div className='px-8 flex items-start'>
               <Sidebar/>
               <div className='w-full'>{children}</div>
-            </div>
-          </Suspense>
-        </ShoppingCartProvider>
+        </div>
+        </Providers>
       </body>
     </html>
   );
