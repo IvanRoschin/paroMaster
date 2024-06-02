@@ -1,249 +1,179 @@
 'use client'
 
-import { useState } from 'react'
-
-import { toast } from 'sonner'
-import Modal from './Modal'
-
-import { useShoppingCart } from 'app/context/ShoppingCartContext'
-import { useRouter } from 'next/navigation'
-// import { FieldValues, SubmitHandler, useForm } from 'react-hook-form'
 import { useFormik } from 'formik'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import * as Yup from 'yup'
 
+import { getGoodById } from '@/actions/getTest'
 import { sendEmail } from '@/actions/sendEmail'
+import { useShoppingCart } from 'app/context/ShoppingCartContext'
 import { CartClient } from '../Cart/CartClient'
+import Modal from './Modal'
 
-const CartModal = ({ isOpen }: { isOpen: boolean }) => {
+interface CartModalProps {
+	isOpen: boolean
+}
+
+interface FormValues {
+	name: string
+	email: string
+	phone: string
+	cartItems: any[]
+	totalAmount: number
+}
+
+const CartModal: React.FC<CartModalProps> = ({ isOpen }) => {
 	const router = useRouter()
-	const { closeCart, cartQuantity } = useShoppingCart()
-
+	const { closeCart, cartItems } = useShoppingCart()
 	const [isLoading, setIsLoading] = useState(false)
 
-	const nameRegex = /^[a-zA-Zа-яА-ЯіІїЇґҐ]+(?: [a-zA-Zа-яА-ЯіІїЇґҐ]+)*$/
+	const nameRegex = /^[а-яА-ЯіІїЇєЄґҐ']+ [а-яА-ЯіІїЇєЄґҐ']+$/u
 	const emailRegex = /^(?=.{1,63}$)(?=.{2,}@)[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+	const phoneRegex = /^\+380\d{9}$/
 
 	const orderSchema = Yup.object().shape({
 		name: Yup.string()
 			.max(20)
 			.min(3)
-			.matches(nameRegex, { message: 'Only Cirilyk or Latin letters' })
-			.required('Name is required'),
+			.matches(nameRegex, { message: 'Тільки українські букви' })
+			.required(`Обов'язкове поле`),
 		email: Yup.string()
-			.matches(emailRegex, { message: 'must include @, min 1 max 63 symbols' })
-			.required('Email is required'),
-		message: Yup.string()
-			.max(20, 'Max 20 symbols')
-			.min(5, 'Min 5 symbols')
-			.required(),
+			.matches(emailRegex, { message: 'Має включати @, від 1 до 63 symbols' })
+			.required(`Обов'язкове поле`),
+		phone: Yup.string()
+			.matches(phoneRegex, { message: 'Має починатись на +380 та 9 цифр номеру' })
+			.required(`Обов'язкове поле`),
 	})
 
-	const { values, errors, touched, handleBlur, handleChange, handleSubmit } = useFormik({
+	const formik = useFormik<FormValues>({
 		initialValues: {
 			name: '',
 			email: '',
-			message: '',
+			phone: '',
+			cartItems: [],
+			totalAmount: 0,
 		},
 		validationSchema: orderSchema,
 		onSubmit: async (values, actions) => {
 			setIsLoading(true)
 			const result = await sendEmail(values)
+			setIsLoading(false)
+
 			if (result?.success) {
-				console.log({ data: result.data })
-				await new Promise(resolve => setTimeout(resolve, 1000))
 				actions.resetForm()
 				router.push('/')
-
-				toast.success('Email sent successfully')
-				return
+				closeCart()
+				localStorage.clear()
+				toast.success('Замовлення відправлене')
+			} else {
+				toast.error('Щось зломалось')
 			}
-			console.log(result?.error)
-			toast.error('Something went wrong')
 		},
 	})
 
-	// const {
-	// 	register,
-	// 	handleSubmit,
-	// 	formState: { errors },
-	// } = useForm<FieldValues>({
-	// 	defaultValues: {
-	// 		email: '',
-	// 		name: '',
-	// 	},
-	// })
+	const { values, errors, touched, handleBlur, handleChange, handleSubmit, setFieldValue } = formik
 
-	// const onSubmit: SubmitHandler<FieldValues> = data => {
-	// 	setIsLoading(true)
-	// 	console.log('Send an email')
-	// 	router.push('/')
+	useEffect(() => {
+		const fetchGoods = async () => {
+			const retrievedGoods = await Promise.all(
+				cartItems.map(async item => {
+					const fetchedItem = await getGoodById(item.id)
+					if (fetchedItem) {
+						return fetchedItem
+					} else {
+						return null
+					}
+				}),
+			)
 
-	// 	///Send an email
-	// }
+			const retrievedAmounts = cartItems.map(item => {
+				const storedAmount = localStorage.getItem(`amount-${item.id}`)
+				return storedAmount ? JSON.parse(storedAmount) : 0
+			})
+			const totalAmount = retrievedAmounts.reduce((total, amount) => total + amount, 0)
+
+			const quantityGoods = cartItems.map((item, index) => {
+				return item ? item.quantity : cartItems[index].quantity
+			})
+
+			setFieldValue(
+				'cartItems',
+				retrievedGoods.filter(item => item !== null),
+			)
+			setFieldValue('quantity', quantityGoods)
+
+			setFieldValue('totalAmount', totalAmount)
+		}
+
+		fetchGoods()
+	}, [cartItems, setFieldValue])
+
+	const renderInputField = (
+		id: keyof FormValues,
+		label: string,
+		type: string = 'text',
+		placeholder: string = ' ',
+	) => (
+		<div className='relative'>
+			<input
+				id={id}
+				name={id}
+				type={type}
+				placeholder={placeholder}
+				onChange={handleChange}
+				value={id === 'phone' && !values[id].startsWith('+380') ? '+380' + values[id] : values[id]}
+				onBlur={handleBlur}
+				className={`
+					peer
+					w-full
+					h-10
+					p-6
+					bg-white
+					border-2
+					rounded-md
+					outline-none
+					transition
+					disabled:opacity-70 disabled:cursor-not-allowed
+					text-neutral-700
+					placeholder-white
+					placeholder:b-black
+					placeholder:text-base 
+					${errors[id] && touched[id] ? 'border-rose-300' : 'border-neutral-300'} ${
+					errors[id] && touched[id] ? 'focus:border-rose-300' : 'focus:border-neutral-500'
+				}`}
+			/>
+			<label
+				htmlFor={id}
+				className='
+					absolute
+					left-0
+					p-2
+					pl-7
+					-top-8
+					text-neutral-500
+					peer-placeholder-shown:text-base
+					peer-placeholder-shown:text-neutral-500
+					peer-placeholder-shown:top-2
+					transition-all'
+			>
+				{label}
+			</label>
+			{errors[id] && touched[id] && (
+				<p className='text-rose-300 pl-7 transition-all'>{errors[id] as any} </p>
+			)}
+		</div>
+	)
 
 	const bodyContent = (
 		<div className='flex flex-col gap-4'>
 			<CartClient />
 			<form onSubmit={handleSubmit} autoComplete='off' className='flex flex-col space-y-8'>
-				<div className='relative'>
-					<input
-						id='name'
-						name='name'
-						type='text'
-						placeholder=' '
-						onChange={handleChange}
-						value={values.name}
-						onBlur={handleBlur}
-						className={`
-          peer
-          w-full
-          h-10
-          p-6
-          bg-white
-          border-2
-          rounded-md
-          outline-none
-          transition
-          disabled:opacity-70 disabled:cursor-not-allowed
-          text-neutral-700
-          placeholder-white
-          placeholder:b-black
-          placeholder:text-base 
-          ${errors?.name && touched.name ? 'border-rose-300' : 'border-neutral-300'} ${
-							errors?.name && touched.name ? 'focus:border-rose-300' : 'focus:border-neutral-500'
-						}`}
-					/>
-					<label
-						htmlFor='name'
-						className='
-                    absolute
-                    left-0
-                    p-2
-                    pl-7
-                    -top-8
-                    text-neutral-500
-                    peer-placeholder-shown:text-base
-                    peer-placeholder-shown:text-neutral-500
-                    peer-placeholder-shown:top-2
-                    transition-all'
-					>
-						Ім'я
-					</label>
-					{errors?.name && <p className='text-rose-300 pl-7 transition-all'>{errors?.name}</p>}
-				</div>
-				<div className='relative'>
-					<input
-						id='email'
-						name='email'
-						type='text'
-						placeholder=' '
-						onChange={handleChange}
-						value={values.email}
-						onBlur={handleBlur}
-						className={`
-          peer
-          w-full
-          h-10
-          p-6
-          bg-white
-          border-2
-          rounded-md
-          outline-none
-          transition
-          disabled:opacity-70 disabled:cursor-not-allowed
-          text-neutral-700
-          placeholder-white
-          placeholder:b-black
-          placeholder:text-base 
-          ${errors?.email && touched.email ? 'border-rose-300' : 'border-neutral-300'} ${
-							errors?.email && touched.email ? 'focus:border-rose-300' : 'focus:border-neutral-500'
-						}`}
-					/>
-					<label
-						htmlFor='email'
-						className='
-                    absolute
-                    left-0
-                    p-2
-                    pl-7
-                    -top-8
-                    text-neutral-500
-                    peer-placeholder-shown:text-base
-                    peer-placeholder-shown:text-neutral-500
-                    peer-placeholder-shown:top-2
-                    transition-all'
-					>
-						Введіть свій email
-					</label>
-					{errors?.email && <p className='text-rose-300 pl-7 transition-all'>{errors?.email}</p>}
-				</div>
-				<div className='relative'>
-					<textarea
-						id='message'
-						name='message'
-						placeholder=' '
-						onChange={handleChange}
-						value={values.message}
-						onBlur={handleBlur}
-						className={`
-          peer
-          w-full
-          h-10
-          p-2
-          bg-white
-          border-2
-          rounded-md
-          outline-none
-          transition
-          disabled:opacity-70 disabled:cursor-not-allowed
-          text-neutral-700
-          placeholder-white
-          placeholder:b-black
-          placeholder:text-base 
-          ${errors?.message && touched.message ? 'border-rose-300' : 'border-neutral-300'} ${
-							errors?.message && touched.message
-								? 'focus:border-rose-300'
-								: 'focus:border-neutral-500'
-						}`}
-					/>
-					<label
-						htmlFor='messaage'
-						className='
-                    absolute
-                    left-0
-                    p-2
-                    pl-7
-                    -top-8
-                    text-black
-                    peer-placeholder-shown:text-base
-                    peer-placeholder-shown:text-neutral-500
-                    peer-placeholder-shown:top-2
-                    transition-all'
-					>
-						Enter your message
-					</label>
-					{errors?.message && (
-						<p className='text-rose-300 pl-7 transition-all'>{errors?.message}</p>
-					)}
-				</div>
+				{renderInputField('name', "Введіть iм'я")}
+				{renderInputField('email', 'Введіть свій email')}
+				{renderInputField('phone', 'Введіть свій телефон', 'tel')}
 			</form>
-
-			{/* <Input
-				id='name'
-				label='Name'
-				disabled={isLoading}
-				register={register}
-				errors={errors}
-				required
-			/>
-			<Input
-				id='email'
-				label='Email'
-				disabled={isLoading}
-				register={register}
-				errors={errors}
-				required
-			/> */}
 		</div>
 	)
 
@@ -258,6 +188,8 @@ const CartModal = ({ isOpen }: { isOpen: boolean }) => {
 			disabled={isLoading}
 			title='Корзина товарів'
 			actionLabel='Замовити'
+			secondaryAction={closeCart}
+			secondaryActionLabel='Закрити'
 			body={bodyContent}
 			footer={footerContent}
 			isOpen={isOpen}

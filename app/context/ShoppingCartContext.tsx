@@ -15,6 +15,7 @@ type CartItem = {
 type ShoppingCartContextProps = {
 	openCart: () => void
 	closeCart: () => void
+	resetCart: () => void
 	getItemQuantity: (id: string) => number
 	increaseCartQuantity: (id: string) => void
 	decreaseCartQuantity: (id: string) => void
@@ -36,6 +37,7 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
 
 	const openCart = () => setIsOpen(true)
 	const closeCart = () => setIsOpen(false)
+	const resetCart = () => setCartItems([])
 
 	function getItemQuantity(id: string) {
 		return cartItems.find(item => item.id === id)?.quantity || 0
@@ -100,6 +102,7 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
 				removeFromCart,
 				openCart,
 				closeCart,
+				resetCart,
 				cartItems,
 				cartQuantity,
 			}}
