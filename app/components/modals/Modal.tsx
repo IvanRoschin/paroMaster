@@ -46,6 +46,22 @@ const Modal: React.FC<ModalProps> = ({
 		}, 300)
 	}, [disabled, onClose])
 
+	useEffect(() => {
+		const onEscClick = (e: KeyboardEvent) => {
+			if (e.code === 'Escape') handleClose()
+		}
+
+		window.addEventListener('keydown', onEscClick)
+
+		return () => {
+			window.removeEventListener('keydown', onEscClick)
+		}
+	}, [handleClose])
+
+	const handleBackdropClick = (e: React.MouseEvent<HTMLElement>) => {
+		if (e.currentTarget === e.target) handleClose()
+	}
+
 	// useEffect(() => {
 	// 	const handleClickOutside = (event: MouseEvent) => {
 	// 		if (!ref.current?.contains(event.target as Node)) {
@@ -83,6 +99,7 @@ const Modal: React.FC<ModalProps> = ({
 	return (
 		<>
 			<div
+				onClick={handleBackdropClick}
 				className='
       justify-center
       items-center
@@ -121,8 +138,6 @@ const Modal: React.FC<ModalProps> = ({
 							className='
             translate
             min-h-full
-            lg:h-auto
-            md:h-auto
             border-0
             rounded-lg
             shadow-lg

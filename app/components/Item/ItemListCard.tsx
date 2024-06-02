@@ -4,9 +4,12 @@ import { IItem } from '@/types/item/IItem'
 import { useShoppingCart } from 'app/context/ShoppingCartContext'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import Button from '../Button'
 
 const ItemListCard = ({ item }: { item: IItem }) => {
+	const [amount, setAmount] = useState(0)
+
 	const {
 		getItemQuantity,
 		increaseCartQuantity,
@@ -15,6 +18,14 @@ const ItemListCard = ({ item }: { item: IItem }) => {
 	} = useShoppingCart()
 
 	const quantity = getItemQuantity(item._id!)
+
+	useEffect(() => {
+		if (item) {
+			const newAmount = item.price * quantity
+			setAmount(newAmount)
+			localStorage.setItem(`amount-${item._id}`, JSON.stringify(newAmount))
+		}
+	}, [item, item._id, quantity])
 
 	return (
 		<li className='flex flex-col justify-between border border-gray-300 rounded-md p-4 hover:shadow-[10px_10px_15px_-3px_rgba(0,0,0,0.3)] transition-all'>
@@ -54,7 +65,13 @@ const ItemListCard = ({ item }: { item: IItem }) => {
 									<Button label='+' onClick={() => increaseCartQuantity(item._id!)} small outline />
 								</div>
 							</div>
-							<Button label='Видалити' onClick={() => removeFromCart(item._id!)} />
+							<Button
+								label='Видалити'
+								onClick={() => {
+									removeFromCart(item._id!)
+									localStorage.removeItem(`amount-${item._id}`)
+								}}
+							/>
 						</div>
 					)}
 				</div>

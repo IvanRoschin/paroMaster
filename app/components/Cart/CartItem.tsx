@@ -4,6 +4,7 @@ import { getGoodById } from '@/actions/getTest'
 import { SItem } from '@/types/item/IItem'
 import { useShoppingCart } from 'app/context/ShoppingCartContext'
 import Image from 'next/image'
+import { useEffect, useState } from 'react'
 import { IoMdClose } from 'react-icons/io'
 import useSWR from 'swr'
 import Button from '../Button'
@@ -23,9 +24,22 @@ const CartItem: React.FC<CartItemProps> = ({ id, quantity }) => {
 	} = useShoppingCart()
 
 	const { data, error } = useSWR(`data-${id}`, () => getGoodById(id))
+	const [amount, setAmount] = useState(0)
+
+	useEffect(() => {
+		if (data) {
+			const good: SItem = JSON.parse(data)
+			const newAmount = good.price * quantity
+			setAmount(newAmount)
+			localStorage.setItem(`amount-${id}`, JSON.stringify(newAmount))
+		}
+	}, [data, id, quantity])
+
 	if (error) {
 		console.error('Error fetching good:', error)
+		return <p>Error loading item.</p>
 	}
+
 	if (!data) {
 		return <Loader />
 	}
@@ -34,10 +48,9 @@ const CartItem: React.FC<CartItemProps> = ({ id, quantity }) => {
 
 	return (
 		<div>
-			<li className='flex flex-col justify-between border border-gray-300 rounded-md p-4 hover:shadow-[10px_10px_15px_-3px_rgba(0,0,0,0.3)] transition-all'>
+			<li className='relative flex flex-col justify-between border border-gray-300 rounded-md p-4 hover:shadow-[10px_10px_15px_-3px_rgba(0,0,0,0.3)] transition-all mb-4'>
 				<div className='flex items-center justify-center gap-10'>
 					<div className='w-[125px] h-[125px]'>
-						{/* Displaying an image using the `Image` component */}
 						<Image
 							src={good.imgUrl[0]}
 							alt='item_photo'
@@ -51,18 +64,28 @@ const CartItem: React.FC<CartItemProps> = ({ id, quantity }) => {
 						<div className='flex items-center justify-center gap-20'>
 							{/* Quantity controls with buttons */}
 							<div className='flex items-center justify-between gap-2'>
-								<Button label='-' onClick={() => decreaseCartQuantity(good._id)} small outline />
+								<Button
+									label='-'
+									onClick={() => {
+										decreaseCartQuantity(good._id)
+									}}
+									small
+									outline
+								/>
 								<span className='text-xl'>{quantity}</span>
 								<Button label='+' onClick={() => increaseCartQuantity(good._id)} small outline />
 							</div>{' '}
 							x <p>{good.price} грн.</p>
 						</div>
-					</div>{' '}
+					</div>
 					{/* Calculated total price for the quantity */}
-					<p>{good.price * quantity} грн.</p>
+					<p>{amount} грн.</p>
 					{/* Button to remove item from cart */}
 					<button
-						onClick={() => removeFromCart(good._id)}
+						onClick={() => {
+							removeFromCart(good._id)
+							localStorage.removeItem(`amount-${id}`)
+						}}
 						className='
             p-1 
             border-[1px] 
@@ -71,7 +94,8 @@ const CartItem: React.FC<CartItemProps> = ({ id, quantity }) => {
             hover:opacity-70 
             transition 
             absolute 
-            right-9
+            right-2
+						top-2
             hover:border-primaryAccentColor
           '
 					>
@@ -82,4 +106,5 @@ const CartItem: React.FC<CartItemProps> = ({ id, quantity }) => {
 		</div>
 	)
 }
+
 export default CartItem

@@ -4,7 +4,10 @@ import { IItem } from '@/types/item/IItem'
 import { ItemListCard } from '..'
 
 const ItemsList = ({ goods }: { goods: string }) => {
-	const newGoods = JSON.parse(goods)
+	let newGoods = []
+	if (goods) {
+		newGoods = JSON.parse(goods)
+	}
 
 	if (newGoods.length === 0) {
 		return <h2 className='text-4xl mb-4'>Товар не знайдений</h2>

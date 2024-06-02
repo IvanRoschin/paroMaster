@@ -1,13 +1,19 @@
+import { getAllGoods } from '@/actions/getTest'
 import { ISearchParams } from '@/types/searchParams'
 import { ItemsList } from '../components'
 
-const page = ({ searchParams }: { searchParams: ISearchParams }) => {
+export default async function categoryPage({ searchParams }: { searchParams: ISearchParams }) {
+	const goods = await getAllGoods(searchParams)
+
+	let newArray = ''
+
+	if (goods) {
+		newArray = JSON.stringify(goods)
+	}
 	return (
 		<div>
 			<h2 className='text-4xl mb-4'>{searchParams?.category}</h2>
-			<ItemsList searchParams={searchParams} />
+			<ItemsList goods={newArray} />
 		</div>
 	)
 }
-
-export default page
