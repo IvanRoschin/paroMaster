@@ -1,6 +1,6 @@
 'use client'
 
-import { uniqueBrands } from '@/actions/getTest'
+import { uniqueBrands } from '@/actions/goods'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
