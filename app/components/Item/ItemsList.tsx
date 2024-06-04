@@ -3,20 +3,15 @@
 import { IItem } from '@/types/item/IItem'
 import { ItemListCard } from '..'
 
-const ItemsList = ({ goods }: { goods: string }) => {
-	let newGoods = []
-	if (goods) {
-		newGoods = JSON.parse(goods)
-	}
-
-	if (newGoods.length === 0) {
+const ItemsList = ({ goods }: { goods: IItem[] }) => {
+	if (goods.length === 0) {
 		return <h2 className='text-4xl mb-4'>Товар не знайдений</h2>
 	}
 
 	return (
 		<ul className='grid grid-cols-4 gap-4'>
-			{newGoods?.map((item: IItem) => (
-				<ItemListCard key={item._id} item={item} />
+			{goods?.map((item: IItem, index) => (
+				<ItemListCard key={index} item={item} />
 			))}
 		</ul>
 	)

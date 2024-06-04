@@ -1,5 +1,5 @@
 'use client'
-import { getMinMaxPrice } from '@/actions/getTest'
+import { getMinMaxPrice } from '@/actions/goods'
 import useSWR from 'swr'
 import BrandFilter from './BrandFilter'
 import Category from './Category'

@@ -1,6 +1,6 @@
 'use client'
 
-import { addGood } from '@/actions/getTest'
+import { addGood } from '@/actions/goods'
 import { Field, Form, Formik, FormikState } from 'formik'
 import * as Yup from 'yup'
 
