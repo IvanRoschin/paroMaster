@@ -8,9 +8,13 @@ import { revalidatePath } from 'next/cache'
 
 //** Vendor search: { "vendor": {$eq:"vendorName" } } * /
 
-export async function getAllGoods(searchParams: ISearchParams) {
+export async function getAllGoods(
+	searchParams: ISearchParams,
+	offset: number,
+	limit: number,
+): Promise<IItem[]> {
 	try {
-		connectToDB()
+		await connectToDB()
 
 		let filter: any = {}
 
@@ -52,14 +56,73 @@ export async function getAllGoods(searchParams: ISearchParams) {
 			sortOption = { price: 1 }
 		}
 
-		const goods: IItem[] = await Good.find(filter).sort(sortOption)
+		const goods: IItem[] = await Good.find(filter)
+			.sort(sortOption)
+			.skip(offset)
+			.limit(limit)
+			.exec()
 
-		return goods
+		return JSON.parse(JSON.stringify(goods))
 	} catch (error) {
 		console.log(error)
+		return []
 	}
-	revalidatePath('/')
 }
+
+// export async function getAllGoods(searchParams: ISearchParams) {
+// 	try {
+// 		connectToDB()
+
+// 		let filter: any = {}
+
+// 		// search string filter
+// 		if (searchParams?.search) {
+// 			filter.$and = [
+// 				// Wrap conditions in $and operator
+// 				{
+// 					$or: [
+// 						{ title: { $regex: searchParams.search, $options: 'i' } },
+// 						{ vendor: searchParams.search },
+// 						{ brand: { $regex: searchParams.search, $options: 'i' } },
+// 						{ compatibility: { $regex: searchParams.search, $options: 'i' } },
+// 					],
+// 				},
+// 			]
+// 		}
+
+// 		// brand filter
+// 		if (searchParams?.brand) {
+// 			filter.brand = searchParams.brand
+// 		}
+
+// 		// category filter
+// 		if (searchParams?.category) {
+// 			filter.category = searchParams.category
+// 		}
+
+// 		// price filter
+// 		if (searchParams?.low && searchParams?.high) {
+// 			filter.price = { $gte: Number(searchParams.low), $lte: Number(searchParams.high) }
+// 		}
+
+// 		// sort by price
+// 		let sortOption: any = {}
+// 		if (searchParams?.sort === 'desc') {
+// 			sortOption = { price: -1 }
+// 		} else {
+// 			sortOption = { price: 1 }
+// 		}
+
+// 		const goods: IItem[] = await Good.find(filter)
+// 			.sort(sortOption)
+// 			.limit(4)
+
+// 		return goods
+// 	} catch (error) {
+// 		console.log(error)
+// 	}
+// 	revalidatePath('/')
+// }
 
 export async function getGoodById(id: string) {
 	try {

@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import * as Yup from 'yup'
 
-import { getGoodById } from '@/actions/getTest'
+import { getGoodById } from '@/actions/goods'
 import { sendEmail } from '@/actions/sendEmail'
 import { useShoppingCart } from 'app/context/ShoppingCartContext'
 import { CartClient } from '../Cart/CartClient'
@@ -20,6 +20,7 @@ interface FormValues {
 	name: string
 	email: string
 	phone: string
+	address: string
 	cartItems: any[]
 	totalAmount: number
 }
@@ -45,6 +46,7 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen }) => {
 		phone: Yup.string()
 			.matches(phoneRegex, { message: 'Має починатись на +380 та 9 цифр номеру' })
 			.required(`Обов'язкове поле`),
+		address: Yup.string().required(`Обов'язкове поле`),
 	})
 
 	const formik = useFormik<FormValues>({
@@ -52,22 +54,30 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen }) => {
 			name: '',
 			email: '',
 			phone: '',
+			address: '',
 			cartItems: [],
 			totalAmount: 0,
 		},
 		validationSchema: orderSchema,
 		onSubmit: async (values, actions) => {
 			setIsLoading(true)
-			const result = await sendEmail(values)
-			setIsLoading(false)
+			try {
+				const emailResult = await sendEmail(values)
+				// const orderResult = await addOrder(values) // assuming addOrder
+				setIsLoading(false)
 
-			if (result?.success) {
-				actions.resetForm()
-				router.push('/')
-				closeCart()
-				localStorage.clear()
-				toast.success('Замовлення відправлене')
-			} else {
+				if (emailResult?.success) {
+					actions.resetForm()
+					router.push('/')
+					closeCart()
+					localStorage.clear()
+					toast.success('Замовлення відправлене')
+				} else {
+					toast.error('Щось зломалось')
+				}
+			} catch (error) {
+				setIsLoading(false)
+				console.error('Error in onSubmit:', error)
 				toast.error('Щось зломалось')
 			}
 		},
@@ -173,6 +183,7 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen }) => {
 				{renderInputField('name', "Введіть iм'я")}
 				{renderInputField('email', 'Введіть свій email')}
 				{renderInputField('phone', 'Введіть свій телефон', 'tel')}
+				{renderInputField('address', 'Введіть місто та номер відділення НП')}
 			</form>
 		</div>
 	)

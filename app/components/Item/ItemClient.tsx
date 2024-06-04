@@ -1,6 +1,6 @@
 'use client'
 
-import { getGoodById } from '@/actions/getTest'
+import { getGoodById } from '@/actions/goods'
 import { Icon } from '@/components/Icon'
 import { SItem } from '@/types/item/IItem'
 import { useShoppingCart } from 'app/context/ShoppingCartContext'

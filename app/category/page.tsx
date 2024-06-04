@@ -1,4 +1,4 @@
-import { getAllGoods } from '@/actions/getTest'
+import { getAllGoods } from '@/actions/goods'
 import { ISearchParams } from '@/types/searchParams'
 import { ItemsList } from '../components'
 

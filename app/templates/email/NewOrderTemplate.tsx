@@ -9,6 +9,17 @@ export interface NewOrderTemplateProps {
 	quantity: number[]
 }
 
+const date = new Date()
+const year = date.getFullYear().toString()
+const month = (date.getMonth() + 1).toString().padStart(2, '0')
+const day = date
+	.getDate()
+	.toString()
+	.padStart(2, '0')
+const formattedDate = `${day}${month}${year}`
+
+const index = 1 // Your index value
+
 export function generateEmailContent({
 	name,
 	email,
@@ -35,7 +46,8 @@ export function generateEmailContent({
 
 	return `
     <div>
-      <h1>Замовлення з сайту ParoMaster</h1>
+      <h1>Замовлення # ${formattedDate}/${index}}
+			з сайту ParoMaster</h1>
       <br />
       <br />
       <h3>

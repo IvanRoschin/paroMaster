@@ -1,21 +1,22 @@
-import { getAllGoods } from '@/actions/getTest'
+import { getAllGoods } from '@/actions/goods'
+import InfiniteScrollGoods from '@/components/InfiniteScrollGoods'
 import { ISearchParams } from '@/types/searchParams'
-import { ItemsList } from '../components'
 
-type Props = {}
+const NUMBER_OF_GOODS_TO_FETCH = 4
 
-export default async function catalogPage({ searchParams }: { searchParams: ISearchParams }) {
-	const goods = await getAllGoods(searchParams)
+const Page = async ({ searchParams }: { searchParams: ISearchParams }) => {
+	const goods = await getAllGoods(searchParams, 0, NUMBER_OF_GOODS_TO_FETCH)
 
-	let newArray = ''
-
-	if (goods) {
-		newArray = JSON.stringify(goods)
-	}
 	return (
 		<div>
 			<h2 className='text-4xl mb-4 flex justify-start items-start'>Каталог товарів</h2>
-			<ItemsList goods={newArray} />
+			<InfiniteScrollGoods
+				initialGoods={goods}
+				searchParams={searchParams}
+				NUMBER_OF_GOODS_TO_FETCH={NUMBER_OF_GOODS_TO_FETCH}
+			/>
 		</div>
 	)
 }
+
+export default Page
