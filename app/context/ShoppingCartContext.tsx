@@ -1,7 +1,8 @@
 'use client'
 
 import ShoppingCart from '@/components/Cart/ShoppingCart'
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 type ShoppingCartProviderProps = {
 	children: React.ReactNode
@@ -15,14 +16,18 @@ type CartItem = {
 type ShoppingCartContextProps = {
 	openCart: () => void
 	closeCart: () => void
+	openOrderModal: () => void
+	closeOrderModal: () => void
 	resetCart: () => void
 	getItemQuantity: (id: string) => number
 	increaseCartQuantity: (id: string) => void
 	decreaseCartQuantity: (id: string) => void
 	removeFromCart: (id: string) => void
+	setCartQuantity: (quantity: number) => void
 	cartQuantity: number
 	cartItems: CartItem[]
 }
+
 const ShoppingCartContext = createContext({} as ShoppingCartContextProps)
 
 export function useShoppingCart() {
@@ -32,12 +37,43 @@ export function useShoppingCart() {
 export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
 	const [cartItems, setCartItems] = useState<CartItem[]>([])
 	const [isOpen, setIsOpen] = useState(false)
+	const [isOrderModalOpen, setIsOrderModalOpen] = useState(false)
+	const [isHydrated, setIsHydrated] = useState(false)
+
+	useEffect(() => {
+		// Run only on client
+		const savedCartItems = localStorage.getItem('cartItems')
+		if (savedCartItems) {
+			setCartItems(JSON.parse(savedCartItems))
+		}
+		setIsHydrated(true)
+	}, [])
+
+	useEffect(() => {
+		if (isHydrated) {
+			localStorage.setItem('cartItems', JSON.stringify(cartItems))
+		}
+	}, [cartItems, isHydrated])
 
 	const cartQuantity = cartItems.reduce((quantity, item) => item.quantity + quantity, 0)
 
 	const openCart = () => setIsOpen(true)
 	const closeCart = () => setIsOpen(false)
-	const resetCart = () => setCartItems([])
+	const openOrderModal = () => {
+		setIsOrderModalOpen(true)
+		setIsOpen(false)
+	}
+	const closeOrderModal = () => setIsOrderModalOpen(false)
+
+	const resetCart = () => {
+		setCartItems([])
+		localStorage.removeItem('cartItems')
+	}
+
+	const setCartQuantity = (quantity: number) => {
+		const updatedItems = cartItems.map(item => ({ ...item, quantity }))
+		setCartItems(updatedItems)
+	}
 
 	function getItemQuantity(id: string) {
 		return cartItems.find(item => item.id === id)?.quantity || 0
@@ -66,6 +102,7 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
 				})
 			}
 		})
+		toast.success('Товар доданий до корзини')
 	}
 
 	function decreaseCartQuantity(id: string) {
@@ -85,12 +122,19 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
 				})
 			}
 		})
+		toast.success('Товар видалено з коризни')
 	}
 
 	function removeFromCart(id: string) {
 		setCartItems(currItems => {
 			return currItems.filter(item => item.id !== id)
 		})
+		toast.info('Товар видалено з корзини')
+	}
+
+	if (!isHydrated) {
+		// Render a loading state or nothing until the component is hydrated
+		return null
 	}
 
 	return (
@@ -102,13 +146,16 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
 				removeFromCart,
 				openCart,
 				closeCart,
+				openOrderModal,
+				closeOrderModal,
 				resetCart,
+				setCartQuantity,
 				cartItems,
 				cartQuantity,
 			}}
 		>
 			{children}
-			<ShoppingCart isOpen={isOpen} />
+			<ShoppingCart isOpen={isOpen} isOrderModalOpen={isOrderModalOpen} />
 		</ShoppingCartContext.Provider>
 	)
 }

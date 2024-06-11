@@ -7,7 +7,7 @@ import { generateEmailContent } from '../templates/email/NewOrderTemplate'
 const resend = new Resend(process.env.RESEND_API)
 
 export async function sendEmail(data: FieldValues) {
-	const { email, name, phone, cartItems, totalAmount, quantity } = data
+	const { email, name, phone, address, payment, cartItems, totalAmount, quantity } = data
 
 	const parsedCartItems = cartItems.map((item: string) => JSON.parse(item))
 
@@ -16,6 +16,8 @@ export async function sendEmail(data: FieldValues) {
 			email,
 			name,
 			phone,
+			address,
+			payment,
 			cartItems: parsedCartItems,
 			totalAmount,
 			quantity,

@@ -1,8 +1,8 @@
 'use client'
 
-import CartItem from '@/components/Cart/CartItem'
 import { useShoppingCart } from 'app/context/ShoppingCartContext'
 import { useEffect, useState } from 'react'
+import CartItem from './CartItem'
 
 type Props = {}
 
@@ -22,12 +22,13 @@ export const CartClient = (props: Props) => {
 
 	return (
 		<div>
-			<h2 className='text-2xl pb-4'>Товари у замовленні</h2>
+			<h2 className='text-2xl'>Товари у замовленні</h2>
 			{cartItems.map(item => (
 				<CartItem key={item.id} id={item.id} quantity={item.quantity} />
 			))}
 			<p className='text-end pt-10'>
 				Всього за замовленням: <span className='font-bold'>{totalAmount} грн.</span>
+				<br />+ вартість доставки: <span className='font-bold'> за тарифами перевізника</span>
 			</p>
 		</div>
 	)
