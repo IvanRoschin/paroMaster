@@ -5,9 +5,9 @@ import { SItem } from '@/types/item/IItem'
 import { useShoppingCart } from 'app/context/ShoppingCartContext'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
-import { IoMdClose } from 'react-icons/io'
 import useSWR from 'swr'
 import Button from '../Button'
+import { Icon } from '../Icon'
 import Loader from '../Loader'
 
 type CartItemProps = {
@@ -50,18 +50,18 @@ const CartItem: React.FC<CartItemProps> = ({ id, quantity }) => {
 		<div>
 			<li className='relative flex flex-col justify-between border border-gray-300 rounded-md p-4 hover:shadow-[10px_10px_15px_-3px_rgba(0,0,0,0.3)] transition-all mb-4'>
 				<div className='flex items-center justify-center gap-10'>
-					<div className='w-[125px] h-[125px]'>
+					<div className='w-[150px] '>
 						<Image
 							src={good.imgUrl[0]}
 							alt='item_photo'
-							width={125}
-							height={125}
-							className='self-center mb-[30px]'
+							width={150}
+							height={150}
+							className='self-center flex items-center justify-center'
 						/>
 					</div>
-					<p>{good.title}</p>
-					<div className='flex items-center flex-col gap-10'>
-						<div className='flex items-center justify-center gap-20'>
+					<p className='text-md'>{good.title}</p>
+					<div className='flex items-center flex-col gap-5'>
+						<div className='flex items-center justify-center gap-5'>
 							{/* Quantity controls with buttons */}
 							<div className='flex items-center justify-between gap-2'>
 								<Button
@@ -75,31 +75,20 @@ const CartItem: React.FC<CartItemProps> = ({ id, quantity }) => {
 								<span className='text-xl'>{quantity}</span>
 								<Button label='+' onClick={() => increaseCartQuantity(good._id)} small outline />
 							</div>{' '}
-							x <p>{good.price} грн.</p>
+							x <p>{good.price}</p>
 						</div>
 					</div>
+					<span>=</span>
 					{/* Calculated total price for the quantity */}
-					<p>{amount} грн.</p>
+					<p> {amount}</p>
 					{/* Button to remove item from cart */}
 					<button
 						onClick={() => {
 							removeFromCart(good._id)
 							localStorage.removeItem(`amount-${id}`)
 						}}
-						className='
-            p-1 
-            border-[1px] 
-            rounded-full 
-            border-neutral-600 
-            hover:opacity-70 
-            transition 
-            absolute 
-            right-2
-						top-2
-            hover:border-primaryAccentColor
-          '
 					>
-						<IoMdClose size={18} />
+						<Icon name='icon_trash' className='w-5 h-5 mr-1 hover:text-primaryAccentColor' />
 					</button>
 				</div>
 			</li>

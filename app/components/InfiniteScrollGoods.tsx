@@ -19,19 +19,22 @@ const InfiniteScrollGods = ({
 }) => {
 	const [offset, setOffset] = useState(0)
 	const [goods, setGoods] = useState<IItem[]>(initialGoods)
+	const [allGoodsLoaded, setAllGoodsLoaded] = useState(false)
 	const { ref, inView } = useInView()
 
 	async function loadMoreGoods() {
-		const goods = await getAllGoods(searchParams, offset, NUMBER_OF_GOODS_TO_FETCH)
+		const newGoods = await getAllGoods(searchParams, offset, NUMBER_OF_GOODS_TO_FETCH)
 
-		if (goods?.length) {
+		if (newGoods?.length) {
 			setOffset(prevOffset => prevOffset + NUMBER_OF_GOODS_TO_FETCH)
-			setGoods(prevGoods => [...prevGoods, ...goods])
+			setGoods(prevGoods => [...prevGoods, ...newGoods])
+		} else {
+			setAllGoodsLoaded(true)
 		}
 	}
 
 	useEffect(() => {
-		if (inView) {
+		if (inView && !allGoodsLoaded) {
 			loadMoreGoods()
 		}
 	}, [inView])
@@ -42,18 +45,22 @@ const InfiniteScrollGods = ({
 				<ItemsList goods={goods} />
 			</section>
 			<section>
-				<div ref={ref} className='flex items-center justify-center py-10'>
-					<TailSpin
-						visible={true}
-						height='40'
-						width='40'
-						color='#ea580c'
-						ariaLabel='tail-spin-loading'
-						radius='1'
-						wrapperStyle={{}}
-						wrapperClass=''
-					/>
-				</div>
+				{allGoodsLoaded ? (
+					<p className='text-center py-10'>Це всі наявні Товари</p>
+				) : (
+					<div ref={ref} className='flex items-center justify-center py-10'>
+						<TailSpin
+							visible={true}
+							height='40'
+							width='40'
+							color='#ea580c'
+							ariaLabel='tail-spin-loading'
+							radius='1'
+							wrapperStyle={{}}
+							wrapperClass=''
+						/>
+					</div>
+				)}
 			</section>
 		</>
 	)

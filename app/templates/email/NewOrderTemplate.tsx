@@ -1,9 +1,17 @@
 import { IItem } from '@/types/item/IItem'
 
+enum PaymentMethod {
+	CashOnDelivery = 'Оплата після отримання',
+	CreditCard = 'Оплата на карту',
+	InvoiceForSPD = 'Рахунок для СПД',
+}
+
 export interface NewOrderTemplateProps {
 	name: string
 	email: string
 	phone: string
+	payment: PaymentMethod
+	address: string
 	cartItems: IItem[]
 	totalAmount: number
 	quantity: number[]
@@ -24,6 +32,8 @@ export function generateEmailContent({
 	name,
 	email,
 	phone,
+	payment,
+	address,
 	cartItems,
 	totalAmount,
 	quantity,
@@ -46,14 +56,16 @@ export function generateEmailContent({
 
 	return `
     <div>
-      <h1>Замовлення # ${formattedDate}/${index}}
+      <h1>Замовлення # ${formattedDate}/${index}
 			з сайту ParoMaster</h1>
       <br />
       <br />
       <h3>
-        <p>Від користувача ${name}</p>
-        <p>Телефон ${phone}</p>
+        <p>Від користувача: ${name}</p>
+        <p>Телефон:${phone}</p>
         <p>Вказаний e-mail: ${email}</p>
+        <p>Вказаний спосіб оплати: ${payment}</p>
+        <p>Доставка за адресою:${address}</p>
       </h3>
       <br />
       <br />
@@ -76,7 +88,8 @@ export function generateEmailContent({
           ${itemsContent}
         </tbody>
       </table>
-      <h2 style="text-align: center; color: #333;">Всього за замовленням: ${totalAmount} грн.</h2>
+      <h2 style="text-align: center; color: #333;">Всього за замовленням: ${totalAmount} грн.</br> + доставка за тарифами перевізника
+      </h2>
 
     </div>
   `

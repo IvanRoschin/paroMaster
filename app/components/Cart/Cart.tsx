@@ -7,6 +7,7 @@ type Props = {}
 
 const Cart = (props: Props) => {
 	const { openCart, cartQuantity } = useShoppingCart()
+
 	return (
 		<div className='relative'>
 			{cartQuantity > 0 && (
