@@ -9,11 +9,13 @@ const ItemsList = ({ goods }: { goods: IItem[] }) => {
 	}
 
 	return (
-		<ul className='grid grid-cols-4 gap-4'>
-			{goods?.map((item: IItem, index) => (
-				<ItemListCard key={index} item={item} />
-			))}
-		</ul>
+		<>
+			<ul key={Math.random()} className='grid grid-cols-4 gap-4'>
+				{goods?.map((item: IItem, index) => (
+					<ItemListCard key={index} item={item} />
+				))}
+			</ul>
+		</>
 	)
 }
 
