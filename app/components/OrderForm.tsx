@@ -1,13 +1,16 @@
+'use client'
+
 import { getGoodById } from '@/actions/goods'
 import { sendEmail } from '@/actions/sendEmail'
 import { useShoppingCart } from 'app/context/ShoppingCartContext'
 import { useFormik } from 'formik'
-import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import * as Yup from 'yup'
+import NovaForm from './NovaForm'
 
-type Props = {
+interface OrderFormProps {
 	closeOrderModal: () => void
 	resetCart: () => void
 }
@@ -22,52 +25,58 @@ interface FormValues {
 	name: string
 	email: string
 	phone: string
-	address: string
+	city: string
+	warehouseId: string
 	payment: PaymentMethod
 	cartItems: any[]
 	totalAmount: number
 }
 
-const nameRegex = /^[а-яА-ЯіІїЇєЄґҐ']+ [а-яА-ЯіІїЇєЄґҐ']+$/u
-const emailRegex = /^(?=.{1,63}$)(?=.{2,}@)[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-const phoneRegex = /^\+380\d{9}$/
-
-const orderSchema = Yup.object().shape({
-	name: Yup.string()
-		.max(20)
-		.min(3)
-		.matches(nameRegex, {
-			message: 'Тільки українські букви від 3 до 20 символів',
-		})
-		.required(`Обов'язкове поле`),
-	email: Yup.string()
-		.max(63)
-		.min(3)
-		.email()
-		.matches(emailRegex, {
-			message: 'Має включати @, від 3 до 63 символів',
-		})
-		.required(`Обов'язкове поле`),
-	phone: Yup.string()
-		.matches(phoneRegex, {
-			message: 'Має починатись на +380 та 9 цифр номеру',
-		})
-		.required(`Обов'язкове поле`),
-	address: Yup.string().required(`Обов'язкове поле`),
-})
-
-const OrderForm = (props: Props) => {
-	const [isLoading, setIsLoading] = useState(false)
+const OrderForm: React.FC<OrderFormProps> = ({ closeOrderModal, resetCart }) => {
 	const router = useRouter()
-	const { closeCart, cartItems, resetCart, closeOrderModal } = useShoppingCart()
+	const { cartItems } = useShoppingCart()
+
+	const [isLoading, setIsLoading] = useState(false)
+
+	const nameRegex = /^[а-яА-ЯіІїЇєЄґҐ']+ [а-яА-ЯіІїЇєЄґҐ']+$/u
+	const emailRegex = /^(?=.{1,63}$)(?=.{2,}@)[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+	const phoneRegex = /^\+380\d{9}$/
+
+	const orderSchema = Yup.object().shape({
+		name: Yup.string()
+			.max(20)
+			.min(3)
+			.matches(nameRegex, {
+				message: 'Тільки українські букви від 3 до 20 символів',
+			})
+			.required(`Обов'язкове поле`),
+		email: Yup.string()
+			.max(63)
+			.min(3)
+			.email()
+			.matches(emailRegex, {
+				message: 'Має включати @, від 3 до 63 символів',
+			})
+			.required(`Обов'язкове поле`),
+		phone: Yup.string()
+			.matches(phoneRegex, {
+				message: 'Має починатись на +380 та 9 цифр номеру',
+			})
+			.required(`Обов'язкове поле`),
+		city: Yup.string()
+			.matches(/^[\u0400-\u04FF\s]+$/, 'Підтримується пошук тільки українською мовою...')
+			.required(`Обов'язкове поле`),
+		warehouseId: Yup.number(),
+	})
 
 	const formik = useFormik<FormValues>({
 		initialValues: {
 			name: '',
 			email: '',
 			phone: '',
-			address: '',
 			payment: PaymentMethod.CashOnDelivery,
+			city: 'київ',
+			warehouseId: '',
 			cartItems: [],
 			totalAmount: 0,
 		},
@@ -134,6 +143,9 @@ const OrderForm = (props: Props) => {
 		fetchGoods()
 	}, [cartItems, setFieldValue])
 
+	const cityRef = useRef<HTMLDivElement>(null)
+	const warehouseRef = useRef<HTMLDivElement>(null)
+
 	const renderInputField = (
 		id: keyof FormValues,
 		label: string,
@@ -150,37 +162,37 @@ const OrderForm = (props: Props) => {
 				value={id === 'phone' && !values[id].startsWith('+380') ? '+380' + values[id] : values[id]}
 				onBlur={handleBlur}
 				className={`
-					peer
-					w-full
-					h-10
-					p-6
-					bg-white
-					border-2
-					rounded-md
-					outline-none
-					transition
-					disabled:opacity-70 disabled:cursor-not-allowed
-					text-neutral-700
-					placeholder-white
-					placeholder:b-black
-					placeholder:text-base 
-					${errors[id] && touched[id] ? 'border-rose-300' : 'border-neutral-300'} ${
+                    peer
+                    w-full
+                    h-10
+                    p-6
+                    bg-white
+                    border-2
+                    rounded-md
+                    outline-none
+                    transition
+                    disabled:opacity-70 disabled:cursor-not-allowed
+                    text-neutral-700
+                    placeholder-white
+                    placeholder:b-black
+                    placeholder:text-base 
+                    ${errors[id] && touched[id] ? 'border-rose-300' : 'border-neutral-300'} ${
 					errors[id] && touched[id] ? 'focus:border-rose-300' : 'focus:border-neutral-500'
 				}`}
 			/>
 			<label
 				htmlFor={id}
 				className='
-					absolute
-					left-0
-					p-2
-					pl-7
-					-top-8
-					text-neutral-500
-					peer-placeholder-shown:text-base
-					peer-placeholder-shown:text-neutral-500
-					peer-placeholder-shown:top-2
-					transition-all'
+                    absolute
+                    left-0
+                    p-2
+                    pl-7
+                    -top-8
+                    text-neutral-500
+                    peer-placeholder-shown:text-base
+                    peer-placeholder-shown:text-neutral-500
+                    peer-placeholder-shown:top-2
+                    transition-all'
 			>
 				{label}
 			</label>
@@ -195,50 +207,53 @@ const OrderForm = (props: Props) => {
 			<select
 				id={id}
 				name={id}
-				onChange={e => {
-					const selectedPaymentMethod = e.currentTarget.value as PaymentMethod
-					setFieldValue(id, selectedPaymentMethod)
-				}}
-				onBlur={handleBlur}
-				value={values[id]}
 				className={`
-        peer
-        w-full
-        h-10
-        p-6
-        bg-white
-        border-2
-        rounded-md
-        outline-none
-        transition
-        disabled:opacity-70 disabled:cursor-not-allowed
-        text-neutral-700
-        placeholder-white
-        placeholder:b-black
-        placeholder:text-base 
-        ${errors[id] && touched[id] ? 'border-rose-300' : 'border-neutral-300'} ${
+                peer
+                w-full
+                h-12
+                px-6
+                bg-white
+                border-2
+                rounded-md
+                outline-none
+                transition
+                disabled:opacity-70 disabled:cursor-not-allowed
+                text-neutral-700
+                placeholder-white
+                placeholder:b-black
+                placeholder:text-base 
+                ${errors[id] && touched[id] ? 'border-rose-300' : 'border-neutral-300'} ${
 					errors[id] && touched[id] ? 'focus:border-rose-300' : 'focus:border-neutral-500'
 				}`}
+				style={{ display: 'block' }}
+				value={values[id]}
+				onBlur={handleBlur}
+				onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+					setFieldValue(id, e.currentTarget.value)
+				}}
 			>
-				{Object.values(PaymentMethod).map((method, index) => (
-					<option key={index} value={method}>
-						{method}
-					</option>
-				))}
+				{Object.values(PaymentMethod).map((method, index) => {
+					return (
+						<option value={method} label={method} key={index}>
+							{method}
+						</option>
+					)
+				})}
 			</select>
+
 			<label
 				htmlFor={id}
 				className='
-        absolute
-        left-0
-        p-2
-        pl-7
-        -top-8
-        text-neutral-500
-        peer-placeholder-shown:text-base
-        peer-placeholder-shown:text-neutral-500
-        peer-placeholder-shown:top-2
-        transition-all'
+                absolute
+                left-0
+                p-2
+                pl-7
+                -top-8
+                text-neutral-500
+                peer-placeholder-shown:text-base
+                peer-placeholder-shown:text-neutral-500
+                peer-placeholder-shown:top-2
+                transition-all'
 			>
 				{label}
 			</label>
@@ -254,7 +269,10 @@ const OrderForm = (props: Props) => {
 			{renderInputField('email', 'Введіть  email')}
 			{renderInputField('phone', 'Введіть телефон', 'tel')}
 			{renderPaymentMethodField('payment', 'Оберіть спосіб оплати')}
-			{renderInputField('address', 'Введіть місто та номер відділення НП')}
+			<NovaForm />
+			<button type='submit' disabled={isLoading}>
+				{isLoading ? 'Завантаження...' : 'Відправити замовлення'}
+			</button>
 		</form>
 	)
 }

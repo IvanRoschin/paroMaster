@@ -28,7 +28,7 @@ const CartItem: React.FC<CartItemProps> = ({ id, quantity }) => {
 
 	useEffect(() => {
 		if (data) {
-			const good: SItem = JSON.parse(data)
+			const good: SItem = data
 			const newAmount = good.price * quantity
 			setAmount(newAmount)
 			localStorage.setItem(`amount-${id}`, JSON.stringify(newAmount))
@@ -44,7 +44,7 @@ const CartItem: React.FC<CartItemProps> = ({ id, quantity }) => {
 		return <Loader />
 	}
 
-	const good: SItem = JSON.parse(data)
+	const good: SItem = data
 
 	return (
 		<div>
