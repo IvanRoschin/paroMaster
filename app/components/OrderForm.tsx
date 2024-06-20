@@ -1,18 +1,24 @@
 'use client'
 
 import { getGoodById } from '@/actions/goods'
+import { getData } from '@/actions/nova'
 import { sendEmail } from '@/actions/sendEmail'
 import { useShoppingCart } from 'app/context/ShoppingCartContext'
+import { orderFormSchema } from 'app/helpers/validationShemas/orderFormShema'
+
 import { useFormik } from 'formik'
 import { useRouter } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import * as Yup from 'yup'
-import NovaForm from './NovaForm'
 
 interface OrderFormProps {
 	closeOrderModal: () => void
 	resetCart: () => void
+}
+
+export interface Warehouse {
+	Ref: string
+	Description: string
 }
 
 enum PaymentMethod {
@@ -21,12 +27,12 @@ enum PaymentMethod {
 	InvoiceForSPD = 'Рахунок для СПД',
 }
 
-interface FormValues {
+export interface FormValues {
 	name: string
 	email: string
 	phone: string
 	city: string
-	warehouseId: string
+	warehouse: string
 	payment: PaymentMethod
 	cartItems: any[]
 	totalAmount: number
@@ -35,59 +41,42 @@ interface FormValues {
 const OrderForm: React.FC<OrderFormProps> = ({ closeOrderModal, resetCart }) => {
 	const router = useRouter()
 	const { cartItems } = useShoppingCart()
-
+	const [warehouses, updateWarehouses] = useState<Warehouse[]>([])
 	const [isLoading, setIsLoading] = useState(false)
-
-	const nameRegex = /^[а-яА-ЯіІїЇєЄґҐ']+ [а-яА-ЯіІїЇєЄґҐ']+$/u
-	const emailRegex = /^(?=.{1,63}$)(?=.{2,}@)[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-	const phoneRegex = /^\+380\d{9}$/
-
-	const orderSchema = Yup.object().shape({
-		name: Yup.string()
-			.max(20)
-			.min(3)
-			.matches(nameRegex, {
-				message: 'Тільки українські букви від 3 до 20 символів',
-			})
-			.required(`Обов'язкове поле`),
-		email: Yup.string()
-			.max(63)
-			.min(3)
-			.email()
-			.matches(emailRegex, {
-				message: 'Має включати @, від 3 до 63 символів',
-			})
-			.required(`Обов'язкове поле`),
-		phone: Yup.string()
-			.matches(phoneRegex, {
-				message: 'Має починатись на +380 та 9 цифр номеру',
-			})
-			.required(`Обов'язкове поле`),
-		city: Yup.string()
-			.matches(/^[\u0400-\u04FF\s]+$/, 'Підтримується пошук тільки українською мовою...')
-			.required(`Обов'язкове поле`),
-		warehouseId: Yup.number(),
-	})
 
 	const formik = useFormik<FormValues>({
 		initialValues: {
 			name: '',
 			email: '',
-			phone: '',
+			phone: '+380',
 			payment: PaymentMethod.CashOnDelivery,
-			city: 'київ',
-			warehouseId: '',
+			city: 'Київ',
+			warehouse: '',
 			cartItems: [],
 			totalAmount: 0,
 		},
-		validationSchema: orderSchema,
+		validationSchema: orderFormSchema,
 		onSubmit: async (values, actions) => {
+			console.log('values', values)
+			const body = {
+				apiKey: '8d677609f6e47ce83929374b3afab572',
+				modelName: 'AddressGeneral',
+				calledMethod: 'searchSettlements',
+				methodProperties: {
+					CityName: values.city,
+					Language: 'UA',
+				},
+			}
 			setIsLoading(true)
+
 			try {
+				const response = await getData(body)
+				if (response && response.data.data) {
+					updateWarehouses(response.data.data)
+				}
 				const emailResult = await sendEmail(values)
-				console.log(values, values)
+				console.log('values in OrderForm:', values)
 				// const orderResult = await addOrder(values) // assuming addOrder
-				setIsLoading(false)
 
 				if (emailResult?.success) {
 					actions.resetForm()
@@ -99,11 +88,23 @@ const OrderForm: React.FC<OrderFormProps> = ({ closeOrderModal, resetCart }) => 
 					toast.error('Щось зломалось')
 				}
 			} catch (error) {
-				setIsLoading(false)
 				console.error('Error in onSubmit:', error)
 				toast.error('Щось зломалось')
+			} finally {
+				setIsLoading(false)
 			}
 		},
+		// onSubmit: async (values, actions) => {
+		// 	try {
+		// 		await onSubmit(values, actions)
+		// 		router.push('/')
+		// 		closeOrderModal()
+		// 		resetCart()
+		// 	} catch (error) {
+		// 		console.error('Error in onSubmit:', error)
+		// 		actions.setSubmitting(false)
+		// 	}
+		// },
 	})
 
 	const { values, errors, touched, handleBlur, handleChange, handleSubmit, setFieldValue } = formik
@@ -130,21 +131,49 @@ const OrderForm: React.FC<OrderFormProps> = ({ closeOrderModal, resetCart }) => 
 			const quantityGoods = cartItems.map((item, index) => {
 				return item ? item.quantity : cartItems[index].quantity
 			})
-
 			setFieldValue(
 				'cartItems',
 				retrievedGoods.filter(item => item !== null),
 			)
 			setFieldValue('quantity', quantityGoods)
-
 			setFieldValue('totalAmount', totalAmount)
 		}
 
 		fetchGoods()
 	}, [cartItems, setFieldValue])
 
-	const cityRef = useRef<HTMLDivElement>(null)
-	const warehouseRef = useRef<HTMLDivElement>(null)
+	useEffect(() => {
+		const fetchWarehouses = async () => {
+			if (!formik.values.city) {
+				updateWarehouses([])
+				return
+			}
+
+			const body = {
+				apiKey: '8d677609f6e47ce83929374b3afab572',
+				modelName: 'Address',
+				calledMethod: 'getWarehouses',
+				methodProperties: {
+					CityName: formik.values.city,
+					Limit: '50',
+					Language: 'UA',
+				},
+			}
+			setIsLoading(true)
+			try {
+				const response = await getData(body)
+				if (response && response.data.data) {
+					updateWarehouses(response.data.data)
+				}
+			} catch (error) {
+				console.error('Error fetching warehouses:', error)
+			} finally {
+				setIsLoading(false)
+			}
+		}
+
+		fetchWarehouses()
+	}, [formik.values.city])
 
 	const renderInputField = (
 		id: keyof FormValues,
@@ -202,7 +231,11 @@ const OrderForm: React.FC<OrderFormProps> = ({ closeOrderModal, resetCart }) => 
 		</div>
 	)
 
-	const renderPaymentMethodField = (id: keyof FormValues, label: string) => (
+	const renderSelectField = (
+		id: keyof FormValues,
+		label: string,
+		options: { value: string; label: string }[],
+	) => (
 		<div className='relative'>
 			<select
 				id={id}
@@ -232,13 +265,11 @@ const OrderForm: React.FC<OrderFormProps> = ({ closeOrderModal, resetCart }) => 
 					setFieldValue(id, e.currentTarget.value)
 				}}
 			>
-				{Object.values(PaymentMethod).map((method, index) => {
-					return (
-						<option value={method} label={method} key={index}>
-							{method}
-						</option>
-					)
-				})}
+				{options.map((option, index) => (
+					<option value={option.value} label={option.label} key={index}>
+						{option.label}
+					</option>
+				))}
 			</select>
 
 			<label
@@ -262,17 +293,24 @@ const OrderForm: React.FC<OrderFormProps> = ({ closeOrderModal, resetCart }) => 
 			)}
 		</div>
 	)
+	const paymentOptions = Object.values(PaymentMethod).map(method => ({
+		value: method,
+		label: method,
+	}))
+
+	const warehouseOptions = warehouses.map(warehouse => ({
+		value: warehouse.Description,
+		label: warehouse.Description,
+	}))
 
 	return (
 		<form onSubmit={handleSubmit} autoComplete='off' className='flex flex-col space-y-8'>
 			{renderInputField('name', "Введіть iм'я та прізвище")}
 			{renderInputField('email', 'Введіть  email')}
 			{renderInputField('phone', 'Введіть телефон', 'tel')}
-			{renderPaymentMethodField('payment', 'Оберіть спосіб оплати')}
-			<NovaForm />
-			<button type='submit' disabled={isLoading}>
-				{isLoading ? 'Завантаження...' : 'Відправити замовлення'}
-			</button>
+			{renderSelectField('payment', 'Оберіть спосіб оплати', paymentOptions)}
+			{renderInputField('city', 'Введіть назву міста')}
+			{renderSelectField('warehouse', 'Оберіть відділення', warehouseOptions)}
 		</form>
 	)
 }
