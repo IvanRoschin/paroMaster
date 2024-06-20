@@ -57,7 +57,6 @@ const OrderForm: React.FC<OrderFormProps> = ({ closeOrderModal, resetCart }) => 
 		},
 		validationSchema: orderFormSchema,
 		onSubmit: async (values, actions) => {
-			console.log('values', values)
 			const body = {
 				apiKey: '8d677609f6e47ce83929374b3afab572',
 				modelName: 'AddressGeneral',
@@ -74,9 +73,9 @@ const OrderForm: React.FC<OrderFormProps> = ({ closeOrderModal, resetCart }) => 
 				if (response && response.data.data) {
 					updateWarehouses(response.data.data)
 				}
-				const emailResult = await sendEmail(values)
+				const emailResult = await sendEmail(values, orderNumber)
 				console.log('values in OrderForm:', values)
-				// const orderResult = await addOrder(values) // assuming addOrder
+				// 				// const orderResult = await addOrder(values) // assuming addOrder
 
 				if (emailResult?.success) {
 					actions.resetForm()
@@ -94,17 +93,6 @@ const OrderForm: React.FC<OrderFormProps> = ({ closeOrderModal, resetCart }) => 
 				setIsLoading(false)
 			}
 		},
-		// onSubmit: async (values, actions) => {
-		// 	try {
-		// 		await onSubmit(values, actions)
-		// 		router.push('/')
-		// 		closeOrderModal()
-		// 		resetCart()
-		// 	} catch (error) {
-		// 		console.error('Error in onSubmit:', error)
-		// 		actions.setSubmitting(false)
-		// 	}
-		// },
 	})
 
 	const { values, errors, touched, handleBlur, handleChange, handleSubmit, setFieldValue } = formik
@@ -204,7 +192,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ closeOrderModal, resetCart }) => 
                     text-neutral-700
                     placeholder-white
                     placeholder:b-black
-                    placeholder:text-base 
+                    placeholder:text-base
                     ${errors[id] && touched[id] ? 'border-rose-300' : 'border-neutral-300'} ${
 					errors[id] && touched[id] ? 'focus:border-rose-300' : 'focus:border-neutral-500'
 				}`}
@@ -254,7 +242,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ closeOrderModal, resetCart }) => 
                 text-neutral-700
                 placeholder-white
                 placeholder:b-black
-                placeholder:text-base 
+                placeholder:text-base
                 ${errors[id] && touched[id] ? 'border-rose-300' : 'border-neutral-300'} ${
 					errors[id] && touched[id] ? 'focus:border-rose-300' : 'focus:border-neutral-500'
 				}`}
