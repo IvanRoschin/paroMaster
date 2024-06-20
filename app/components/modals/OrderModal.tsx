@@ -64,7 +64,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 		validationSchema: orderFormSchema,
 		onSubmit: async (values, actions) => {
 			const body = {
-				apiKey: '8d677609f6e47ce83929374b3afab572',
+				apiKey: process.env.NOVA_API,
 				modelName: 'AddressGeneral',
 				calledMethod: 'searchSettlements',
 				methodProperties: {
@@ -167,7 +167,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 			}
 
 			const request = {
-				apiKey: '8d677609f6e47ce83929374b3afab572',
+				apiKey: process.env.NOVA_API,
 				modelName: 'Address',
 				calledMethod: 'getWarehouses',
 				methodProperties: {
