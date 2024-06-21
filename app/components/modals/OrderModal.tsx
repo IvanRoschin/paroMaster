@@ -84,7 +84,6 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 					payment: values.payment,
 				},
 				orderedGoods: values.cartItems.map((item: any) => ({
-					// Assuming item has the necessary properties; adjust as per your actual data structure
 					title: item.title,
 					brand: item.brand,
 					model: item.model,

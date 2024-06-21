@@ -5,10 +5,12 @@ export interface IOrder {
 		name: string
 		phone: string
 		email: string
-		address?: string
+		city: string
+		warehouse: string
+		payment: string
 	}
 	orderedGoods: {
-		id: string
+		id?: string
 		title: string
 		brand: string
 		model: string
