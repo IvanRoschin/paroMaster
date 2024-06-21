@@ -12,6 +12,7 @@ import { getData } from '@/actions/nova'
 import { sendEmail } from '@/actions/sendEmail'
 
 import { addOrder } from '@/actions/orders'
+import { IItem } from '@/types/item/IItem'
 import { IOrder } from '@/types/order/IOrder'
 import { generateOrderNumber } from 'app/helpers/oderNumber'
 import { orderFormSchema } from 'app/helpers/validationShemas/orderFormShema'
@@ -33,7 +34,7 @@ interface FormValues {
 	city: string
 	warehouse: string
 	payment: PaymentMethod
-	cartItems: any[]
+	cartItems: any
 	totalAmount: number
 }
 
@@ -73,8 +74,10 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 				},
 			}
 
+			console.log('values.cartItems', values.cartItems)
+
 			const orderData: IOrder = {
-				orderNumber,
+				orderNumber: orderNumber,
 				customer: {
 					name: values.name,
 					email: values.email,
@@ -83,12 +86,13 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 					warehouse: values.warehouse,
 					payment: values.payment,
 				},
-				orderedGoods: values.cartItems.map((item: any) => ({
+				orderedGoods: values.cartItems.map((item: IItem) => ({
+					id: item._id,
 					title: item.title,
 					brand: item.brand,
 					model: item.model,
 					vendor: item.vendor,
-					quantity: item.quantity,
+					quantity: cartItems,
 					price: item.price,
 				})),
 				totalPrice: values.totalAmount,
@@ -103,9 +107,9 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 					setWarehouses(response.data.data)
 				}
 				const emailResult = await sendEmail(values, orderNumber)
-				const orderResult = await addOrder(orderData) // assuming addOrder
+				const orderResult = await addOrder(orderData)
 
-				if (emailResult?.success) {
+				if (emailResult?.success && orderResult?.success) {
 					router.push('/')
 					actions.resetForm()
 					closeOrderModal()
@@ -116,7 +120,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 				}
 			} catch (error) {
 				console.error('Error in onSubmit:', error)
-				toast.error('Щось зломалось')
+				toast.error('Помилка створення замовлення')
 			} finally {
 				setIsLoading(false)
 			}
@@ -251,6 +255,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 		id: keyof FormValues,
 		label: string,
 		options: { value: string; label: string }[],
+		onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void,
 	) => (
 		<div className='relative'>
 			<select
@@ -277,9 +282,10 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 				style={{ display: 'block' }}
 				value={values[id]}
 				onBlur={handleBlur}
-				onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-					setFieldValue(id, e.currentTarget.value)
-				}}
+				onChange={onChange || handleChange}
+				// onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+				// 	setFieldValue(id, e.currentTarget.value)
+				// }}
 			>
 				{options.map((option, index) => (
 					<option value={option.value} label={option.label} key={index}>

@@ -10,22 +10,32 @@ export async function addOrder(values: IOrder) {
 		await connectToDB()
 
 		const orderData = {
-			number: values.orderNumber, // Assuming 'number' corresponds to 'orderNumber' in your schema
+			orderNumber: values.orderNumber,
 			customer: values.customer,
 			orderedGoods: values.orderedGoods.map(item => ({
-				id: item.id, // Assuming 'id' exists in your ordered goods objects
-				title: item.title, // Adjust properties as per your schema
-				quantity: item.quantity, // Ensure 'quantity' is provided
-				price: item.price, // Adjust as per your schema
+				id: item.id,
+				title: item.title,
+				brand: item.brand,
+				model: item.model,
+				vendor: item.vendor,
+				quantity: item.quantity,
+				price: item.price,
 			})),
 			totalPrice: values.totalPrice,
-			status: 'Новий', // Set initial status
+			status: 'Новий',
 		}
 
 		console.log('orderData', orderData)
 		await Order.create(orderData)
+		revalidatePath('/')
+		return { success: true, data: orderData }
 	} catch (error) {
-		console.log(error)
+		if (error instanceof Error) {
+			console.error('Error adding order:', error)
+			throw new Error('Failed to add order: ' + error.message)
+		} else {
+			console.error('Unknown error:', error)
+			throw new Error('Failed to add order: Unknown error')
+		}
 	}
-	revalidatePath('/')
 }
