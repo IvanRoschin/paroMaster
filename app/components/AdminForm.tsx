@@ -1,6 +1,6 @@
 'use client'
 
-import { addGood } from '@/actions/getTest'
+import { addGood } from '@/actions/goods'
 import { Field, Form, Formik, FormikState } from 'formik'
 import * as Yup from 'yup'
 
@@ -126,6 +126,25 @@ const AdminForm = () => {
 							<ImagesUpload setFieldValue={setFieldValue} />
 						</div>
 						<div className='flex flex-col'>
+							className=
+							{`
+                peer
+                w-full
+                h-10
+                p-6
+                bg-white
+                border-2
+                rounded-md
+                outline-none
+                transition
+                disabled:opacity-70 disabled:cursor-not-allowed
+                text-neutral-700
+                placeholder-white
+                placeholder:b-black
+                placeholder:text-base 
+                ${errors[id] && touched[id] ? 'border-rose-300' : 'border-neutral-300'} ${
+								errors[id] && touched[id] ? 'focus:border-rose-300' : 'focus:border-neutral-500'
+							}`}
 							<select
 								name='category'
 								className='mb-5 p-2 rounded-md border border-slate-400 text-slate-400'
@@ -149,7 +168,6 @@ const AdminForm = () => {
 							{errors.category && touched.category && (
 								<div className='text-red-500'>{errors.category}</div>
 							)}
-
 							<Field
 								type='text'
 								name='title'

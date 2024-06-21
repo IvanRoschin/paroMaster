@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import Cart from './Cart'
+import Cart from './Cart/Cart'
 import { Icon } from './Icon'
 import Logo from './Logo'
 import Menu from './Menu'
@@ -30,7 +30,6 @@ const Header = (props: Props) => {
 
 			<div className='flex justify-between items-center border border-b p-4 px-8'>
 				<Logo />
-
 				<Search />
 				<Cart />
 			</div>
