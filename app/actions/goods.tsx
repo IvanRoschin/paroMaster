@@ -8,10 +8,13 @@ import { revalidatePath } from 'next/cache'
 
 //** Vendor search: { "vendor": {$eq:"vendorName" } } * /
 
-export async function getAllGoods({ searchParams }: { searchParams: ISearchParams }) {
-	console.log(searchParams)
+export async function getAllGoods(
+	searchParams: ISearchParams,
+	offset: number,
+	limit: number,
+): Promise<IItem[]> {
 	try {
-		connectToDB()
+		await connectToDB()
 
 		let filter: any = {}
 
@@ -29,10 +32,12 @@ export async function getAllGoods({ searchParams }: { searchParams: ISearchParam
 				},
 			]
 		}
+
 		// brand filter
 		if (searchParams?.brand) {
 			filter.brand = searchParams.brand
 		}
+
 		// category filter
 		if (searchParams?.category) {
 			filter.category = searchParams.category
@@ -51,13 +56,17 @@ export async function getAllGoods({ searchParams }: { searchParams: ISearchParam
 			sortOption = { price: 1 }
 		}
 
-		const goods: IItem[] = await Good.find(filter).sort(sortOption)
+		const goods: IItem[] = await Good.find(filter)
+			.sort(sortOption)
+			.skip(offset)
+			.limit(limit)
+			.exec()
 
-		return goods
+		return JSON.parse(JSON.stringify(goods))
 	} catch (error) {
 		console.log(error)
+		return []
 	}
-	revalidatePath('/')
 }
 
 export async function getGoodById(id: string) {
@@ -65,7 +74,7 @@ export async function getGoodById(id: string) {
 		await connectToDB()
 
 		const good = await Good.findById({ _id: id })
-		return good
+		return JSON.parse(JSON.stringify(good))
 	} catch (error) {
 		console.log(error)
 	}
@@ -101,6 +110,38 @@ export async function uniqueBrands() {
 		return uniqueBrands
 	} catch (error) {
 		console.log(error)
+	}
+	revalidatePath('/')
+}
+
+export async function getMinMaxPrice() {
+	try {
+		connectToDB()
+
+		const result = await Good.aggregate([
+			{
+				$group: {
+					_id: null,
+					minPrice: { $min: '$price' },
+					maxPrice: { $max: '$price' },
+				},
+			},
+			{
+				$project: {
+					_id: 0,
+					minPrice: 1,
+					maxPrice: 1,
+				},
+			},
+		]).exec()
+
+		if (result.length === 0) {
+			throw new Error('No goods found')
+		}
+
+		return result[0]
+	} catch (error) {
+		console.error(error)
 	}
 	revalidatePath('/')
 }

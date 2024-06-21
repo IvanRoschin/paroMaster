@@ -52,7 +52,6 @@ const Search = () => {
 					<Icon
 						name={'icon_close'}
 						className={`w-5 h-5 border border-primaryAccentColor  text-primaryAccentColor p-1 rounded-full 
->>>>>>> 34381d5 (bug fix)
                 hover:bg-primaryAccentColor focus:bg-[primaryAccentColor] ${
 									inputValue ? 'block' : 'hidden'
 								}`}

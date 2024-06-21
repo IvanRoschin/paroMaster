@@ -25,7 +25,7 @@ const Slider = (props: Props) => {
 				pagination={{
 					clickable: true,
 				}}
-				className='h-[455px] max-w-[1050px] rounded-lg'
+				className='h-[455px] max-w-[950px] rounded-lg'
 				effect='fade'
 				speed={800}
 				autoplay={{ delay: 5000 }}

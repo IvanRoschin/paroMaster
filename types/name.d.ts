@@ -18,3 +18,4 @@ export type IconName =
 	| 'category_rezervuarVoda'
 	| 'category_boiler'
 	| 'icon_close'
+	| 'icon_trash'
