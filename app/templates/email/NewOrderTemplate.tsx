@@ -11,32 +11,36 @@ export interface NewOrderTemplateProps {
 	email: string
 	phone: string
 	payment: PaymentMethod
-	address: string
+	city: string
+	warehouse: string
 	cartItems: IItem[]
 	totalAmount: number
 	quantity: number[]
+	orderNumber: string
 }
 
-const date = new Date()
-const year = date.getFullYear().toString()
-const month = (date.getMonth() + 1).toString().padStart(2, '0')
-const day = date
-	.getDate()
-	.toString()
-	.padStart(2, '0')
-const formattedDate = `${day}${month}${year}`
+// const date = new Date()
+// const year = date.getFullYear().toString()
+// const month = (date.getMonth() + 1).toString().padStart(2, '0')
+// const day = date
+// 	.getDate()
+// 	.toString()
+// 	.padStart(2, '0')
+// const formattedDate = `${day}${month}${year}`
 
-const index = 1 // Your index value
+// const index = 1 // Your index value
 
 export function generateEmailContent({
 	name,
 	email,
 	phone,
 	payment,
-	address,
+	city,
+	warehouse,
 	cartItems,
 	totalAmount,
 	quantity,
+	orderNumber,
 }: NewOrderTemplateProps): string {
 	const itemsContent = cartItems
 		.map(
@@ -56,7 +60,7 @@ export function generateEmailContent({
 
 	return `
     <div>
-      <h1>Замовлення # ${formattedDate}/${index}
+      <h1>Замовлення # ${orderNumber}
 			з сайту ParoMaster</h1>
       <br />
       <br />
@@ -65,7 +69,9 @@ export function generateEmailContent({
         <p>Телефон:${phone}</p>
         <p>Вказаний e-mail: ${email}</p>
         <p>Вказаний спосіб оплати: ${payment}</p>
-        <p>Доставка за адресою:${address}</p>
+        <p>Доставка за адресою:</p>
+        <p>місто: ${city}</p>
+        <p>відділення НП: ${warehouse}</p>
       </h3>
       <br />
       <br />

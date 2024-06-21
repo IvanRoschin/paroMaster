@@ -1,5 +1,5 @@
 import CartModal from '../modals/CartModal'
-import OrderModal from '../modals/OpderModal'
+import OrderModal from '../modals/OrderModal'
 
 export function ShoppingCart({
 	isOpen,
