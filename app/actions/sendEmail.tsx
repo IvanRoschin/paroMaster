@@ -53,7 +53,12 @@ export async function sendEmail(data: FieldValues, orderNumber: string) {
 		console.log('Email sent successfully:', responseData)
 		return { success: true, data: responseData }
 	} catch (error) {
-		console.error('Error in sendEmail function:', error)
-		return { success: false, error }
+		if (error instanceof Error) {
+			console.error('Error in sendEmail function:', error)
+			throw new Error('Error in sendEmail function: ' + error.message)
+		} else {
+			console.error('Unknown error:', error)
+			throw new Error('Error in sendEmail function: Unknown error')
+		}
 	}
 }
