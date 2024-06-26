@@ -5,10 +5,10 @@ import { Field, Form, Formik, FormikState } from 'formik'
 import * as Yup from 'yup'
 
 import React, { useState } from 'react'
-import { ImagesUpload } from '.'
+import { ImagesUpload } from '../components'
 // import { useGlobalContext } from "@/context/store";
 // import { useRouter } from "next/navigation";
-import { categoryList } from './Category'
+import { categoryList } from '../components/Category'
 
 const GoodFormSchema = Yup.object().shape({
 	category: Yup.string()
