@@ -39,3 +39,23 @@ export async function addOrder(values: IOrder) {
 		}
 	}
 }
+
+export async function getAllOrders() {
+	try {
+		await connectToDB()
+
+		const orders: IOrder[] = await Order.find()
+
+		console.log('orders', orders)
+
+		return { success: true, data: orders }
+	} catch (error) {
+		if (error instanceof Error) {
+			console.error('Error getting orders:', error)
+			throw new Error('Failed to get orders: ' + error.message)
+		} else {
+			console.error('Unknown error:', error)
+			throw new Error('Failed to get orders: Unknown error')
+		}
+	}
+}

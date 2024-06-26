@@ -22,10 +22,9 @@ export default function Item({ params }: { params: any }) {
 
 	useEffect(() => {
 		if (data) {
-			const item = JSON.parse(data)
-			const newAmount = item.price * getItemQuantity(item._id)
+			const newAmount = data.price * getItemQuantity(data._id)
 			setAmount(newAmount)
-			localStorage.setItem(`amount-${item._id}`, JSON.stringify(newAmount))
+			localStorage.setItem(`amount-${data._id}`, JSON.stringify(newAmount))
 		}
 	}, [data, getItemQuantity])
 
@@ -38,43 +37,42 @@ export default function Item({ params }: { params: any }) {
 		return <Loader />
 	}
 
-	const item = JSON.parse(data)
-	const quantity = getItemQuantity(item._id)
+	const quantity = getItemQuantity(data._id)
 
 	return (
 		<div className='flex'>
-			<ImagesBlock item={item} />
+			<ImagesBlock item={data} />
 			<div className='pt-10'>
-				<h2 className='font-semibold text-2xl mb-[40px]'>{item.title}</h2>
-				<p className='mb-[20px]'>{item.description}</p>
-				<p className={`mb-[30px] ${item.isAvailable ? 'text-green-600' : 'text-red-600'}`}>
-					{item.isAvailable ? 'В наявності' : 'Немає в наявності'}
+				<h2 className='font-semibold text-2xl mb-[40px]'>{data.title}</h2>
+				<p className='mb-[20px]'>{data.description}</p>
+				<p className={`mb-[30px] ${data.isAvailable ? 'text-green-600' : 'text-red-600'}`}>
+					{data.isAvailable ? 'В наявності' : 'Немає в наявності'}
 				</p>
-				<p className='mb-[20px]'>Артикул: {item.vendor}</p>
-				<p className='text-2xl font-bold mb-[30px]'>{item.price} грн</p>
+				<p className='mb-[20px]'>Артикул: {data.vendor}</p>
+				<p className='text-2xl font-bold mb-[30px]'>{data.price} грн</p>
 				<div>
 					{quantity === 0 ? (
-						<Button label='Купити' onClick={() => increaseCartQuantity(item._id)} />
+						<Button label='Купити' onClick={() => increaseCartQuantity(data._id)} />
 					) : (
 						<div className='flex items-center flex-col gap-10'>
 							<div className='flex items-center justify-center gap-20'>
 								<div className='flex items-center justify-between gap-2'>
-									<Button label='-' onClick={() => decreaseCartQuantity(item._id)} small outline />
+									<Button label='-' onClick={() => decreaseCartQuantity(data._id)} small outline />
 									<span className='text-xl'>{quantity}</span> в корзині
-									<Button label='+' onClick={() => increaseCartQuantity(item._id)} small outline />
+									<Button label='+' onClick={() => increaseCartQuantity(data._id)} small outline />
 								</div>
 							</div>
 							<Button
 								label='Видалити'
 								onClick={() => {
-									removeFromCart(item._id)
-									localStorage.removeItem(`amount-${item._id}`)
+									removeFromCart(data._id)
+									localStorage.removeItem(`amount-${data._id}`)
 								}}
 							/>
 						</div>
 					)}
 				</div>
-				<ItemDetails item={item} />
+				<ItemDetails item={data} />
 			</div>
 		</div>
 	)
