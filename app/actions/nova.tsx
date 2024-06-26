@@ -16,7 +16,6 @@ export async function getData(body: any) {
 		if (status !== 200) {
 			throw new Error(`Failed to fetch data: ${status}`)
 		}
-		console.log('data', data)
 		return { success: true, data }
 	} catch (error) {
 		// Return error object

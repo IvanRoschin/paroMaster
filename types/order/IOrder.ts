@@ -10,7 +10,7 @@ export interface IOrder {
 		payment: string
 	}
 	orderedGoods: {
-		id?: string
+		id: string
 		title: string
 		brand: string
 		model: string
@@ -18,6 +18,7 @@ export interface IOrder {
 		quantity: number
 		price: number
 	}[]
+	goodsQuantity: number
 	totalPrice: number
 	status: 'Новий' | 'Опрацьовується' | 'Оплачено' | 'На відправку' | 'Закритий'
 }

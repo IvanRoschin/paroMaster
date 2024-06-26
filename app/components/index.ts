@@ -1,17 +1,18 @@
-import AdminForm from './AdminForm'
-import Cart from './Cart/Cart'
-import Category from './Category'
-import Header from './Header'
-import ImagesBlock from './ImagesBlock'
-import ImagesUpload from './ImagesUpload'
-import ItemListCard from './Item/ItemListCard'
-import ItemsList from './Item/ItemsList'
-import Loader from './Loader'
-import Sidebar from './Sidebar'
-import Slider from './Slider'
-
+import Cart from '@/components/Cart/Cart'
+import Category from '@/components/Category'
+import Header from '@/components/Header'
+import ImagesBlock from '@/components/ImagesBlock'
+import ImagesUpload from '@/components/ImagesUpload'
+import ItemListCard from '@/components/Item/ItemListCard'
+import ItemsList from '@/components/Item/ItemsList'
+import Loader from '@/components/Loader'
+import Sidebar from '@/components/Sidebar'
+import Slider from '@/components/Slider'
+import AdminForm from '@/components/admin/AdminForm'
+import AdminMenu from '@/components/admin/AdminMenu'
 export {
 	AdminForm,
+	AdminMenu,
 	Cart,
 	Category,
 	Header,
