@@ -12,7 +12,7 @@ import { getData } from '@/actions/nova'
 import { sendEmail } from '@/actions/sendEmail'
 
 import { addOrder } from '@/actions/orders'
-import { IItem } from '@/types/item/IItem'
+import { SItem } from '@/types/item/IItem'
 import { IOrder } from '@/types/order/IOrder'
 import { generateOrderNumber } from 'app/helpers/oderNumber'
 import { orderFormSchema } from 'app/helpers/validationShemas/orderFormShema'
@@ -46,9 +46,10 @@ enum PaymentMethod {
 
 const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 	const router = useRouter()
-	const { cartItems, closeOrderModal, resetCart } = useShoppingCart()
+	const { cartItems, closeOrderModal, resetCart, getItemQuantity } = useShoppingCart()
 	const [warehouses, setWarehouses] = useState<Warehouse[]>([])
 	const [isLoading, setIsLoading] = useState(false)
+
 	const orderNumber = generateOrderNumber()
 
 	const formik = useFormik<FormValues>({
@@ -74,8 +75,6 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 				},
 			}
 
-			console.log('values.cartItems', values.cartItems)
-
 			const orderData: IOrder = {
 				orderNumber: orderNumber,
 				customer: {
@@ -86,15 +85,16 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 					warehouse: values.warehouse,
 					payment: values.payment,
 				},
-				orderedGoods: values.cartItems.map((item: IItem) => ({
+				orderedGoods: values.cartItems.map((item: SItem) => ({
 					id: item._id,
 					title: item.title,
 					brand: item.brand,
 					model: item.model,
 					vendor: item.vendor,
-					quantity: cartItems,
+					quantity: getItemQuantity(item._id),
 					price: item.price,
 				})),
+				goodsQuantity: cartItems.reduce((total, item) => total + item.quantity, 0),
 				totalPrice: values.totalAmount,
 				status: 'Новий',
 			}
