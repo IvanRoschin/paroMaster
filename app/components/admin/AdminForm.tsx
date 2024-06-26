@@ -4,11 +4,10 @@ import { addGood } from '@/actions/goods'
 import { Field, Form, Formik, FormikState } from 'formik'
 import * as Yup from 'yup'
 
+import { ImagesUpload, categoryList } from '@/components/index'
 import React, { useState } from 'react'
-import { ImagesUpload } from '../components'
 // import { useGlobalContext } from "@/context/store";
 // import { useRouter } from "next/navigation";
-import { categoryList } from '../components/Category'
 
 const GoodFormSchema = Yup.object().shape({
 	category: Yup.string()

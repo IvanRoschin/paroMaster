@@ -7,44 +7,44 @@ import { useCallback } from 'react'
 
 export const categoryList = [
 	{
-		iconName: 'category_korpusniDetali',
-		categoryName: 'Корпус станції',
+		icon: 'category_korpusniDetali',
+		title: 'Корпус станції',
 	},
 	{
-		iconName: 'category_korpusUtuga',
-		categoryName: 'Корпус для прасок',
+		icon: 'category_korpusUtuga',
+		title: 'Корпус для прасок',
 	},
 	{
-		iconName: 'category_pidoshvaUtuga',
-		categoryName: 'Підошви для прасок',
+		icon: 'category_pidoshvaUtuga',
+		title: 'Підошви для прасок',
 	},
 	{
-		iconName: 'category_platu',
-		categoryName: 'Плати керування',
+		icon: 'category_platu',
+		title: 'Плати керування',
 	},
 	{
-		iconName: 'category_boiler',
-		categoryName: 'Бойлери',
+		icon: 'category_boiler',
+		title: 'Бойлери',
 	},
 	{
-		iconName: 'category_electroKlapan',
-		categoryName: 'Електроклапани',
+		icon: 'category_electroKlapan',
+		title: 'Електроклапани',
 	},
 	{
-		iconName: 'category_nasos',
-		categoryName: 'Насоси(помпи)',
+		icon: 'category_nasos',
+		title: 'Насоси(помпи)',
 	},
 	{
-		iconName: 'category_rezervuarVoda',
-		categoryName: 'Резервуари для води',
+		icon: 'category_rezervuarVoda',
+		title: 'Резервуари для води',
 	},
 	{
-		iconName: 'category_provoda',
-		categoryName: 'Провода та шланги',
+		icon: 'category_provoda',
+		title: 'Провода та шланги',
 	},
 	{
-		iconName: 'category_accsecuari',
-		categoryName: 'Аксесуари та комплектуючі',
+		icon: 'category_accsecuari',
+		title: 'Аксесуари та комплектуючі',
 	},
 ]
 
@@ -68,15 +68,15 @@ const Category = () => {
 		<div className='pt-0 mr-4 text-sm w-[250px] mb-4'>
 			<h2 className='text-2xl text-primaryAccentColor mb-4 bold'>Категорії товарів</h2>
 			<ul className='bg-secondaryBackground p-4 rounded-lg'>
-				{categoryList.map(({ iconName, categoryName }, index) => {
+				{categoryList.map(({ icon, title }, index) => {
 					return (
 						<li key={index} className='mb-3 nav'>
 							<Link
-								href={`/category/?${createQueryString('category', categoryName)}`}
+								href={`/category/?${createQueryString('category', title)}`}
 								className='flex justify-start items-start'
 							>
-								<Icon name={iconName} className='w-5 h-5  mr-3' />
-								{categoryName}
+								<Icon name={icon} className='w-5 h-5  mr-3' />
+								{title}
 							</Link>
 						</li>
 					)
