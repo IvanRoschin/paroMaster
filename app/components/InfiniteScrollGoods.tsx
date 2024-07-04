@@ -1,7 +1,7 @@
 'use client'
 
 import { getAllGoods } from '@/actions/goods'
-import { IItem } from '@/types/item/IItem'
+import { IGood } from '@/types/good/IGood'
 import { ISearchParams } from '@/types/searchParams'
 import { useEffect, useState } from 'react'
 import { useInView } from 'react-intersection-observer'
@@ -14,11 +14,11 @@ const InfiniteScrollGods = ({
 	NUMBER_OF_GOODS_TO_FETCH,
 }: {
 	searchParams: ISearchParams
-	initialGoods: IItem[]
+	initialGoods: IGood[]
 	NUMBER_OF_GOODS_TO_FETCH: number
 }) => {
 	const [offset, setOffset] = useState(0)
-	const [goods, setGoods] = useState<IItem[]>(initialGoods)
+	const [goods, setGoods] = useState<IGood[]>(initialGoods)
 	const [allGoodsLoaded, setAllGoodsLoaded] = useState(false)
 	const { ref, inView } = useInView()
 

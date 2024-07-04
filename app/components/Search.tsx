@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import { CiSearch } from 'react-icons/ci'
 import { Icon } from './Icon'
 
-const Search = () => {
+const Search = ({ placeholder }: { placeholder: string }) => {
 	const searchParams = useSearchParams()
 	let searchValue = searchParams.get('search') || ''
 	const pathName = usePathname()
@@ -26,7 +26,7 @@ const Search = () => {
 					type='text'
 					name='search'
 					className=' relative py-1 block w-full ps-10 mr-4 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-primaryAccentColor focus:border-primaryAccentColor '
-					placeholder='Код товару, артикул або модель...'
+					placeholder={placeholder}
 					required
 					value={inputValue || ''}
 					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {

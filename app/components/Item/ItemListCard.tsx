@@ -1,6 +1,6 @@
 'use client'
 
-import { IItem } from '@/types/item/IItem'
+import { IGood } from '@/types/good/IGood'
 import { useShoppingCart } from 'app/context/ShoppingCartContext'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react'
 import Button from '../Button'
 
 interface ItemListCardProps {
-	item: IItem
+	item: IGood
 }
 
 const ItemListCard: React.FC<ItemListCardProps> = ({ item }) => {
@@ -106,7 +106,7 @@ const CartActions: React.FC<CartActionsProps> = ({
 }
 
 interface ItemDetailsProps {
-	item: IItem
+	item: IGood
 }
 
 const ItemDetails: React.FC<ItemDetailsProps> = ({ item }) => {

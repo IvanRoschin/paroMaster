@@ -6,12 +6,13 @@ import ImagesUpload from '@/components/ImagesUpload'
 import ItemListCard from '@/components/Item/ItemListCard'
 import ItemsList from '@/components/Item/ItemsList'
 import Loader from '@/components/Loader'
+import Search from '@/components/Search'
 import Sidebar from '@/components/Sidebar'
 import Slider from '@/components/Slider'
-import AdminForm from '@/components/admin/AdminForm'
+import AddGoodForm from '@/components/admin/AddGoodForm'
 import AdminMenu from '@/components/admin/Navbar'
 export {
-	AdminForm,
+	AddGoodForm,
 	AdminMenu,
 	Cart,
 	Category,
@@ -21,6 +22,7 @@ export {
 	ItemListCard,
 	ItemsList,
 	Loader,
+	Search,
 	Sidebar,
 	Slider,
 	categoryList,

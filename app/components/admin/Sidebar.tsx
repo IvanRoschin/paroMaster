@@ -1,45 +1,46 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import {
 	MdDashboard,
 	MdProductionQuantityLimits,
 	MdShoppingBag,
 	MdSupervisedUserCircle,
+	MdVerifiedUser,
 } from 'react-icons/md'
 import Button from '../Button'
-import MenuLink from './MenuLink'
 
 type Props = {}
 
 const menuItems = [
 	{
-		title: 'Pages',
-		list: [
-			{
-				title: 'Dashboard',
-				path: '/admin',
-				icon: <MdDashboard />,
-			},
-			{
-				title: 'Clients',
-				path: '/admin/clients',
-				icon: <MdSupervisedUserCircle />,
-			},
-			{
-				title: 'Orders',
-				path: '/admin/orders',
-				icon: <MdProductionQuantityLimits />,
-			},
-			{
-				title: 'Products',
-				path: '/admin/products',
-				icon: <MdShoppingBag />,
-			},
-			{
-				title: 'Edit Product',
-				path: '/admin/edit-product',
-				icon: <MdShoppingBag />,
-			},
-		],
+		title: 'Dashboard',
+		path: '/admin',
+		icon: <MdDashboard />,
+	},
+	{
+		title: 'Customers',
+		path: '/admin/customers',
+		icon: <MdSupervisedUserCircle />,
+	},
+	{
+		title: 'Orders',
+		path: '/admin/orders',
+		icon: <MdProductionQuantityLimits />,
+	},
+	{
+		title: 'Goods',
+		path: '/admin/goods',
+		icon: <MdShoppingBag />,
+	},
+	{
+		title: 'Users',
+		path: '/admin/users',
+		icon: <MdVerifiedUser />,
+	},
+	{
+		title: 'Edit Product',
+		path: '/admin/edit-product',
+		icon: <MdShoppingBag />,
 	},
 ]
 
@@ -60,15 +61,13 @@ const Sidebar = (props: Props) => {
 				<span className=''>Adiministrator</span>
 			</div>
 			<ul className='bg-secondaryBackground p-4 rounded-lg'>
-				{menuItems.map(cat => {
+				{menuItems.map(({ title, path, icon }) => {
 					return (
-						<li key={cat.title} className='mb-3 nav'>
-							<span>{cat.title}</span>
-							<ul>
-								{cat.list.map(item => (
-									<MenuLink item={item} key={item.title} />
-								))}
-							</ul>
+						<li key={title} className='mb-3 nav'>
+							<Link href={path} className='flex items-center gap-2'>
+								{icon}
+								<span>{title}</span>
+							</Link>
 						</li>
 					)
 				})}

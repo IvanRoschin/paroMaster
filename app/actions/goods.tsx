@@ -1,6 +1,6 @@
 'use server'
 
-import { IItem } from '@/types/item/IItem'
+import { IGood } from '@/types/good/IGood'
 import { ISearchParams } from '@/types/searchParams'
 import { connectToDB } from '@/utils/dbConnect'
 import Good from 'model/Good'
@@ -12,7 +12,7 @@ export async function getAllGoods(
 	searchParams: ISearchParams,
 	offset: number,
 	limit: number,
-): Promise<IItem[]> {
+): Promise<IGood[]> {
 	try {
 		await connectToDB()
 
@@ -56,7 +56,7 @@ export async function getAllGoods(
 			sortOption = { price: 1 }
 		}
 
-		const goods: IItem[] = await Good.find(filter)
+		const goods: IGood[] = await Good.find(filter)
 			.sort(sortOption)
 			.skip(offset)
 			.limit(limit)
@@ -80,7 +80,7 @@ export async function getGoodById(id: string) {
 	}
 }
 
-export async function addGood(values: IItem) {
+export async function addGood(values: IGood) {
 	try {
 		await connectToDB()
 

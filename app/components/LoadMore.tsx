@@ -1,7 +1,7 @@
 'use client'
 
 import { getAllGoods } from '@/actions/goods'
-import { IItem } from '@/types/item/IItem'
+import { IGood } from '@/types/good/IGood'
 import { ISearchParams } from '@/types/searchParams'
 import { useEffect, useState } from 'react'
 import { useInView } from 'react-intersection-observer'
@@ -9,7 +9,7 @@ import { TailSpin } from 'react-loader-spinner'
 import ItemsList from './Item/ItemsList'
 
 const LoadMore = ({ searchParams }: { searchParams: ISearchParams }) => {
-	const [goods, setGoods] = useState<IItem[]>([])
+	const [goods, setGoods] = useState<IGood[]>([])
 	const [offset, setOffset] = useState(0)
 
 	const { ref, inView } = useInView({
@@ -20,7 +20,7 @@ const LoadMore = ({ searchParams }: { searchParams: ISearchParams }) => {
 	useEffect(() => {
 		const fetchData = async () => {
 			if (inView) {
-				const data = await getAllGoods(searchParams, offset)
+				const data = await getAllGoods(searchParams, offset, 10)
 				setGoods(prevGoods => [...prevGoods, ...data])
 				setOffset(prevOffset => prevOffset + NUMBER_OF_GOODS_TO_FETCH)
 			}

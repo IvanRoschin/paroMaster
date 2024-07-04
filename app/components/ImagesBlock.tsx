@@ -1,11 +1,11 @@
 'use client'
 
-import { IItem } from '@/types/item/IItem'
+import { IGood } from '@/types/good/IGood'
 import Image from 'next/image'
 import { useState } from 'react'
 
 interface ImagesBlockProps {
-	item: IItem // Use the IItem interface directly instead of parsing a string
+	item: IGood // Use the IGood interface directly instead of parsing a string
 }
 
 const ImagesBlock: React.FC<ImagesBlockProps> = ({ item }) => {

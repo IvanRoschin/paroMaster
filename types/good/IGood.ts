@@ -1,4 +1,4 @@
-export interface IItem {
+export interface IGood {
 	_id?: string
 	category: string
 	imgUrl: string[]
@@ -13,7 +13,7 @@ export interface IItem {
 	compatibility: string[]
 }
 
-export interface SItem {
+export interface SGood {
 	_id: string
 	category: string
 	imgUrl: string[]
