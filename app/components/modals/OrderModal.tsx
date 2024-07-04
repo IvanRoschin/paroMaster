@@ -11,10 +11,13 @@ import { getGoodById } from '@/actions/goods'
 import { getData } from '@/actions/nova'
 import { sendEmail } from '@/actions/sendEmail'
 
+import { addCustomer } from '@/actions/customers'
 import { addOrder } from '@/actions/orders'
-import { SItem } from '@/types/item/IItem'
+import { ICustomer } from '@/types/customer/ICustomer'
+import { SGood } from '@/types/good/IGood'
 import { IOrder } from '@/types/order/IOrder'
-import { generateOrderNumber } from 'app/helpers/oderNumber'
+import { PaymentMethod } from '@/types/paymentMethod'
+import { generateOrderNumber } from 'app/helpers/orderNumber'
 import { orderFormSchema } from 'app/helpers/validationShemas/orderFormShema'
 import Modal from './Modal'
 
@@ -38,19 +41,31 @@ interface FormValues {
 	totalAmount: number
 }
 
-enum PaymentMethod {
-	CashOnDelivery = 'Оплата після отримання',
-	CreditCard = 'Оплата на карту',
-	InvoiceForSPD = 'Рахунок для СПД',
-}
+// enum PaymentMethod {
+// 	CashOnDelivery = 'Оплата після отримання',
+// 	CreditCard = 'Оплата на карту',
+// 	InvoiceForSPD = 'Рахунок для СПД',
+// }
 
 const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 	const router = useRouter()
 	const { cartItems, closeOrderModal, resetCart, getItemQuantity } = useShoppingCart()
 	const [warehouses, setWarehouses] = useState<Warehouse[]>([])
 	const [isLoading, setIsLoading] = useState(false)
+	const [orderNumber, setOrderNumber] = useState('')
 
-	const orderNumber = generateOrderNumber()
+	useEffect(() => {
+		const fetchOrderNumber = async () => {
+			try {
+				const getOrderNumber = await generateOrderNumber()
+				setOrderNumber(getOrderNumber)
+			} catch (error) {
+				console.error('Failed to generate order number:', error)
+			}
+		}
+
+		fetchOrderNumber()
+	}, [])
 
 	const formik = useFormik<FormValues>({
 		initialValues: {
@@ -65,6 +80,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 		},
 		validationSchema: orderFormSchema,
 		onSubmit: async (values, actions) => {
+			console.log('OrderModalValues', values)
 			const body = {
 				apiKey: process.env.NOVA_API,
 				modelName: 'AddressGeneral',
@@ -85,7 +101,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 					warehouse: values.warehouse,
 					payment: values.payment,
 				},
-				orderedGoods: values.cartItems.map((item: SItem) => ({
+				orderedGoods: values.cartItems.map((item: SGood) => ({
 					id: item._id,
 					title: item.title,
 					brand: item.brand,
@@ -99,6 +115,16 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 				status: 'Новий',
 			}
 
+			const customer: ICustomer = {
+				name: values.name,
+				email: values.email,
+				phone: values.phone,
+				city: values.city,
+				warehouse: values.warehouse,
+				payment: values.payment,
+				orders: [],
+			}
+
 			setIsLoading(true)
 
 			try {
@@ -108,8 +134,9 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 				}
 				const emailResult = await sendEmail(values, orderNumber)
 				const orderResult = await addOrder(orderData)
+				const customerResult = await addCustomer(customer)
 
-				if (emailResult?.success && orderResult?.success) {
+				if (emailResult?.success && orderResult?.success && customerResult?.success) {
 					router.push('/')
 					actions.resetForm()
 					closeOrderModal()

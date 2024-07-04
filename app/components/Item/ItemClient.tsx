@@ -2,7 +2,7 @@
 
 import { getGoodById } from '@/actions/goods'
 import { Icon } from '@/components/Icon'
-import { SItem } from '@/types/item/IItem'
+import { SGood } from '@/types/good/IGood'
 import { useShoppingCart } from 'app/context/ShoppingCartContext'
 import useSWR from 'swr'
 import ImagesBlock from '../ImagesBlock'
@@ -24,7 +24,7 @@ export default function ItemClient({ id }: { id: string }) {
 		return <Loader />
 	}
 
-	const item: SItem = JSON.parse(data)
+	const item: SGood = JSON.parse(data)
 
 	const quantity = getItemQuantity(item._id)
 

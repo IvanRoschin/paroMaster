@@ -20,8 +20,18 @@ const orderSchema = new Schema(
 				type: String,
 				required: true,
 			},
-			address: {
+			city: {
 				type: String,
+				required: true,
+			},
+			warehouse: {
+				type: String,
+				required: true,
+			},
+			payment: {
+				type: String,
+				enum: ['Оплата після отримання', 'Оплата на карту', 'Рахунок для СПД'],
+				required: true,
 			},
 		},
 		orderedGoods: [

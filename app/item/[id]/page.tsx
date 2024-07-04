@@ -3,7 +3,7 @@ import { getGoodById } from '@/actions/goods'
 import Button from '@/components/Button'
 import ImagesBlock from '@/components/ImagesBlock'
 import Loader from '@/components/Loader'
-import { IItem } from '@/types/item/IItem'
+import { IGood } from '@/types/good/IGood'
 import { useShoppingCart } from 'app/context/ShoppingCartContext'
 import { useEffect, useState } from 'react'
 import useSWR from 'swr'
@@ -78,7 +78,7 @@ export default function Item({ params }: { params: any }) {
 	)
 }
 
-function ItemDetails({ item }: { item: IItem }) {
+function ItemDetails({ item }: { item: IGood }) {
 	return (
 		<>
 			<p className='font-light text-gray-500'>

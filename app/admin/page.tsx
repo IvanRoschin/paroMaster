@@ -1,5 +1,5 @@
 import { getAllOrders } from '@/actions/orders'
-import { AdminMenu } from '@/components/index'
+import Card from '@/components/admin/Card'
 
 export default async function Admin() {
 	try {
@@ -8,8 +8,11 @@ export default async function Admin() {
 
 	return (
 		<div className='mo:max-w-[480px] sm:w-[480px] md:w-[768px] lg:w-[1280px] mx-auto p-5 flex justify-center'>
-			<AdminMenu />
-			{/* <AdminForm /> */}
+			<div className='flex justify-between items-center gap-2'>
+				<Card />
+				<Card />
+				<Card />
+			</div>
 		</div>
 	)
 }

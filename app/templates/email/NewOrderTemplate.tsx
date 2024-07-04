@@ -1,4 +1,4 @@
-import { IItem } from '@/types/item/IItem'
+import { IGood } from '@/types/good/IGood'
 
 enum PaymentMethod {
 	CashOnDelivery = 'Оплата після отримання',
@@ -13,7 +13,7 @@ export interface NewOrderTemplateProps {
 	payment: PaymentMethod
 	city: string
 	warehouse: string
-	cartItems: IItem[]
+	cartItems: IGood[]
 	totalAmount: number
 	quantity: number[]
 	orderNumber: string

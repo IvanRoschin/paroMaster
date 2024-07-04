@@ -24,8 +24,7 @@ export async function addOrder(values: IOrder) {
 			totalPrice: values.totalPrice,
 			status: 'Новий',
 		}
-
-		console.log('orderData', orderData)
+		console.log('orderActionData: ', orderData)
 		await Order.create(orderData)
 		revalidatePath('/')
 		return { success: true, data: orderData }
@@ -43,11 +42,7 @@ export async function addOrder(values: IOrder) {
 export async function getAllOrders() {
 	try {
 		await connectToDB()
-
 		const orders: IOrder[] = await Order.find()
-
-		console.log('orders', orders)
-
 		return { success: true, data: orders }
 	} catch (error) {
 		if (error instanceof Error) {

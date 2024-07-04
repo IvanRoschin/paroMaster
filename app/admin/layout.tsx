@@ -10,12 +10,11 @@ const layout = ({
 }>) => {
 	return (
 		<div className='flex'>
-			<div className='flex-1'>
-				<Navbar />
-			</div>
-			<div>
+			<div className='flex-1'></div>
+			<div className='flex'>
 				<Sidebar />
 				{children}
+				<Navbar />
 			</div>
 		</div>
 	)
