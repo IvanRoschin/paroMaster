@@ -1,4 +1,6 @@
+import bcrypt from 'bcrypt'
 import mongoose from 'mongoose'
+
 const { Schema } = mongoose
 
 const userSchema = new Schema(
@@ -28,7 +30,7 @@ const userSchema = new Schema(
 		isActive: {
 			type: Boolean,
 			required: true,
-			default: false,
+			default: true,
 		},
 	},
 	{ versionKey: false, timestamps: true },
@@ -36,4 +38,11 @@ const userSchema = new Schema(
 
 userSchema.index({ '$**': 'text' })
 
+userSchema.methods.setPassword = function(password: any) {
+	this.password = bcrypt.hashSync(password, bcrypt.genSaltSync(10))
+}
+
+userSchema.methods.comparePassword = function(password: any) {
+	return bcrypt.compareSync(password, this.password)
+}
 export default mongoose.models.User || mongoose.model('User', userSchema)

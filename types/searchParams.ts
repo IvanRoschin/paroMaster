@@ -5,4 +5,7 @@ export interface ISearchParams {
 	high: string
 	category?: string
 	brand?: string
+	q?: string
+	page?: number
+	id?: string
 }

@@ -3,9 +3,9 @@ import { AddGoodForm } from '@/components/index'
 const AddGoodPage = () => {
 	return (
 		<div>
-			<AdminForm />
+			<AddGoodForm />
 		</div>
 	)
 }
 
-export default AddGoodForm
+export default AddGoodPage
