@@ -4,31 +4,29 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { CiSearch } from 'react-icons/ci'
 import { useDebouncedCallback } from 'use-debounce'
-import { Icon } from './Icon'
+import { Icon } from '../Icon'
 
 const Search = ({ placeholder }: { placeholder: string }) => {
 	const searchParams = useSearchParams()
 	const pathname = usePathname()
 	const { replace } = useRouter()
-
 	const [inputValue, setInputValue] = useState<string>('')
 
 	const handleSearch = useDebouncedCallback((e: React.ChangeEvent<HTMLInputElement>) => {
 		const params = new URLSearchParams(searchParams)
+		params.set('page', '1')
+
 		const searchValue = e.target.value
 
 		if (searchValue.length > 2) {
-			params.set('search', searchValue)
+			params.set('q', searchValue)
 		} else {
-			params.delete('search')
+			params.delete('q')
 		}
 		setInputValue(e.target.value)
 		replace(`${pathname}?${searchParams.toString()}`, { scroll: false })
 	}, 300)
 
-	// useEffect(() => {
-	// 	if (searchValue) setInputValue(searchValue)
-	// }, [searchValue])
 	return (
 		<form className='w-full mx-7'>
 			<label className='mb-2 text-sm font-medium text-gray-900 sr-only'>Пошук</label>
@@ -44,16 +42,6 @@ const Search = ({ placeholder }: { placeholder: string }) => {
 					required
 					value={inputValue || ''}
 					onChange={handleSearch}
-					// onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-					// 	const params = new URLSearchParams(searchParams)
-					// 	if (e.target.value) {
-					// 		params.set('search', e.target.value)
-					// 	} else {
-					// 		params.delete('search')
-					// 	}
-					// 	setInputValue(e.target.value)
-					// 	replace(`${pathName}?${params.toString()}`, { scroll: false })
-					// }}
 				/>
 				<button
 					type='button'

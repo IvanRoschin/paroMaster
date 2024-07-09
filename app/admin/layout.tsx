@@ -1,5 +1,4 @@
 import Navbar from '@/components/admin/Navbar'
-import Sidebar from '@/components/admin/Sidebar'
 
 type Props = {}
 
@@ -12,7 +11,7 @@ const layout = ({
 		<div className='flex'>
 			<div className='flex-1'></div>
 			<div className='flex'>
-				<Sidebar />
+				{/* <AdminSidebar /> */}
 				{children}
 				<Navbar />
 			</div>

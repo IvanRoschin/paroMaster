@@ -4,6 +4,7 @@ import { addUser } from '@/actions/users'
 import { IUser } from '@/types/user/IUser'
 import { Field, Form, Formik, FormikState } from 'formik'
 import React from 'react'
+import { toast } from 'sonner'
 import { userFormSchema } from '../../helpers/validationShemas'
 
 interface InitialStateType extends Omit<IUser, '_id'> {}
@@ -18,6 +19,7 @@ const AddUserForm = () => {
 		phone: '',
 		email: '',
 		password: '',
+		createdAt: '',
 		isAdmin: false,
 		isActive: false,
 	}
@@ -26,8 +28,9 @@ const AddUserForm = () => {
 		try {
 			await addUser(values)
 			resetForm()
-			console.log('User successfully added')
+			toast.success('Нового користувача додано!')
 		} catch (error) {
+			toast.error(error.message || 'Помилка!')
 			console.log(error)
 		}
 	}
@@ -100,7 +103,7 @@ const AddUserForm = () => {
 									name='isActive'
 									className='mb-5 p-2 rounded-md border border-slate-400 text-slate-400'
 									onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-										setFieldValue('status', e.target.value === 'true')
+										setFieldValue('isActive', e.target.value === 'true')
 									}}
 								>
 									<option value='false'>Активний?</option>

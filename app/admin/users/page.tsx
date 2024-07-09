@@ -1,10 +1,25 @@
+import { deleteUser, getAllUsers } from '@/actions/users'
+import Search from '@/components/admin/AdminSearch'
 import Pagination from '@/components/admin/Pagination'
-import { Search } from '@/components/index'
+import { ISearchParams } from '@/types/searchParams'
+import { IUser } from '@/types/user/IUser'
 import Link from 'next/link'
 
-type Props = {}
+interface UserResponse {
+	success: boolean
+	data: IUser[]
+	count: number
+}
 
-const UsersPage = (props: Props) => {
+const UsersPage = async ({ searchParams }: { searchParams: ISearchParams }) => {
+	const page = searchParams?.page || 1
+
+	const users: UserResponse = await getAllUsers(searchParams)
+	if (!users.success) {
+		return <div>Error fetching users</div>
+	}
+	const count = users.count
+
 	return (
 		<div className='p-3 rounded-xl'>
 			<div className='flex items-center justify-between'>
@@ -26,31 +41,40 @@ const UsersPage = (props: Props) => {
 					</tr>
 				</thead>
 				<tbody>
-					<tr>
-						<td className='p-2'>John Doe</td>
-						<td className='p-2'>johndoe@gmail.com</td>
-						<td className='p-2'>+380951983729</td>
-						<td className='p-2'>01.01.2024</td>
-						<td className='p-2'>admin</td>
-						<td className='p-2'>active</td>
-						<td className='p-2'>
-							<div className='flex gap-2'>
-								<Link href='/admin/users/add'>
-									<button className='px-2 py-3 rounded-lg border-none cursor-pointer bg-teal-400'>
-										View
-									</button>
-								</Link>
-								<Link href='/admin/users/add'>
-									<button className='px-2 py-3 rounded-lg border-none cursor-pointer bg-crimson-500'>
-										Delete
-									</button>
-								</Link>
-							</div>
-						</td>
-					</tr>
+					{users.data.map(user => {
+						console.log(user._id)
+						return (
+							<tr key={user._id}>
+								<td className='p-2'>{user.name}</td>
+								<td className='p-2'>{user.email}</td>
+								<td className='p-2'>{user.phone}</td>
+								<td className='p-2'>{new Date(user.createdAt).toLocaleDateString('uk-UA')}</td>
+								<td className='p-2'>{user.isAdmin ? 'admin' : 'user'}</td>
+								<td className='p-2'>{user.isActive ? 'active' : 'passive'}</td>
+								<td className='p-2'>
+									<div className='flex gap-2'>
+										<Link href={`/admin/users/${user._id}`}>
+											<button className='px-2 py-3 rounded-lg border-none cursor-pointer bg-teal-400'>
+												View
+											</button>
+										</Link>
+										<form action={deleteUser}>
+											<input type='hidden' name='id' value={user._id} />
+											<button
+												type='submit'
+												className='px-2 py-3 rounded-lg border-none cursor-pointer bg-red-500'
+											>
+												Delete
+											</button>
+										</form>
+									</div>
+								</td>
+							</tr>
+						)
+					})}
 				</tbody>
 			</table>
-			<Pagination />
+			<Pagination count={count} />
 		</div>
 	)
 }

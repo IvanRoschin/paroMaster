@@ -1,13 +1,14 @@
+import { signOut } from 'auth'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
 	MdDashboard,
+	MdLogout,
 	MdProductionQuantityLimits,
 	MdShoppingBag,
 	MdSupervisedUserCircle,
 	MdVerifiedUser,
 } from 'react-icons/md'
-import Button from '../Button'
 
 type Props = {}
 
@@ -44,7 +45,13 @@ const menuItems = [
 	},
 ]
 
-const Sidebar = (props: Props) => {
+type AdminSidebarProps = {
+	user: {
+		name?: string | null
+	}
+}
+const AdminSidebar = ({ user }: AdminSidebarProps) => {
+	console.log('user', user)
 	return (
 		<div className='pt-0 mr-4 text-sm w-[250px] mb-4'>
 			<h2 className='text-2xl text-primaryAccentColor mb-4 bold'>Меню адміна</h2>
@@ -57,8 +64,8 @@ const Sidebar = (props: Props) => {
 				className='border-[50%]'
 			/>
 			<div className='flex flex-col'>
-				<span className=''> John Doe</span>
-				<span className=''>Adiministrator</span>
+				<span className=''>{user?.name}</span>
+				<span className=''>Admin</span>
 			</div>
 			<ul className='bg-secondaryBackground p-4 rounded-lg'>
 				{menuItems.map(({ title, path, icon }) => {
@@ -72,9 +79,19 @@ const Sidebar = (props: Props) => {
 					)
 				})}
 			</ul>
-			<Button label='Logout'></Button>
+			<form
+				action={async () => {
+					'use server'
+					await signOut()
+				}}
+			>
+				<button>
+					<MdLogout />
+					Logout
+				</button>
+			</form>
 		</div>
 	)
 }
 
-export default Sidebar
+export default AdminSidebar

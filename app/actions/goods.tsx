@@ -6,13 +6,19 @@ import { connectToDB } from '@/utils/dbConnect'
 import Good from 'model/Good'
 import { revalidatePath } from 'next/cache'
 
-//** Vendor search: { "vendor": {$eq:"vendorName" } } * /
+interface IGetAllGoodsResponse {
+	success: boolean
+	data: IGood[]
+	count: number
+}
 
 export async function getAllGoods(
 	searchParams: ISearchParams,
 	offset: number,
 	limit: number,
-): Promise<IGood[]> {
+): Promise<IGetAllGoodsResponse> {
+	const page = searchParams.page || 1
+
 	try {
 		await connectToDB()
 
@@ -55,6 +61,7 @@ export async function getAllGoods(
 		} else {
 			sortOption = { price: 1 }
 		}
+		const count = await Good.countDocuments(filter)
 
 		const goods: IGood[] = await Good.find(filter)
 			.sort(sortOption)
@@ -62,17 +69,16 @@ export async function getAllGoods(
 			.limit(limit)
 			.exec()
 
-		return JSON.parse(JSON.stringify(goods))
+		return { success: true, data: JSON.parse(JSON.stringify(goods)), count: count }
 	} catch (error) {
 		console.log(error)
-		return []
+		return { success: false, data: [], count: 0 }
 	}
 }
 
 export async function getGoodById(id: string) {
 	try {
 		await connectToDB()
-
 		const good = await Good.findById({ _id: id })
 		return JSON.parse(JSON.stringify(good))
 	} catch (error) {
@@ -97,6 +103,16 @@ export async function addGood(values: IGood) {
 			isCompatible: values.isCompatible,
 			compatibility: values.compatibility,
 		})
+	} catch (error) {
+		console.log(error)
+	}
+	revalidatePath('/')
+}
+
+export async function deleteGood(id: string) {
+	try {
+		await connectToDB()
+		await Good.findByIdAndDelete({ _id: id })
 	} catch (error) {
 		console.log(error)
 	}

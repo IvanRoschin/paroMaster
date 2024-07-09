@@ -3,6 +3,7 @@ import * as Yup from 'yup'
 const nameRegex = /^[а-яА-ЯіІїЇєЄґҐ']+ [а-яА-ЯіІїЇєЄґҐ']+$/u
 const emailRegex = /^(?=.{1,63}$)(?=.{2,}@)[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 const phoneRegex = /^\+380\d{9}$/
+const passwordRegexp = /^\S+$/
 
 export const userFormSchema = Yup.object().shape({
 	name: Yup.string()
@@ -25,13 +26,10 @@ export const userFormSchema = Yup.object().shape({
 			message: 'Має включати @, від 3 до 63 символів',
 		})
 		.required(`Обов'язкове поле`),
+	password: Yup.string().matches(passwordRegexp, {
+		message: 'Password can`t contain white spaces',
+	}),
 
-	password: Yup.string().matches(
-		/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-		{
-			message: 'Пароль має містити мінімум 8 символів, включаючи одну велику літеру',
-		},
-	),
 	isAdmin: Yup.boolean(),
 	isActive: Yup.boolean(),
 })
