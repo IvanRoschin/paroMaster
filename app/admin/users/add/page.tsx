@@ -1,3 +1,4 @@
+import { addUser } from '@/actions/users'
 import AddUserForm from '@/components/admin/AddUserForm'
 
 type Props = {}
@@ -5,8 +6,7 @@ type Props = {}
 const AddUserPage = (props: Props) => {
 	return (
 		<div>
-			AddUserPage
-			<AddUserForm />
+			<AddUserForm title='Додати нового користувача' action={addUser} />
 		</div>
 	)
 }

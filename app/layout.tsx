@@ -1,8 +1,7 @@
 import AdminSidebar from '@/components/admin/AdminSidebar'
-import Navbar from '@/components/admin/Navbar'
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
-import { auth } from '../auth'
+import { auth } from '../auth.js'
 import { Header, Sidebar } from './components'
 import "./globals.css"
 import { Providers } from './providers/providers'
@@ -20,8 +19,6 @@ export default async function RootLayout({
 }>) {
   const session = await auth();
 
-  console.log('session:', session);
-
   return (
     <html lang="uk">
       <body className={`${inter.className} primaryTextColor`}>
@@ -34,7 +31,7 @@ export default async function RootLayout({
                 <div className='w-full'>
                   {children}
                 </div>
-                <Navbar />
+                {/* <Navbar /> */}
               </>
             ) : (
               <>

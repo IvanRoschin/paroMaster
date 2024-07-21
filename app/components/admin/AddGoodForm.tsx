@@ -8,6 +8,7 @@ import React, { useState } from 'react'
 // import { useGlobalContext } from "@/context/store";
 // import { useRouter } from "next/navigation";
 import { goodFormSchema } from 'app/helpers/validationShemas/addGoodShema'
+import { categoryList } from '../Category'
 
 interface InitialStateType {
 	category: string
@@ -28,8 +29,6 @@ interface ResetFormProps {
 }
 
 const AddGoodForm = () => {
-	//   const { isLoggedIn } = useGlobalContext();
-	//   const router = useRouter();
 	const [description, setDescription] = useState<string>('')
 	const [category, setCategory] = useState<string>('')
 
@@ -46,10 +45,6 @@ const AddGoodForm = () => {
 		isCompatible: true,
 		compatibility: ['Philips', 'Bosh', 'Kenwood'],
 	}
-
-	//   useEffect(() => {
-	//     isLoggedIn ? router.replace("/admin") : router.replace("/login");
-	//   }, [isLoggedIn, router]);
 
 	const handleSubmit = (values: InitialStateType, { resetForm }: ResetFormProps) => {
 		try {
@@ -90,14 +85,13 @@ const AddGoodForm = () => {
 									<option value='' disabled>
 										Вибір категорії
 									</option>
-
-									{/* {categoryList.map(({ name }, index) => {
-									return (
-										<option value={name} label={name} key={index}>
-											{name}
-										</option>
-									)
-								})} */}
+									{categoryList.map(({ title }, index) => {
+										return (
+											<option value={title} title={title} key={index}>
+												{title}
+											</option>
+										)
+									})}
 								</select>
 								{errors.category && touched.category && (
 									<div className='text-red-500'>{errors.category}</div>

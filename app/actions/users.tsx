@@ -1,35 +1,41 @@
 'use server'
 
+import User from '@/models/User'
 import { ISearchParams } from '@/types/searchParams'
 import { IUser } from '@/types/user/IUser'
 import { connectToDB } from '@/utils/dbConnect'
-import User from 'model/User'
+import bcrypt from 'bcrypt'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
-export async function addUser(values: IUser) {
+export async function addUser(formData: FormData): Promise<void> {
 	try {
 		await connectToDB()
 		// Check if email already exists
-		const existingUser = await User.findOne({ email: values.email })
+		const email = formData.get('email') as string
+
+		const existingUser = await User.findOne({ email })
 		if (existingUser) {
 			throw new Error('Email already exists')
 		}
 
+		const name = formData.get('name') as string
+		const phone = formData.get('phone') as string
+		const isAdmin = formData.get('isAdmin') === 'true'
+		const isActive = formData.get('isActive') === 'true'
+		const password = formData.get('password') as string
+
 		const newUser = new User({
-			name: values.name,
-			phone: values.phone,
-			email: values.email,
-			isAdmin: values.isAdmin,
-			isActive: values.isActive,
+			name,
+			phone,
+			email,
+			isAdmin,
+			isActive,
 		})
 
-		newUser.setPassword(values.password)
+		newUser.setPassword(password)
 
 		await newUser.save()
-		revalidatePath('/admin/users')
-		redirect('/admin/users')
-		return { success: true, data: newUser }
 	} catch (error) {
 		if (error instanceof Error) {
 			console.error('Error adding newUser:', error)
@@ -38,6 +44,9 @@ export async function addUser(values: IUser) {
 			console.error('Unknown error:', error)
 			throw new Error('Failed to add newUser: Unknown error')
 		}
+	} finally {
+		revalidatePath('/admin/users')
+		redirect('/admin/users')
 	}
 }
 
@@ -103,6 +112,7 @@ export async function updateUser(formData: FormData) {
 		isAdmin?: string
 		isActive?: string
 	}
+
 	try {
 		await connectToDB()
 
@@ -110,9 +120,12 @@ export async function updateUser(formData: FormData) {
 			name,
 			phone,
 			email,
-			password,
 			isAdmin: isAdmin === 'true',
 			isActive: isActive === 'true',
+		}
+
+		if (password) {
+			updateFields.password = await bcrypt.hash(password, 10)
 		}
 
 		Object.keys(updateFields).forEach(

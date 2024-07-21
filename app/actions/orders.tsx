@@ -1,8 +1,8 @@
 'use server'
 
+import Order from '@/models/Order'
 import { IOrder } from '@/types/order/IOrder'
 import { connectToDB } from '@/utils/dbConnect'
-import Order from 'model/Order'
 import { revalidatePath } from 'next/cache'
 
 export async function addOrder(values: IOrder) {
