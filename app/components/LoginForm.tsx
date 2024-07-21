@@ -1,30 +1,75 @@
 'use client'
 
-import authentificate from '@/actions/auth'
-import { useState } from 'react'
+import { authenticate } from '@/actions/authenticate'
+import { userLoginSchema } from 'app/helpers/validationShemas'
+import { Form, Formik, FormikHelpers } from 'formik'
+import { toast } from 'sonner'
+import Button from './Button'
+import FormField from './input/FormField'
 
-type Props = {}
+interface InitialStateType {
+	email: string
+	password: string
+}
 
-const LoginForm = (props: Props) => {
-	const [error, setError] = useState('')
+const LoginForm = () => {
+	const initialValues: InitialStateType = {
+		email: '',
+		password: '',
+	}
 
-	const handleLogin = async (formData: FormData) => {
-		const data = await authentificate(formData)
-		const error = data?.error
-		if (error) {
-			setError(error)
+	const handleSubmit = async (
+		values: InitialStateType,
+		{ resetForm }: FormikHelpers<InitialStateType>,
+	) => {
+		try {
+			const formData = new FormData()
+			formData.append('email', values.email)
+			formData.append('password', values.password)
+
+			await authenticate(formData)
+			resetForm()
+			toast.success('Login successful!')
+		} catch (error) {
+			toast.error('Error logging in!')
+			console.log(error)
 		}
 	}
 
+	const inputs = [
+		{
+			label: 'Email',
+			type: 'text',
+			id: 'email',
+			required: true,
+		},
+		{
+			label: 'Password',
+			type: 'password',
+			id: 'password',
+			required: true,
+		},
+	]
+
 	return (
-		<div>
-			<form action={handleLogin}>
-				<h2>Login</h2>
-				<input type='email' placeholder='email' name='email' />
-				<input type='password' placeholder='password' name='password' />
-				<button>Login</button>
-				{error && error}
-			</form>
+		<div className='flex flex-col justify-center items-center'>
+			<h2 className='text-4xl mb-4'>Login</h2>
+
+			<Formik
+				initialValues={initialValues}
+				onSubmit={handleSubmit}
+				validationSchema={userLoginSchema}
+				enableReinitialize
+			>
+				{({ errors, setFieldValue }) => (
+					<Form className='flex flex-col w-[600px]'>
+						{inputs.map((item, i) => (
+							<FormField item={item} key={i} errors={errors} />
+						))}
+						<Button type={'submit'} label='Login' />
+					</Form>
+				)}
+			</Formik>
 		</div>
 	)
 }

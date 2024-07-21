@@ -1,6 +1,7 @@
 import { deleteUser, getAllUsers } from '@/actions/users'
 import Search from '@/components/admin/AdminSearch'
 import Pagination from '@/components/admin/Pagination'
+import Button from '@/components/Button'
 import { ISearchParams } from '@/types/searchParams'
 import { IUser } from '@/types/user/IUser'
 import Link from 'next/link'
@@ -24,8 +25,12 @@ const UsersPage = async ({ searchParams }: { searchParams: ISearchParams }) => {
 		<div className='p-3 rounded-xl'>
 			<div className='flex items-center justify-between'>
 				<Search placeholder='Знайти користувача' />
-				<Link href='/admin/users/add'>
-					<button>Add New</button>
+				<Link
+					href='/admin/users/add'
+					className='
+				'
+				>
+					<Button type={'submit'} label='Додати' small outline />
 				</Link>
 			</div>
 			<table className='w-full'>
@@ -54,18 +59,11 @@ const UsersPage = async ({ searchParams }: { searchParams: ISearchParams }) => {
 								<td className='p-2'>
 									<div className='flex gap-2'>
 										<Link href={`/admin/users/${user._id}`}>
-											<button className='px-2 py-3 rounded-lg border-none cursor-pointer bg-teal-400'>
-												View
-											</button>
+											<Button type={'submit'} label='Див' small outline />
 										</Link>
 										<form action={deleteUser}>
 											<input type='hidden' name='id' value={user._id} />
-											<button
-												type='submit'
-												className='px-2 py-3 rounded-lg border-none cursor-pointer bg-red-500'
-											>
-												Delete
-											</button>
+											<Button type={'submit'} label='Видалити' small outline />
 										</form>
 									</div>
 								</td>

@@ -1,14 +1,14 @@
 'use server'
 
+import Good from '@/models/Good'
 import { IGood } from '@/types/good/IGood'
 import { ISearchParams } from '@/types/searchParams'
 import { connectToDB } from '@/utils/dbConnect'
-import Good from 'model/Good'
 import { revalidatePath } from 'next/cache'
 
 interface IGetAllGoodsResponse {
 	success: boolean
-	data: IGood[]
+	goods: IGood[]
 	count: number
 }
 
@@ -69,10 +69,10 @@ export async function getAllGoods(
 			.limit(limit)
 			.exec()
 
-		return { success: true, data: JSON.parse(JSON.stringify(goods)), count: count }
+		return { success: true, goods: JSON.parse(JSON.stringify(goods)), count: count }
 	} catch (error) {
 		console.log(error)
-		return { success: false, data: [], count: 0 }
+		return { success: false, goods: [], count: 0 }
 	}
 }
 

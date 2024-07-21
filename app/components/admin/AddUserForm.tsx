@@ -1,11 +1,11 @@
 'use client'
 
-import { addUser } from '@/actions/users'
 import { IUser } from '@/types/user/IUser'
-import { Field, Form, Formik, FormikState } from 'formik'
-import React from 'react'
+import { Form, Formik, FormikState } from 'formik'
 import { toast } from 'sonner'
 import { userFormSchema } from '../../helpers/validationShemas'
+import FormField from '../input/FormField'
+import CustomButton from './CustomFormikButton'
 
 interface InitialStateType extends Omit<IUser, '_id'> {}
 
@@ -13,115 +13,119 @@ interface ResetFormProps {
 	resetForm: (nextState?: Partial<FormikState<InitialStateType>>) => void
 }
 
-const AddUserForm = () => {
+interface UserFormProps {
+	user?: Partial<IUser>
+	title?: string
+	action: (data: FormData) => Promise<void>
+}
+
+const UserForm: React.FC<UserFormProps> = ({ user, title, action }) => {
+	const inputs = [
+		{
+			id: 'name',
+			label: 'Ім`я',
+			type: 'text',
+			required: true,
+		},
+		{
+			id: 'phone',
+			label: 'Телефон',
+			type: 'tel',
+			required: true,
+		},
+		{
+			id: 'email',
+			label: 'Email',
+			type: 'email',
+			required: true,
+		},
+		{
+			id: 'password',
+			label: 'Password',
+			type: 'password',
+			required: !user, // Password is required only for new users
+		},
+		{
+			id: 'isAdmin',
+			label: 'isAdmin',
+			options: [
+				{
+					value: 'false',
+					label: 'Адмін?',
+				},
+				{
+					value: 'true',
+					label: 'Так',
+				},
+				{
+					value: 'false',
+					label: 'Ні',
+				},
+			],
+		},
+		{
+			id: 'isActive',
+			label: 'isActive',
+			options: [
+				{
+					value: 'false',
+					label: 'Активний?',
+				},
+				{
+					value: 'true',
+					label: 'Так',
+				},
+				{
+					value: 'false',
+					label: 'Ні',
+				},
+			],
+		},
+	]
+
 	const initialValues: InitialStateType = {
-		name: '',
-		phone: '',
-		email: '',
+		name: user?.name || '',
+		phone: user?.phone || '',
+		email: user?.email || '',
 		password: '',
-		createdAt: '',
-		isAdmin: false,
-		isActive: false,
+		createdAt: user?.createdAt || '',
+		isAdmin: user?.isAdmin || false,
+		isActive: user?.isActive || false,
 	}
 
 	const handleSubmit = async (values: InitialStateType, { resetForm }: ResetFormProps) => {
 		try {
-			await addUser(values)
+			const formData = new FormData()
+			Object.keys(values).forEach(key => {
+				formData.append(key, (values as any)[key])
+			})
+
+			await action(formData)
 			resetForm()
-			toast.success('Нового користувача додано!')
+			toast.success(user?._id ? 'Користувача оновлено!' : 'Нового користувача додано!')
 		} catch (error) {
-			toast.error(error.message || 'Помилка!')
+			toast.error('Помилка!')
 			console.log(error)
 		}
 	}
 
 	return (
-		<div>
-			<h2 className='text-4xl'>Додати нового користувача</h2>
+		<div className='flex flex-col justify-center items-center'>
+			<h2 className='text-4xl mb-4'>{title}</h2>
 			<Formik
 				initialValues={initialValues}
 				onSubmit={handleSubmit}
 				validationSchema={userFormSchema}
+				enableReinitialize
 			>
-				{({ errors, touched, setFieldValue }) => (
+				{({ errors, setFieldValue }) => (
 					<Form className='flex flex-col w-[600px]'>
-						<div className='flex justify-between items-center'>
-							<div>
-								<Field
-									type='text'
-									name='name'
-									placeholder="Ім'я"
-									className='mb-5 p-2 rounded-md border border-slate-400 text-slate-400'
-								/>
-								{errors.name && touched.name && <div className='text-red-500'>{errors.name}</div>}
-								<Field
-									type='tel'
-									name='phone'
-									placeholder='Телефон'
-									className='mb-5 p-2 rounded-md border border-slate-400 text-slate-400'
-								/>
-								{errors.phone && touched.phone && (
-									<div className='text-red-500'>{errors.phone}</div>
-								)}
-								<Field
-									type='email'
-									name='email'
-									placeholder='Email'
-									className='mb-5 p-2 rounded-md border border-slate-400 text-slate-400'
-								/>
-								{errors.email && touched.email && (
-									<div className='text-red-500'>{errors.email}</div>
-								)}
-								<Field
-									type='password'
-									name='password'
-									placeholder='Password'
-									className='mb-5 p-2 rounded-md border border-slate-400 text-slate-400'
-								/>
-								{errors.password && touched.password && (
-									<div className='text-red-500'>{errors.password}</div>
-								)}
-							</div>
-							<div>
-								<Field
-									as='select'
-									name='isAdmin'
-									className='mb-5 p-2 rounded-md border border-slate-400 text-slate-400'
-									onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-										setFieldValue('isAdmin', e.target.value === 'true')
-									}}
-								>
-									<option value='false'>Адмін?</option>
-									<option value='true'>Так</option>
-									<option value='false'>Ні</option>
-								</Field>
-								{errors.isAdmin && touched.isAdmin && (
-									<div className='text-red-500'>{errors.isAdmin}</div>
-								)}
-								<Field
-									as='select'
-									name='isActive'
-									className='mb-5 p-2 rounded-md border border-slate-400 text-slate-400'
-									onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-										setFieldValue('isActive', e.target.value === 'true')
-									}}
-								>
-									<option value='false'>Активний?</option>
-									<option value='true'>Так</option>
-									<option value='false'>Ні</option>
-								</Field>
-								{errors.isActive && touched.isActive && (
-									<div className='text-red-500'>{errors.isActive}</div>
-								)}
-							</div>
+						<div>
+							{inputs.map((item, i) => (
+								<FormField item={item} key={i} errors={errors} setFieldValue={setFieldValue} />
+							))}
 						</div>
-
-						<button
-							type='submit'
-							className='p-2 w-[100px] border border-gray-400 rounded-md self-center hover:bg-gray-300 transition ease-in-out'
-						>
-							Зберегти
-						</button>
+						<CustomButton label={'Зберегти'} />
 					</Form>
 				)}
 			</Formik>
@@ -129,4 +133,4 @@ const AddUserForm = () => {
 	)
 }
 
-export default AddUserForm
+export default UserForm

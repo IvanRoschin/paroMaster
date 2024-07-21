@@ -1,8 +1,8 @@
 'use server'
 
+import Customer from '@/models/Customer'
 import { ICustomer } from '@/types/customer/ICustomer'
 import { connectToDB } from '@/utils/dbConnect'
-import Customer from 'model/Customer'
 import { revalidatePath } from 'next/cache'
 
 export async function addCustomer(values: ICustomer) {

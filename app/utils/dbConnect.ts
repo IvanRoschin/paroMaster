@@ -8,10 +8,10 @@ export const connectToDB = async () => {
 	const mongodbUri: string | undefined = process.env.MONGODB_URI
 
 	const options = {
-		useNewUrlParser: true,
-		useUnifiedTopology: true,
-		serverSelectionTimeoutMS: 20000, // Increase server selection timeout to 20 seconds
-		connectTimeoutMS: 20000, // Increase connection timeout to 20 seconds
+		// useNewUrlParser: true,
+		// useUnifiedTopology: true,
+		// serverSelectionTimeoutMS: 20000, // Increase server selection timeout to 20 seconds
+		// connectTimeoutMS: 20000, // Increase connection timeout to 20 seconds
 		dbName: 'paromaster', //
 	}
 

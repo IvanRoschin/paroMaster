@@ -3,11 +3,12 @@ import { getAllGoods } from './actions/goods'
 import { ItemsList, Slider } from './components'
 
 export default async function Home({ searchParams }: { searchParams: ISearchParams }) {
-	const goods = await getAllGoods(searchParams, 0, 4)
+	const data = await getAllGoods(searchParams, 0, 4)
+
 	return (
 		<div className='container'>
 			<Slider />
-			<ItemsList goods={goods.data} />
+			<ItemsList goods={data.goods} />
 		</div>
 	)
 }

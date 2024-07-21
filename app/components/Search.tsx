@@ -43,17 +43,17 @@ const Search = ({ placeholder }: { placeholder: string }) => {
 					placeholder={placeholder}
 					required
 					value={inputValue || ''}
-					onChange={handleSearch}
-					// onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-					// 	const params = new URLSearchParams(searchParams)
-					// 	if (e.target.value) {
-					// 		params.set('search', e.target.value)
-					// 	} else {
-					// 		params.delete('search')
-					// 	}
-					// 	setInputValue(e.target.value)
-					// 	replace(`${pathName}?${params.toString()}`, { scroll: false })
-					// }}
+					// onChange={handleSearch}
+					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+						const params = new URLSearchParams(searchParams)
+						if (e.target.value) {
+							params.set('search', e.target.value)
+						} else {
+							params.delete('search')
+						}
+						setInputValue(e.target.value)
+						replace(`${pathname}?${params.toString()}`, { scroll: false })
+					}}
 				/>
 				<button
 					type='button'

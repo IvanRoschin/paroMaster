@@ -1,6 +1,9 @@
+// 'use client'
+
 import { signOut } from 'auth'
 import Image from 'next/image'
 import Link from 'next/link'
+// import { useRouter } from 'next/router'
 import {
 	MdDashboard,
 	MdLogout,
@@ -9,8 +12,6 @@ import {
 	MdSupervisedUserCircle,
 	MdVerifiedUser,
 } from 'react-icons/md'
-
-type Props = {}
 
 const menuItems = [
 	{
@@ -51,7 +52,6 @@ type AdminSidebarProps = {
 	}
 }
 const AdminSidebar = ({ user }: AdminSidebarProps) => {
-	console.log('user', user)
 	return (
 		<div className='pt-0 mr-4 text-sm w-[250px] mb-4'>
 			<h2 className='text-2xl text-primaryAccentColor mb-4 bold'>Меню адміна</h2>
@@ -67,7 +67,7 @@ const AdminSidebar = ({ user }: AdminSidebarProps) => {
 				<span className=''>{user?.name}</span>
 				<span className=''>Admin</span>
 			</div>
-			<ul className='bg-secondaryBackground p-4 rounded-lg'>
+			<ul className='bg-secondaryBackground p-4 rounded-t-lg'>
 				{menuItems.map(({ title, path, icon }) => {
 					return (
 						<li key={title} className='mb-3 nav'>
@@ -79,13 +79,19 @@ const AdminSidebar = ({ user }: AdminSidebarProps) => {
 					)
 				})}
 			</ul>
+
 			<form
 				action={async () => {
 					'use server'
-					await signOut()
+					await signOut({ redirectTo: '/' })
 				}}
 			>
-				<button>
+				<button
+					className='text-white end-2.5 bottom-2.5 bg-primaryAccentColor hover:opacity-80 
+					focus:opacity-80 
+					focus:outline-none 
+					focus:ring-secondaryBackground rounded-b-lg text-md px-4 py-3 w-full placeholder:bg-transparent flex justify-start items-center gap-2'
+				>
 					<MdLogout />
 					Logout
 				</button>
