@@ -22,12 +22,14 @@ const ProductsPage = async ({ searchParams }: { searchParams: ISearchParams }) =
 			<table className='w-full'>
 				<thead className='bg-teal-400'>
 					<tr>
-						<td className='p-2'>Category</td>
-						<td className='p-2'>Title</td>
-						<td className='p-2'>Brand</td>
-						<td className='p-2'>Model</td>
+						<td className='p-2'>Категорія</td>
+						<td className='p-2'>Назва</td>
+						<td className='p-2'>Бренд</td>
+						<td className='p-2'>Модель</td>
 						<td className='p-2'>Vendor</td>
-						<td className='p-2'>Price</td>
+						<td className='p-2'>Ціна</td>
+						<td className='p-2'>Редагувати</td>
+						<td className='p-2'>Видалити</td>
 					</tr>
 				</thead>
 				<tbody>
@@ -44,10 +46,13 @@ const ProductsPage = async ({ searchParams }: { searchParams: ISearchParams }) =
 									<Link href={`/admin/goods/${good._id}`}>
 										<Button type={'submit'} label='Див' small outline />
 									</Link>
-									<Link href={`/admin/goods/delete/${good._id}`}>
-										<Button type={'submit'} label='Видалити' small outline />
-									</Link>
 								</div>
+							</td>
+							<td>
+								{' '}
+								<Link href={`/admin/goods/delete/${good._id}`}>
+									<Button type={'submit'} label='Видалити' small outline />
+								</Link>
 							</td>
 						</tr>
 					))}

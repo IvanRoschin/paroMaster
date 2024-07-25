@@ -30,7 +30,7 @@ const Header = (props: Props) => {
 
 			<div className='flex justify-between items-center border border-b p-4 px-8'>
 				<Logo />
-				<Search />
+				<Search placeholder='Пошук товарів' />
 				<Cart />
 			</div>
 		</div>

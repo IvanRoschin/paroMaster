@@ -3,7 +3,7 @@
 import { IconType } from 'react-icons'
 
 interface ButtonProps {
-	label: string
+	label?: string
 	type: string
 	onClick?: () => void
 	disabled?: boolean
@@ -19,24 +19,30 @@ const Button: React.FC<ButtonProps> = ({
 	disabled,
 	outline,
 	small,
+	color,
 	icon: Icon,
 }) => {
 	return (
 		<button
 			onClick={onClick}
 			disabled={disabled}
-			className={`relative disabled:opacity-70 disabled:cursor-not-allowed rounded-lg hover:opacity-80 transition  
+			className={` 
+				flex items-center justify-center
+				disabled:opacity-70 disabled:cursor-not-allowed rounded-lg hover:opacity-80 transition
+			
+			${small && color ? `${color}` : 'bg-orange-600'} 
+
 			${outline ? 'bg-white' : 'bg-orange-600'} 
       ${outline ? 'border-orange-600' : 'border-orange-600'} 
       ${outline ? 'border-orange-600' : 'text-white'} 
-      ${small ? 'py-1' : 'py-3'} 
+      ${small ? 'py-[2px]' : 'py-2'} 
+			${small ? 'px-1' : 'px-2'}
       ${small ? 'text-md' : 'text-md'} 
-      ${small ? 'font-light' : 'font-semibold'} 
       ${small ? 'border-[1px]' : 'border-2'}
       ${small ? 'w-[80px]' : 'w-full'}
       `}
 		>
-			{Icon && <Icon size={24} className='absolute left-4 top-3' />}
+			{Icon && <Icon size={18} className=' ' />}
 			{label}
 		</button>
 	)

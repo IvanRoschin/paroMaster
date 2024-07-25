@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { CiSearch } from 'react-icons/ci'
 import { useDebouncedCallback } from 'use-debounce'
+import Button from '../Button'
 import { Icon } from '../Icon'
 
 const Search = ({ placeholder }: { placeholder: string }) => {
@@ -31,7 +32,7 @@ const Search = ({ placeholder }: { placeholder: string }) => {
 		<form className='w-full mx-7'>
 			<label className='mb-2 text-sm font-medium text-gray-900 sr-only'>Пошук</label>
 			<div className='relative w-full flex justify-center items-center'>
-				<div className='absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none'>
+				<div className='absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none z-10'>
 					<CiSearch />
 				</div>
 				<input
@@ -60,12 +61,7 @@ const Search = ({ placeholder }: { placeholder: string }) => {
 								}`}
 					/>
 				</button>
-				<button
-					type='submit'
-					className='text-white end-2.5 bottom-2.5 bg-primaryAccentColor hover:bg-secondaryBackground hover:text-black focus:text-black focus:ring-4 focus:outline-none focus:ring-secondaryBackground font-medium rounded-lg text-sm px-4 py-1'
-				>
-					Знайти
-				</button>
+				<Button type='submit' label='Знайти' small />
 			</div>
 		</form>
 	)

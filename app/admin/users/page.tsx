@@ -1,71 +1,102 @@
+'use client'
+
 import { deleteUser, getAllUsers } from '@/actions/users'
 import Search from '@/components/admin/AdminSearch'
 import Pagination from '@/components/admin/Pagination'
 import Button from '@/components/Button'
+import EmptyState from '@/components/EmptyState'
+import Loader from '@/components/Loader'
 import { ISearchParams } from '@/types/searchParams'
 import { IUser } from '@/types/user/IUser'
 import Link from 'next/link'
+import { FaPen, FaTrash } from 'react-icons/fa'
+import useSWR from 'swr'
 
 interface UserResponse {
 	success: boolean
-	data: IUser[]
+	users: IUser[]
 	count: number
 }
 
-const UsersPage = async ({ searchParams }: { searchParams: ISearchParams }) => {
+const fetcher = async (url: string, params: ISearchParams): Promise<UserResponse> => {
+	return getAllUsers(params)
+}
+
+const UsersPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 	const page = searchParams?.page || 1
 
-	const users: UserResponse = await getAllUsers(searchParams)
-	if (!users.success) {
-		return <div>Error fetching users</div>
+	const { data, error } = useSWR(['goods', searchParams], () => fetcher('goods', searchParams))
+
+	if (error) {
+		console.error('Error fetching goods', error)
 	}
-	const count = users.count
+	if (data?.users.length === 0) {
+		return <EmptyState />
+	}
+	if (!data) {
+		return <Loader />
+	}
+
+	// const users: UserResponse = await getAllUsers(searchParams)
+	// if (users.data.length === 0) {
+	// 	return <EmptyState />
+	// }
+
+	const count = data.count
 
 	return (
 		<div className='p-3 rounded-xl'>
-			<div className='flex items-center justify-between'>
+			<div className='flex items-center justify-between mb-8'>
 				<Search placeholder='Знайти користувача' />
 				<Link
 					href='/admin/users/add'
 					className='
 				'
 				>
-					<Button type={'submit'} label='Додати' small outline />
+					<Button type={'submit'} label='Додати' small outline color='border-green-400' />
 				</Link>
 			</div>
 			<table className='w-full'>
 				<thead>
-					<tr>
-						<td className='p-2'>Name</td>
-						<td className='p-2'>Email</td>
-						<td className='p-2'>Phone</td>
-						<td className='p-2'>Created At</td>
-						<td className='p-2'>Role</td>
-						<td className='p-2'>Status</td>
-						<td className='p-2'>Actions</td>
+					<tr className='bg-slate-300 font-semibold'>
+						<td className='p-2 border-r-2 text-center'>Ім'я</td>
+						<td className='p-2 border-r-2 text-center'>Email</td>
+						<td className='p-2 border-r-2 text-center'>Телефон</td>
+						<td className='p-2 border-r-2 text-center'>Створений</td>
+						<td className='p-2 border-r-2 text-center'>Роль</td>
+						<td className='p-2 border-r-2 text-center'>Статус</td>
+						<td className='p-2 border-r-2 text-center'>Редагувати</td>
+						<td className='p-2 border-r-2 text-center'>Видалити</td>
 					</tr>
 				</thead>
 				<tbody>
-					{users.data.map(user => {
-						console.log(user._id)
+					{data.users.map(user => {
 						return (
-							<tr key={user._id}>
-								<td className='p-2'>{user.name}</td>
-								<td className='p-2'>{user.email}</td>
-								<td className='p-2'>{user.phone}</td>
-								<td className='p-2'>{new Date(user.createdAt).toLocaleDateString('uk-UA')}</td>
-								<td className='p-2'>{user.isAdmin ? 'admin' : 'user'}</td>
-								<td className='p-2'>{user.isActive ? 'active' : 'passive'}</td>
-								<td className='p-2'>
-									<div className='flex gap-2'>
-										<Link href={`/admin/users/${user._id}`}>
-											<Button type={'submit'} label='Див' small outline />
-										</Link>
-										<form action={deleteUser}>
-											<input type='hidden' name='id' value={user._id} />
-											<Button type={'submit'} label='Видалити' small outline />
-										</form>
-									</div>
+							<tr key={user._id} className='border-b-2'>
+								<td className='p-2 border-r-2 text-center'>{user.name}</td>
+								<td className='p-2 border-r-2 text-center'>{user.email}</td>
+								<td className='p-2 border-r-2 text-center'>{user.phone}</td>
+								<td className='p-2 border-r-2 text-center'>
+									{new Date(user.createdAt).toLocaleDateString('uk-UA')}
+								</td>
+								<td className='p-2 border-r-2 text-center'>{user.isAdmin ? 'admin' : 'user'}</td>
+								<td className='p-2 border-r-2 text-center'>
+									{user.isActive ? 'active' : 'passive'}
+								</td>
+								<td className='p-2 border-r-2 text-center'>
+									<Link
+										href={`/admin/users/${user._id}`}
+										className='flex items-center justify-center'
+									>
+										<Button type={'submit'} icon={FaPen} small outline color='border-yellow-400' />
+									</Link>
+								</td>
+								<td className='p-2 text-center'>
+									{' '}
+									<form action={deleteUser} className='flex justify-center items-center'>
+										<input type='hidden' name='id' value={user._id} />
+										<Button type='submit' icon={FaTrash} small outline color='border-red-400' />
+									</form>
 								</td>
 							</tr>
 						)

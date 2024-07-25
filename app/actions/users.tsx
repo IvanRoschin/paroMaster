@@ -63,7 +63,7 @@ export async function getAllUsers(searchParams: ISearchParams) {
 			.limit(ITEM_PER_PAGE)
 			.skip(ITEM_PER_PAGE * (page - 1))
 
-		return { success: true, data: JSON.parse(JSON.stringify(users)), count: count }
+		return { success: true, users: JSON.parse(JSON.stringify(users)), count: count }
 	} catch (error) {
 		if (error instanceof Error) {
 			console.error('Error getting users:', error)
