@@ -30,14 +30,14 @@ const Pagination = ({ count }: Props) => {
 				disabled={!hasPrev}
 				onClick={() => handleChangePage('prev')}
 			>
-				Prev
+				Назад
 			</button>
 			<button
 				className='cursor-pointer px-1 py-2 disabled:cursor-not-allowed'
 				disabled={!hasNext}
 				onClick={() => handleChangePage('next')}
 			>
-				Next
+				Вперед
 			</button>
 		</div>
 	)
