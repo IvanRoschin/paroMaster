@@ -2,7 +2,7 @@ import AdminSidebar from '@/components/admin/AdminSidebar'
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { auth } from '../auth.js'
-import { Header, Sidebar } from './components'
+import { Footer, Header, Sidebar } from './components'
 import "./globals.css"
 import { Providers } from './providers/providers'
 const inter = Inter({ subsets: ["latin"] });
@@ -42,6 +42,7 @@ export default async function RootLayout({
               </>
             )}
           </div>
+          <Footer />
         </Providers>
       </body>
     </html>

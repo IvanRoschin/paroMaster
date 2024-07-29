@@ -25,10 +25,10 @@ const fetcher = async (url: string, params: ISearchParams): Promise<UserResponse
 const UsersPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 	const page = searchParams?.page || 1
 
-	const { data, error } = useSWR(['goods', searchParams], () => fetcher('goods', searchParams))
+	const { data, error } = useSWR(['users', searchParams], () => fetcher('users', searchParams))
 
 	if (error) {
-		console.error('Error fetching goods', error)
+		console.error('Error fetching users', error)
 	}
 	if (data?.users.length === 0) {
 		return <EmptyState />

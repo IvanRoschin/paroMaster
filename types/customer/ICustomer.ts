@@ -7,5 +7,5 @@ export interface ICustomer {
 	city: string
 	warehouse: string
 	payment: string
-	orders: IOrder[]
+	orders: IOrder
 }

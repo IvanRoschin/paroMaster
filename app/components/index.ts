@@ -1,5 +1,6 @@
 import Cart from '@/components/Cart/Cart'
 import { default as Category, default as categoryList } from '@/components/Category'
+import Footer from '@/components/Footer'
 import Header from '@/components/Header'
 import ImagesBlock from '@/components/ImagesBlock'
 import ImagesUpload from '@/components/ImagesUpload'
@@ -16,6 +17,8 @@ export {
 	AdminMenu,
 	Cart,
 	Category,
+	categoryList,
+	Footer,
 	Header,
 	ImagesBlock,
 	ImagesUpload,
@@ -25,5 +28,4 @@ export {
 	Search,
 	Sidebar,
 	Slider,
-	categoryList,
 }

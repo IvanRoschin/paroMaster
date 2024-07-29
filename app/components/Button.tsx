@@ -11,6 +11,7 @@ interface ButtonProps {
 	small?: boolean
 	icon?: IconType
 	color?: string
+	width?: string
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -20,6 +21,7 @@ const Button: React.FC<ButtonProps> = ({
 	outline,
 	small,
 	color,
+	width,
 	icon: Icon,
 }) => {
 	return (
@@ -32,6 +34,7 @@ const Button: React.FC<ButtonProps> = ({
 			
 			${small && color ? `${color}` : 'bg-orange-600'} 
 
+
 			${outline ? 'bg-white' : 'bg-orange-600'} 
       ${outline ? 'border-orange-600' : 'border-orange-600'} 
       ${outline ? 'border-orange-600' : 'text-white'} 
@@ -39,7 +42,7 @@ const Button: React.FC<ButtonProps> = ({
 			${small ? 'px-1' : 'px-2'}
       ${small ? 'text-md' : 'text-md'} 
       ${small ? 'border-[1px]' : 'border-2'}
-      ${small ? 'w-[80px]' : 'w-full'}
+      ${small && width ? `w-[${width}px]` : 'w-full'}
       `}
 		>
 			{Icon && <Icon size={18} className=' ' />}

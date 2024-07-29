@@ -73,7 +73,7 @@ const Search = ({ placeholder }: { placeholder: string }) => {
 								}`}
 					/>
 				</button>
-				<Button type='submit' label='Знайти' small />
+				<Button type='submit' label='Знайти' small width={'80'} />
 				{/* <button className='text-white end-2.5 bottom-2.5 bg-primaryAccentColor hover:bg-secondaryBackground hover:text-black focus:text-black focus:ring-4 focus:outline-none focus:ring-secondaryBackground font-medium rounded-lg text-sm px-4 py-1'></button> */}
 			</div>
 		</form>
