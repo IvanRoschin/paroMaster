@@ -1,11 +1,16 @@
 import Link from 'next/link'
 
-type Props = {}
+interface LogoProps {
+	color?: string
+}
 
-const Logo = (props: Props) => {
+const Logo: React.FC<LogoProps> = ({ color }) => {
 	return (
 		<Link href='/' rel='noopener noreferrer' target='_self'>
-			<div className='text-4xl font-bold'>
+			<div
+				className={`text-4xl font-bold 
+				${color ? 'text-white' : 'text-black'}`}
+			>
 				paro<span className='text-primaryAccentColor'>Master</span>
 			</div>
 		</Link>

@@ -50,19 +50,40 @@ export default function Item({ params }: { params: any }) {
 				</p>
 				<p className='mb-[20px]'>Артикул: {data.vendor}</p>
 				<p className='text-2xl font-bold mb-[30px]'>{data.price} грн</p>
-				<div>
+				<div className='mb-4'>
 					{quantity === 0 ? (
-						<Button label='Купити' onClick={() => increaseCartQuantity(data._id)} />
+						<Button
+							width='40'
+							type='button'
+							label='Купити'
+							onClick={() => increaseCartQuantity(data._id)}
+						/>
 					) : (
 						<div className='flex items-center flex-col gap-10'>
 							<div className='flex items-center justify-center gap-20'>
 								<div className='flex items-center justify-between gap-2'>
-									<Button label='-' onClick={() => decreaseCartQuantity(data._id)} small outline />
+									<Button
+										width='40'
+										type='button'
+										label='-'
+										onClick={() => decreaseCartQuantity(data._id)}
+										small
+										outline
+									/>
 									<span className='text-xl'>{quantity}</span> в корзині
-									<Button label='+' onClick={() => increaseCartQuantity(data._id)} small outline />
+									<Button
+										width='40'
+										type='button'
+										label='+'
+										onClick={() => increaseCartQuantity(data._id)}
+										small
+										outline
+									/>
 								</div>
 							</div>
 							<Button
+								width='40'
+								type='button'
 								label='Видалити'
 								onClick={() => {
 									removeFromCart(data._id)
@@ -82,11 +103,17 @@ function ItemDetails({ item }: { item: IGood }) {
 	return (
 		<>
 			<p className='font-light text-gray-500'>
-				Сумісність з брендами: {item.isCompatible ? 'так' : 'ні'}
+				Сумісність з брендами: <span className='font-bold'>{item.isCompatible ? 'так' : 'ні'}</span>
 			</p>
-			<p className='font-light text-gray-500'>Brand: {item.brand}</p>
-			<p className='font-light text-gray-500'>Model: {item.model}</p>
-			<p className='font-light text-gray-500'>Сумісність з брендами: {item.compatibility}</p>
+			<p className='font-light text-gray-500'>
+				Brand: <span className='font-bold'> {item.brand}</span>
+			</p>
+			<p className='font-light text-gray-500'>
+				Model: <span className='font-bold'>{item.model}</span>{' '}
+			</p>
+			<p className='font-light text-gray-500'>
+				Сумісність з брендами: <span className='font-bold'>{item.compatibility}</span>
+			</p>
 		</>
 	)
 }

@@ -8,6 +8,7 @@ enum PaymentMethod {
 
 export interface NewOrderTemplateProps {
 	name: string
+	surname: string
 	email: string
 	phone: string
 	payment: PaymentMethod
@@ -32,6 +33,7 @@ export interface NewOrderTemplateProps {
 
 export function generateEmailContent({
 	name,
+	surname,
 	email,
 	phone,
 	payment,
@@ -65,7 +67,7 @@ export function generateEmailContent({
       <br />
       <br />
       <h3>
-        <p>Від користувача: ${name}</p>
+        <p>Від користувача: ${name} ${surname}</p>
         <p>Телефон:${phone}</p>
         <p>Вказаний e-mail: ${email}</p>
         <p>Вказаний спосіб оплати: ${payment}</p>
