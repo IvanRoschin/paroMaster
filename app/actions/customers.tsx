@@ -18,7 +18,6 @@ export async function addCustomer(values: ICustomer) {
 			payment: values.payment,
 			orders: [],
 		}
-		console.log('newCustomer: ', newCustomer)
 		await Customer.create(newCustomer)
 		revalidatePath('/')
 		return { success: true, data: newCustomer }

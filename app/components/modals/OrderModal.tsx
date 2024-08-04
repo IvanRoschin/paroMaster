@@ -76,7 +76,6 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 		},
 		validationSchema: orderFormSchema,
 		onSubmit: async (values, actions) => {
-			console.log('OrderModalValues', values)
 			const body = {
 				apiKey: process.env.NOVA_API,
 				modelName: 'AddressGeneral',
@@ -246,7 +245,6 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 		{
 			id: 'city',
 			label: 'Місто',
-			type: 'text',
 		},
 		{
 			id: 'warehouse',
@@ -255,6 +253,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 				value: warehouse.Description,
 				label: warehouse.Description,
 			})),
+			type: 'select',
 		},
 		{
 			id: 'payment',
@@ -263,6 +262,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 				value: method,
 				label: method,
 			})),
+			type: 'select',
 		},
 	]
 
@@ -271,8 +271,16 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 			<FormikProvider value={formik}>
 				<form onSubmit={handleSubmit} autoComplete='off' className='flex flex-col space-y-8'>
 					{inputItems.map(item => (
-						<FormField key={item.id} item={item} errors={errors} setFieldValue={setFieldValue} />
+						<div key={item.id}>
+							{item.type === 'select' && (
+								<label htmlFor={item.id} className='block mb-2'>
+									{item.label}
+								</label>
+							)}
+							<FormField key={item.id} item={item} errors={errors} setFieldValue={setFieldValue} />
+						</div>
 					))}
+
 					<div className='flex items-center'>
 						<input
 							id='termsCheckbox'

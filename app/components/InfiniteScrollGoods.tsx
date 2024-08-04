@@ -25,9 +25,9 @@ const InfiniteScrollGods = ({
 	async function loadMoreGoods() {
 		const newGoods = await getAllGoods(searchParams, offset, NUMBER_OF_GOODS_TO_FETCH)
 
-		if (newGoods?.length) {
+		if (newGoods?.goods?.length) {
 			setOffset(prevOffset => prevOffset + NUMBER_OF_GOODS_TO_FETCH)
-			setGoods(prevGoods => [...prevGoods, ...newGoods])
+			setGoods(prevGoods => [...prevGoods, ...newGoods.goods])
 		} else {
 			setAllGoodsLoaded(true)
 		}
