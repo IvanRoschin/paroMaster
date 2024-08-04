@@ -109,14 +109,19 @@ export async function addGood(values: IGood) {
 	revalidatePath('/')
 }
 
-export async function deleteGood(id: string) {
+export async function deleteGood(formData: FormData): Promise<void> {
+	const { id } = Object.fromEntries(formData) as { id: string }
+	if (!id) {
+		console.error('No ID provided')
+		return
+	}
 	try {
 		await connectToDB()
-		await Good.findByIdAndDelete({ _id: id })
+		await Good.findByIdAndDelete(id)
+		revalidatePath('/')
 	} catch (error) {
-		console.log(error)
+		console.error('Failed to delete the good:', error)
 	}
-	revalidatePath('/')
 }
 
 export async function uniqueBrands() {

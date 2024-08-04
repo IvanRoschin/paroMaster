@@ -31,10 +31,7 @@ const Button: React.FC<ButtonProps> = ({
 			className={` 
 				flex items-center justify-center
 				disabled:opacity-70 disabled:cursor-not-allowed rounded-lg hover:opacity-80 transition
-			
 			${small && color ? `${color}` : 'bg-orange-600'} 
-
-
 			${outline ? 'bg-white' : 'bg-orange-600'} 
       ${outline ? 'border-orange-600' : 'border-orange-600'} 
       ${outline ? 'border-orange-600' : 'text-white'} 
@@ -45,7 +42,7 @@ const Button: React.FC<ButtonProps> = ({
       ${small && width ? `w-[${width}px]` : 'w-full'}
       `}
 		>
-			{Icon && <Icon size={18} className=' ' />}
+			{Icon && <Icon size={12} className=' ' />}
 			{label}
 		</button>
 	)
