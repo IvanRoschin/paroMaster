@@ -5,6 +5,7 @@ import { IGood } from '@/types/good/IGood'
 import { ISearchParams } from '@/types/searchParams'
 import { connectToDB } from '@/utils/dbConnect'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 
 interface IGetAllGoodsResponse {
 	success: boolean
@@ -86,7 +87,8 @@ export async function getGoodById(id: string) {
 	}
 }
 
-export async function addGood(values: IGood) {
+export async function addGood(formData: FormData) {
+	const values = Object.fromEntries(formData.entries())
 	try {
 		await connectToDB()
 
@@ -95,18 +97,20 @@ export async function addGood(values: IGood) {
 			title: values.title,
 			brand: values.brand,
 			model: values.model,
-			price: values.price,
+			price: parseFloat(values.price as string),
 			description: values.description,
-			imgUrl: values.imgUrl,
+			imgUrl: values.imgUrl instanceof Array ? values.imgUrl : [values.imgUrl],
 			vendor: values.vendor,
-			isAvailable: values.isAvailable,
-			isCompatible: values.isCompatible,
-			compatibility: values.compatibility,
+			isAvailable: values.isAvailable === 'true',
+			isCompatible: values.isCompatible === 'false',
+			compatibility:
+				values.compatibility instanceof Array ? values.compatibility : [values.compatibility],
 		})
 	} catch (error) {
 		console.log(error)
 	}
-	revalidatePath('/')
+	revalidatePath('/admin/goods')
+	redirect('/admin/goods')
 }
 
 export async function deleteGood(formData: FormData): Promise<void> {
@@ -118,7 +122,7 @@ export async function deleteGood(formData: FormData): Promise<void> {
 	try {
 		await connectToDB()
 		await Good.findByIdAndDelete(id)
-		revalidatePath('/')
+		revalidatePath('/admin/goods')
 	} catch (error) {
 		console.error('Failed to delete the good:', error)
 	}
@@ -165,4 +169,71 @@ export async function getMinMaxPrice() {
 		console.error(error)
 	}
 	revalidatePath('/')
+}
+
+export async function updateGood(formData: FormData) {
+	const entries = Object.fromEntries(formData.entries())
+
+	const {
+		id,
+		category,
+		imgUrl,
+		brand,
+		model,
+		vendor,
+		title,
+		description,
+		price,
+		isAvailable,
+		isCompatible,
+		compatibility,
+	} = entries as {
+		id: string
+		category?: string
+		imgUrl?: any
+		brand?: string
+		model?: string
+		vendor?: string
+		title?: string
+		description?: string
+		price?: any
+		isAvailable?: string
+		isCompatible?: string
+		compatibility?: any
+	}
+
+	try {
+		await connectToDB()
+
+		const updateFields: Partial<IGood> = {
+			category,
+			imgUrl,
+			brand,
+			model,
+			vendor,
+			title,
+			description,
+			price: parseFloat(price),
+			isAvailable: isAvailable === 'true',
+			isCompatible: isCompatible === 'true',
+			compatibility: Array.isArray(compatibility) ? compatibility : [compatibility],
+		}
+
+		Object.keys(updateFields).forEach(
+			key =>
+				(updateFields[key as keyof IGood] === '' ||
+					updateFields[key as keyof IGood] === undefined) &&
+				delete updateFields[key as keyof IGood],
+		)
+		await Good.findByIdAndUpdate(id, updateFields)
+		return { success: true }
+	} catch (error) {
+		if (error instanceof Error) {
+			console.error('Error updating good:', error)
+			throw new Error('Failed to update good: ' + error.message)
+		} else {
+			console.error('Unknown error:', error)
+			throw new Error('Failed to update good: Unknown error')
+		}
+	}
 }

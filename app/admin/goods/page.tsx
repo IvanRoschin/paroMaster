@@ -18,7 +18,7 @@ interface GoodsResponse {
 }
 
 const fetcher = async (params: ISearchParams): Promise<GoodsResponse> => {
-	return getAllGoods(params, 4, 0)
+	return getAllGoods(params, 0, 4)
 }
 
 const ProductsPage = ({ searchParams }: { searchParams: ISearchParams }) => {
@@ -66,15 +66,13 @@ const ProductsPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 				<tbody>
 					{data.goods.map(good => (
 						<tr key={good._id} className='border-b-2 '>
-							<td className='p-2 border-r-2 text-center'>{good.category}</td>
-							<td className='p-2 border-r-2 text-center text'>{good.title}</td>
+							<td className='p-2 border-r-2 text-start'>{good.category}</td>
+							<td className='p-2 border-r-2 text-start'>{good.title}</td>
 							<td className='p-2 border-r-2 text-center'>{good.brand}</td>
 							<td className='p-2 border-r-2 text-center'>{good.model}</td>
 							<td className='p-2 border-r-2 text-center'>{good.vendor}</td>
 							<td className='p-2 border-r-2 text-center'>{good.price}</td>
-							<td className='p-2 border-r-2 text-center'>
-								{good.isAvailable ? 'в наявності' : 'відсутній'}
-							</td>
+							<td className='p-2 border-r-2 text-center'>{good.isAvailable ? 'Так' : 'Ні'}</td>
 
 							<td className='p-2 border-r-2 text-center'>
 								<Link

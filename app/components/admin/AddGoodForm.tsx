@@ -1,173 +1,172 @@
 'use client'
 
 import { addGood } from '@/actions/goods'
-import { Field, Form, Formik, FormikState } from 'formik'
-
-import { ImagesUpload } from '@/components/index'
-import React, { useState } from 'react'
-// import { useGlobalContext } from "@/context/store";
-// import { useRouter } from "next/navigation";
-import { goodFormSchema } from 'app/helpers/validationShemas/addGoodShema'
+import { IGood } from '@/types/good/IGood'
+import { goodFormSchema } from 'app/helpers/validationShemas'
+import { Form, Formik, FormikState } from 'formik'
+import { toast } from 'sonner'
 import { categoryList } from '../Category'
+import ImagesUpload from '../ImagesUpload'
+import FormField from '../input/FormField'
+import CustomButton from './CustomFormikButton'
 
-interface InitialStateType {
-	category: string
-	imgUrl: string[]
-	brand: string
-	model: string
-	vendor: string
-	title: string
-	description: string
-	price: number
-	isAvailable: boolean
-	isCompatible: boolean
-	compatibility: string[]
-}
+interface InitialStateType extends Omit<IGood, '_id'> {}
 
 interface ResetFormProps {
 	resetForm: (nextState?: Partial<FormikState<InitialStateType>>) => void
 }
 
-const AddGoodForm = () => {
-	const [description, setDescription] = useState<string>('')
-	const [category, setCategory] = useState<string>('')
+interface GoodFormProps {
+	good?: IGood
+	title?: string
+	action: (data: FormData) => Promise<void>
+}
+
+const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
+	const inputs = [
+		{
+			id: 'category',
+			label: 'Категорія',
+			type: 'select',
+			options: categoryList.map(category => ({ value: category.title, label: category.title })),
+			required: true,
+		},
+		{
+			id: 'title',
+			label: 'Назва товару',
+			type: 'text',
+			required: true,
+		},
+		{
+			id: 'brand',
+			label: 'Бренд',
+			type: 'text',
+			required: true,
+		},
+		{
+			id: 'model',
+			label: 'Модель',
+			type: 'text',
+			required: true,
+		},
+		{
+			id: 'vendor',
+			label: 'Артикул',
+			type: 'text',
+			required: true,
+		},
+		{
+			id: 'price',
+			label: 'Ціна',
+			type: 'number',
+			required: true,
+		},
+		{
+			id: 'isAvailable',
+			label: 'В наявності?',
+			type: 'select',
+			options: [
+				{
+					value: 'false',
+					label: 'Ні',
+				},
+				{
+					value: 'true',
+					label: 'Так',
+				},
+			],
+		},
+		{
+			id: 'isCompatible',
+			label: 'Сумісний з іншими?',
+			type: 'select',
+			options: [
+				{
+					value: 'false',
+					label: 'Ні',
+				},
+				{
+					value: 'true',
+					label: 'Так',
+				},
+			],
+		},
+		{
+			id: 'compatibility',
+			label: 'З якими моделями?',
+			type: 'text',
+		},
+		{
+			id: 'description',
+			label: 'Опис',
+			type: 'textarea',
+			required: true,
+		},
+	]
 
 	const initialValues: InitialStateType = {
-		category: '',
-		imgUrl: [],
-		brand: '',
-		model: '',
-		vendor: '',
-		title: '',
-		description: '',
-		price: 0,
-		isAvailable: true,
-		isCompatible: true,
-		compatibility: ['Philips', 'Bosh', 'Kenwood'],
+		category: good?.category || categoryList[0].title,
+		imgUrl: good?.imgUrl || [],
+		brand: good?.brand || '',
+		model: good?.model || '',
+		vendor: good?.vendor || '',
+		title: good?.title || '',
+		description: good?.description || '',
+		price: good?.price || 0,
+		isAvailable: good?.isAvailable || false,
+		isCompatible: good?.isCompatible || false,
+		compatibility: good?.compatibility || [],
 	}
 
-	const handleSubmit = (values: InitialStateType, { resetForm }: ResetFormProps) => {
+	const handleSubmit = async (values: InitialStateType, { resetForm }: ResetFormProps) => {
 		try {
-			addGood(values)
-			setDescription('')
-			setCategory('')
+			const formData = new FormData()
+
+			Object.keys(values).forEach(key => {
+				const value = (values as Record<string, any>)[key] // Type assertion
+
+				if (Array.isArray(value)) {
+					value.forEach((val: any) => formData.append(key, val))
+				} else {
+					formData.append(key, value)
+				}
+			})
+			await addGood(formData)
 			resetForm()
-			console.log('Success send')
+			toast.success(good?._id ? 'Товар оновлено!' : 'Новий товар додано!')
 		} catch (error) {
-			console.log(error)
+			toast.error('Помилка!')
+			console.error(error)
 		}
 	}
 
 	return (
-		<div className=''>
-			<h2 className='text-4xl'>Додати товар</h2>
+		<div className='flex flex-col justify-center items-center'>
+			<h2 className='text-4xl mb-4'>{title}</h2>
 			<Formik
 				initialValues={initialValues}
 				onSubmit={handleSubmit}
 				validationSchema={goodFormSchema}
+				enableReinitialize
 			>
-				{({ values, setFieldValue, errors, touched }) => (
+				{({ errors, setFieldValue, touched, values }) => (
 					<Form className='flex flex-col w-[600px]'>
-						<div>
-							<ImagesUpload setFieldValue={setFieldValue} />
-						</div>
-						<div className='flex justify-between items-center'>
-							<div>
-								<select
-									name='category'
-									className='mb-5 p-2 rounded-md border border-slate-400 text-slate-400'
-									style={{ display: 'block' }}
-									value={values.category}
-									onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-										setFieldValue('category', e.currentTarget.value)
-									}}
-								>
-									<option value='' disabled>
-										Вибір категорії
-									</option>
-									{categoryList.map(({ title }, index) => {
-										return (
-											<option value={title} title={title} key={index}>
-												{title}
-											</option>
-										)
-									})}
-								</select>
-								{errors.category && touched.category && (
-									<div className='text-red-500'>{errors.category}</div>
-								)}
-								<Field
-									type='text'
-									name='title'
-									placeholder='Назва товару'
-									className='mb-5 p-2 rounded-md border border-slate-400 text-slate-400'
-								/>
-								{errors.title && touched.title ? (
-									<div className='text-red-500'>{errors.title}</div>
-								) : null}
-								<Field
-									type='text'
-									name='brand'
-									placeholder='Бренд'
-									className='mb-5 p-2 rounded-md border border-slate-400 text-slate-400'
-								/>
-								{errors.brand && touched.brand ? (
-									<div className='text-red-500'>{errors.brand}</div>
-								) : null}
-							</div>
-							<div>
-								<Field
-									type='text'
-									name='model'
-									placeholder='Модель'
-									className='mb-5 p-2 rounded-md border border-slate-400 text-slate-400'
-								/>
-								{errors.model && touched.model ? (
-									<div className='text-red-500'>{errors.model}</div>
-								) : null}
-								<Field
-									type='number'
-									name='price'
-									placeholder='Ціна'
-									className='mb-5 p-2 rounded-md border border-slate-400 text-slate-400'
-								/>
-								{errors.price && touched.price ? (
-									<div className='text-red-500'>{errors.price}</div>
-								) : null}
-								<Field
-									type='text'
-									name='vendor'
-									placeholder='Артикул'
-									className='mb-5 p-2 rounded-md border border-slate-400 text-slate-400'
-								/>
-								{errors.vendor && touched.vendor ? (
-									<div className='text-red-500'>{errors.vendor}</div>
-								) : null}
-							</div>
-						</div>
-
-						<Field
-							type='text'
-							as='textarea'
-							value={description}
-							name='description'
-							placeholder='Опис'
-							className='mb-5 p-2 rounded-md border border-slate-400 text-slate-400'
-							onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-								setFieldValue('description', e.currentTarget.value)
-								setDescription(e.currentTarget.value)
-							}}
+						<ImagesUpload
+							onChange={value => setFieldValue('imgUrl', value)}
+							values={values?.imgUrl}
+							good={good}
 						/>
-						{errors.description && touched.description ? (
-							<div className='text-red-500'>{errors.description}</div>
-						) : null}
-
-						<button
-							type='submit'
-							className='p-2 w-[100px] border border-gray-400 rounded-md self-center hover:bg-gray-300 transition ease-in-out'
-						>
-							Зберегти
-						</button>
+						{inputs.map((item, i) => (
+							<div key={i}>
+								{item.type === 'select' && (
+									<label htmlFor={item.id} className='block mb-2'>
+										{item.label}
+									</label>
+								)}
+								<FormField item={item} errors={errors} setFieldValue={setFieldValue} />
+							</div>
+						))}
+						<CustomButton label={'Зберегти'} />
 					</Form>
 				)}
 			</Formik>
@@ -175,4 +174,4 @@ const AddGoodForm = () => {
 	)
 }
 
-export default AddGoodForm
+export default GoodForm

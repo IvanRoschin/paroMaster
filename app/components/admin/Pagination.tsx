@@ -12,7 +12,7 @@ const Pagination = ({ count }: Props) => {
 	const { replace } = useRouter()
 	const params = new URLSearchParams(searchParams)
 	const page = parseInt(searchParams.get('page') || '1')
-	const ITEM_PER_PAGE = 1
+	const ITEM_PER_PAGE = 4
 
 	const hasPrev = ITEM_PER_PAGE * (page - 1) > 0
 	const hasNext = ITEM_PER_PAGE * (page - 1) + ITEM_PER_PAGE < count

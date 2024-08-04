@@ -47,12 +47,9 @@ const UserForm: React.FC<UserFormProps> = ({ user, title, action }) => {
 		},
 		{
 			id: 'isAdmin',
-			label: 'isAdmin',
+			label: 'Адмін?',
+			type: 'select',
 			options: [
-				{
-					value: 'false',
-					label: 'Адмін?',
-				},
 				{
 					value: 'true',
 					label: 'Так',
@@ -65,12 +62,9 @@ const UserForm: React.FC<UserFormProps> = ({ user, title, action }) => {
 		},
 		{
 			id: 'isActive',
-			label: 'isActive',
+			label: 'Активний?',
+			type: 'select',
 			options: [
-				{
-					value: 'false',
-					label: 'Активний?',
-				},
 				{
 					value: 'true',
 					label: 'Так',
@@ -122,7 +116,14 @@ const UserForm: React.FC<UserFormProps> = ({ user, title, action }) => {
 					<Form className='flex flex-col w-[600px]'>
 						<div>
 							{inputs.map((item, i) => (
-								<FormField item={item} key={i} errors={errors} setFieldValue={setFieldValue} />
+								<div key={i}>
+									{item.type === 'select' && (
+										<label htmlFor={item.id} className='block mb-2'>
+											{item.label}
+										</label>
+									)}
+									<FormField item={item} errors={errors} setFieldValue={setFieldValue} />
+								</div>
 							))}
 						</div>
 						<CustomButton label={'Зберегти'} />
