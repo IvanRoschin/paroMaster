@@ -37,11 +37,6 @@ const UsersPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 		return <Loader />
 	}
 
-	// const users: UserResponse = await getAllUsers(searchParams)
-	// if (users.data.length === 0) {
-	// 	return <EmptyState />
-	// }
-
 	const count = data.count
 
 	return (
@@ -56,7 +51,7 @@ const UsersPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 					<Button type={'submit'} label='Додати' small outline color='border-green-400' />
 				</Link>
 			</div>
-			<table className='w-full'>
+			<table className='w-full text-xs'>
 				<thead>
 					<tr className='bg-slate-300 font-semibold'>
 						<td className='p-2 border-r-2 text-center'>Ім'я</td>

@@ -24,7 +24,6 @@ export async function addOrder(values: IOrder) {
 			totalPrice: values.totalPrice,
 			status: 'Новий',
 		}
-		console.log('orderActionData: ', orderData)
 		await Order.create(orderData)
 		revalidatePath('/')
 		return { success: true, data: orderData }

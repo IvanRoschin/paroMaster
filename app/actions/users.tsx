@@ -85,7 +85,7 @@ export async function getUserById(id: string) {
 	}
 }
 
-export async function deleteUser(formData: any) {
+export async function deleteUser(formData: FormData) {
 	const { id } = Object.fromEntries(formData) as { id: string }
 	if (!id) {
 		console.error('No ID provided')

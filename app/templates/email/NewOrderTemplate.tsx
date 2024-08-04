@@ -20,17 +20,6 @@ export interface NewOrderTemplateProps {
 	orderNumber: string
 }
 
-// const date = new Date()
-// const year = date.getFullYear().toString()
-// const month = (date.getMonth() + 1).toString().padStart(2, '0')
-// const day = date
-// 	.getDate()
-// 	.toString()
-// 	.padStart(2, '0')
-// const formattedDate = `${day}${month}${year}`
-
-// const index = 1 // Your index value
-
 export function generateEmailContent({
 	name,
 	surname,

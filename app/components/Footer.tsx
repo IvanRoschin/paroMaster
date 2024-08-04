@@ -1,6 +1,14 @@
+import { addNewLid } from '@/actions/lids'
 import Image from 'next/image'
+import AddLidForm from './AddLidForm'
 import Logo from './Logo'
 import Socials from './Socials'
+
+interface FormValues {
+	name: string
+	email: string
+	phone: string
+}
 
 // const footerMenu = {[
 // 	{ menuItemName: 'Послуги', menuItemLink: '/ ' },
@@ -16,44 +24,66 @@ const Footer = () => {
 				<Logo color='white' />
 				<Socials color='white' />
 			</div>
-			<div className='flex gap-8 mb-8'>
-				<div className='w-[50%]  text-2xl flex flex-col gap-8'>
-					Доставка
-					<div className='border-b border-primaryAccentColor' />
-					<Image
-						src={'/delivery/Nova_Poshta.png'}
-						alt='Нова пошта'
-						width={150}
-						height={100}
-						className='w-full h-[80px] object-cover'
-					/>
-					<Image
-						src={'/delivery/Meest.png'}
-						alt='Meest'
-						width={75}
-						height={50}
-						className='w-full h-[80px] object-cover'
-					/>
+			<div className='flex justify-between'>
+				<div className='mb-10'>
+					<div className='flex gap-8 mb-20'>
+						<div className='w-[50%] text-2xl flex flex-col gap-8'>
+							Доставка
+							<div className='border-b border-primaryAccentColor ' />
+							<div className='flex justify-between'>
+								<Image
+									src={'/delivery/nova_poshta_white.svg'}
+									alt='Нова пошта'
+									width={120}
+									height={30}
+									className='h-[30px] object-fit'
+								/>
+								<Image
+									src={'/delivery/ukr_poshta_white.svg'}
+									alt='Ukrposhta'
+									width={120}
+									height={30}
+									className='h-[30px] object-fit'
+								/>
+							</div>
+						</div>
+						<div className='w-[50%] text-2xl flex flex-col gap-8'>
+							Оплата
+							<div className='border-b border-primaryAccentColor' />
+							<div className='flex justify-between'>
+								<Image
+									src={'/payment/mastercard_white.svg'}
+									alt='MasterCard'
+									width={120}
+									height={30}
+									className='h-[30px] object-fit'
+								/>
+								<Image
+									src={'/payment/visa_white.svg'}
+									alt='visa'
+									width={120}
+									height={30}
+									className='h-[30px] object-fit'
+								/>
+							</div>
+						</div>
+					</div>
+					<div className='flex gap-8 mb-4 '>
+						<div className='w-[33%] text-2xl flex flex-col gap-8'>
+							Інформація
+							<div className='border-b border-primaryAccentColor ' />
+						</div>
+						<div className='w-[33%] text-2xl flex flex-col gap-8'>
+							Продукція <div className='border-b border-primaryAccentColor ' />
+						</div>
+						<div className='w-[33%] text-2xl flex flex-col gap-8'>
+							Категорії <div className='border-b border-primaryAccentColor ' />
+						</div>
+					</div>
 				</div>
-				<div className='w-[50%]  text-2xl flex flex-col gap-8'>
-					Оплата
-					<div className='border-b border-primaryAccentColor' />
-					<Image
-						src={'/payment/mastercard_white.svg'}
-						alt='MasterCard'
-						width={75}
-						height={50}
-						className='w-full h-[65px] object-cover'
-					/>
-					<Image
-						src={'/payment/visa_white.svg'}
-						alt='visa'
-						width={75}
-						height={80}
-						className='w-[75px] h-[80px] object-contain'
-					/>
+				<div>
+					<AddLidForm action={addNewLid} title='Замовити зворотній дзвінок' />
 				</div>
-				<div>Contacts</div>
 			</div>
 			<div>
 				Footer menu
