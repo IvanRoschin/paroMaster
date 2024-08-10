@@ -7,6 +7,11 @@ const nextConfig = {
 				hostname: 'res.cloudinary.com',
 				pathname: '/dfocogmzz/**',
 			},
+			{
+				protocol: 'https',
+				hostname: 'lh3.googleusercontent.com',
+				pathname: '**',
+			},
 		],
 	},
 }

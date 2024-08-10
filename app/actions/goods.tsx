@@ -108,9 +108,10 @@ export async function addGood(formData: FormData) {
 		})
 	} catch (error) {
 		console.log(error)
+	} finally {
+		revalidatePath('/admin/goods')
+		redirect('/admin/goods')
 	}
-	revalidatePath('/admin/goods')
-	redirect('/admin/goods')
 }
 
 export async function deleteGood(formData: FormData): Promise<void> {
@@ -122,9 +123,11 @@ export async function deleteGood(formData: FormData): Promise<void> {
 	try {
 		await connectToDB()
 		await Good.findByIdAndDelete(id)
-		revalidatePath('/admin/goods')
 	} catch (error) {
 		console.error('Failed to delete the good:', error)
+	} finally {
+		revalidatePath('/admin/goods')
+		redirect('/admin/goods')
 	}
 }
 
@@ -173,6 +176,7 @@ export async function getMinMaxPrice() {
 
 export async function updateGood(formData: FormData) {
 	const entries = Object.fromEntries(formData.entries())
+	console.log('entries', entries)
 
 	const {
 		id,
@@ -216,7 +220,7 @@ export async function updateGood(formData: FormData) {
 			price: parseFloat(price),
 			isAvailable: isAvailable === 'true',
 			isCompatible: isCompatible === 'true',
-			compatibility: Array.isArray(compatibility) ? compatibility : [compatibility],
+			compatibility,
 		}
 
 		Object.keys(updateFields).forEach(
@@ -226,7 +230,6 @@ export async function updateGood(formData: FormData) {
 				delete updateFields[key as keyof IGood],
 		)
 		await Good.findByIdAndUpdate(id, updateFields)
-		return { success: true }
 	} catch (error) {
 		if (error instanceof Error) {
 			console.error('Error updating good:', error)
@@ -235,5 +238,8 @@ export async function updateGood(formData: FormData) {
 			console.error('Unknown error:', error)
 			throw new Error('Failed to update good: Unknown error')
 		}
+	} finally {
+		revalidatePath('/admin/goods')
+		redirect('/admin/goods')
 	}
 }
