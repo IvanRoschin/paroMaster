@@ -1,6 +1,5 @@
 'use client'
 
-import { addGood } from '@/actions/goods'
 import { IGood } from '@/types/good/IGood'
 import { goodFormSchema } from 'app/helpers/validationShemas'
 import { Form, Formik, FormikState } from 'formik'
@@ -115,7 +114,7 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 		price: good?.price || 0,
 		isAvailable: good?.isAvailable || false,
 		isCompatible: good?.isCompatible || false,
-		compatibility: good?.compatibility || [],
+		compatibility: good?.compatibility || '',
 	}
 
 	const handleSubmit = async (values: InitialStateType, { resetForm }: ResetFormProps) => {
@@ -123,7 +122,7 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 			const formData = new FormData()
 
 			Object.keys(values).forEach(key => {
-				const value = (values as Record<string, any>)[key] // Type assertion
+				const value = (values as Record<string, any>)[key]
 
 				if (Array.isArray(value)) {
 					value.forEach((val: any) => formData.append(key, val))
@@ -131,7 +130,7 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 					formData.append(key, value)
 				}
 			})
-			await addGood(formData)
+			await action(formData)
 			resetForm()
 			toast.success(good?._id ? 'Товар оновлено!' : 'Новий товар додано!')
 		} catch (error) {
@@ -152,9 +151,10 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 				{({ errors, setFieldValue, touched, values }) => (
 					<Form className='flex flex-col w-[600px]'>
 						<ImagesUpload
-							onChange={value => setFieldValue('imgUrl', value)}
+							setFieldValue={setFieldValue}
 							values={values?.imgUrl}
 							good={good}
+							errors={errors}
 						/>
 						{inputs.map((item, i) => (
 							<div key={i}>

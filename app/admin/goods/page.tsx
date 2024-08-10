@@ -18,7 +18,7 @@ interface GoodsResponse {
 }
 
 const fetcher = async (params: ISearchParams): Promise<GoodsResponse> => {
-	return getAllGoods(params, 0, 4)
+	return getAllGoods(params, 0, 8)
 }
 
 const ProductsPage = ({ searchParams }: { searchParams: ISearchParams }) => {

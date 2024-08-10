@@ -1,8 +1,9 @@
 import AdminSidebar from '@/components/admin/AdminSidebar'
 import type { Metadata } from "next"
+import { getServerSession } from 'next-auth'
 import { Inter } from "next/font/google"
-import { auth } from '../auth.js'
 import { Footer, Header, Sidebar } from './components'
+import { authOptions } from './config/authOptions'
 import "./globals.css"
 import { Providers } from './providers/providers'
 const inter = Inter({ subsets: ["latin"] });
@@ -17,21 +18,26 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth();
+  const session = await getServerSession( authOptions );
+  
+    const user = {
+    name: session?.user?.name ?? 'Guest', // Fallback to 'Guest' if name is undefined
+    email: session?.user?.email ?? '', // Fallback to an empty string if email is undefined
+    image: session?.user?.image ?? '/noavatar.png', // Fallback to a default image
+  };
 
   return (
     <html lang="uk">
       <body className={`${inter.className} primaryTextColor`}>
         <Providers>
-          <Header />
+          <Header session={ session} />
           <div className='px-8 flex items-start'>
             {session?.user ? (
               <>
-                <AdminSidebar user={session.user} />
+                <AdminSidebar user={user} />
                 <div className='w-full'>
                   {children}
                 </div>
-                {/* <Navbar /> */}
               </>
             ) : (
               <>

@@ -1,9 +1,8 @@
-// 'use client'
+'use client'
 
-import { signOut } from 'auth'
+import { signOut } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
-// import { useRouter } from 'next/router'
 import {
 	MdDashboard,
 	MdLogout,
@@ -48,24 +47,36 @@ const menuItems = [
 
 type AdminSidebarProps = {
 	user: {
-		name?: string | null
+		name: string
+		image?: string
+		email?: string
 	}
 }
 const AdminSidebar = ({ user }: AdminSidebarProps) => {
 	return (
 		<div className='pt-0 mr-4 text-sm w-[250px] mb-4'>
-			<h2 className='text-2xl text-primaryAccentColor mb-4 bold'>Меню адміна</h2>
-			<Image
-				src='/noavatar.png'
-				alt=''
-				width={50}
-				height={50}
-				objectFit='cover'
-				className='border-[50%]'
-			/>
-			<div className='flex flex-col'>
-				<span className=''>{user?.name}</span>
-				<span className=''>Admin</span>
+			<h2 className='text-2xl text-primaryAccentColor mb-4 bold text-center'>Меню адміна</h2> 
+			<div className='flex flex-col justify-center items-center mb-4'>
+				{user.image ? (
+					<Image
+						src={user.image}
+						alt='user photo'
+						width={50}
+						height={50}
+						className='border-[50%] rounded-[50%]'
+					/>
+				) : (
+					<Image
+						src='/noavatar.png'
+						alt='user photo'
+						width={50}
+						height={50}
+						className='border-[50%] rounded-[50%] m-2'
+					/>
+				)}
+				<div className='flex flex-col'>
+					<span className='text-primaryAccentColor text-lg'>{user?.name}</span>
+				</div>
 			</div>
 			<ul className='bg-secondaryBackground p-4 rounded-t-lg'>
 				{menuItems.map(({ title, path, icon }) => {
@@ -79,23 +90,16 @@ const AdminSidebar = ({ user }: AdminSidebarProps) => {
 					)
 				})}
 			</ul>
-
-			<form
-				action={async () => {
-					'use server'
-					await signOut({ redirectTo: '/' })
-				}}
-			>
-				<button
-					className='text-white end-2.5 bottom-2.5 bg-primaryAccentColor hover:opacity-80 
+			<button
+				onClick={() => signOut({ callbackUrl: '/' })}
+				className='text-white end-2.5 bottom-2.5 bg-primaryAccentColor hover:opacity-80 
 					focus:opacity-80 
 					focus:outline-none 
-					focus:ring-secondaryBackground rounded-b-lg text-md px-4 py-3 w-full placeholder:bg-transparent flex justify-start items-center gap-2'
-				>
-					<MdLogout />
-					Logout
-				</button>
-			</form>
+					focus:ring-secondaryBackground rounded-b-lg text-md px-4 py-3 w-full placeholder:bg-transparent flex justify-center items-center text-center gap-2'
+			>
+				<MdLogout />
+				Вихід
+			</button>
 		</div>
 	)
 }

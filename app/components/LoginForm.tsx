@@ -1,8 +1,11 @@
 'use client'
 
-import { authenticate } from '@/actions/authenticate'
 import { userLoginSchema } from 'app/helpers/validationShemas'
 import { Form, Formik, FormikHelpers } from 'formik'
+import { signIn } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { FcGoogle } from 'react-icons/fc'
 import { toast } from 'sonner'
 import Button from './Button'
 import FormField from './input/FormField'
@@ -13,6 +16,9 @@ interface InitialStateType {
 }
 
 const LoginForm = () => {
+	const [isLoading, setIsLoading] = useState(false)
+	const router = useRouter()
+
 	const initialValues: InitialStateType = {
 		email: '',
 		password: '',
@@ -22,18 +28,23 @@ const LoginForm = () => {
 		values: InitialStateType,
 		{ resetForm }: FormikHelpers<InitialStateType>,
 	) => {
-		try {
-			const formData = new FormData()
-			formData.append('email', values.email)
-			formData.append('password', values.password)
-
-			await authenticate(formData)
-			resetForm()
-			toast.success('Login successful!')
-		} catch (error) {
-			toast.error('Error logging in!')
-			console.log(error)
-		}
+		setIsLoading(true)
+		signIn('credentials', {
+			email: values.email.toLowerCase(),
+			password: values.password,
+			redirect: false,
+		}).then(callback => {
+			setIsLoading(false)
+			if (callback?.ok) {
+				toast.success('Успішний вхід')
+				resetForm()
+				router.push('/admin')
+				window.location.replace('/admin')
+			}
+			if (callback?.error) {
+				toast.error(callback.error || 'Помилка')
+			}
+		})
 	}
 
 	const inputs = [
@@ -52,24 +63,46 @@ const LoginForm = () => {
 	]
 
 	return (
-		<div className='flex flex-col justify-center items-center'>
-			<h2 className='text-4xl mb-4'>Login</h2>
-
+		<div className='flex flex-col justify-center items-center '>
+			<h2 className='text-4xl mb-4'>Сторінка авторизації</h2>
 			<Formik
 				initialValues={initialValues}
 				onSubmit={handleSubmit}
 				validationSchema={userLoginSchema}
 				enableReinitialize
 			>
-				{({ errors, setFieldValue }) => (
+				{({ errors }) => (
 					<Form className='flex flex-col w-[600px]'>
 						{inputs.map((item, i) => (
 							<FormField item={item} key={i} errors={errors} />
 						))}
-						<Button type={'submit'} label='Login' />
+						<Button type={'submit'} label='Увійти' />
 					</Form>
 				)}
 			</Formik>
+			<span className='text-xl py-6'>або авторизуйтесь з Google</span>
+			<div className='w-[600px]'>
+				<Button
+					outline
+					label='Continue with Google'
+					icon={FcGoogle}
+					onClick={() => {
+						setIsLoading(true)
+						signIn('google').then(callback => {
+							setIsLoading(false)
+							if (callback?.ok) {
+								toast.success('Успішний вхід')
+								router.push('/admin')
+								window.location.replace('/admin')
+							}
+							if (callback?.error) {
+								toast.error(callback.error || 'Помилка')
+							}
+						})
+					}}
+					type={'button'}
+				/>
+			</div>
 		</div>
 	)
 }

@@ -134,13 +134,7 @@ export async function updateUser(formData: FormData) {
 					updateFields[key as keyof IUser] === undefined) &&
 				delete updateFields[key as keyof IUser],
 		)
-		// Check if email already exists
-		if (email) {
-			const existingUser = await User.findOne({ email })
-			if (existingUser && existingUser._id.toString() !== id) {
-				throw new Error('Email already exists')
-			}
-		}
+
 		await User.findByIdAndUpdate(id, updateFields)
 	} catch (error) {
 		if (error instanceof Error) {
@@ -150,5 +144,8 @@ export async function updateUser(formData: FormData) {
 			console.error('Unknown error:', error)
 			throw new Error('Failed to update user: Unknown error')
 		}
+	} finally {
+		revalidatePath('/admin/users')
+		redirect('/admin/users')
 	}
 }

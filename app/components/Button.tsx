@@ -31,6 +31,7 @@ const Button: React.FC<ButtonProps> = ({
 			className={` 
 				flex items-center justify-center
 				disabled:opacity-70 disabled:cursor-not-allowed rounded-lg hover:opacity-80 transition
+				${width ? `w-[${width}px]` : `w-[600px]`}
 			${small && color ? `${color}` : 'bg-orange-600'} 
 			${outline ? 'bg-white' : 'bg-orange-600'} 
       ${outline ? 'border-orange-600' : 'border-orange-600'} 
