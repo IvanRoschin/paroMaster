@@ -14,10 +14,10 @@ interface IGetAllGoodsResponse {
 	count: number
 }
 
-const NUMBER_OF_GOODS_TO_FETCH = 4
+const limit = 4
 
 const fetcher = async (url: string, params: ISearchParams): Promise<IGetAllGoodsResponse> => {
-	return getAllGoods(params, 0, NUMBER_OF_GOODS_TO_FETCH)
+	return getAllGoods(params, limit)
 }
 
 const Page = ({ searchParams }: { searchParams: ISearchParams }) => {
@@ -32,6 +32,7 @@ const Page = ({ searchParams }: { searchParams: ISearchParams }) => {
 	if (!data) {
 		return <Loader />
 	}
+
 	// const data = await getAllGoods(searchParams, 0, NUMBER_OF_GOODS_TO_FETCH)
 
 	return (
@@ -40,11 +41,13 @@ const Page = ({ searchParams }: { searchParams: ISearchParams }) => {
 			<h3>
 				Всього товарів в базі: <span className='text-primaryAccentColor'>{data.count}</span>
 			</h3>
-			<InfiniteScrollGoods
-				initialGoods={data.goods}
-				searchParams={searchParams}
-				NUMBER_OF_GOODS_TO_FETCH={NUMBER_OF_GOODS_TO_FETCH}
-			/>
+			<div key={Math.random()}>
+				<InfiniteScrollGoods
+					initialGoods={data.goods}
+					search={searchParams}
+					NUMBER_OF_GOODS_TO_FETCH={limit}
+				/>
+			</div>
 		</div>
 	)
 }

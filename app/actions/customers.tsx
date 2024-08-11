@@ -46,9 +46,10 @@ export async function addCustomer(formData: FormData) {
 			phone: values.phone,
 			email: values.email,
 			city: values.city,
-			warehouse: values.city,
+			warehouse: values.warehouse,
 			payment: values.payment,
 		}
+
 		await Customer.create(newCustomer)
 		return {
 			success: true,
@@ -138,6 +139,8 @@ export async function updateCustomer(
 					updateFields[key as keyof ICustomer] === undefined) &&
 				delete updateFields[key as keyof ICustomer],
 		)
+
+		console.log('updateFields', updateFields)
 
 		const updatedCustomer = await Customer.findByIdAndUpdate(id, updateFields, { new: true }).lean()
 
