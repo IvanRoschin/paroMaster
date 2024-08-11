@@ -8,4 +8,5 @@ export interface ISearchParams {
 	q?: string
 	page?: number
 	id?: string
+	status?: string | null
 }

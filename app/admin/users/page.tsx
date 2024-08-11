@@ -18,10 +18,10 @@ interface UserResponse {
 	count: number
 }
 
-const perPage = 4
+const limit = 4
 
 const fetcher = async (url: string, params: ISearchParams): Promise<UserResponse> => {
-	return getAllUsers(params, perPage)
+	return getAllUsers(params, limit)
 }
 
 const UsersPage = ({ searchParams }: { searchParams: ISearchParams }) => {
@@ -39,9 +39,9 @@ const UsersPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 
 	const page = searchParams?.page || 1
 
-	const count = data.count
+	const usersCount = data.count
 
-	const totalPages = Math.ceil(count / perPage)
+	const totalPages = Math.ceil(usersCount / limit)
 	const pageNumbers = []
 	const offsetNumber = 3
 
@@ -112,7 +112,7 @@ const UsersPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 					})}
 				</tbody>
 			</table>
-			<Pagination count={count} pageNumbers={pageNumbers} />
+			<Pagination count={usersCount} pageNumbers={pageNumbers} />
 		</div>
 	)
 }

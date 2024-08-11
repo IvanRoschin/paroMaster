@@ -10,7 +10,7 @@ import { addCustomer } from '@/actions/customers'
 import { getGoodById } from '@/actions/goods'
 import { getData } from '@/actions/nova'
 import { addOrder } from '@/actions/orders'
-import { sendEmail } from '@/actions/sendEmail'
+import { sendCustomerEmail, sendEmail } from '@/actions/sendEmail'
 import { SGood } from '@/types/good/IGood'
 import { IOrder } from '@/types/order/IOrder'
 import { PaymentMethod } from '@/types/paymentMethod'
@@ -119,16 +119,6 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 			formData.append('warehouse', values.warehouse)
 			formData.append('payment', values.payment as string)
 
-			// const customer: ICustomer = {
-			// 	name: `${values.name} ${values.surname}`,
-			// 	email: values.email,
-			// 	phone: values.phone,
-			// 	city: values.city,
-			// 	warehouse: values.warehouse,
-			// 	payment: values.payment,
-			// 	orders: orderData,
-			// }
-
 			setIsLoading(true)
 
 			try {
@@ -137,10 +127,21 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 					setWarehouses(response.data.data)
 				}
 				const emailResult = await sendEmail(values, orderNumber)
+				const customerEmailRusult = await sendCustomerEmail(values, orderNumber)
 				const orderResult = await addOrder(orderData)
 				const customerResult = await addCustomer(formData)
 
-				if (emailResult?.success && orderResult?.success && customerResult?.success) {
+				console.log('emailResult', emailResult)
+				console.log('customerEmailRusult', customerEmailRusult)
+				console.log('orderResult', orderResult)
+				console.log('customerResult', customerResult)
+
+				if (
+					emailResult?.success &&
+					customerEmailRusult?.success &&
+					orderResult?.success &&
+					customerResult?.success
+				) {
 					router.push('/')
 					actions.resetForm()
 					closeOrderModal()

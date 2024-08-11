@@ -67,12 +67,9 @@ const AddCustomerForm: React.FC<CustomerFormProps> = ({
 		validationSchema: customerFormSchema,
 		onSubmit: async (values, { resetForm }) => {
 			setIsLoading(true)
-
 			try {
 				const formData = new FormData()
-
 				const fullName = `${values.name} ${values.surname}`.trim()
-
 				{
 					customer && formData.append('id', customer._id as string)
 				}
@@ -85,21 +82,14 @@ const AddCustomerForm: React.FC<CustomerFormProps> = ({
 
 				await action(formData)
 
-				// if (customerResult?.success) {
-				// 	toast.success('Замовника додано')
-				// 	resetForm()
-				// 	router.push('/')
-				// } else {
-				// 	toast.error('Щось зломалось')
-				// }
+				resetForm()
+				toast.success(customer?._id ? 'Клієнта оновлено!' : 'Нового клієнта додано!')
 			} catch (error) {
 				console.error('Error in onSubmit:', error)
 				toast.error('Помилка створення замовника')
 			} finally {
 				setIsLoading(false)
-				toast.success('Замовника додано')
-				resetForm()
-				// router.push('/admin/customers')
+				router.push('/admin/customers')
 			}
 		},
 	})
