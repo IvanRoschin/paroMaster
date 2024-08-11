@@ -71,7 +71,6 @@ const CustomersPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 						<td className='p-2 border-r-2 text-center'>E-mail</td>
 						<td className='p-2 border-r-2 text-center'>Місто</td>
 						<td className='p-2 border-r-2 text-center'>Відділення</td>
-						<td className='p-2 border-r-2 text-center'>Ціна</td>
 						<td className='p-2 border-r-2 text-center'>Спосіб оплати</td>
 						<td className='p-2 border-r-2 text-center'>Редагувати</td>
 						<td className='p-2 border-r-2 text-center'>Видалити</td>
@@ -86,7 +85,6 @@ const CustomersPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 							<td className='p-2 border-r-2 text-center'>{customer.city}</td>
 							<td className='p-2 border-r-2 text-center'>{customer.warehouse}</td>
 							<td className='p-2 border-r-2 text-center'>{customer.payment}</td>
-							<td className='p-2 border-r-2 text-center'>{customer.orders ? 'Так' : 'Ні'}</td>
 
 							<td className='p-2 border-r-2 text-center'>
 								<Link

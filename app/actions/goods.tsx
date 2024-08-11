@@ -16,8 +16,16 @@ interface IGetAllGoodsResponse {
 export async function getAllGoods(
 	searchParams: ISearchParams,
 	limit: number,
+	nextPage?: number,
 ): Promise<IGetAllGoodsResponse> {
-	const page = searchParams.page || 1
+	let skip
+
+	if (nextPage) {
+		skip = (nextPage - 1) * limit
+	} else {
+		const page = searchParams?.page || 1
+		skip = (page - 1) * limit
+	}
 
 	try {
 		await connectToDB()
@@ -65,7 +73,7 @@ export async function getAllGoods(
 
 		const goods: IGood[] = await Good.find(filter)
 			.sort(sortOption)
-			.skip(limit * (page - 1))
+			.skip(skip)
 			.limit(limit)
 			.exec()
 

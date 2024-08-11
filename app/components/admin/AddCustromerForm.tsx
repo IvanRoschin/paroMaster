@@ -54,7 +54,6 @@ const AddCustomerForm: React.FC<CustomerFormProps> = ({
 	const [warehouses, setWarehouses] = useState<Warehouse[]>([])
 	const [isLoading, setIsLoading] = useState(false)
 	const router = useRouter()
-
 	const formik = useFormik<FormValues>({
 		initialValues: {
 			name: customer?.name || '',
@@ -73,6 +72,10 @@ const AddCustomerForm: React.FC<CustomerFormProps> = ({
 				const formData = new FormData()
 
 				const fullName = `${values.name} ${values.surname}`.trim()
+
+				{
+					customer && formData.append('id', customer._id as string)
+				}
 				formData.append('name', fullName)
 				formData.append('email', values.email)
 				formData.append('phone', values.phone)
@@ -80,20 +83,23 @@ const AddCustomerForm: React.FC<CustomerFormProps> = ({
 				formData.append('warehouse', values.warehouse)
 				formData.append('payment', values.payment as string)
 
-				const customerResult = await action(formData)
+				await action(formData)
 
-				if (customerResult?.success) {
-					toast.success('Замовника додано')
-					resetForm()
-					router.push('/')
-				} else {
-					toast.error('Щось зломалось')
-				}
+				// if (customerResult?.success) {
+				// 	toast.success('Замовника додано')
+				// 	resetForm()
+				// 	router.push('/')
+				// } else {
+				// 	toast.error('Щось зломалось')
+				// }
 			} catch (error) {
 				console.error('Error in onSubmit:', error)
 				toast.error('Помилка створення замовника')
 			} finally {
 				setIsLoading(false)
+				toast.success('Замовника додано')
+				resetForm()
+				// router.push('/admin/customers')
 			}
 		},
 	})
@@ -167,12 +173,19 @@ const AddCustomerForm: React.FC<CustomerFormProps> = ({
 			<FormikProvider value={formik}>
 				<form onSubmit={handleSubmit} autoComplete='off' className='flex flex-col space-y-8'>
 					{inputItems.map(item => (
-						<FormField
-							key={item.id}
-							item={item}
-							errors={formik.errors}
-							setFieldValue={setFieldValue}
-						/>
+						<div key={item.id}>
+							{item.type === 'select' && (
+								<label htmlFor={item.id} className='block mb-2'>
+									{item.label}
+								</label>
+							)}
+							<FormField
+								key={item.id}
+								item={item}
+								errors={formik.errors}
+								setFieldValue={setFieldValue}
+							/>
+						</div>
 					))}
 					<CustomButton label='Зберегти' disabled={isLoading} />
 				</form>

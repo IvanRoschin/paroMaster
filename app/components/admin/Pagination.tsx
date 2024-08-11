@@ -41,8 +41,8 @@ const Pagination = ({ count, pageNumbers }: Props) => {
 							href={`?page=${pageNumber}`}
 							className={
 								page === pageNumber
-									? 'border rounded-full border-primaryAccentColor bg-slate-200 text-primaryAccentColor p-3  '
-									: 'border rounded-full border-transparent  bg-white text-primaryAccentColor p-2 '
+									? '  bg-transparent text-primaryAccentColor p-3  '
+									: '  bg-transparent text-primaryTextColor hover:text-primaryAccentColor p-2 '
 							}
 						>
 							{pageNumber}

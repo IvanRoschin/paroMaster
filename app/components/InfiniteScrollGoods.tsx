@@ -9,32 +9,33 @@ import { TailSpin } from 'react-loader-spinner'
 import ItemsList from './Item/ItemsList'
 
 const InfiniteScrollGods = ({
-	searchParams,
+	search,
 	initialGoods,
 	NUMBER_OF_GOODS_TO_FETCH,
 }: {
-	searchParams: ISearchParams
+	search: ISearchParams
 	initialGoods: IGood[]
 	NUMBER_OF_GOODS_TO_FETCH: number
 }) => {
-	const [offset, setOffset] = useState(0)
 	const [goods, setGoods] = useState<IGood[]>(initialGoods)
+	const [pagesLoaded, setPagesLoaded] = useState(1)
 	const [allGoodsLoaded, setAllGoodsLoaded] = useState(false)
 	const { ref, inView } = useInView()
 
 	async function loadMoreGoods() {
-		const newGoods = await getAllGoods(searchParams, offset, NUMBER_OF_GOODS_TO_FETCH)
+		const nextPage = pagesLoaded + 1
+		const newGoods = (await getAllGoods(search, NUMBER_OF_GOODS_TO_FETCH, nextPage)) ?? []
 
-		if (newGoods?.goods?.length) {
-			setOffset(prevOffset => prevOffset + NUMBER_OF_GOODS_TO_FETCH)
-			setGoods(prevGoods => [...prevGoods, ...newGoods.goods])
+		if (newGoods?.goods?.length > 0) {
+			setGoods((prevGoods: IGood[]) => [...prevGoods, ...newGoods.goods])
+			setPagesLoaded(nextPage)
 		} else {
 			setAllGoodsLoaded(true)
 		}
 	}
 
 	useEffect(() => {
-		if (inView && !allGoodsLoaded) {
+		if (inView) {
 			loadMoreGoods()
 		}
 	}, [inView])

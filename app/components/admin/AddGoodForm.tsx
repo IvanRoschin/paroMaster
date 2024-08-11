@@ -130,6 +130,9 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 					formData.append(key, value)
 				}
 			})
+			{
+				good && formData.append('id', good._id as string)
+			}
 			await action(formData)
 			resetForm()
 			toast.success(good?._id ? 'Товар оновлено!' : 'Новий товар додано!')
