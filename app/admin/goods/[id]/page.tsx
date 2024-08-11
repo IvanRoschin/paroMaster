@@ -7,7 +7,6 @@ interface Params {
 const SingleGoodPage = async ({ params }: { params: Params }) => {
 	const { id } = params
 	const good = await getGoodById(id)
-	console.log(good)
 	return (
 		<div className='mb-20'>
 			<AddGoodForm title={'Редагувати дані про товар'} good={good} action={updateGood} />

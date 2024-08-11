@@ -10,9 +10,11 @@ import Loader from '@/components/Loader'
 import Search from '@/components/Search'
 import Sidebar from '@/components/Sidebar'
 import Slider from '@/components/Slider'
+import AddCustomerForm from '@/components/admin/AddCustromerForm'
 import AddGoodForm from '@/components/admin/AddGoodForm'
 import AdminMenu from '@/components/admin/Navbar'
 export {
+	AddCustomerForm,
 	AddGoodForm,
 	AdminMenu,
 	Cart,

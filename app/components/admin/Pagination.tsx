@@ -1,12 +1,14 @@
 'use client'
 
+import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 type Props = {
 	count: number
+	pageNumbers: number[]
 }
 
-const Pagination = ({ count }: Props) => {
+const Pagination = ({ count, pageNumbers }: Props) => {
 	const searchParams = useSearchParams()
 	const pathname = usePathname()
 	const { replace } = useRouter()
@@ -26,14 +28,30 @@ const Pagination = ({ count }: Props) => {
 	return (
 		<div className='flex p-2 justify-between'>
 			<button
-				className='cursor-pointer px-1 py-2 disabled:cursor-not-allowed'
+				className='cursor-pointer py-2 disabled:cursor-not-allowed nav bg-slate-300 rounded-2xl px-8'
 				disabled={!hasPrev}
 				onClick={() => handleChangePage('назад')}
 			>
 				Назад
 			</button>
+			<div className='flex gap-4 justify-center items-center'>
+				{pageNumbers.map((pageNumber, index) => (
+					<div key={index}>
+						<Link
+							href={`?page=${pageNumber}`}
+							className={
+								page === pageNumber
+									? 'border rounded-full border-primaryAccentColor bg-slate-200 text-primaryAccentColor p-3  '
+									: 'border rounded-full border-transparent  bg-white text-primaryAccentColor p-2 '
+							}
+						>
+							{pageNumber}
+						</Link>
+					</div>
+				))}
+			</div>
 			<button
-				className='cursor-pointer px-1 py-2 disabled:cursor-not-allowed'
+				className='cursor-pointer py-2 disabled:cursor-not-allowed nav bg-slate-300 rounded-2xl px-8'
 				disabled={!hasNext}
 				onClick={() => handleChangePage('вперед')}
 			>

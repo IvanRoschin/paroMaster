@@ -17,13 +17,13 @@ interface GoodsResponse {
 	count: number
 }
 
+const perPage = 4
+
 const fetcher = async (params: ISearchParams): Promise<GoodsResponse> => {
-	return getAllGoods(params, 0, 8)
+	return getAllGoods(params, perPage)
 }
 
 const ProductsPage = ({ searchParams }: { searchParams: ISearchParams }) => {
-	const page = searchParams?.page || 1
-
 	const { data, error } = useSWR(['goods', searchParams], () => fetcher(searchParams))
 
 	if (error) {
@@ -41,15 +41,29 @@ const ProductsPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 
 	const count = data.count
 
+	const page = searchParams.page
+
+	const totalPages = Math.ceil(count / perPage)
+	const pageNumbers = []
+	const offsetNumber = 3
+
+	if (page) {
+		for (let i = page - offsetNumber; i <= page + offsetNumber; i++) {
+			if (i >= 1 && i <= totalPages) {
+				pageNumbers.push(i)
+			}
+		}
+	}
+
 	return (
-		<div className='p-3 rounded-xl'>
+		<div className='p-3'>
 			<div className='flex items-center justify-between mb-8'>
 				<Search placeholder='Знайти товар' />
 				<Link href='/admin/goods/add'>
 					<Button type='button' label='Додати' small outline color='border-green-400' />
 				</Link>
 			</div>
-			<table className='w-full text-xs'>
+			<table className='w-full text-xs mb-8'>
 				<thead>
 					<tr className='bg-slate-300 font-semibold'>
 						<td className='p-2 border-r-2 text-center'>Категорія</td>
@@ -92,7 +106,7 @@ const ProductsPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 					))}
 				</tbody>
 			</table>
-			<Pagination count={count} />
+			<Pagination count={count} pageNumbers={pageNumbers} />
 		</div>
 	)
 }
