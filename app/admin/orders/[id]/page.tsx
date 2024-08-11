@@ -1,7 +1,19 @@
-type Props = {}
+import { getOrderById, updateOrder } from '@/actions/orders'
+import AddUserForm from '@/components/admin/AddUserForm'
 
-const SingleOrderPage = (props: Props) => {
-	return <div>SingleOrderPage</div>
+interface Params {
+	id: string
+}
+
+const SingleOrderPage = async ({ params }: { params: Params }) => {
+	const { id } = params
+	const order = await getOrderById(id)
+
+	return (
+		<div className='mb-20'>
+			<AddUserForm order={order} title={'Редагувати дані ордера'} action={updateOrder} />
+		</div>
+	)
 }
 
 export default SingleOrderPage

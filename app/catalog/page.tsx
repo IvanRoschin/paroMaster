@@ -33,8 +33,6 @@ const Page = ({ searchParams }: { searchParams: ISearchParams }) => {
 		return <Loader />
 	}
 
-	// const data = await getAllGoods(searchParams, 0, NUMBER_OF_GOODS_TO_FETCH)
-
 	return (
 		<div>
 			<h2 className='text-4xl mb-4 flex justify-start items-start'>Каталог товарів</h2>

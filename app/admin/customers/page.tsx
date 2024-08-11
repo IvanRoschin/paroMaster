@@ -17,10 +17,10 @@ interface CustomersResponse {
 	count: number
 }
 
-const perPage = 4
+const limit = 4
 
 const fetcher = async (params: ISearchParams): Promise<CustomersResponse> => {
-	return getAllCustomers(params, perPage)
+	return getAllCustomers(params, limit)
 }
 
 const CustomersPage = ({ searchParams }: { searchParams: ISearchParams }) => {
@@ -39,11 +39,11 @@ const CustomersPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 		return <EmptyState />
 	}
 
-	const count = data.count
+	const customersCount = data.count
 
 	const page = searchParams.page
 
-	const totalPages = Math.ceil(count / perPage)
+	const totalPages = Math.ceil(customersCount / limit)
 	const pageNumbers = []
 	const offsetNumber = 3
 
@@ -70,7 +70,7 @@ const CustomersPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 						<td className='p-2 border-r-2 text-center'>Телефон</td>
 						<td className='p-2 border-r-2 text-center'>E-mail</td>
 						<td className='p-2 border-r-2 text-center'>Місто</td>
-						<td className='p-2 border-r-2 text-center'>Відділення</td>
+						<td className='p-2 border-r-2 text-center'>Склад</td>
 						<td className='p-2 border-r-2 text-center'>Спосіб оплати</td>
 						<td className='p-2 border-r-2 text-center'>Редагувати</td>
 						<td className='p-2 border-r-2 text-center'>Видалити</td>
@@ -104,7 +104,7 @@ const CustomersPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 					))}
 				</tbody>
 			</table>
-			<Pagination count={count} pageNumbers={pageNumbers} />
+			<Pagination count={customersCount} pageNumbers={pageNumbers} />
 		</div>
 	)
 }

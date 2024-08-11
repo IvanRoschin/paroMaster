@@ -17,10 +17,10 @@ interface GoodsResponse {
 	count: number
 }
 
-const perPage = 4
+const limit = 4
 
 const fetcher = async (params: ISearchParams): Promise<GoodsResponse> => {
-	return getAllGoods(params, perPage)
+	return getAllGoods(params, limit)
 }
 
 const ProductsPage = ({ searchParams }: { searchParams: ISearchParams }) => {
@@ -39,11 +39,11 @@ const ProductsPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 		return <EmptyState />
 	}
 
-	const count = data.count
+	const goodsCount = data.count
 
 	const page = searchParams.page
 
-	const totalPages = Math.ceil(count / perPage)
+	const totalPages = Math.ceil(goodsCount / limit)
 	const pageNumbers = []
 	const offsetNumber = 3
 
@@ -106,7 +106,7 @@ const ProductsPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 					))}
 				</tbody>
 			</table>
-			<Pagination count={count} pageNumbers={pageNumbers} />
+			<Pagination count={goodsCount} pageNumbers={pageNumbers} />
 		</div>
 	)
 }
