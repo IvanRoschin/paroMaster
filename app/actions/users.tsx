@@ -50,10 +50,10 @@ export async function addUser(formData: FormData): Promise<void> {
 	}
 }
 
-export async function getAllUsers(searchParams: ISearchParams) {
+export async function getAllUsers(searchParams: ISearchParams, perPage: number) {
 	const q = searchParams.q || ''
 	const page = searchParams.page || 1
-	const ITEM_PER_PAGE = 2
+	const ITEM_PER_PAGE = perPage
 	const regex = new RegExp(q, 'i')
 
 	try {

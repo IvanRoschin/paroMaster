@@ -15,7 +15,6 @@ interface IGetAllGoodsResponse {
 
 export async function getAllGoods(
 	searchParams: ISearchParams,
-	offset: number,
 	limit: number,
 ): Promise<IGetAllGoodsResponse> {
 	const page = searchParams.page || 1
@@ -66,7 +65,7 @@ export async function getAllGoods(
 
 		const goods: IGood[] = await Good.find(filter)
 			.sort(sortOption)
-			.skip(offset)
+			.skip(limit * (page - 1))
 			.limit(limit)
 			.exec()
 
@@ -129,49 +128,6 @@ export async function deleteGood(formData: FormData): Promise<void> {
 		revalidatePath('/admin/goods')
 		redirect('/admin/goods')
 	}
-}
-
-export async function uniqueBrands() {
-	try {
-		connectToDB()
-		const uniqueBrands = await Good.distinct('brand')
-		return uniqueBrands
-	} catch (error) {
-		console.log(error)
-	}
-	revalidatePath('/')
-}
-
-export async function getMinMaxPrice() {
-	try {
-		connectToDB()
-
-		const result = await Good.aggregate([
-			{
-				$group: {
-					_id: null,
-					minPrice: { $min: '$price' },
-					maxPrice: { $max: '$price' },
-				},
-			},
-			{
-				$project: {
-					_id: 0,
-					minPrice: 1,
-					maxPrice: 1,
-				},
-			},
-		]).exec()
-
-		if (result.length === 0) {
-			throw new Error('No goods found')
-		}
-
-		return result[0]
-	} catch (error) {
-		console.error(error)
-	}
-	revalidatePath('/')
 }
 
 export async function updateGood(formData: FormData) {
@@ -242,4 +198,47 @@ export async function updateGood(formData: FormData) {
 		revalidatePath('/admin/goods')
 		redirect('/admin/goods')
 	}
+}
+
+export async function uniqueBrands() {
+	try {
+		connectToDB()
+		const uniqueBrands = await Good.distinct('brand')
+		return uniqueBrands
+	} catch (error) {
+		console.log(error)
+	}
+	revalidatePath('/')
+}
+
+export async function getMinMaxPrice() {
+	try {
+		connectToDB()
+
+		const result = await Good.aggregate([
+			{
+				$group: {
+					_id: null,
+					minPrice: { $min: '$price' },
+					maxPrice: { $max: '$price' },
+				},
+			},
+			{
+				$project: {
+					_id: 0,
+					minPrice: 1,
+					maxPrice: 1,
+				},
+			},
+		]).exec()
+
+		if (result.length === 0) {
+			throw new Error('No goods found')
+		}
+
+		return result[0]
+	} catch (error) {
+		console.error(error)
+	}
+	revalidatePath('/')
 }

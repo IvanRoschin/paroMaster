@@ -18,13 +18,13 @@ interface UserResponse {
 	count: number
 }
 
+const perPage = 4
+
 const fetcher = async (url: string, params: ISearchParams): Promise<UserResponse> => {
-	return getAllUsers(params)
+	return getAllUsers(params, perPage)
 }
 
 const UsersPage = ({ searchParams }: { searchParams: ISearchParams }) => {
-	const page = searchParams?.page || 1
-
 	const { data, error } = useSWR(['users', searchParams], () => fetcher('users', searchParams))
 
 	if (error) {
@@ -37,7 +37,21 @@ const UsersPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 		return <Loader />
 	}
 
+	const page = searchParams?.page || 1
+
 	const count = data.count
+
+	const totalPages = Math.ceil(count / perPage)
+	const pageNumbers = []
+	const offsetNumber = 3
+
+	if (page) {
+		for (let i = page - offsetNumber; i <= page + offsetNumber; i++) {
+			if (i >= 1 && i <= totalPages) {
+				pageNumbers.push(i)
+			}
+		}
+	}
 
 	return (
 		<div className='p-3 rounded-xl'>
@@ -98,7 +112,7 @@ const UsersPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 					})}
 				</tbody>
 			</table>
-			<Pagination count={count} />
+			<Pagination count={count} pageNumbers={pageNumbers} />
 		</div>
 	)
 }

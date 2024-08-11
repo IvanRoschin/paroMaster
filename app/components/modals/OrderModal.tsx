@@ -11,7 +11,6 @@ import { getGoodById } from '@/actions/goods'
 import { getData } from '@/actions/nova'
 import { addOrder } from '@/actions/orders'
 import { sendEmail } from '@/actions/sendEmail'
-import { ICustomer } from '@/types/customer/ICustomer'
 import { SGood } from '@/types/good/IGood'
 import { IOrder } from '@/types/order/IOrder'
 import { PaymentMethod } from '@/types/paymentMethod'
@@ -110,15 +109,25 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 				status: 'Новий',
 			}
 
-			const customer: ICustomer = {
-				name: `${values.name} ${values.surname}`,
-				email: values.email,
-				phone: values.phone,
-				city: values.city,
-				warehouse: values.warehouse,
-				payment: values.payment,
-				orders: orderData,
-			}
+			const formData = new FormData()
+
+			const fullName = `${values.name} ${values.surname}`.trim()
+			formData.append('name', fullName)
+			formData.append('email', values.email)
+			formData.append('phone', values.phone)
+			formData.append('city', values.city)
+			formData.append('warehouse', values.warehouse)
+			formData.append('payment', values.payment as string)
+
+			// const customer: ICustomer = {
+			// 	name: `${values.name} ${values.surname}`,
+			// 	email: values.email,
+			// 	phone: values.phone,
+			// 	city: values.city,
+			// 	warehouse: values.warehouse,
+			// 	payment: values.payment,
+			// 	orders: orderData,
+			// }
 
 			setIsLoading(true)
 
@@ -129,7 +138,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 				}
 				const emailResult = await sendEmail(values, orderNumber)
 				const orderResult = await addOrder(orderData)
-				const customerResult = await addCustomer(customer)
+				const customerResult = await addCustomer(formData)
 
 				if (emailResult?.success && orderResult?.success && customerResult?.success) {
 					router.push('/')
