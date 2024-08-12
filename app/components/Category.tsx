@@ -2,51 +2,9 @@
 import Link from 'next/link'
 import { Icon } from './Icon'
 
+import { categoryList } from 'app/config/constants'
 import { useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
-
-export const categoryList = [
-	{
-		icon: 'category_korpusniDetali',
-		title: 'Корпус станції',
-	},
-	{
-		icon: 'category_korpusUtuga',
-		title: 'Корпус для прасок',
-	},
-	{
-		icon: 'category_pidoshvaUtuga',
-		title: 'Підошви для прасок',
-	},
-	{
-		icon: 'category_platu',
-		title: 'Плати керування',
-	},
-	{
-		icon: 'category_boiler',
-		title: 'Бойлери',
-	},
-	{
-		icon: 'category_electroKlapan',
-		title: 'Електроклапани',
-	},
-	{
-		icon: 'category_nasos',
-		title: 'Насоси(помпи)',
-	},
-	{
-		icon: 'category_rezervuarVoda',
-		title: 'Резервуари для води',
-	},
-	{
-		icon: 'category_provoda',
-		title: 'Провода та шланги',
-	},
-	{
-		icon: 'category_accsecuari',
-		title: 'Аксесуари та комплектуючі',
-	},
-]
 
 const Category = () => {
 	const searchParams = useSearchParams()

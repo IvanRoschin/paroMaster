@@ -131,11 +131,6 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 				const orderResult = await addOrder(orderData)
 				const customerResult = await addCustomer(formData)
 
-				console.log('emailResult', emailResult)
-				console.log('customerEmailRusult', customerEmailRusult)
-				console.log('orderResult', orderResult)
-				console.log('customerResult', customerResult)
-
 				if (
 					emailResult?.success &&
 					customerEmailRusult?.success &&

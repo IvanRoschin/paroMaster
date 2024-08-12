@@ -25,7 +25,8 @@
 			"@/utils/*": ["app/utils/*"],
 			"@/types/*": ["types/*"],
 			"@/models/*": ["models/*"],
-			"@/helpers/*": ["helpers/*"]
+			"@/helpers/*": ["helpers/*"],
+			"@/config/*": ["config/*"]
 		}
 	},
 	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "auth.tjs", "auth.js"],

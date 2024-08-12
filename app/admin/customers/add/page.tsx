@@ -4,7 +4,7 @@ import { AddCustomerForm } from '@/components/index'
 const AddCustomerPage = () => {
 	return (
 		<div className='mb-20'>
-			<AddCustomerForm title='Додати нового замовника' action={addCustomer} />
+			<AddCustomerForm title='Додати нового клієнта' action={addCustomer} />
 		</div>
 	)
 }

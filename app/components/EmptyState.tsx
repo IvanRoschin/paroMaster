@@ -12,8 +12,8 @@ interface EmptyStateProps {
 }
 
 const EmptyState: React.FC<EmptyStateProps> = ({
-	title = 'Відсутні товари',
-	subtitle = 'Спробуйте змінити фільтри',
+	title = 'Відсутні товари 🤷‍♂️',
+	subtitle = 'Спробуйте змінити фільтри ⚙️',
 	showReset,
 	category,
 }) => {
@@ -32,12 +32,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
 			<Heading center title={title} subtitle={subtitle} category={category} />
 			<div className='w-48 mt-4'>
 				{showReset && (
-					<Button
-						type='button'
-						outline
-						label='Remove all filters'
-						onClick={() => router.push('/')}
-					/>
+					<Button type='button' outline label='Видалити фільтри' onClick={() => router.push('/')} />
 				)}
 			</div>
 		</div>

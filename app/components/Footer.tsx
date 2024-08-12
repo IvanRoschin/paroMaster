@@ -1,6 +1,13 @@
+'use client'
+
 import { addNewLid } from '@/actions/lids'
+import { categoryList } from 'app/config/constants'
 import Image from 'next/image'
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { useCallback } from 'react'
 import AddLidForm from './AddLidForm'
+import { Icon } from './Icon'
 import Logo from './Logo'
 import Socials from './Socials'
 
@@ -18,6 +25,20 @@ interface FormValues {
 // ]}
 
 const Footer = () => {
+	const searchParams = useSearchParams()
+
+	const createQueryString = useCallback(
+		(name: string, value: string) => {
+			const params = new URLSearchParams(searchParams.toString())
+			if (value) {
+				params.set(name, value)
+			} else {
+				params.delete(name)
+			}
+			return params.toString()
+		},
+		[searchParams],
+	)
 	return (
 		<div className='bg-slate-800  p-8 text-white'>
 			<div className='flex justify-between mb-10'>
@@ -72,12 +93,60 @@ const Footer = () => {
 						<div className='w-[33%] text-2xl flex flex-col gap-8'>
 							Інформація
 							<div className='border-b border-primaryAccentColor ' />
+							<ul className='text-sm'>
+								<li className='nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200'>
+									{' '}
+									<Link href='/delivery'>Оплата та доставка</Link>
+								</li>
+								<li className='nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200'>
+									{' '}
+									<Link href='/services'> Послуги та сервіси</Link>
+								</li>
+								<li className='nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200'>
+									{' '}
+									<Link href='/guarantee'>Гарантія</Link>
+								</li>
+								<li className='nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200'>
+									{' '}
+									<Link href='/contact'>Контакти</Link>
+								</li>
+								<li className='nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200'>
+									{' '}
+									<Link href='/guarantee'>Політика Конфіденційності</Link>
+								</li>
+							</ul>
 						</div>
 						<div className='w-[33%] text-2xl flex flex-col gap-8'>
-							Продукція <div className='border-b border-primaryAccentColor ' />
+							Товари <div className='border-b border-primaryAccentColor ' />
+							<ul className='text-sm'>
+								<li className='nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200'>
+									<Link href='/special'>Популярні</Link>
+								</li>
+								<li className='nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200'>
+									<Link href='/sales'>Акції та знижки</Link>
+								</li>
+							</ul>
 						</div>
 						<div className='w-[33%] text-2xl flex flex-col gap-8'>
 							Категорії <div className='border-b border-primaryAccentColor ' />
+							<ul className='text-sm'>
+								{categoryList.map(({ icon, title }, index) => {
+									return (
+										<li
+											key={index}
+											className='mb-2 nav hover:transform hover:translate-x-2 transition-transform duration-200'
+										>
+											<Link
+												href={`/category/?${createQueryString('category', title)}`}
+												className='flex justify-start items-start'
+											>
+												<Icon name={icon} className='w-5 h-5  mr-3 text-white bg-transparent' />
+												{title}
+											</Link>
+										</li>
+									)
+								})}
+							</ul>
 						</div>
 					</div>
 				</div>
@@ -85,16 +154,16 @@ const Footer = () => {
 					<AddLidForm action={addNewLid} title='Замовити зворотній дзвінок' />
 				</div>
 			</div>
-			<div>
-				Footer menu
-				<ul>
-					<li></li>
-					<li></li>
-					<li></li>
-					<li></li>
-				</ul>
+			<div className='border-b border-primaryAccentColor mb-5' />
+			<div className='mb-5'>
+				<p className='text-center'>
+					&copy; 2024 Paro<span className='text-primaryAccentColor'>Master</span>. Усі права
+					захищено. Створено з ❤️ та інноваціями.
+					<br />
+					<br />
+					Створюючи сьогодення, ми формуємо майбутнє разом.{' '}
+				</p>
 			</div>
-			Footer
 		</div>
 	)
 }

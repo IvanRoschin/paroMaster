@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 // import right from '../public/right.svg'
 import { IoIosArrowDropleft, IoIosArrowDropright } from 'react-icons/io'
 import Button from './Button'
-import { slides } from './constants'
+import { slides } from '../config/constants'
 
 type Props = {
 	activeImage: any

@@ -92,11 +92,12 @@ export function generateCustomerEmailContent({
       
       </h3>
 
-      <h2>Щиро вдячні за довіру!</h2>
+      <h3>Щиро вдячний за довіру!
       <p>З повагою, власник сайту ParoMaster.</p>
       <p>${process.env.ADMIN_NAME}</p>
       <p>тел.: ${process.env.ADMIN_PHONE}</p>
       <p>email: ${process.env.ADMIN_EMAIL}</p>
+      </h3>
     </div>
   `
 }

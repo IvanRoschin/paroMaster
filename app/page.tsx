@@ -6,10 +6,10 @@ import useSWR from 'swr'
 import { getAllGoods } from './actions/goods'
 import { ItemsList, Loader, Slider } from './components'
 import Advantages from './components/Advantages'
-import EmptyState from './components/EmptyState'
-import TestimonialsList from './components/Testimonials'
 import Description from './components/Description'
+import EmptyState from './components/EmptyState'
 import { slides } from './components/Slides'
+import TestimonialsList from './components/Testimonials'
 
 interface GoodsResponse {
 	success: boolean
@@ -17,8 +17,10 @@ interface GoodsResponse {
 	count: number
 }
 
+const limit = 4
+
 const fetcher = async (url: string, params: ISearchParams): Promise<GoodsResponse> => {
-	return getAllGoods(params, 0, 4)
+	return getAllGoods(params, limit)
 }
 const Home = ({ searchParams }: { searchParams: ISearchParams }) => {
 	const { data, error } = useSWR(['goods', searchParams], () => fetcher('goods', searchParams))
@@ -27,7 +29,7 @@ const Home = ({ searchParams }: { searchParams: ISearchParams }) => {
 		console.error('Error fetching goods', error)
 	}
 	if (data?.goods.length === 0) {
-		return <EmptyState />
+		return <EmptyState showReset />
 	}
 	if (!data) {
 		return <Loader />
