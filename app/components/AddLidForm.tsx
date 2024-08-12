@@ -1,5 +1,6 @@
 'use client'
 
+import { sendEmailToLid } from '@/actions/sendEmail'
 import CustomButton from '@/components/admin/CustomFormikButton'
 import FormField from '@/components/input/FormField'
 import { ILid } from '@/types/lid/ILid'
@@ -15,7 +16,16 @@ interface ResetFormProps {
 
 interface NewLidFormProps {
 	lid?: Partial<ILid>
-	action: (data: FormData) => Promise<void>
+	action: (
+		data: FormData,
+	) => Promise<{
+		success: boolean
+		data: {
+			name: FormDataEntryValue
+			phone: FormDataEntryValue
+			email: FormDataEntryValue
+		}
+	}>
 	title?: string
 }
 
@@ -43,9 +53,8 @@ const NewLidForm: React.FC<NewLidFormProps> = ({ lid, title, action }) => {
 
 	const initialValues: InitialStateType = {
 		name: '',
-		phone: '',
+		phone: '+380',
 		email: '',
-
 		createdAt: lid?.createdAt || '',
 	}
 
@@ -55,9 +64,12 @@ const NewLidForm: React.FC<NewLidFormProps> = ({ lid, title, action }) => {
 			Object.keys(values).forEach(key => {
 				formData.append(key, (values as any)[key])
 			})
-			await action(formData)
-			resetForm()
-			toast.success(lid?._id ? 'Користувача оновлено!' : 'Нового користувача додано!')
+			const emailResult = await sendEmailToLid(values)
+			if (emailResult.success) {
+				await action(formData)
+				resetForm()
+				toast.success(lid?._id ? 'Користувача оновлено!' : 'Ваше повідомлення направлено!')
+			}
 		} catch (error) {
 			toast.error('Помилка!')
 			console.log(error)
@@ -65,7 +77,7 @@ const NewLidForm: React.FC<NewLidFormProps> = ({ lid, title, action }) => {
 	}
 
 	return (
-		<div className='flex flex-col justify-center items-center'>
+		<div className='flex flex-col justify-center items-center '>
 			<h2 className='text-4xl mb-4'>{title}</h2>
 
 			<Formik
@@ -81,7 +93,7 @@ const NewLidForm: React.FC<NewLidFormProps> = ({ lid, title, action }) => {
 								<FormField item={item} key={i} errors={errors} setFieldValue={setFieldValue} />
 							))}
 						</div>
-						<CustomButton label={'Зберегти'} />
+						<CustomButton label={'Відправити'} />
 					</Form>
 				)}
 			</Formik>

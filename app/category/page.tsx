@@ -12,9 +12,10 @@ interface IGetAllGoodsResponse {
 	goods: IGood[]
 	count: number
 }
+const limit = 8
 
 const fetcher = async (url: string, params: ISearchParams): Promise<IGetAllGoodsResponse> => {
-	return getAllGoods(params, 0, 8)
+	return getAllGoods(params, limit)
 }
 export default function categoryPage({ searchParams }: { searchParams: ISearchParams }) {
 	const { data, error } = useSWR(['goods', searchParams], () => fetcher('goods', searchParams))
@@ -23,7 +24,7 @@ export default function categoryPage({ searchParams }: { searchParams: ISearchPa
 		console.error('Error fetching goods', error)
 	}
 	if (data?.goods.length === 0) {
-		return <EmptyState category={searchParams.category} />
+		return <EmptyState category={searchParams.category} showReset />
 	}
 	if (!data) {
 		return <Loader />

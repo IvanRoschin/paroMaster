@@ -27,7 +27,7 @@ const Page = ({ searchParams }: { searchParams: ISearchParams }) => {
 		console.error('Error fetching goods', error)
 	}
 	if (data?.goods.length === 0) {
-		return <EmptyState />
+		return <EmptyState showReset />
 	}
 	if (!data) {
 		return <Loader />
@@ -36,9 +36,9 @@ const Page = ({ searchParams }: { searchParams: ISearchParams }) => {
 	return (
 		<div>
 			<h2 className='text-4xl mb-4 flex justify-start items-start'>Каталог товарів</h2>
-			<h3>
+			{/* <h3>
 				Всього товарів в базі: <span className='text-primaryAccentColor'>{data.count}</span>
-			</h3>
+			</h3> */}
 			<div key={Math.random()}>
 				<InfiniteScrollGoods
 					initialGoods={data.goods}

@@ -3,18 +3,17 @@
 import Lid from '@/models/Lid'
 import { connectToDB } from '@/utils/dbConnect'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 
-export async function addNewLid(formData: FormData): Promise<void> {
+export async function addNewLid(formData: FormData) {
 	try {
 		await connectToDB()
 		// Check if email already exists
 		const email = formData.get('email') as string
 
-		const existingLid = await Lid.findOne({ email })
-		if (existingLid) {
-			throw new Error('Email already exists')
-		}
+		// const existingLid = await Lid.findOne({ email })
+		// if (existingLid) {
+		// 	throw new Error('Email already exists')
+		// }
 
 		const name = formData.get('name') as string
 		const phone = formData.get('phone') as string
@@ -25,6 +24,10 @@ export async function addNewLid(formData: FormData): Promise<void> {
 			email,
 		})
 		await newLid.save()
+		return {
+			success: true,
+			data: newLid,
+		}
 	} catch (error) {
 		if (error instanceof Error) {
 			console.error('Error adding newLid:', error)
@@ -35,6 +38,5 @@ export async function addNewLid(formData: FormData): Promise<void> {
 		}
 	} finally {
 		revalidatePath('/')
-		redirect('/')
 	}
 }

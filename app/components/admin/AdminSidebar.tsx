@@ -14,34 +14,29 @@ import {
 
 const menuItems = [
 	{
-		title: 'Dashboard',
+		title: 'Панель керування',
 		path: '/admin',
 		icon: <MdDashboard />,
 	},
 	{
-		title: 'Customers',
+		title: 'Клієнти',
 		path: '/admin/customers',
 		icon: <MdSupervisedUserCircle />,
 	},
 	{
-		title: 'Orders',
+		title: 'Замовлення',
 		path: '/admin/orders',
 		icon: <MdProductionQuantityLimits />,
 	},
 	{
-		title: 'Goods',
+		title: 'Товари',
 		path: '/admin/goods',
 		icon: <MdShoppingBag />,
 	},
 	{
-		title: 'Users',
+		title: 'Адміністратори',
 		path: '/admin/users',
 		icon: <MdVerifiedUser />,
-	},
-	{
-		title: 'Edit Product',
-		path: '/admin/edit-product',
-		icon: <MdShoppingBag />,
 	},
 ]
 

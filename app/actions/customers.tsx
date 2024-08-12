@@ -41,6 +41,13 @@ export async function addCustomer(formData: FormData) {
 	try {
 		await connectToDB()
 
+		const phone = formData.get('phone') as string
+
+		const existingCustomer = await Customer.findOne({ phone })
+		if (existingCustomer) {
+			throw new Error('Phone already exists')
+		}
+
 		const newCustomer = {
 			name: values.name,
 			phone: values.phone,
@@ -49,6 +56,7 @@ export async function addCustomer(formData: FormData) {
 			warehouse: values.warehouse,
 			payment: values.payment,
 		}
+
 		await Customer.create(newCustomer)
 		return {
 			success: true,
