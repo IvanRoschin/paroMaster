@@ -3,10 +3,10 @@ import Link from 'next/link'
 import { Icon } from './Icon'
 
 const menu = [
-	{ menuItemName: 'Послуги', menuItemLink: '/ ' },
-	{ menuItemName: 'Доставка та оплата', menuItemLink: '/ ' },
-	{ menuItemName: 'Гарантія', menuItemLink: '/ ' },
-	{ menuItemName: 'Контакти', menuItemLink: '/ ' },
+	{ menuItemName: 'Послуги', menuItemLink: '/services ' },
+	{ menuItemName: 'Доставка та оплата', menuItemLink: '/delivery ' },
+	{ menuItemName: 'Гарантія', menuItemLink: '/guarantee ' },
+	{ menuItemName: 'Контакти', menuItemLink: '/contact' },
 ]
 
 type Props = {}

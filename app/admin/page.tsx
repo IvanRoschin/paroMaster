@@ -1,7 +1,7 @@
 'use client'
 
 import Card from '@/components/admin/Card'
-import PopUp from '@/components/admin/Popup'
+import PopUp from '@/components/admin/PopUp'
 import Button from '@/components/Button'
 import React, { useState } from 'react'
 import { IconType } from 'react-icons'
@@ -49,7 +49,7 @@ const Admin: React.FC = () => {
 
 	const handleClick = (response: 'yes' | 'no') => {
 		const message =
-			response === 'yes' ? 'Це круто 🎉, погнали .' : 'Не обманюйся 🤨, я бачу, що готовий'
+			response === 'yes' ? 'Це круто 👍 погнали 🏍️' : 'Не обманюйся 🤨, я бачу, що готовий'
 
 		setPopUpMessage(message)
 		setIsPopUpOpen(true)

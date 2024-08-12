@@ -62,7 +62,7 @@ const AdminSidebar = ({ user }: AdminSidebarProps) => {
 					/>
 				) : (
 					<Image
-						src='/noavatar.png'
+						src={`${process.env.PUBLIC_URL}/noavatar.png`}
 						alt='user photo'
 						width={50}
 						height={50}

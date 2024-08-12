@@ -23,7 +23,7 @@ export default async function RootLayout({
     const user = {
     name: session?.user?.name ?? 'Guest', // Fallback to 'Guest' if name is undefined
     email: session?.user?.email ?? '', // Fallback to an empty string if email is undefined
-    image: session?.user?.image ?? '/noavatar.png', // Fallback to a default image
+    image: session?.user?.image ?? `${process.env.PUBLIC_URL}/noavatar.png`,
   };
 
   return (
