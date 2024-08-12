@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	images: {
+		domains: ['localhost'],
+
 		remotePatterns: [
 			{
 				protocol: 'https',
@@ -10,6 +12,11 @@ const nextConfig = {
 			{
 				protocol: 'https',
 				hostname: 'lh3.googleusercontent.com',
+				pathname: '**',
+			},
+			{
+				protocol: 'http',
+				hostname: 'localhost:3000',
 				pathname: '**',
 			},
 		],

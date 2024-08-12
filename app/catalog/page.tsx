@@ -20,7 +20,7 @@ const fetcher = async (url: string, params: ISearchParams): Promise<IGetAllGoods
 	return getAllGoods(params, limit)
 }
 
-const Page = ({ searchParams }: { searchParams: ISearchParams }) => {
+const CatalogPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 	const { data, error } = useSWR(['goods', searchParams], () => fetcher('goods', searchParams))
 
 	if (error) {
@@ -50,4 +50,4 @@ const Page = ({ searchParams }: { searchParams: ISearchParams }) => {
 	)
 }
 
-export default Page
+export default CatalogPage

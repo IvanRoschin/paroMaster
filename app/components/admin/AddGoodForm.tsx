@@ -1,10 +1,10 @@
 'use client'
 
 import { IGood } from '@/types/good/IGood'
+import { categoryList } from 'app/config/constants'
 import { goodFormSchema } from 'app/helpers/validationShemas'
 import { Form, Formik, FormikState } from 'formik'
 import { toast } from 'sonner'
-import { categoryList } from '../Category'
 import ImagesUpload from '../ImagesUpload'
 import FormField from '../input/FormField'
 import CustomButton from './CustomFormikButton'

@@ -13,7 +13,6 @@ import Slider from '@/components/Slider'
 import AddCustomerForm from '@/components/admin/AddCustromerForm'
 import AddGoodForm from '@/components/admin/AddGoodForm'
 import AdminMenu from '@/components/admin/Navbar'
-import PopUp from '@/components/admin/Popup'
 export {
 	AddCustomerForm,
 	AddGoodForm,
@@ -28,7 +27,6 @@ export {
 	ItemListCard,
 	ItemsList,
 	Loader,
-	PopUp,
 	Search,
 	Sidebar,
 	Slider,

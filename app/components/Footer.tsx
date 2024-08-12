@@ -53,14 +53,14 @@ const Footer = () => {
 							<div className='border-b border-primaryAccentColor ' />
 							<div className='flex justify-between'>
 								<Image
-									src={'/delivery/nova_poshta_white.svg'}
+									src={`${process.env.PUBLIC_URL}/delivery/nova_poshta_white.svg`}
 									alt='Нова пошта'
 									width={120}
 									height={30}
 									className='h-[30px] object-fit'
 								/>
 								<Image
-									src={'/delivery/ukr_poshta_white.svg'}
+									src={`${process.env.PUBLIC_URL}/delivery/ukr_poshta_white.svg`}
 									alt='Ukrposhta'
 									width={120}
 									height={30}
@@ -73,14 +73,14 @@ const Footer = () => {
 							<div className='border-b border-primaryAccentColor' />
 							<div className='flex justify-between'>
 								<Image
-									src={'/payment/mastercard_white.svg'}
+									src={`${process.env.PUBLIC_URL}/payment/mastercard_white.svg`}
 									alt='MasterCard'
 									width={120}
 									height={30}
 									className='h-[30px] object-fit'
 								/>
 								<Image
-									src={'/payment/visa_white.svg'}
+									src={`${process.env.PUBLIC_URL}/payment/visa_white.svg`}
 									alt='visa'
 									width={120}
 									height={30}
