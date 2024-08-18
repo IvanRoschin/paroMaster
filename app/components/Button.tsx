@@ -4,7 +4,7 @@ import { IconType } from 'react-icons'
 
 interface ButtonProps {
 	label?: string
-	type: string
+	type?: string
 	onClick?: () => void
 	disabled?: boolean
 	outline?: boolean

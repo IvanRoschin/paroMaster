@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion'
 // import left from '../public/left.svg'
 // import right from '../public/right.svg'
+import Link from 'next/link'
 import { IoIosArrowDropleft, IoIosArrowDropright } from 'react-icons/io'
-import Button from './Button'
 import { slides } from '../config/constants'
+import Button from './Button'
 
 type Props = {
 	activeImage: any
@@ -44,7 +45,12 @@ const Description = ({ activeImage, clickNext, clickPrev }: Props) => {
 							{elem.desc}
 						</div>
 						<div className='absolute bottom-0 left-20'>
-							<Button type={'button'} label='Замовити' />
+							<Link
+								href='/#footer'
+								className='flex items-center justify-center p-2  focus:outline-none group-hover:bg-primaryAccentColor group-hover:text-secondaryBackground         scroll-smooth'
+							>
+								<Button type={'button'} label='Замовити' />
+							</Link>
 						</div>
 					</motion.div>
 

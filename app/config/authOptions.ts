@@ -22,27 +22,19 @@ export const authOptions: NextAuthOptions = {
 				if (!credentials?.email || !credentials.password) {
 					throw new Error('Invalid credentials')
 				}
-
 				await connectToDB()
-
 				const user = await User.findOne({ email: credentials.email })
-
 				if (!user) {
 					toast.error('User not found')
 					throw new Error('User not found')
 				}
-
 				if (!user.isAdmin) {
 					toast.error("User doesn't have admin rights")
 					throw new Error("User doesn't have admin rights")
 				}
-
-				// Ensure both are strings
 				if (typeof credentials.password !== 'string' || typeof user.password !== 'string') {
 					throw new Error('Invalid password format')
 				}
-
-				// Perform password comparison
 				const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password)
 
 				if (!isPasswordCorrect) {

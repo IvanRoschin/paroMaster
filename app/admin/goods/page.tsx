@@ -9,6 +9,7 @@ import { IGood } from '@/types/good/IGood'
 import { ISearchParams } from '@/types/searchParams'
 import Link from 'next/link'
 import { FaPen, FaTrash } from 'react-icons/fa'
+import { toast } from 'sonner'
 import useSWR from 'swr'
 
 interface GoodsResponse {
@@ -37,6 +38,18 @@ const ProductsPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 
 	if (data.goods.length === 0) {
 		return <EmptyState />
+	}
+
+	const handleDelete = async (id: string) => {
+		try {
+			const formData = new FormData()
+			formData.append('id', id)
+			await deleteGood(formData)
+			toast.success('Товар успішно видалено!')
+		} catch (error) {
+			toast.error('Помилка при видаленні товару!')
+			console.error('Error deleting good', error)
+		}
 	}
 
 	const goodsCount = data.count
@@ -97,10 +110,24 @@ const ProductsPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 								</Link>
 							</td>
 							<td className='p-2 text-center'>
-								<form action={deleteGood} className='flex justify-center items-center'>
+								<Button
+									type='button'
+									icon={FaTrash}
+									small
+									outline
+									color='border-red-400'
+									onClick={() => {
+										if (good._id) {
+											handleDelete(good._id)
+										} else {
+											console.error('Error: Good ID is undefined')
+										}
+									}}
+								/>
+								{/* <form action={deleteGood} className='flex justify-center items-center'>
 									<input type='hidden' name='id' value={good._id} />
 									<Button type='submit' icon={FaTrash} small outline color='border-red-400' />
-								</form>
+								</form> */}
 							</td>
 						</tr>
 					))}

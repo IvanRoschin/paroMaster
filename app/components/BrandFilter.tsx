@@ -38,11 +38,10 @@ const BrandFilter = () => {
 	}, [])
 
 	if (brands.length === 0) {
-		return <h2 className='text-4xl mb-4'>Бренд не знайдений</h2>
+		return <h2 className='subtitle mb-4'>Бренд не знайдений</h2>
 	}
 
 	const handleBrandCheckboxClick = (brand: string) => {
-		console.log('brand', brand)
 		const selectedBrand = searchParams.get('brand')
 		const newBrand = selectedBrand === brand ? null : brand
 		push(pathname + '?' + createQueryString('brand', newBrand as string), { scroll: false })
@@ -50,7 +49,7 @@ const BrandFilter = () => {
 
 	return (
 		<div>
-			<h2 className='text-2xl text-primaryAccentColor mb-4 bold'>Бренди</h2>{' '}
+			<h2 className='subtitle mb-4'>Бренди</h2>
 			<ul>
 				{brands.map((brand, index) => {
 					const isChecked = searchParams.get('brand') === brand

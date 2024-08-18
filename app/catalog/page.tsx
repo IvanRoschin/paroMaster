@@ -35,7 +35,7 @@ const CatalogPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 
 	return (
 		<div>
-			<h2 className='text-4xl mb-4 flex justify-start items-start'>Каталог товарів</h2>
+			<h2 className='title mb-1'>Каталог товарів</h2>
 			{/* <h3>
 				Всього товарів в базі: <span className='text-primaryAccentColor'>{data.count}</span>
 			</h3> */}

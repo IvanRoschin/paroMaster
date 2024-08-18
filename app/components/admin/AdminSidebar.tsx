@@ -38,6 +38,11 @@ const menuItems = [
 		path: '/admin/users',
 		icon: <MdVerifiedUser />,
 	},
+	{
+		title: 'Категорії',
+		path: '/admin/categories',
+		icon: <MdVerifiedUser />,
+	},
 ]
 
 type AdminSidebarProps = {

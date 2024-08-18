@@ -95,7 +95,35 @@ export async function getGoodById(id: string) {
 }
 
 export async function addGood(formData: FormData) {
-	const values = Object.fromEntries(formData.entries())
+	// const values = Object.fromEntries( formData.entries() )
+	const values: any = {}
+	formData.forEach((value, key) => {
+		if (!values[key]) {
+			values[key] = []
+		}
+		values[key].push(value)
+	})
+
+	Object.keys(values).forEach(key => {
+		if (values[key].length === 1) {
+			values[key] = values[key][0]
+		}
+	})
+
+	if (
+		!values.category ||
+		!values.title ||
+		!values.brand ||
+		!values.model ||
+		!values.model ||
+		!values.price ||
+		!values.description ||
+		!values.src
+	) {
+		console.error('Missing required fields')
+		return
+	}
+
 	try {
 		await connectToDB()
 
@@ -106,18 +134,21 @@ export async function addGood(formData: FormData) {
 			model: values.model,
 			price: parseFloat(values.price as string),
 			description: values.description,
-			imgUrl: values.imgUrl instanceof Array ? values.imgUrl : [values.imgUrl],
+			src: values.src instanceof Array ? values.src : [values.src],
 			vendor: values.vendor,
 			isAvailable: values.isAvailable === 'true',
 			isCompatible: values.isCompatible === 'false',
 			compatibility:
 				values.compatibility instanceof Array ? values.compatibility : [values.compatibility],
 		})
+		return {
+			success: true,
+			message: 'Good added successfully',
+		}
 	} catch (error) {
 		console.log(error)
 	} finally {
 		revalidatePath('/admin/goods')
-		redirect('/admin/goods')
 	}
 }
 
@@ -139,13 +170,24 @@ export async function deleteGood(formData: FormData): Promise<void> {
 }
 
 export async function updateGood(formData: FormData) {
-	const entries = Object.fromEntries(formData.entries())
-	console.log('entries', entries)
+	// const entries = Object.fromEntries(formData.entries())
+	const values: any = {}
+	formData.forEach((value, key) => {
+		if (!values[key]) {
+			values[key] = []
+		}
+		values[key].push(value)
+	})
 
+	Object.keys(values).forEach(key => {
+		if (values[key].length === 1) {
+			values[key] = values[key][0]
+		}
+	})
 	const {
 		id,
 		category,
-		imgUrl,
+		src,
 		brand,
 		model,
 		vendor,
@@ -155,10 +197,10 @@ export async function updateGood(formData: FormData) {
 		isAvailable,
 		isCompatible,
 		compatibility,
-	} = entries as {
+	} = values as {
 		id: string
 		category?: string
-		imgUrl?: any
+		src?: any
 		brand?: string
 		model?: string
 		vendor?: string
@@ -175,7 +217,7 @@ export async function updateGood(formData: FormData) {
 
 		const updateFields: Partial<IGood> = {
 			category,
-			imgUrl,
+			src,
 			brand,
 			model,
 			vendor,

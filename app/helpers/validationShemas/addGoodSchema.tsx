@@ -8,6 +8,7 @@ export const goodFormSchema = Yup.object().shape({
 				'Корпус для прасок',
 				'Підошви для прасок',
 				'Плати керування',
+				'Бойлери',
 				'Електроклапани',
 				'Насоси(помпи)',
 				'Резервуари для води',
@@ -25,7 +26,7 @@ export const goodFormSchema = Yup.object().shape({
 		.min(20, 'Мінімум 20 символів')
 		.max(200, 'Максимум 200 символів')
 		.required(`Обов'язкове поле`),
-	imgUrl: Yup.array()
+	src: Yup.array()
 		.of(Yup.string().url('Некоректне посилання'))
 		.required(`Обов'язкове поле`),
 	brand: Yup.string()
@@ -46,5 +47,5 @@ export const goodFormSchema = Yup.object().shape({
 		.nullable(),
 	isAvailable: Yup.boolean().required(`Обов'язкове поле`),
 	isCompatible: Yup.boolean().required(`Обов'язкове поле`),
-	compatibility: Yup.string().nullable(),
+	compatibility: Yup.string(),
 })

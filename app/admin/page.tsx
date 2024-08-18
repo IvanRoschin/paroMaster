@@ -41,6 +41,12 @@ const cardData: CardData[] = [
 		link: 'admin/goods',
 		icon: FiPackage,
 	},
+	{
+		title: 'Категорії',
+		count: 323,
+		link: 'admin/categories',
+		icon: FiPackage,
+	},
 ]
 
 const Admin: React.FC = () => {
@@ -71,8 +77,8 @@ const Admin: React.FC = () => {
 				</h3>
 			</div>
 
-			<div className='flex items-center justify-center min-h-[50vh]'>
-				<div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
+			<div className='flex items-center justify-center m-4'>
+				<div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
 					{cardData.map((data, index) => (
 						<Card
 							key={index}

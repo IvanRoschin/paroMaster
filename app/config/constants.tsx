@@ -1,3 +1,5 @@
+///Categories///
+
 export const categoryList = [
 	{
 		icon: 'category_korpusniDetali',
@@ -41,6 +43,7 @@ export const categoryList = [
 	},
 ]
 
+///Slides///
 export const slides = [
 	{
 		id: 1,

@@ -1,50 +1,51 @@
-import React from 'react'
-
 type Props = {}
 
 const DeliveryPage = (props: Props) => {
 	return (
-		<div>
-			<h2 className='text-4xl mb-4 flex justify-start items-start'>Оплата та Доставка</h2>
-
-			<section className='mb-6'>
-				<h2 className='text-xl font-semibold mb-2'>Оплата</h2>
-				<ul className='list-disc pl-5'>
-					<li className='mb-1'>
-						Безготівковий розрахунок: Здійсніть оплату через банківський переказ або платіжні
-						системи.
+		<div className='container mx-auto p-8'>
+			<h2 className='title mb-1'>Оплата та Доставка</h2>
+			<section className='mb-8'>
+				<h3 className='subtitle'>Оплата</h3>
+				<ul className='list-disc pl-5 space-y-2'>
+					<li className='text-lg text-gray-700'>
+						<strong>Безготівковий розрахунок:</strong> Здійсніть оплату через банківський переказ
+						або платіжні системи.
 					</li>
-					<li className='mb-1'>
-						Передплата: Можлива оплата замовлення повністю або частково перед відправкою.
+					<li className='text-lg text-gray-700'>
+						<strong>Передплата:</strong> Можлива оплата замовлення повністю або частково перед
+						відправкою.
 					</li>
-					<li className='mb-1'>
-						Оплата при отриманні: Оплатіть ваше замовлення на відділенні Нової Пошти.
+					<li className='text-lg text-gray-700'>
+						<strong>Оплата при отриманні:</strong> Оплатіть ваше замовлення на відділенні Нової
+						Пошти.
 					</li>
 				</ul>
 			</section>
 
-			<section>
-				<h2 className='text-xl font-semibold mb-2'>Доставка</h2>
-				<p className='mb-2'>Доставка здійснюється надійними операторами:</p>
-				<ul className='list-disc pl-5 mb-2'>
-					<li className='mb-1'>Укрпошта</li>
-					<li className='mb-1'>Нова Пошта</li>
+			<section className='mb-8'>
+				<h3 className='subtitle'>Доставка</h3>
+				<p className='text-lg text-gray-700 mb-4'>Доставка здійснюється надійними операторами:</p>
+				<ul className='list-disc pl-5 space-y-2 mb-4'>
+					<li className='text-lg text-gray-700'>Укрпошта</li>
+					<li className='text-lg text-gray-700'>Нова Пошта</li>
 				</ul>
-				<p>
-					При замовленні на суму більше <strong>1000 грн</strong> доставка буде безкоштовною.
+				<p className='text-lg text-gray-700'>
+					При замовленні на суму більше <strong>1000 грн</strong>, доставка буде безкоштовною.
 				</p>
 			</section>
 
-			<section className='mt-4'>
-				<h2 className='text-xl font-semibold mb-2'>Як оформити замовлення</h2>
-				<ol className='list-decimal pl-5'>
-					<li className='mb-1'>Оберіть товари, які вас цікавлять, та додайте їх у кошик.</li>
-					<li className='mb-1'>
+			<section className='mt-8'>
+				<h3 className='subtitle'>Як оформити замовлення</h3>
+				<ol className='list-decimal pl-5 space-y-2'>
+					<li className='text-lg text-gray-700'>
+						Оберіть товари, які вас цікавлять, та додайте їх у кошик.
+					</li>
+					<li className='text-lg text-gray-700'>
 						Перейдіть до оформлення замовлення, вибравши зручний вам спосіб оплати.
 					</li>
-					<li className='mb-1'>Вкажіть адресу доставки.</li>
-					<li className='mb-1'>
-						Підтвердіть замовлення, і ми відправимо його вам у найкоротші терміни!
+					<li className='text-lg text-gray-700'>Вкажіть адресу доставки.</li>
+					<li className='text-lg text-gray-700'>
+						Підтвердіть замовлення, і ми відправимо його Вам у найкоротші терміни!
 					</li>
 				</ol>
 			</section>
