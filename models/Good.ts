@@ -4,7 +4,7 @@ const { Schema } = mongoose
 const goodSchema = new Schema(
 	{
 		category: {
-			type: 'string',
+			type: String,
 			enum: [
 				'Корпус станції',
 				'Корпус для прасок',
@@ -19,44 +19,44 @@ const goodSchema = new Schema(
 			required: true,
 		},
 		title: {
-			type: 'string',
+			type: String,
 			required: true,
 		},
 		description: {
-			type: 'string',
+			type: String,
 			required: true,
 		},
-		imgUrl: {
-			type: ['string'],
+		src: {
+			type: [String],
 			required: true,
 		},
 		brand: {
-			type: 'string',
+			type: String,
 			required: true,
 		},
 		model: {
-			type: 'string',
+			type: String,
 			required: true,
 		},
 		vendor: {
-			type: 'string',
+			type: String,
 			required: true,
 			unique: true,
 		},
 		price: {
-			type: 'number',
+			type: String,
 			required: true,
 		},
 		isAvailable: {
-			type: 'boolean',
+			type: Boolean,
 			required: true,
 		},
 		isCompatible: {
-			type: 'boolean',
+			type: Boolean,
 			required: true,
 		},
 		compatibility: {
-			type: ['string'],
+			type: [String],
 		},
 	},
 	{ versionKey: false, timestamps: true },

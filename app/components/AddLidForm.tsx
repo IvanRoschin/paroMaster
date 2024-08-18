@@ -27,9 +27,11 @@ interface NewLidFormProps {
 		}
 	}>
 	title?: string
+	subtitle?: boolean
+	icon?: React.ReactNode
 }
 
-const NewLidForm: React.FC<NewLidFormProps> = ({ lid, title, action }) => {
+const NewLidForm: React.FC<NewLidFormProps> = ({ lid, title, action, subtitle, icon }) => {
 	const inputs = [
 		{
 			id: 'name',
@@ -78,8 +80,13 @@ const NewLidForm: React.FC<NewLidFormProps> = ({ lid, title, action }) => {
 
 	return (
 		<div className='flex flex-col justify-center items-center '>
-			<h2 className='text-4xl mb-4'>{title}</h2>
-
+			<h2
+				className={`${subtitle ? 'subtitle mb-4' : 'text-2xl mb-4'}
+			${icon ? 'justify-center items-center' : 'justify-center items-center'}`}
+			>
+				{icon}
+				{title}
+			</h2>
 			<Formik
 				initialValues={initialValues}
 				onSubmit={handleSubmit}

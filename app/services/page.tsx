@@ -47,22 +47,31 @@ interface ServiceCardProps {
 
 export const ServiceCard: React.FC<ServiceCardProps> = ({ id, title, desc, conditions, src }) => {
 	return (
-		<div className='flex flex-col items-center gap-y-12'>
-			<Image className='w-40 h-40 rounded-full' src={src} alt={title} width={320} height={240} />
-			<h3 className='text-xl font-bold'>{title}</h3>
-			<p className='text-sm text-gray-600'>{desc}</p>
-			<p className='text-sm text-gray-500'>{conditions}</p>
+		<div className='flex flex-col items-center p-6 bg-white rounded-lg shadow-md min-h-full'>
+			<Image className='w-80 h-60 rounded-lg mb-4' src={src} alt={title} width={320} height={240} />
+			<h3 className='subtitle'>{title}</h3>
+			<p className='text-sm text-gray-700 text-center mb-4 leading-relaxed flex-grow'>{desc}</p>
+			<p className='text-sm text-gray-500 text-center italic border-t pt-2'>{conditions}</p>
 		</div>
 	)
 }
 
 const ServicesPage = (props: Props) => {
 	return (
-		<div>
-			<h2 className='text-4xl mb-4 flex justify-start items-start'>Послуги</h2>
-			{services.map(service => (
-				<ServiceCard key={service.id} {...service} />
-			))}
+		<div className='container mx-auto p-8'>
+			<h2 className='title mb-1'>Послуги</h2>
+			<div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
+				{services.map((service, index) => (
+					<div
+						key={service.id}
+						className={`${
+							index % 2 === 0 ? 'md:row-start-1' : 'md:row-start-2'
+						} md:col-start-${(index % 2) + 1} flex`}
+					>
+						<ServiceCard {...service} />
+					</div>
+				))}
+			</div>
 		</div>
 	)
 }

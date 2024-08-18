@@ -47,10 +47,7 @@ const InfiniteScrollGods = ({
 			</section>
 			<section>
 				{allGoodsLoaded ? (
-					<p className='text-center py-10 text-2xl text-primaryAccentColor'>
-						{' '}
-						Це всі 🤷‍♂️ наявні Товари 🛒
-					</p>
+					<p className=' subtitle mb-4 text-center py-10'> Це всі 🤷‍♂️ наявні Товари 🛒</p>
 				) : (
 					<div ref={ref} className='flex items-center justify-center py-10'>
 						<TailSpin

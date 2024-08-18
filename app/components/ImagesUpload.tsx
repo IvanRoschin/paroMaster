@@ -8,7 +8,7 @@ import ImagesBlock from './ImagesBlock'
 
 interface FormikProps {
 	setFieldValue: (field: string, value: string[], shouldValidate?: boolean) => void
-	values?: string[]
+	values?: string[] | string
 	errors?: { [key: string]: string | string[] | FormikErrors<any> | FormikErrors<any>[] }
 	good?: IGood
 }
@@ -24,7 +24,7 @@ const ImagesUpload: React.FC<FormikProps> = ({ setFieldValue, values, errors, go
 				const data = await uploadCloudinary(images[i])
 				if (data?.url) arr.push(data.url)
 			}
-			setFieldValue('imgUrl', arr)
+			setFieldValue('src', arr)
 			setIsUploaded(true)
 		} catch (error) {
 			console.log(error)
@@ -38,41 +38,43 @@ const ImagesUpload: React.FC<FormikProps> = ({ setFieldValue, values, errors, go
 
 			<div className='my-10'>
 				<h3 className='text-lg mb-4'>Додати фото товару</h3>
-				<input
-					type='file'
-					placeholder='Додати фото'
-					multiple
-					className='mb-5'
-					onChange={(e: ChangeEvent<HTMLInputElement>) => {
-						if (e.target.files) {
-							const fileList = Array.from(e.target.files)
-							setImages(fileList)
-						}
-					}}
-				/>
-				<button
-					type='button'
-					onClick={upload}
-					className='p-2 mr-8 w-[100px] border border-gray-400 rounded-md hover:bg-gray-300 transition ease-in-out relative'
-				>
-					Завантажити{isUploaded && '...'}
-					{errors?.imgUrl && <span className='text-red-500'>{errors?.imgUrl as any}</span>}
-					{isUploaded && (
-						<span
-							className={`bg-[url('${process.env.PUBLIC_URL}/success-check.png)'] bg-no-repeat bg-center bg-cover w-[20px] h-[20px] absolute top-[-10px] right-[-10px]`}
-						></span>
-					)}
-				</button>
-				<button
-					type='button'
-					onClick={() => {
-						setImages([])
-						setIsUploaded(false)
-					}}
-					className='p-2 w-[100px] border border-gray-400 rounded-md hover:bg-gray-300 transition ease-in-out'
-				>
-					Скасувати
-				</button>
+				<div className='flex justify-center items-center'>
+					<input
+						type='file'
+						placeholder='Додати фото'
+						multiple
+						className='mb-5'
+						onChange={(e: ChangeEvent<HTMLInputElement>) => {
+							if (e.target.files) {
+								const fileList = Array.from(e.target.files)
+								setImages(fileList)
+							}
+						}}
+					/>
+					<button
+						type='button'
+						onClick={upload}
+						className='p-2 mr-8 w-[150px] border border-gray-400 rounded-md hover:bg-gray-300 transition ease-in-out relative'
+					>
+						Завантажити{isUploaded && '...'}
+						{errors?.src && <span className='text-red-500'>{errors?.src as any}</span>}
+						{isUploaded && (
+							<span
+								className={`bg-[url('/success-check.png)'] bg-no-repeat bg-center bg-cover w-[20px] h-[20px] absolute top-[-10px] right-[-10px]`}
+							></span>
+						)}
+					</button>
+					<button
+						type='button'
+						onClick={() => {
+							setImages([])
+							setIsUploaded(false)
+						}}
+						className='p-2 w-[150px] border border-gray-400 rounded-md hover:bg-gray-300 transition ease-in-out'
+					>
+						Скасувати
+					</button>
+				</div>
 			</div>
 		</div>
 	)

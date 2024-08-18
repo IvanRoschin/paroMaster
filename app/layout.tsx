@@ -28,7 +28,7 @@ export default async function RootLayout({
 
   return (
     <html lang="uk">
-      <body className={`${inter.className} primaryTextColor`}>
+      <body className={`${inter.className} primaryTextColor  `}>
         <Providers>
           <Header session={ session} />
           <div className='px-8 flex items-start'>
@@ -48,7 +48,13 @@ export default async function RootLayout({
               </>
             )}
           </div>
-          <Footer />
+          <section
+            id="footer"
+            className="
+        mb-20
+        snap-start
+        px-4"> <Footer /></section>
+         
         </Providers>
       </body>
     </html>

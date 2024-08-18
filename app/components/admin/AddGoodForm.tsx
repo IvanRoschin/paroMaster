@@ -5,7 +5,7 @@ import { categoryList } from 'app/config/constants'
 import { goodFormSchema } from 'app/helpers/validationShemas'
 import { Form, Formik, FormikState } from 'formik'
 import { toast } from 'sonner'
-import ImagesUpload from '../ImagesUpload'
+import ImageUploadCloudinary from '../ImageUploadCloudinary'
 import FormField from '../input/FormField'
 import CustomButton from './CustomFormikButton'
 
@@ -105,7 +105,7 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 
 	const initialValues: InitialStateType = {
 		category: good?.category || categoryList[0].title,
-		imgUrl: good?.imgUrl || [],
+		src: good?.src || [],
 		brand: good?.brand || '',
 		model: good?.model || '',
 		vendor: good?.vendor || '',
@@ -130,13 +130,16 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 					formData.append(key, value)
 				}
 			})
-			{
-				good && formData.append('id', good._id as string)
+			// Append the ID if available
+			if (good?._id) {
+				formData.append('id', good._id as string)
 			}
+
 			await action(formData)
 			resetForm()
 			toast.success(good?._id ? 'Товар оновлено!' : 'Новий товар додано!')
 		} catch (error) {
+			// Handle any errors
 			toast.error('Помилка!')
 			console.error(error)
 		}
@@ -151,14 +154,19 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 				validationSchema={goodFormSchema}
 				enableReinitialize
 			>
-				{({ errors, setFieldValue, touched, values }) => (
+				{({ errors, setFieldValue, values }) => (
 					<Form className='flex flex-col w-[600px]'>
-						<ImagesUpload
+						<ImageUploadCloudinary
 							setFieldValue={setFieldValue}
-							values={values?.imgUrl}
-							good={good}
+							values={values.src}
 							errors={errors}
 						/>
+						{/* <ImagesUpload
+							setFieldValue={setFieldValue}
+							values={values.src}
+							good={good}
+							errors={errors}
+						/> */}
 						{inputs.map((item, i) => (
 							<div key={i}>
 								{item.type === 'select' && (

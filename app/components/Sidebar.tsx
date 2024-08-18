@@ -14,7 +14,6 @@ const Sidebar = () => {
 		console.error('Error fetching min and max price:', error)
 	}
 	if (!minMaxPrice) {
-		// Loading state
 		return <Loader />
 	}
 	return (

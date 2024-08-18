@@ -1,7 +1,7 @@
 export interface IGood {
 	_id?: string
 	category: string
-	imgUrl: string[]
+	src: string[]
 	brand: string
 	model: string
 	vendor: string
@@ -16,7 +16,7 @@ export interface IGood {
 export interface SGood {
 	_id: string
 	category: string
-	imgUrl: string[]
+	src: string[]
 	brand: string
 	model: string
 	vendor: string

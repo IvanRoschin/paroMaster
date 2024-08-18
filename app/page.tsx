@@ -1,15 +1,20 @@
 'use client'
 
-import { IGood } from '@/types/good/IGood'
-import { ISearchParams } from '@/types/searchParams'
 import useSWR from 'swr'
-import { getAllGoods } from './actions/goods'
-import { ItemsList, Loader, Slider } from './components'
-import Advantages from './components/Advantages'
-import Description from './components/Description'
-import EmptyState from './components/EmptyState'
-import { slides } from './components/Slides'
-import TestimonialsList from './components/Testimonials'
+
+import { getAllGoods } from '@/actions/goods'
+
+import {
+	Advantages,
+	Description,
+	EmptyState,
+	ItemsList,
+	Loader,
+	Slider,
+	TestimonialsList,
+	slides,
+} from '@/components/index'
+import { IGood, ISearchParams } from '@/types/index'
 
 interface GoodsResponse {
 	success: boolean

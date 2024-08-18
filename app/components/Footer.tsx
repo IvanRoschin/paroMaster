@@ -17,12 +17,8 @@ interface FormValues {
 	phone: string
 }
 
-// const footerMenu = {[
-// 	{ menuItemName: 'Послуги', menuItemLink: '/ ' },
-// 	{ menuItemName: 'Доставка та оплата', menuItemLink: '/ ' },
-// 	{ menuItemName: 'Гарантія', menuItemLink: '/ ' },
-// 	{ menuItemName: 'Контакти', menuItemLink: '/ ' },
-// ]}
+const env = process.env
+env.PUBLIC_URL = env.PUBLIC_URL || ''
 
 const Footer = () => {
 	const searchParams = useSearchParams()
@@ -39,13 +35,14 @@ const Footer = () => {
 		},
 		[searchParams],
 	)
+
 	return (
 		<div className='bg-slate-800  p-8 text-white'>
 			<div className='flex justify-between mb-10'>
 				<Logo color='white' />
 				<Socials color='white' />
 			</div>
-			<div className='flex justify-between'>
+			<div className='flex justify-between gap-10'>
 				<div className='mb-10'>
 					<div className='flex gap-8 mb-20'>
 						<div className='w-[50%] text-2xl flex flex-col gap-8'>
@@ -140,7 +137,7 @@ const Footer = () => {
 												href={`/category/?${createQueryString('category', title)}`}
 												className='flex justify-start items-start'
 											>
-												<Icon name={icon} className='w-5 h-5  mr-3 text-white bg-transparent' />
+												<Icon name={icon} className='w-5 h-5  mr-3 fill-white bg-transparent' />
 												{title}
 											</Link>
 										</li>

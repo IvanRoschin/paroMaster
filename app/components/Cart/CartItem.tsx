@@ -52,7 +52,7 @@ const CartItem: React.FC<CartItemProps> = ({ id, quantity }) => {
 				<div className='flex items-center justify-center gap-10'>
 					<div className='w-[150px] '>
 						<Image
-							src={good.imgUrl[0]}
+							src={good.src[0]}
 							alt='item_photo'
 							width={150}
 							height={150}

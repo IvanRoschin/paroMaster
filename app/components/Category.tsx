@@ -24,13 +24,13 @@ const Category = () => {
 
 	return (
 		<div className='pt-0 mr-4 text-sm w-[250px] mb-4'>
-			<h2 className='text-2xl text-primaryAccentColor mb-4 bold'>Категорії товарів</h2>
+			<h2 className='subtitle mb-4'>Категорії товарів</h2>
 			<ul className='bg-secondaryBackground p-4 rounded-lg'>
 				{categoryList.map(({ icon, title }, index) => {
 					return (
 						<li key={index} className='mb-3 nav'>
 							<Link
-								href={`/category/?${createQueryString('category', title)}`}
+								href={`${process.env.PUBLIC_URL}/category/?${createQueryString('category', title)}`}
 								className='flex justify-start items-start'
 							>
 								<Icon name={icon} className='w-5 h-5  mr-3' />

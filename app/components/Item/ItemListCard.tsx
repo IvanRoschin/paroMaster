@@ -35,7 +35,7 @@ const ItemListCard: React.FC<ItemListCardProps> = ({ item }) => {
 				<div>
 					<div className='w-[200px] h-[200px]'>
 						<Image
-							src={item.imgUrl[0]}
+							src={item.src[0]}
 							alt='item_photo'
 							width={200}
 							height={200}

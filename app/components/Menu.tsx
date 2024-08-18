@@ -29,16 +29,6 @@ const Menu = (props: Props) => {
 					)
 				})}
 			</ul>
-			{/* <button
-				onClick={handleLogout}
-				className='text-white end-2.5 bottom-2.5 bg-primaryAccentColor hover:opacity-80 
-				focus:opacity-80 
-				focus:outline-none 
-				focus:ring-secondaryBackground rounded-b-lg text-md px-4 py-3 w-full placeholder:bg-transparent flex justify-center items-center text-center gap-2'
-			>
-				<MdLogout />
-				Logout
-			</button> */}
 		</nav>
 	)
 }

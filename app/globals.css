@@ -103,4 +103,18 @@ primaryAccentColor #ea580c => 234 88 12
 	.swiper-button-prev::after {
 		display: none;
 	}
+
+	.title {
+		color: #ea580c;
+		font-size: 36px;
+		text-align: center;
+		font-weight: 700;
+	}
+
+	.subtitle {
+		color: #ea580c;
+		font-size: 24px;
+		text-align: left;
+		font-weight: 700;
+	}
 }

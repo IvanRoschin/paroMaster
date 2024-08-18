@@ -6,7 +6,7 @@ import { useState } from 'react'
 
 interface ImagesBlockProps {
 	item?: IGood
-	values?: string[]
+	values?: string[] | string
 }
 
 const ImagesBlock: React.FC<ImagesBlockProps> = ({ item, values }) => {
@@ -14,23 +14,23 @@ const ImagesBlock: React.FC<ImagesBlockProps> = ({ item, values }) => {
 
 	return (
 		<div>
-			{item && item.imgUrl && item.imgUrl.length > 0 ? (
+			{item && item.src && item.src.length > 0 ? (
 				<div className='mr-[50px] pb-[40px]'>
 					<div className='w-[400px] h-[400px]'>
 						<Image
-							src={item.imgUrl[index]}
-							alt='item_photo'
+							src={item.src[index]}
+							alt={item.title}
 							width={400}
 							height={400}
 							className='self-center mb-[30px]'
 						/>
 					</div>
 					<ul className='grid grid-cols-3 gap-3'>
-						{item.imgUrl.map((img: string, imgIndex: number) => (
+						{item.src.map((img: string, imgIndex: number) => (
 							<li key={imgIndex}>
 								<Image
 									src={img}
-									alt='item another look'
+									alt={item.title}
 									width={120}
 									height={120}
 									className='border border-gray-400 block cursor-pointer hover:shadow-[10px_10px_15px_-3px_rgba(0,0,0,0.3)] hover:scale-105 transition-all'
@@ -47,7 +47,7 @@ const ImagesBlock: React.FC<ImagesBlockProps> = ({ item, values }) => {
 						<div className='w-[400px] h-[400px]'>
 							<Image
 								src={values[index]}
-								alt='item_photo'
+								alt='another image'
 								width={400}
 								height={400}
 								className='self-center mb-[30px]'
