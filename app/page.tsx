@@ -1,9 +1,5 @@
 'use client'
 
-import useSWR from 'swr'
-
-import { getAllGoods } from '@/actions/goods'
-
 import {
 	Advantages,
 	Description,
@@ -12,42 +8,68 @@ import {
 	Loader,
 	Slider,
 	TestimonialsList,
-	slides,
 } from '@/components/index'
-import { IGood, ISearchParams } from '@/types/index'
-
-interface GoodsResponse {
-	success: boolean
-	goods: IGood[]
-	count: number
-}
+import { ISearchParams } from '@/types/index'
+import { useQuery } from '@tanstack/react-query'
+import { getAllGoods } from './actions/goods'
+import { getAllSlides } from './actions/slider'
+import { getAllTestimonials } from './actions/testimonials'
+// import useGetGoods from './hooks/useGoods'
+// import useGetSlides from './hooks/useSlides'
 
 const limit = 4
 
-const fetcher = async (url: string, params: ISearchParams): Promise<GoodsResponse> => {
-	return getAllGoods(params, limit)
-}
 const Home = ({ searchParams }: { searchParams: ISearchParams }) => {
-	const { data, error } = useSWR(['goods', searchParams], () => fetcher('goods', searchParams))
+	//React Query
+	// Fetch goods data
+	const { data: goodsData, isLoading: isGoodsLoading, isError: isGoodsError } = useQuery({
+		queryKey: ['goods', searchParams],
+		queryFn: () => getAllGoods(searchParams, limit),
+	})
+	const goods = goodsData?.goods ?? []
 
-	if (error) {
-		console.error('Error fetching goods', error)
-	}
-	if (data?.goods.length === 0) {
-		return <EmptyState showReset />
-	}
-	if (!data) {
+	// Fetch slides data
+	const { data: slidesData, isLoading: isSlidesLoading, isError: isSlidesError } = useQuery({
+		queryKey: ['slides', searchParams],
+		queryFn: () => getAllSlides(searchParams, limit),
+	})
+	const slides = slidesData?.slides ?? []
+
+	// Fetch testimonials data
+
+	const {
+		data: testimonialsData,
+		isLoading: isTestimonialsLoading,
+		isError: isTestimonialsError,
+	} = useQuery({
+		queryKey: ['testimonials', searchParams],
+		queryFn: () => getAllTestimonials(searchParams, limit),
+	})
+	const testimonials = testimonialsData?.testimonials ?? []
+
+	// Handle loading states
+	if (isGoodsLoading || isSlidesLoading || isTestimonialsLoading) {
 		return <Loader />
+	}
+
+	// Handle errors
+	if (isGoodsError || isSlidesError || isTestimonialsError) {
+		return <div>Error fetching data.</div>
+	}
+
+	// Handle empty state
+	if (!goods?.length && !slides?.length && !testimonials?.length) {
+		return <EmptyState showReset />
 	}
 
 	return (
 		<div className='container'>
 			<Slider slides={slides} DescriptionComponent={Description} />
 			<h2 className='m-4 ml-0 text-2xl text-primaryAccentColor mb-4 bold'>Пропозиції дня</h2>
-			<ItemsList goods={data.goods} />
+			<ItemsList goods={goods} />
 			<div className='flex flex-col'>
 				<h2 className='m-4 ml-0 text-2xl text-primaryAccentColor mb-4 bold'>Відгуки клієнтів</h2>
-				<TestimonialsList />
+				<TestimonialsList testimonials={testimonials} />
 				<h2 className='m-4 ml-0 text-2xl text-primaryAccentColor mb-4 bold'>Переваги</h2>
 				<Advantages />
 			</div>

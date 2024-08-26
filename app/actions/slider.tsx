@@ -1,45 +1,41 @@
 'use server'
 
-import Category from '@/models/Category'
-import { ICategory } from '@/types/category/ICategory'
+import Slider from '@/models/Slider'
+import { ISlider } from '@/types/index'
 import { ISearchParams } from '@/types/searchParams'
 import { connectToDB } from '@/utils/dbConnect'
 import { revalidatePath } from 'next/cache'
 
 interface IGetAllCategories {
 	success: boolean
-	categories: ICategory[]
+	slides: ISlider[]
 	count: number
 }
 
-export async function addCategory(formData: FormData) {
+export async function addSlide(formData: FormData) {
 	const values = Object.fromEntries(formData.entries())
 	try {
 		await connectToDB()
-		const title = values.title
-		const existingCategory = await Category.findOne({ title })
-		if (existingCategory) {
-			throw new Error('Category already exists')
-		}
-		await Category.create(values)
+
+		await Slider.create(values)
 		return {
 			success: true,
-			message: 'Category added successfully',
+			message: 'Slide added successfully',
 		}
 	} catch (error) {
 		if (error instanceof Error) {
-			console.error('Error adding category:', error)
-			throw new Error('Failed to add category: ' + error.message)
+			console.error('Error adding Slide:', error)
+			throw new Error('Failed to add Slide: ' + error.message)
 		} else {
 			console.error('Unknown error:', error)
 			throw new Error('Failed to add category: Unknown error')
 		}
 	} finally {
-		revalidatePath('/admin/categories')
+		revalidatePath('/admin/slider')
 	}
 }
 
-export async function getAllCategories(
+export async function getAllSlides(
 	searchParams: ISearchParams,
 	limit: number,
 ): Promise<IGetAllCategories> {
@@ -48,32 +44,32 @@ export async function getAllCategories(
 	try {
 		await connectToDB()
 
-		const count = await Category.countDocuments()
+		const count = await Slider.countDocuments()
 
-		const categories: ICategory[] = await Category.find()
+		const slides: ISlider[] = await Slider.find()
 			.skip(limit * (page - 1))
 			.limit(limit)
 			.exec()
 
 		return {
 			success: true,
-			categories: JSON.parse(JSON.stringify(categories)),
+			slides: JSON.parse(JSON.stringify(slides)),
 			count: count,
 		}
 	} catch (error) {
 		console.log(error)
-		return { success: false, categories: [], count: 0 }
+		return { success: false, slides: [], count: 0 }
 	}
 }
 
-export async function getCategoryById(id: string) {
+export async function getSlideById(id: string) {
 	try {
 		await connectToDB()
-		const category = await Category.findById({ _id: id })
+		const category = await Slider.findById({ _id: id })
 		return JSON.parse(JSON.stringify(category))
 	} catch (error) {
 		if (error instanceof Error) {
-			console.error('Error getting categories:', error)
+			console.error('Error getting Slide:', error)
 			throw new Error('Failed to get categories: ' + error.message)
 		} else {
 			console.error('Unknown error:', error)
@@ -82,7 +78,7 @@ export async function getCategoryById(id: string) {
 	}
 }
 
-export async function deleteCategory(formData: FormData) {
+export async function deleteSlide(formData: FormData) {
 	const { id } = Object.fromEntries(formData) as { id: string }
 	if (!id) {
 		console.error('No ID provided')
@@ -90,53 +86,54 @@ export async function deleteCategory(formData: FormData) {
 	}
 	try {
 		await connectToDB()
-		await Category.findByIdAndDelete(id)
+		await Slider.findByIdAndDelete(id)
 	} catch (error) {
 		if (error instanceof Error) {
-			console.error('Error delete category:', error)
-			throw new Error('Failed to delete category: ' + error.message)
+			console.error('Error delete Slide:', error)
+			throw new Error('Failed to delete Slide: ' + error.message)
 		} else {
 			console.error('Unknown error:', error)
 			throw new Error('Failed to delete category: Unknown error')
 		}
 	} finally {
-		revalidatePath('/admin/categories')
+		revalidatePath('/admin/slider')
 	}
 }
 
-export async function updateCategory(formData: FormData) {
+export async function updateSlide(formData: FormData) {
 	const entries = Object.fromEntries(formData.entries())
 	const { id, title, src } = entries as {
 		id: string
 		title?: string
+		desc?: string
 		src?: string
 	}
 	try {
 		await connectToDB()
-		const updateFields: Partial<ICategory> = {
+		const updateFields: Partial<ISlider> = {
 			title,
 			src,
 		}
 		Object.keys(updateFields).forEach(
 			key =>
-				(updateFields[key as keyof ICategory] === '' ||
-					updateFields[key as keyof ICategory] === undefined) &&
-				delete updateFields[key as keyof ICategory],
+				(updateFields[key as keyof ISlider] === '' ||
+					updateFields[key as keyof ISlider] === undefined) &&
+				delete updateFields[key as keyof ISlider],
 		)
-		await Category.findByIdAndUpdate(id, updateFields)
+		await Slider.findByIdAndUpdate(id, updateFields)
 		return {
 			success: true,
-			message: 'Category updated successfully',
+			message: 'Slide updated successfully',
 		}
 	} catch (error) {
 		if (error instanceof Error) {
-			console.error('Error update category:', error)
-			throw new Error('Failed to category user: ' + error.message)
+			console.error('Error update Slide:', error)
+			throw new Error('Failed to update Slide: ' + error.message)
 		} else {
 			console.error('Unknown error:', error)
-			throw new Error('Failed to update category: Unknown error')
+			throw new Error('Failed to update Slide: Unknown error')
 		}
 	} finally {
-		revalidatePath('/admin/categories')
+		revalidatePath('/admin/slider')
 	}
 }

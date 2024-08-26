@@ -21,8 +21,8 @@ export default async function RootLayout({
   const session = await getServerSession( authOptions );
   
     const user = {
-    name: session?.user?.name ?? 'Guest', // Fallback to 'Guest' if name is undefined
-    email: session?.user?.email ?? '', // Fallback to an empty string if email is undefined
+    name: session?.user?.name ?? 'Guest', 
+    email: session?.user?.email ?? '', 
     image: session?.user?.image ?? `${process.env.PUBLIC_URL}/noavatar.png`,
   };
 

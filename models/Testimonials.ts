@@ -11,9 +11,13 @@ const testimonialsSchema = new Schema(
 			type: String,
 			required: true,
 		},
-		stars: {
+		rating: {
 			type: Number,
 			required: true,
+		},
+		isActive: {
+			type: Boolean,
+			default: false,
 		},
 	},
 	{ versionKey: false, timestamps: true },
@@ -21,5 +25,7 @@ const testimonialsSchema = new Schema(
 
 testimonialsSchema.index({ '$**': 'text' })
 
-export default mongoose.models.testimonialsSchema ||
-	mongoose.model('Testimonials', testimonialsSchema)
+const Testimonials =
+	mongoose.models.Testimonials || mongoose.model('Testimonials', testimonialsSchema)
+
+export default Testimonials

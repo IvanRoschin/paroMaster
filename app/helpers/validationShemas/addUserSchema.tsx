@@ -7,10 +7,10 @@ const passwordRegexp = /^\S+$/
 
 export const userFormSchema = Yup.object().shape({
 	name: Yup.string()
-		.max(20)
-		.min(3)
+		.min(2, 'Мінімум 2 символи')
+		.max(20, 'Максимум 20 символів')
 		.matches(nameRegex, {
-			message: 'Тільки українські букви від 3 до 20 символів',
+			message: 'Тільки українські букви',
 		})
 		.required(`Обов'язкове поле`),
 	phone: Yup.string()

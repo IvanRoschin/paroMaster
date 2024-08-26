@@ -56,18 +56,20 @@ const ImageUploadCloudinary: React.FC<ImageUploadProps> = ({
 					>
 						<TbPhotoPlus size={50} />
 						<div className='font-semibold text-lg text-center'>Завантажити</div>
-						<div className='flex flex-wrap gap-2 mt-4'>
-							{resource.map((src, index) => (
-								<div key={index} className='relative w-24 h-24'>
-									<Image
-										alt={`Upload ${index + 1}`}
-										fill
-										style={{ objectFit: 'cover' }}
-										src={src}
-									/>
-								</div>
-							))}
-						</div>
+						{resource.length > 0 && (
+							<div className='flex flex-wrap gap-2 mt-4'>
+								{resource.map((src, index) => (
+									<div key={index} className='relative w-24 h-24'>
+										<Image
+											alt={`Upload ${index + 1}`}
+											fill
+											style={{ objectFit: 'cover' }}
+											src={src}
+										/>
+									</div>
+								))}
+							</div>
+						)}
 
 						{errors?.src && <span className='text-red-500'>{errors?.src as any}</span>}
 					</div>

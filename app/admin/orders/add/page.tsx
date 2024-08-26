@@ -1,10 +1,10 @@
-import { addOrder } from '@/actions/orders'
-import { AddGoodForm } from '@/components/index'
+import { addOrderAction } from '@/actions/orders'
+import { AddOrderForm } from '@/components/index'
 
 const AddOrderPage = () => {
 	return (
 		<div className='mb-20'>
-			<AddGoodForm title='Додати новий ордер' action={addOrder} />
+			<AddOrderForm title='Додати новий ордер' action={addOrderAction} />
 		</div>
 	)
 }

@@ -8,7 +8,7 @@ const CategorySchema = new Schema(
 			type: String,
 			required: true,
 		},
-		imgUrl: {
+		src: {
 			type: String,
 			required: true,
 		},

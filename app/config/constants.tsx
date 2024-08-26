@@ -1,4 +1,20 @@
 ///Categories///
+// 'use client'
+
+// import { getAllCategories } from '@/actions/categories'
+// import { ICategory } from '@/types/index'
+// import useSWR from 'swr'
+
+// interface CategoriesResponse {
+// 	success: boolean
+// 	categories: ICategory[]
+// 	count: number
+// }
+
+// const fetcher = async (): Promise<CategoriesResponse> => {
+// 	return getAllCategories()
+// }
+// const { data, error } = useSWR(['categories'], () => fetcher())
 
 export const categoryList = [
 	{

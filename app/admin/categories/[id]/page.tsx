@@ -1,5 +1,5 @@
 import { getCategoryById, updateCategory } from '@/actions/categories'
-import AddCategoryForm from '@/components/admin/AddCategoryForm'
+import { AddCategoryForm } from '@/components/index'
 
 interface Params {
 	id: string

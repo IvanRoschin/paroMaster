@@ -2,6 +2,7 @@
 
 import AddCustomerForm from '@/components/admin/AddCustromerForm'
 import AddGoodForm from '@/components/admin/AddGoodForm'
+import TestimonialForm from '@/components/admin/AddTestimonialForm'
 import AdminMenu from '@/components/admin/Navbar'
 import Advantages from '@/components/Advantages'
 import Cart from '@/components/Cart/Cart'
@@ -20,11 +21,15 @@ import Sidebar from '@/components/Sidebar'
 import Slider from '@/components/Slider'
 import TestimonialsList from '@/components/Testimonials'
 import AddCategoryForm from './admin/AddCategoryForm'
+import AddOrderForm from './admin/AddOrderForm'
+import AddSlideForm from './admin/AddSlideForm'
 import { slides } from './Slides'
 export {
 	AddCategoryForm,
 	AddCustomerForm,
 	AddGoodForm,
+	AddOrderForm,
+	AddSlideForm,
 	AdminMenu,
 	Advantages,
 	Cart,
@@ -43,5 +48,6 @@ export {
 	Sidebar,
 	Slider,
 	slides,
+	TestimonialForm,
 	TestimonialsList,
 }
