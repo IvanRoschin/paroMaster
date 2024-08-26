@@ -5,8 +5,8 @@ const passwordRegexp = /^\S+$/
 
 export const userLoginSchema = Yup.object().shape({
 	email: Yup.string()
-		.max(63)
-		.min(3)
+		.max(63, 'Максимум 63 символи')
+		.min(3, 'Мінімум 3 символи')
 		.email()
 		.matches(emailRegex, {
 			message: 'Має включати @, від 3 до 63 символів',

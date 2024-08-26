@@ -1,12 +1,11 @@
 'use client'
 
 import { getAllGoods } from '@/actions/goods'
-import EmptyState from '@/components/EmptyState'
 import InfiniteScrollGoods from '@/components/InfiniteScrollGoods'
-import { IGood } from '@/types/good/IGood'
+import { IGood } from '@/types/index'
 import { ISearchParams } from '@/types/searchParams'
 import useSWR from 'swr'
-import { Loader } from '../components'
+import { EmptyState, Loader } from '../components'
 
 interface IGetAllGoodsResponse {
 	success: boolean
@@ -20,7 +19,7 @@ const fetcher = async (url: string, params: ISearchParams): Promise<IGetAllGoods
 	return getAllGoods(params, limit)
 }
 
-const CatalogPage = ({ searchParams }: { searchParams: ISearchParams }) => {
+export default async function categoryPage({ searchParams }: { searchParams: ISearchParams }) {
 	const { data, error } = useSWR(['goods', searchParams], () => fetcher('goods', searchParams))
 
 	if (error) {
@@ -35,10 +34,8 @@ const CatalogPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 
 	return (
 		<div>
-			<h2 className='title mb-1'>Каталог товарів</h2>
-			<h3>
-				Всього товарів в базі: <span className='text-primaryAccentColor'>{data.count}</span>
-			</h3>
+			<h2 className='text-4xl mb-4'>{searchParams?.category}</h2>
+			{/* <ItemsList goods={data.goods} /> */}
 			<div key={Math.random()}>
 				<InfiniteScrollGoods
 					initialGoods={data.goods}
@@ -49,5 +46,3 @@ const CatalogPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 		</div>
 	)
 }
-
-export default CatalogPage

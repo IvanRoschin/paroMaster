@@ -1,6 +1,6 @@
 'use client'
 
-import { getAllOrders } from '@/actions/orders'
+import { deleteOrder, getAllOrders } from '@/actions/orders'
 import Pagination from '@/components/admin/Pagination'
 import Button from '@/components/Button'
 import EmptyState from '@/components/EmptyState'
@@ -10,6 +10,7 @@ import { ISearchParams } from '@/types/searchParams'
 import Link from 'next/link'
 import { useState } from 'react'
 import { FaPen, FaTrash } from 'react-icons/fa'
+import { toast } from 'sonner'
 import useSWR from 'swr'
 
 interface OrdersResponse {
@@ -46,6 +47,18 @@ const OrdersPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 
 	if (data.orders.length === 0) {
 		return <EmptyState />
+	}
+
+	const handleDelete = async (id: string) => {
+		try {
+			const formData = new FormData()
+			formData.append('id', id)
+			await deleteOrder(formData)
+			toast.success('Ордер успішно видалено!')
+		} catch (error) {
+			toast.error('Помилка при видаленні ордеру!')
+			console.error('Error deleting order', error)
+		}
 	}
 
 	const ordersCount = data.count
@@ -127,14 +140,25 @@ const OrdersPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 								<td className='p-2 border-r-2 text-center'>{order.totalPrice}</td>
 								<td className='p-2 border-r-2 text-center'>{order.status}</td>
 								<td className='p-2 border-r-2 text-center'>
-									<Link href={`/admin/orders/${order.orderNumber}`}>
+									<Link href={`/admin/orders/${order._id}`}>
 										<Button type='button' icon={FaPen} small outline color='border-yellow-400' />
 									</Link>
 								</td>
 								<td className='p-2 text-center'>
-									<form action={`/admin/orders/delete/${order.orderNumber}`} method='post'>
-										<Button type='submit' icon={FaTrash} small outline color='border-red-400' />
-									</form>
+									<Button
+										type='button'
+										icon={FaTrash}
+										small
+										outline
+										color='border-red-400'
+										onClick={() => {
+											if (order._id) {
+												handleDelete(order._id)
+											} else {
+												console.error('Error: Good ID is undefined')
+											}
+										}}
+									/>
 								</td>
 							</tr>
 						))}

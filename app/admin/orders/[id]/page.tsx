@@ -1,5 +1,5 @@
 import { getOrderById, updateOrder } from '@/actions/orders'
-import AddUserForm from '@/components/admin/AddUserForm'
+import { AddOrderForm } from '@/components/index'
 
 interface Params {
 	id: string
@@ -11,7 +11,7 @@ const SingleOrderPage = async ({ params }: { params: Params }) => {
 
 	return (
 		<div className='mb-20'>
-			<AddUserForm order={order} title={'Редагувати дані ордера'} action={updateOrder} />
+			<AddOrderForm order={order} title={'Редагувати дані ордера'} action={updateOrder} />
 		</div>
 	)
 }

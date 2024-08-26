@@ -11,6 +11,9 @@ import {
 	MdSupervisedUserCircle,
 	MdVerifiedUser,
 } from 'react-icons/md'
+import { SiTestinglibrary } from 'react-icons/si'
+import { TbCategoryPlus } from 'react-icons/tb'
+import { TfiLayoutSlider } from 'react-icons/tfi'
 
 const menuItems = [
 	{
@@ -41,7 +44,17 @@ const menuItems = [
 	{
 		title: 'Категорії',
 		path: '/admin/categories',
-		icon: <MdVerifiedUser />,
+		icon: <TbCategoryPlus />,
+	},
+	{
+		title: 'Відгуки',
+		path: '/admin/testimonials',
+		icon: <SiTestinglibrary />,
+	},
+	{
+		title: 'Слайдер',
+		path: '/admin/slider',
+		icon: <TfiLayoutSlider />,
 	},
 ]
 

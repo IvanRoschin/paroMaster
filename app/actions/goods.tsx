@@ -263,9 +263,29 @@ export async function uniqueBrands() {
 
 export async function getMinMaxPrice() {
 	try {
-		connectToDB()
+		// Connect to the database
+		await connectToDB()
 
+		// Perform the aggregation
 		const result = await Good.aggregate([
+			{
+				$project: {
+					// Convert price to double, exclude documents where price is not a number
+					price: {
+						$cond: {
+							if: { $isNumber: { $toDouble: '$price' } },
+							then: { $toDouble: '$price' },
+							else: null,
+						},
+					},
+				},
+			},
+			{
+				$match: {
+					// Filter out documents where price is null (i.e., was not a number)
+					price: { $ne: null },
+				},
+			},
 			{
 				$group: {
 					_id: null,
@@ -282,13 +302,15 @@ export async function getMinMaxPrice() {
 			},
 		]).exec()
 
+		// Handle the case where no goods are found
 		if (result.length === 0) {
-			throw new Error('No goods found')
+			throw new Error('No valid goods found')
 		}
 
-		return result[0]
+		return result[0] // Return the min and max price
 	} catch (error) {
-		console.error(error)
+		console.error('Error fetching min and max prices:', error)
+		// You can also throw the error if you want the calling function to handle it
+		throw error
 	}
-	revalidatePath('/')
 }

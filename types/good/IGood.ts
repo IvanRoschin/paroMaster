@@ -14,7 +14,8 @@ export interface IGood {
 }
 
 export interface SGood {
-	_id: string
+	quantity: number
+	id: string
 	category: string
 	src: string[]
 	brand: string

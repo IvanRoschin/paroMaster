@@ -1,21 +1,19 @@
 'use client'
 
+import { getAllCategories } from '@/actions/categories'
 import { addNewLid } from '@/actions/lids'
-import { categoryList } from 'app/config/constants'
+import { useQuery } from '@tanstack/react-query'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
 import AddLidForm from './AddLidForm'
-import { Icon } from './Icon'
+import EmptyState from './EmptyState'
+import Loader from './Loader'
 import Logo from './Logo'
 import Socials from './Socials'
 
-interface FormValues {
-	name: string
-	email: string
-	phone: string
-}
+const limit = 10
 
 const env = process.env
 env.PUBLIC_URL = env.PUBLIC_URL || ''
@@ -36,8 +34,32 @@ const Footer = () => {
 		[searchParams],
 	)
 
+	const {
+		data: categoriesData,
+		isLoading: isCategorisLoading,
+		isError: isCategoriesError,
+	} = useQuery({
+		queryKey: ['categories', searchParams],
+		queryFn: () => getAllCategories(searchParams, limit),
+	})
+
+	const categories = categoriesData?.categories
+
+	// Handle loading states
+	if (isCategorisLoading) {
+		return <Loader />
+	}
+
+	if (isCategoriesError) {
+		return <div>Error fetching data.</div>
+	}
+	// Handle errors
+	if (!categories?.length) {
+		return <EmptyState showReset />
+	}
+
 	return (
-		<div className='bg-slate-800  p-8 text-white'>
+		<div className='bg-slate-800 p-8 text-white'>
 			<div className='flex justify-between mb-10'>
 				<Logo color='white' />
 				<Socials color='white' />
@@ -47,7 +69,7 @@ const Footer = () => {
 					<div className='flex gap-8 mb-20'>
 						<div className='w-[50%] text-2xl flex flex-col gap-8'>
 							Доставка
-							<div className='border-b border-primaryAccentColor ' />
+							<div className='border-b border-primaryAccentColor' />
 							<div className='flex justify-between'>
 								<Image
 									src={`${process.env.PUBLIC_URL}/delivery/nova_poshta_white.svg`}
@@ -78,7 +100,7 @@ const Footer = () => {
 								/>
 								<Image
 									src={`${process.env.PUBLIC_URL}/payment/visa_white.svg`}
-									alt='visa'
+									alt='Visa'
 									width={120}
 									height={30}
 									className='h-[30px] object-fit'
@@ -86,63 +108,62 @@ const Footer = () => {
 							</div>
 						</div>
 					</div>
-					<div className='flex gap-8 mb-4 '>
+					<div className='flex gap-8 mb-4'>
 						<div className='w-[33%] text-2xl flex flex-col gap-8'>
 							Інформація
-							<div className='border-b border-primaryAccentColor ' />
+							<div className='border-b border-primaryAccentColor' />
 							<ul className='text-sm'>
-								<li className='nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200'>
-									{' '}
-									<Link href='/delivery'>Оплата та доставка</Link>
-								</li>
-								<li className='nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200'>
-									{' '}
-									<Link href='/services'> Послуги та сервіси</Link>
-								</li>
-								<li className='nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200'>
-									{' '}
-									<Link href='/guarantee'>Гарантія</Link>
-								</li>
-								<li className='nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200'>
-									{' '}
-									<Link href='/contact'>Контакти</Link>
-								</li>
-								<li className='nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200'>
-									{' '}
-									<Link href='/guarantee'>Політика Конфіденційності</Link>
-								</li>
+								{[
+									'Оплата та доставка',
+									'Послуги та сервіси',
+									'Гарантія',
+									'Контакти',
+									'Політика Конфіденційності',
+								].map((text, index) => (
+									<li
+										key={index}
+										className='nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200'
+									>
+										<Link href={`/${text.toLowerCase().replace(/ /g, '-')}`}>{text}</Link>
+									</li>
+								))}
 							</ul>
 						</div>
 						<div className='w-[33%] text-2xl flex flex-col gap-8'>
-							Товари <div className='border-b border-primaryAccentColor ' />
+							Товари
+							<div className='border-b border-primaryAccentColor' />
 							<ul className='text-sm'>
-								<li className='nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200'>
-									<Link href='/special'>Популярні</Link>
-								</li>
-								<li className='nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200'>
-									<Link href='/sales'>Акції та знижки</Link>
-								</li>
+								{['Популярні', 'Акції та знижки'].map((text, index) => (
+									<li
+										key={index}
+										className='nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200'
+									>
+										<Link href={`/${text.toLowerCase().replace(/ /g, '-')}`}>{text}</Link>
+									</li>
+								))}
 							</ul>
 						</div>
 						<div className='w-[33%] text-2xl flex flex-col gap-8'>
-							Категорії <div className='border-b border-primaryAccentColor ' />
+							Категорії
+							<div className='border-b border-primaryAccentColor' />
 							<ul className='text-sm'>
-								{categoryList.map(({ icon, title }, index) => {
-									return (
-										<li
-											key={index}
-											className='mb-2 nav hover:transform hover:translate-x-2 transition-transform duration-200'
+								{categories?.map(({ src, title }, index) => (
+									<li key={index} className='mb-3 nav'>
+										<Link
+											href={`/category/?${createQueryString('category', title)}`}
+											className='flex justify-start items-start group'
 										>
-											<Link
-												href={`/category/?${createQueryString('category', title)}`}
-												className='flex justify-start items-start'
-											>
-												<Icon name={icon} className='w-5 h-5  mr-3 fill-white bg-transparent' />
-												{title}
-											</Link>
-										</li>
-									)
-								})}
+											<Image
+												alt={title}
+												src={src}
+												width={20}
+												height={20}
+												className='w-5 h-5 mr-3 transition-filter duration-300 ease-in-out group-hover:filter-primary filter-white'
+											/>
+											{title}
+										</Link>
+									</li>
+								))}
 							</ul>
 						</div>
 					</div>
@@ -158,7 +179,7 @@ const Footer = () => {
 					захищено. Створено з ❤️ та інноваціями.
 					<br />
 					<br />
-					Створюючи сьогодення, ми формуємо майбутнє разом.{' '}
+					Створюючи сьогодення, ми формуємо майбутнє разом.
 				</p>
 			</div>
 		</div>

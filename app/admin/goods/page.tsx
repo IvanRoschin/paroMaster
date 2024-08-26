@@ -8,7 +8,15 @@ import { Loader, Search } from '@/components/index'
 import { IGood } from '@/types/good/IGood'
 import { ISearchParams } from '@/types/searchParams'
 import Link from 'next/link'
-import { FaPen, FaTrash } from 'react-icons/fa'
+import { useState } from 'react'
+import {
+	FaPen,
+	FaSortAlphaDown,
+	FaSortAlphaUp,
+	FaSortAmountDown,
+	FaSortAmountUp,
+	FaTrash,
+} from 'react-icons/fa'
 import { toast } from 'sonner'
 import useSWR from 'swr'
 
@@ -25,7 +33,12 @@ const fetcher = async (params: ISearchParams): Promise<GoodsResponse> => {
 }
 
 const ProductsPage = ({ searchParams }: { searchParams: ISearchParams }) => {
-	const { data, error } = useSWR(['goods', searchParams], () => fetcher(searchParams))
+	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+	const [sortBy, setSortBy] = useState<'category' | 'brand' | 'price' | 'availability'>('category')
+
+	const { data, error } = useSWR(['goods', searchParams, sortOrder, sortBy], () =>
+		fetcher({ ...searchParams, sortOrder, sortBy }),
+	)
 
 	if (error) {
 		console.error('Error fetching goods', error)
@@ -53,9 +66,7 @@ const ProductsPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 	}
 
 	const goodsCount = data.count
-
 	const page = searchParams.page
-
 	const totalPages = Math.ceil(goodsCount / limit)
 	const pageNumbers = []
 	const offsetNumber = 3
@@ -68,6 +79,27 @@ const ProductsPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 		}
 	}
 
+	const handleSort = (sortKey: 'category' | 'brand' | 'price' | 'availability') => {
+		setSortBy(sortKey)
+		setSortOrder(prevOrder => (prevOrder === 'asc' ? 'desc' : 'asc'))
+	}
+
+	const sortedGoods = [...data.goods].sort((a, b) => {
+		let comparison = 0
+
+		if (sortBy === 'category') {
+			comparison = a.category.localeCompare(b.category)
+		} else if (sortBy === 'brand') {
+			comparison = a.brand.localeCompare(b.brand)
+		} else if (sortBy === 'price') {
+			comparison = a.price - b.price
+		} else if (sortBy === 'availability') {
+			comparison = a.isAvailable === b.isAvailable ? 0 : a.isAvailable ? -1 : 1
+		}
+
+		return sortOrder === 'asc' ? comparison : -comparison
+	})
+
 	return (
 		<div className='p-3'>
 			<div className='flex items-center justify-between mb-8'>
@@ -79,28 +111,73 @@ const ProductsPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 			<table className='w-full text-xs mb-8'>
 				<thead>
 					<tr className='bg-slate-300 font-semibold'>
-						<td className='p-2 border-r-2 text-center'>Категорія</td>
-						<td className='p-2 border-r-2 text-center'>Назва</td>
-						<td className='p-2 border-r-2 text-center'>Бренд</td>
+						<td className='p-2 border-r-2 text-center'>
+							<div className='flex items-center'>
+								<Button
+									type='button'
+									label='Категорія'
+									icon={
+										sortBy === 'category' && sortOrder === 'asc' ? FaSortAlphaUp : FaSortAlphaDown
+									}
+									onClick={() => handleSort('category')}
+								/>
+							</div>
+						</td>
+						<td className='p-2 border-r-2 text-center'>
+							<div className='flex items-center'>
+								<Button
+									type='button'
+									icon={sortBy === 'brand' && sortOrder === 'asc' ? FaSortAlphaUp : FaSortAlphaDown}
+									onClick={() => handleSort('brand')}
+									label='Бренд'
+								/>
+							</div>
+						</td>
 						<td className='p-2 border-r-2 text-center'>Модель</td>
 						<td className='p-2 border-r-2 text-center'>Артикул</td>
-						<td className='p-2 border-r-2 text-center'>Ціна</td>
-						<td className='p-2 border-r-2 text-center'>В наявності</td>
+						<td className='p-2 border-r-2 text-center'>
+							<div className='flex items-center'>
+								<Button
+									label='Ціна'
+									type='button'
+									icon={
+										sortBy === 'price' && sortOrder === 'asc' ? FaSortAmountUp : FaSortAmountDown
+									}
+									onClick={() => handleSort('price')}
+									aria-label={`Sort by price ${sortOrder === 'asc' ? 'descending' : 'ascending'}`}
+								/>
+							</div>
+						</td>
+						<td className='p-2 border-r-2 text-center'>
+							<div className='flex items-center'>
+								<Button
+									label='В наявності'
+									type='button'
+									icon={
+										sortBy === 'availability' && sortOrder === 'asc'
+											? FaSortAmountUp
+											: FaSortAmountDown
+									}
+									onClick={() => handleSort('availability')}
+									aria-label={`Sort by availability ${
+										sortOrder === 'asc' ? 'descending' : 'ascending'
+									}`}
+								/>
+							</div>
+						</td>
 						<td className='p-2 border-r-2 text-center'>Редагувати</td>
 						<td className='p-2 border-r-2 text-center'>Видалити</td>
 					</tr>
 				</thead>
 				<tbody>
-					{data.goods.map(good => (
+					{sortedGoods.map(good => (
 						<tr key={good._id} className='border-b-2 '>
 							<td className='p-2 border-r-2 text-start'>{good.category}</td>
-							<td className='p-2 border-r-2 text-start'>{good.title}</td>
-							<td className='p-2 border-r-2 text-center'>{good.brand}</td>
+							<td className='p-2 border-r-2 text-start'>{good.brand}</td>
 							<td className='p-2 border-r-2 text-center'>{good.model}</td>
 							<td className='p-2 border-r-2 text-center'>{good.vendor}</td>
 							<td className='p-2 border-r-2 text-center'>{good.price}</td>
 							<td className='p-2 border-r-2 text-center'>{good.isAvailable ? 'Так' : 'Ні'}</td>
-
 							<td className='p-2 border-r-2 text-center'>
 								<Link
 									href={`/admin/goods/${good._id}`}
@@ -124,10 +201,6 @@ const ProductsPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 										}
 									}}
 								/>
-								{/* <form action={deleteGood} className='flex justify-center items-center'>
-									<input type='hidden' name='id' value={good._id} />
-									<Button type='submit' icon={FaTrash} small outline color='border-red-400' />
-								</form> */}
 							</td>
 						</tr>
 					))}

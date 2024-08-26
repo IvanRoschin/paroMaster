@@ -8,6 +8,7 @@ import { IconType } from 'react-icons'
 import { FaShoppingCart, FaUser } from 'react-icons/fa'
 import { FiPackage } from 'react-icons/fi'
 import { RiAdminLine } from 'react-icons/ri'
+import { SiTestinglibrary } from 'react-icons/si'
 
 interface CardData {
 	title: string
@@ -46,6 +47,12 @@ const cardData: CardData[] = [
 		count: 323,
 		link: 'admin/categories',
 		icon: FiPackage,
+	},
+	{
+		title: 'Відгуки',
+		count: 323,
+		link: 'admin/testimonials',
+		icon: SiTestinglibrary,
 	},
 ]
 

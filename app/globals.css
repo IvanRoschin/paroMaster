@@ -66,6 +66,12 @@ primaryAccentColor #ea580c => 234 88 12
 	.nav:focus::after {
 		@apply w-full;
 	}
+	.filter-primary {
+		filter: invert(39%) sepia(95%) saturate(3935%) hue-rotate(350deg) brightness(94%) contrast(91%);
+	}
+	.filter-white {
+		filter: invert(100%) brightness(100%);
+	}
 
 	.swiper {
 		@apply mx-0

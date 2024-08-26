@@ -1,6 +1,6 @@
 'use client'
 
-import { deleteCategory, getAllCategories } from '@/actions/categories'
+import { deleteCategory } from '@/actions/categories'
 import Pagination from '@/components/admin/Pagination'
 import Button from '@/components/Button'
 import EmptyState from '@/components/EmptyState'
@@ -8,10 +8,12 @@ import Loader from '@/components/Loader'
 import Search from '@/components/Search'
 import { ICategory } from '@/types/category/ICategory'
 import { ISearchParams } from '@/types/searchParams'
+import useGetCategories from 'app/hooks/useCategories'
 import Image from 'next/image'
 import Link from 'next/link'
-import { FaPen, FaTrash } from 'react-icons/fa'
-import useSWR from 'swr'
+import { useState } from 'react'
+import { FaPen, FaSortAlphaDown, FaSortAlphaUp, FaTrash } from 'react-icons/fa'
+import { toast } from 'sonner'
 
 interface CategoriesResponse {
 	success: boolean
@@ -19,32 +21,48 @@ interface CategoriesResponse {
 	count: number
 }
 
-const limit = 4
+const limit = 10
 
-const fetcher = async (params: ISearchParams): Promise<CategoriesResponse> => {
-	return getAllCategories(params, limit)
-}
+// const fetcher = async (params: ISearchParams): Promise<CategoriesResponse> => {
+// 	return getAllCategories(params, limit)
+// }
 
 const CategoriesPage = ({ searchParams }: { searchParams: ISearchParams }) => {
-	const { data, error } = useSWR(['categories', searchParams], () => fetcher(searchParams))
+	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+	const { data, error, isLoading } = useGetCategories({ ...searchParams, sortOrder })
 
 	if (error) {
 		console.error('Error fetching categories', error)
 		return <div>Error loading categories.</div>
 	}
 
-	if (!data) {
+	if (isLoading) {
 		return <Loader />
 	}
 
-	if (data.categories.length === 0) {
+	if (data?.categories.length === 0) {
 		return <EmptyState />
 	}
 
-	const categoriesCount = data.count
+	// Sorting handler
+	const handleSort = () => {
+		setSortOrder(prevOrder => (prevOrder === 'asc' ? 'desc' : 'asc'))
+	}
 
-	const page = searchParams.page
+	const handleDelete = async (id: string) => {
+		try {
+			const formData = new FormData()
+			formData.append('id', id)
+			await deleteCategory(formData)
+			toast.success('Категорію успішно видалено!')
+		} catch (error) {
+			toast.error('Помилка при видаленні Категорії!')
+			console.error('Error deleting order', error)
+		}
+	}
 
+	const categoriesCount = data?.count || 0
+	const page = searchParams.page ? Number(searchParams.page) : 1
 	const totalPages = Math.ceil(categoriesCount / limit)
 	const pageNumbers = []
 	const offsetNumber = 3
@@ -56,7 +74,11 @@ const CategoriesPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 			}
 		}
 	}
-	console.log('data.categories', data.categories)
+
+	const sortedCategories = [...(data?.categories || [])].sort((a, b) => {
+		const comparison = a.title.localeCompare(b.title)
+		return sortOrder === 'asc' ? comparison : -comparison
+	})
 
 	return (
 		<div className='p-3'>
@@ -69,15 +91,25 @@ const CategoriesPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 			<table className='w-full text-xs mb-8'>
 				<thead>
 					<tr className='bg-slate-300 font-semibold'>
-						<td className='p-2 border-r-2 text-center'>Назва категорії</td>
+						<td className='p-2 border-r-2 text-center flex items-center'>
+							<Button
+								label='Назва категорії'
+								small
+								width='80'
+								type='button'
+								icon={sortOrder === 'asc' ? FaSortAlphaUp : FaSortAlphaDown}
+								onClick={handleSort}
+								aria-label={`Sort categories ${sortOrder === 'asc' ? 'descending' : 'ascending'}`}
+							/>
+						</td>
 						<td className='p-2 border-r-2 text-center'>SVG іконка</td>
 						<td className='p-2 border-r-2 text-center'>Редагувати</td>
 						<td className='p-2 border-r-2 text-center'>Видалити</td>
 					</tr>
 				</thead>
 				<tbody>
-					{data.categories.map(category => (
-						<tr key={category._id} className='border-b-2 '>
+					{sortedCategories.map(category => (
+						<tr key={category._id} className='border-b-2'>
 							<td className='p-2 border-r-2 text-start'>{category.title}</td>
 							<td className='p-2 border-r-2 text-start'>
 								<div className='flex justify-center'>
@@ -93,10 +125,20 @@ const CategoriesPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 								</Link>
 							</td>
 							<td className='p-2 text-center'>
-								<form action={deleteCategory} className='flex justify-center items-center'>
-									<input type='hidden' name='id' value={category._id} />
-									<Button type='submit' icon={FaTrash} small outline color='border-red-400' />
-								</form>
+								<Button
+									type='button'
+									icon={FaTrash}
+									small
+									outline
+									color='border-red-400'
+									onClick={() => {
+										if (category._id) {
+											handleDelete(category._id)
+										} else {
+											console.error('Error: Category ID is undefined')
+										}
+									}}
+								/>
 							</td>
 						</tr>
 					))}
