@@ -2,7 +2,7 @@
 
 import Category from '@/models/Category'
 import { ICategory } from '@/types/category/ICategory'
-import { ISearchParams } from '@/types/searchParams'
+import { ISearchParams } from '@/types/index'
 import { connectToDB } from '@/utils/dbConnect'
 import { revalidatePath } from 'next/cache'
 

@@ -1,50 +1,43 @@
 'use client'
 
-import { deleteCategory } from '@/actions/categories'
+import { deleteCategory, getAllCategories } from '@/actions/categories'
 import Pagination from '@/components/admin/Pagination'
 import Button from '@/components/Button'
 import EmptyState from '@/components/EmptyState'
 import Loader from '@/components/Loader'
 import Search from '@/components/Search'
-import { ICategory } from '@/types/category/ICategory'
-import { ISearchParams } from '@/types/searchParams'
-import useGetCategories from 'app/hooks/useCategories'
+import { ISearchParams } from '@/types/index'
+import useFetchData from 'app/hooks/useFetchData'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 import { FaPen, FaSortAlphaDown, FaSortAlphaUp, FaTrash } from 'react-icons/fa'
 import { toast } from 'sonner'
 
-interface CategoriesResponse {
-	success: boolean
-	categories: ICategory[]
-	count: number
-}
-
 const limit = 10
-
-// const fetcher = async (params: ISearchParams): Promise<CategoriesResponse> => {
-// 	return getAllCategories(params, limit)
-// }
 
 const CategoriesPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
-	const { data, error, isLoading } = useGetCategories({ ...searchParams, sortOrder })
 
-	if (error) {
-		console.error('Error fetching categories', error)
-		return <div>Error loading categories.</div>
-	}
+	const { data, isLoading, isError } = useFetchData(
+		searchParams,
+		limit,
+		getAllCategories,
+		'categories',
+	)
 
 	if (isLoading) {
 		return <Loader />
 	}
 
-	if (data?.categories.length === 0) {
-		return <EmptyState />
+	if (isError) {
+		return <div>Error fetching data.</div>
 	}
 
-	// Sorting handler
+	if (!data?.categories || data.categories.length === 0) {
+		return <EmptyState showReset />
+	}
+
 	const handleSort = () => {
 		setSortOrder(prevOrder => (prevOrder === 'asc' ? 'desc' : 'asc'))
 	}
@@ -62,7 +55,9 @@ const CategoriesPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 	}
 
 	const categoriesCount = data?.count || 0
+
 	const page = searchParams.page ? Number(searchParams.page) : 1
+
 	const totalPages = Math.ceil(categoriesCount / limit)
 	const pageNumbers = []
 	const offsetNumber = 3

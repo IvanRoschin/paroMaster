@@ -3,12 +3,18 @@ import { getGoodById } from '@/actions/goods'
 import Button from '@/components/Button'
 import ImagesBlock from '@/components/ImagesBlock'
 import Loader from '@/components/Loader'
-import { IGood } from '@/types/good/IGood'
+import { IGood } from '@/types/index'
 import { useShoppingCart } from 'app/context/ShoppingCartContext'
+import { useSession } from 'next-auth/react'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { FaPen } from 'react-icons/fa'
 import useSWR from 'swr'
 
 export default function Item({ params }: { params: any }) {
+	const { data: session } = useSession()
+
+	const isAdmin = session?.user
 	const [amount, setAmount] = useState(0)
 
 	const {
@@ -42,7 +48,17 @@ export default function Item({ params }: { params: any }) {
 	return (
 		<div className='flex'>
 			<ImagesBlock item={data} />
-			<div className='pt-10'>
+			<div className='pt-10 relative'>
+				{isAdmin && (
+					<Link
+						href={`/admin/goods/${data._id}`}
+						className='absolute top-0 right-0 flex items-center justify-center'
+					>
+						<span className='cursor-pointer w-[30px] h-[30px] rounded-full bg-orange-600 flex justify-center items-center hover:opacity-80'>
+							<FaPen size={12} color='white' />
+						</span>
+					</Link>
+				)}
 				<h2 className='font-semibold text-2xl mb-[40px]'>{data.title}</h2>
 				<p className='mb-[20px]'>{data.description}</p>
 				<p className={`mb-[30px] ${data.isAvailable ? 'text-green-600' : 'text-red-600'}`}>

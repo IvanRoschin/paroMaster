@@ -2,9 +2,8 @@
 
 import Order from '@/models/Order'
 import { SGood } from '@/types/good/IGood'
-import { IGood } from '@/types/index'
+import { ISearchParams } from '@/types/index'
 import { IOrder } from '@/types/order/IOrder'
-import { ISearchParams } from '@/types/searchParams'
 import { connectToDB } from '@/utils/dbConnect'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'

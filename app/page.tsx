@@ -1,66 +1,68 @@
 'use client'
 
-import {
-	Advantages,
-	Description,
-	EmptyState,
-	ItemsList,
-	Loader,
-	Slider,
-	TestimonialsList,
-} from '@/components/index'
+import { Advantages, Description, ItemsList, Slider, TestimonialsList } from '@/components/index'
 import { ISearchParams } from '@/types/index'
-import { useQuery } from '@tanstack/react-query'
 import { getAllGoods } from './actions/goods'
 import { getAllSlides } from './actions/slider'
 import { getAllTestimonials } from './actions/testimonials'
-// import useGetGoods from './hooks/useGoods'
-// import useGetSlides from './hooks/useSlides'
+import useFetchData from './hooks/useFetchData'
+import useSwrGetData from './hooks/useGoods'
 
 const limit = 4
 
 const Home = ({ searchParams }: { searchParams: ISearchParams }) => {
-	//React Query
-	// Fetch goods data
-	const { data: goodsData, isLoading: isGoodsLoading, isError: isGoodsError } = useQuery({
-		queryKey: ['goods', searchParams],
-		queryFn: () => getAllGoods(searchParams, limit),
-	})
-	const goods = goodsData?.goods ?? []
+	const { data: slidesData, isLoading: isSlidesLoading, isError: isSlidesError } = useFetchData(
+		searchParams,
+		limit,
+		getAllSlides,
+		'slides',
+	)
 
-	// Fetch slides data
-	const { data: slidesData, isLoading: isSlidesLoading, isError: isSlidesError } = useQuery({
-		queryKey: ['slides', searchParams],
-		queryFn: () => getAllSlides(searchParams, limit),
-	})
 	const slides = slidesData?.slides ?? []
 
-	// Fetch testimonials data
+	console.log('slides', slides)
+
+	const { data: goodsData, isLoading: isGoodsLoading, error: isGoodsError } = useSwrGetData(
+		searchParams,
+		limit,
+		getAllGoods,
+		'goods',
+	)
+
+	const goods = goodsData?.goods ?? []
+
+	console.log('goods', goods)
 
 	const {
 		data: testimonialsData,
 		isLoading: isTestimonialsLoading,
-		isError: isTestimonialsError,
-	} = useQuery({
-		queryKey: ['testimonials', searchParams],
-		queryFn: () => getAllTestimonials(searchParams, limit),
-	})
+		error: isTestimonialsError,
+	} = useSwrGetData(searchParams, limit, getAllTestimonials, 'testimonials')
+
 	const testimonials = testimonialsData?.testimonials ?? []
 
-	// Handle loading states
-	if (isGoodsLoading || isSlidesLoading || isTestimonialsLoading) {
-		return <Loader />
-	}
+	console.log('slides', slides)
 
-	// Handle errors
-	if (isGoodsError || isSlidesError || isTestimonialsError) {
-		return <div>Error fetching data.</div>
-	}
+	// if (isGoodsLoading || isSlidesLoading || isTestimonialsLoading) {
+	// 	return <Loader />
+	// }
 
-	// Handle empty state
-	if (!goods?.length && !slides?.length && !testimonials?.length) {
-		return <EmptyState showReset />
-	}
+	// // Handle errors
+	// if (isGoodsError || isSlidesError || isTestimonialsError) {
+	// 	return <div>Error fetching data.</div>
+	// }
+
+	// // Handle empty state
+	// if (
+	// 	!goods ||
+	// 	!slides ||
+	// 	!testimonials ||
+	// 	goods?.length === 0 ||
+	// 	slides?.length === 0 ||
+	// 	testimonials?.length === 0
+	// ) {
+	// 	return <EmptyState showReset />
+	// }
 
 	return (
 		<div className='container'>

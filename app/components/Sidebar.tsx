@@ -2,7 +2,8 @@
 
 import { getAllCategories } from '@/actions/categories'
 import { getMinMaxPrice } from '@/actions/goods'
-import { useQuery } from '@tanstack/react-query'
+import useFetchData from 'app/hooks/useFetchData'
+import useSwrGetData from 'app/hooks/useGoods'
 import { useSearchParams } from 'next/navigation'
 import BrandFilter from './BrandFilter'
 import Category from './Category'
@@ -15,50 +16,40 @@ const limit = 10
 
 const Sidebar = () => {
 	const searchParams = useSearchParams()
-	const {
-		data: minMaxPriceData,
-		isLoading: minMaxPriceIsLoading,
-		isError: MaxPriceIsError,
-	} = useQuery({
-		queryKey: ['minMaxPrice', URLSearchParams],
-		queryFn: () => getMinMaxPrice(),
-	})
-	const minMaxPrice = minMaxPriceData?.minMaxPrice
+
+	const { data: pricesData, isLoading: isPricesLoading, error: isPricesError } = useSwrGetData(
+		searchParams,
+		limit,
+		getMinMaxPrice,
+		'prices',
+	)
 
 	const {
 		data: categoriesData,
 		isLoading: isCategorisLoading,
 		isError: isCategoriesError,
-	} = useQuery({
-		queryKey: ['categories', searchParams],
-		queryFn: () => getAllCategories(searchParams, limit),
-	})
-
-	const categories = categoriesData?.categories ?? []
+	} = useFetchData(searchParams, limit, getAllCategories, 'categories')
 
 	// Handle loading states
-	if (isCategorisLoading || minMaxPriceIsLoading) {
+	if (isCategorisLoading || isPricesLoading) {
 		return <Loader />
 	}
 
-	if (isCategoriesError || MaxPriceIsError) {
+	if (isCategoriesError || isPricesError) {
 		return <div>Error fetching data.</div>
 	}
-	// Handle errors
-	if (!categories?.length && !minMaxPrice?.length) {
-		return <EmptyState showReset />
-	}
 
-	if (minMaxPrice.minPrice === minMaxPrice.maxPrice) {
-		minMaxPrice.maxPrice = minMaxPrice.minPrice + 100
+	// Handle errors
+	if (!categoriesData || !pricesData) {
+		return <EmptyState showReset />
 	}
 
 	return (
 		<div>
-			<Category categories={categories} />
-			<PriceFilter minPrice={minMaxPrice?.minPrice} maxPrice={minMaxPrice?.maxPrice} />
+			<Category categories={categoriesData?.categories} />
 			<Sort />
 			<BrandFilter />
+			<PriceFilter minPrice={pricesData?.minPrice} maxPrice={pricesData?.maxPrice} />
 		</div>
 	)
 }

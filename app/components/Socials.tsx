@@ -10,7 +10,7 @@ const Socials: React.FC<SocialsProps> = ({ color }) => {
 		<ul className=''>
 			<li>
 				<Link
-					href='tel:+380977440979'
+					href={`tel:${process.env.ADMIN_PHONE}`}
 					target='_blank'
 					rel='noopener noreferrer'
 					className={`flex items-center justify-start

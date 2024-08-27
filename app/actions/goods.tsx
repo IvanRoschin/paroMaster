@@ -2,7 +2,7 @@
 
 import Good from '@/models/Good'
 import { IGood } from '@/types/good/IGood'
-import { ISearchParams } from '@/types/searchParams'
+import { ISearchParams } from '@/types/index'
 import { connectToDB } from '@/utils/dbConnect'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
@@ -18,6 +18,8 @@ export async function getAllGoods(
 	limit: number,
 	nextPage?: number,
 ): Promise<IGetAllGoodsResponse> {
+	console.log('searchParams', searchParams)
+
 	let skip
 
 	if (nextPage) {
@@ -57,7 +59,9 @@ export async function getAllGoods(
 			filter.category = searchParams.category
 		}
 
-		// price filter
+		console.log('searchParams?.low', searchParams?.low)
+		console.log('searchParams?.high', searchParams?.high)
+
 		if (searchParams?.low && searchParams?.high) {
 			filter.price = { $gte: Number(searchParams.low), $lte: Number(searchParams.high) }
 		}
@@ -130,7 +134,7 @@ export async function addGood(formData: FormData) {
 		await Good.create({
 			category: values.category,
 			title: values.title,
-			brand: values.brand,
+			brand: values.brand.toUpperCase(),
 			model: values.model,
 			price: parseFloat(values.price as string),
 			description: values.description,

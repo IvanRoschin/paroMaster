@@ -22,6 +22,11 @@ interface GoodFormProps {
 }
 
 const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
+	const textareaStyles: React.CSSProperties = {
+		height: '100px',
+		overflowY: 'auto',
+	}
+
 	const inputs = [
 		{
 			id: 'category',
@@ -100,6 +105,7 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 			label: 'Опис',
 			type: 'textarea',
 			required: true,
+			style: textareaStyles,
 		},
 	]
 
@@ -137,11 +143,12 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 
 			await action(formData)
 			resetForm()
-			toast.success(good?._id ? 'Товар оновлено!' : 'Новий товар додано!')
 		} catch (error) {
 			// Handle any errors
 			toast.error('Помилка!')
 			console.error(error)
+		} finally {
+			toast.success(good?._id ? 'Товар оновлено!' : 'Новий товар додано!')
 		}
 	}
 
@@ -161,12 +168,7 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 							values={values.src}
 							errors={errors}
 						/>
-						{/* <ImagesUpload
-							setFieldValue={setFieldValue}
-							values={values.src}
-							good={good}
-							errors={errors}
-						/> */}
+
 						{inputs.map((item, i) => (
 							<div key={i}>
 								{item.type === 'select' && (
