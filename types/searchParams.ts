@@ -1,3 +1,11 @@
+export interface ISearchParams {
+	page?: number
+	search?: string
+	low?: string
+	high?: string
+	[key: string]: any
+}
+
 // export interface ISearchParams {
 // 	search?: string
 // 	sort?: string

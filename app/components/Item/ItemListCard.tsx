@@ -2,9 +2,11 @@
 
 import { IGood } from '@/types/good/IGood'
 import { useShoppingCart } from 'app/context/ShoppingCartContext'
+import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { FaPen } from 'react-icons/fa'
 import Button from '../Button'
 
 interface ItemListCardProps {
@@ -12,6 +14,10 @@ interface ItemListCardProps {
 }
 
 const ItemListCard: React.FC<ItemListCardProps> = ({ item }) => {
+	const { data: session } = useSession()
+
+	const isAdmin = session?.user
+
 	const [amount, setAmount] = useState(0)
 
 	const {
@@ -31,8 +37,8 @@ const ItemListCard: React.FC<ItemListCardProps> = ({ item }) => {
 
 	return (
 		<li className='flex flex-col justify-between border border-gray-300 rounded-md p-4 hover:shadow-[10px_10px_15px_-3px_rgba(0,0,0,0.3)] transition-all'>
-			<Link href={`/item/${item._id}`} className='flex flex-col h-full justify-between'>
-				<div>
+			<div className='relative'>
+				<Link href={`/item/${item._id}`} className='flex flex-col h-full justify-between'>
 					<div className='w-[200px] h-[200px]'>
 						<Image
 							src={item.src[0]}
@@ -43,15 +49,26 @@ const ItemListCard: React.FC<ItemListCardProps> = ({ item }) => {
 						/>
 					</div>
 					<h2 className='font-semibold mb-[20px]'>{item.title}</h2>
-				</div>
-				<div>
-					<p className={`mb-[20px] ${item.isAvailable ? 'text-green-600' : 'text-red-600'}`}>
-						{item.isAvailable ? 'В наявності' : 'Немає в наявності'}
-					</p>
-					<p className='mb-[20px]'>Артикул: {item.vendor}</p>
-					<p className='text-2xl font-bold mb-[20px]'>{item.price} грн</p>
-				</div>
-			</Link>
+					<div>
+						<p className={`mb-[20px] ${item.isAvailable ? 'text-green-600' : 'text-red-600'}`}>
+							{item.isAvailable ? 'В наявності' : 'Немає в наявності'}
+						</p>
+						<p className='mb-[20px]'>Артикул: {item.vendor}</p>
+						<p className='text-2xl font-bold mb-[20px]'>{item.price} грн</p>
+					</div>
+				</Link>
+				{isAdmin && (
+					<Link
+						href={`/admin/goods/${item._id}`}
+						className='absolute top-0 right-0 flex items-center justify-center'
+					>
+						<span className='cursor-pointer w-[30px] h-[30px] rounded-full bg-orange-600 flex justify-center items-center hover:opacity-80'>
+							<FaPen size={12} color='white' />
+						</span>
+					</Link>
+				)}
+			</div>
+
 			<CartActions
 				itemId={item._id!}
 				quantity={quantity}

@@ -1,8 +1,7 @@
 'use server'
 
 import Testimonials from '@/models/Testimonials'
-import { ITestimonial } from '@/types/index'
-import { ISearchParams } from '@/types/searchParams'
+import { ISearchParams, ITestimonial } from '@/types/index'
 import { connectToDB } from '@/utils/dbConnect'
 import { revalidatePath } from 'next/cache'
 

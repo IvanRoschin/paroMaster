@@ -3,50 +3,43 @@
 import { deleteTestimonial, getAllTestimonials } from '@/actions/testimonials'
 import Pagination from '@/components/admin/Pagination'
 import Button from '@/components/Button'
-import { Loader, Search } from '@/components/index'
-import { ITestimonial } from '@/types/index'
+import { EmptyState, Loader, Search } from '@/components/index'
 import { ISearchParams } from '@/types/searchParams'
+import useFetchData from 'app/hooks/useFetchData'
 import Link from 'next/link'
 import { useState } from 'react'
 import { FaPen, FaTrash } from 'react-icons/fa'
 import { toast } from 'sonner'
-import useSWR from 'swr'
 
-interface OrdersResponse {
-	success: boolean
-	testimonials: ITestimonial[]
-	count: number
+interface SearchParams {
+	page?: number
+	search?: string
+	[key: string]: any
 }
 
 const limit = 4
 
-const fetcher = async (params: ISearchParams): Promise<OrdersResponse> => {
-	return getAllTestimonials(params, limit)
-}
-
 const TestimonialsPage = ({ searchParams }: { searchParams: ISearchParams }) => {
-	// State for the selected status filter
 	const [statusFilter, setStatusFilter] = useState<string | null>(null)
 
-	// Update searchParams with the selected status filter
-	const searchParamsWithStatus = { ...searchParams, status: statusFilter }
-
-	const { data, error } = useSWR(['testimonials', searchParamsWithStatus], () =>
-		fetcher(searchParamsWithStatus),
+	const { data, isLoading, isError } = useFetchData(
+		{ ...searchParams, statusFilter },
+		limit,
+		getAllTestimonials,
+		'testimonials',
 	)
 
-	if (error) {
-		console.error('Error fetching testimonials', error)
-		return <div>Error loading testimonials.</div>
-	}
-
-	if (!data) {
+	if (isLoading) {
 		return <Loader />
 	}
 
-	// if (data.testimonials.length === 0) {
-	// 	return <EmptyState />
-	// }
+	if (isError) {
+		return <div>Error fetching data.</div>
+	}
+
+	if (!data?.testimonials || data.testimonials.length === 0) {
+		return <EmptyState showReset />
+	}
 
 	const handleDelete = async (id: string) => {
 		try {
@@ -60,9 +53,9 @@ const TestimonialsPage = ({ searchParams }: { searchParams: ISearchParams }) => 
 		}
 	}
 
-	const testimonialsCount = data.count
+	const testimonialsCount = data?.count || 0
 
-	const page = searchParams.page
+	const page = searchParams.page ? Number(searchParams.page) : 1
 
 	const totalPages = Math.ceil(testimonialsCount / limit)
 	const pageNumbers = []

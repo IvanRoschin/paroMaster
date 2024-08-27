@@ -6,6 +6,7 @@ const goodSchema = new Schema(
 		category: {
 			type: String,
 			enum: [
+				'Бойлери',
 				'Корпус станції',
 				'Корпус для прасок',
 				'Підошви для прасок',

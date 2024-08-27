@@ -18,6 +18,29 @@ const limit = 10
 const env = process.env
 env.PUBLIC_URL = env.PUBLIC_URL || ''
 
+const links = [
+	{
+		title: 'Оплата та доставка',
+		link: 'delivery',
+	},
+	{
+		title: 'Послуги та сервіси',
+		link: 'services',
+	},
+	{
+		title: 'Гарантія',
+		link: 'guarantee',
+	},
+	{
+		title: 'Контакти',
+		link: 'contact',
+	},
+	{
+		title: 'Політика Конфіденційності',
+		link: 'privacyPolicy',
+	},
+]
+
 const Footer = () => {
 	const searchParams = useSearchParams()
 
@@ -113,18 +136,14 @@ const Footer = () => {
 							Інформація
 							<div className='border-b border-primaryAccentColor' />
 							<ul className='text-sm'>
-								{[
-									'Оплата та доставка',
-									'Послуги та сервіси',
-									'Гарантія',
-									'Контакти',
-									'Політика Конфіденційності',
-								].map((text, index) => (
+								{links.map((item, index) => (
 									<li
 										key={index}
 										className='nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200'
 									>
-										<Link href={`/${text.toLowerCase().replace(/ /g, '-')}`}>{text}</Link>
+										<Link href={`/${item.link.toLowerCase().replace(/ /g, '-')}`}>
+											{item.title}
+										</Link>
 									</li>
 								))}
 							</ul>

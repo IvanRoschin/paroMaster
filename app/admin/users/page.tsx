@@ -6,40 +6,31 @@ import Pagination from '@/components/admin/Pagination'
 import Button from '@/components/Button'
 import EmptyState from '@/components/EmptyState'
 import Loader from '@/components/Loader'
-import { ISearchParams } from '@/types/searchParams'
-import { IUser } from '@/types/user/IUser'
+import { ISearchParams, IUser } from '@/types/index'
+import useFetchData from 'app/hooks/useFetchData'
 import Link from 'next/link'
 import { FaPen, FaTrash } from 'react-icons/fa'
-import useSWR from 'swr'
-
-interface UserResponse {
-	success: boolean
-	users: IUser[]
-	count: number
-}
 
 const limit = 4
 
-const fetcher = async (url: string, params: ISearchParams): Promise<UserResponse> => {
-	return getAllUsers(params, limit)
-}
-
 const UsersPage = ({ searchParams }: { searchParams: ISearchParams }) => {
-	const { data, error } = useSWR(['users', searchParams], () => fetcher('users', searchParams))
+	const { data, isLoading, isError } = useFetchData(searchParams, limit, getAllUsers, 'users')
 
-	if (error) {
-		console.error('Error fetching users', error)
-	}
-	if (data?.users.length === 0) {
-		return <EmptyState />
-	}
-	if (!data) {
+	if (isLoading) {
 		return <Loader />
 	}
 
-	const page = searchParams?.page || 1
+	if (isError) {
+		return <div>Error fetching data.</div>
+	}
 
-	const usersCount = data.count
+	if (!data?.users || data.users.length === 0) {
+		return <EmptyState showReset />
+	}
+
+	const usersCount = data?.count || 0
+
+	const page = searchParams.page ? Number(searchParams.page) : 1
 
 	const totalPages = Math.ceil(usersCount / limit)
 	const pageNumbers = []
@@ -57,11 +48,7 @@ const UsersPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 		<div className='p-3 rounded-xl'>
 			<div className='flex items-center justify-between mb-8'>
 				<Search placeholder='Знайти користувача' />
-				<Link
-					href='/admin/users/add'
-					className='
-				'
-				>
+				<Link href='/admin/users/add'>
 					<Button type={'submit'} label='Додати' small outline color='border-green-400' />
 				</Link>
 			</div>
@@ -79,7 +66,7 @@ const UsersPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 					</tr>
 				</thead>
 				<tbody>
-					{data.users.map(user => {
+					{data.users.map((user: IUser) => {
 						return (
 							<tr key={user._id} className='border-b-2'>
 								<td className='p-2 border-r-2 text-center'>{user.name}</td>

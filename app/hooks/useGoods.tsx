@@ -1,13 +1,19 @@
 'use client'
 
-import { getAllGoods } from '@/actions/goods'
 import { ISearchParams } from '@/types/searchParams'
 import useSWR from 'swr'
 
-function useGetGoods(params: ISearchParams, limit: number) {
-	const { data, error, isLoading } = useSWR(['goods', params], () => getAllGoods(params, limit))
+function useSwrGetData<T>(
+	params: ISearchParams,
+	limit: number,
+	action: (params: ISearchParams, limit: number) => Promise<T>,
+	key: string,
+) {
+	const { data, error, isValidating: isLoading } = useSWR([key, params], () =>
+		action(params, limit),
+	)
 
 	return { data, error, isLoading }
 }
 
-export default useGetGoods
+export default useSwrGetData

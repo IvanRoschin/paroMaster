@@ -5,43 +5,36 @@ import Pagination from '@/components/admin/Pagination'
 import Button from '@/components/Button'
 import EmptyState from '@/components/EmptyState'
 import { Loader, Search } from '@/components/index'
-import { ICustomer } from '@/types/customer/ICustomer'
 import { ISearchParams } from '@/types/searchParams'
+import useFetchData from 'app/hooks/useFetchData'
 import Link from 'next/link'
 import { FaPen, FaTrash } from 'react-icons/fa'
-import useSWR from 'swr'
-
-interface CustomersResponse {
-	success: boolean
-	customers: ICustomer[]
-	count: number
-}
 
 const limit = 4
 
-const fetcher = async (params: ISearchParams): Promise<CustomersResponse> => {
-	return getAllCustomers(params, limit)
-}
-
 const CustomersPage = ({ searchParams }: { searchParams: ISearchParams }) => {
-	const { data, error } = useSWR(['customers', searchParams], () => fetcher(searchParams))
+	const { data, isLoading, isError } = useFetchData(
+		searchParams,
+		limit,
+		getAllCustomers,
+		'customers',
+	)
 
-	if (error) {
-		console.error('Error fetching customers', error)
-		return <div>Error loading customers.</div>
-	}
-
-	if (!data) {
+	if (isLoading) {
 		return <Loader />
 	}
 
-	if (data.customers.length === 0) {
-		return <EmptyState />
+	if (isError) {
+		return <div>Error fetching data.</div>
 	}
 
-	const customersCount = data.count
+	if (!data?.customers || data.customers.length === 0) {
+		return <EmptyState showReset />
+	}
 
-	const page = searchParams.page
+	const customersCount = data?.count || 0
+
+	const page = searchParams.page ? Number(searchParams.page) : 1
 
 	const totalPages = Math.ceil(customersCount / limit)
 	const pageNumbers = []

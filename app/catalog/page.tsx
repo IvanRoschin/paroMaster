@@ -1,36 +1,25 @@
 'use client'
 
 import { getAllGoods } from '@/actions/goods'
-import EmptyState from '@/components/EmptyState'
 import InfiniteScrollGoods from '@/components/InfiniteScrollGoods'
-import { IGood } from '@/types/good/IGood'
 import { ISearchParams } from '@/types/searchParams'
-import useSWR from 'swr'
-import { Loader } from '../components'
+import useFetchData from 'app/hooks/useFetchData'
+import { EmptyState, Loader } from '../components'
 
-interface IGetAllGoodsResponse {
-	success: boolean
-	goods: IGood[]
-	count: number
-}
-
-const limit = 2
-
-const fetcher = async (url: string, params: ISearchParams): Promise<IGetAllGoodsResponse> => {
-	return getAllGoods(params, limit)
-}
+const limit = 4
 
 const CatalogPage = ({ searchParams }: { searchParams: ISearchParams }) => {
-	const { data, error } = useSWR(['goods', searchParams], () => fetcher('goods', searchParams))
+	const { data, isLoading, isError } = useFetchData(searchParams, limit, getAllGoods, 'goods')
 
-	if (error) {
-		console.error('Error fetching goods', error)
-	}
-	if (data?.goods.length === 0) {
-		return <EmptyState showReset />
-	}
-	if (!data) {
+	if (isLoading) {
 		return <Loader />
+	}
+	if (isError) {
+		return <div>Error fetching data.</div>
+	}
+
+	if (!data || data?.goods.length === 0) {
+		return <EmptyState showReset />
 	}
 
 	return (

@@ -58,10 +58,6 @@ const Description = ({ activeImage, clickNext, clickPrev, slides }: Props) => {
 								</Link>
 							</div>
 						</motion.div>
-
-						{/* <button className='bg-[#ecae7e] text-white uppercase px-4 py-2 rounded-md my-10'>
-						order now
-					</button> */}
 						<div className='absolute md:bottom-1 bottom-10 right-10 md:right-0 w-full flex justify-center items-center'>
 							<div className='absolute bottom-2 right-10 cursor-pointer' onClick={clickPrev}>
 								{/* <Image src={left} alt='' /> */}

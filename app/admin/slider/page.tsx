@@ -1,13 +1,13 @@
 'use client'
 
-import { deleteSlide } from '@/actions/slider'
+import { deleteSlide, getAllSlides } from '@/actions/slider'
 import Pagination from '@/components/admin/Pagination'
 import Button from '@/components/Button'
 import EmptyState from '@/components/EmptyState'
 import Loader from '@/components/Loader'
 import Search from '@/components/Search'
 import { ISearchParams } from '@/types/searchParams'
-import useGetSlides from 'app/hooks/useSlides'
+import useFetchData from 'app/hooks/useFetchData'
 import Image from 'next/image'
 import Link from 'next/link'
 import { FaPen, FaTrash } from 'react-icons/fa'
@@ -16,19 +16,18 @@ import { toast } from 'sonner'
 const limit = 10
 
 const SlidesPage = ({ searchParams }: { searchParams: ISearchParams }) => {
-	const { data, error, isLoading } = useGetSlides(searchParams, limit)
-
-	if (error) {
-		console.error('Error fetching slides', error)
-		return <div>Error loading slides.</div>
-	}
+	const { data, isLoading, isError } = useFetchData(searchParams, limit, getAllSlides, 'slides')
 
 	if (isLoading) {
 		return <Loader />
 	}
 
-	if (data?.slides.length === 0) {
-		return <EmptyState />
+	if (isError) {
+		return <div>Error fetching data.</div>
+	}
+
+	if (!data?.slides || data.slides.length === 0) {
+		return <EmptyState showReset />
 	}
 
 	const handleDelete = async (id: string) => {

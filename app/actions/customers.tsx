@@ -2,7 +2,7 @@
 
 import Customer from '@/models/Customer'
 import { ICustomer } from '@/types/customer/ICustomer'
-import { ISearchParams } from '@/types/searchParams'
+import { ISearchParams } from '@/types/index'
 import { connectToDB } from '@/utils/dbConnect'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
@@ -45,7 +45,10 @@ export async function addCustomer(formData: FormData) {
 
 		const existingCustomer = await Customer.findOne({ phone })
 		if (existingCustomer) {
-			throw new Error('Phone already exists')
+			return {
+				success: true,
+				message: 'Phone already exist',
+			}
 		}
 
 		const newCustomer = {

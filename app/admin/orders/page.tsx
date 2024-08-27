@@ -5,48 +5,35 @@ import Pagination from '@/components/admin/Pagination'
 import Button from '@/components/Button'
 import EmptyState from '@/components/EmptyState'
 import { Loader, Search } from '@/components/index'
-import { IOrder } from '@/types/order/IOrder'
 import { ISearchParams } from '@/types/searchParams'
+import useFetchData from 'app/hooks/useFetchData'
 import Link from 'next/link'
 import { useState } from 'react'
 import { FaPen, FaTrash } from 'react-icons/fa'
 import { toast } from 'sonner'
-import useSWR from 'swr'
-
-interface OrdersResponse {
-	success: boolean
-	orders: IOrder[]
-	count: number
-}
 
 const limit = 4
 
-const fetcher = async (params: ISearchParams): Promise<OrdersResponse> => {
-	return getAllOrders(params, limit)
-}
-
 const OrdersPage = ({ searchParams }: { searchParams: ISearchParams }) => {
-	// State for the selected status filter
 	const [statusFilter, setStatusFilter] = useState<string | null>(null)
 
-	// Update searchParams with the selected status filter
-	const searchParamsWithStatus = { ...searchParams, status: statusFilter }
-
-	const { data, error } = useSWR(['orders', searchParamsWithStatus], () =>
-		fetcher(searchParamsWithStatus),
+	const { data, isLoading, isError } = useFetchData(
+		{ ...searchParams, status: statusFilter },
+		limit,
+		getAllOrders,
+		'orders',
 	)
 
-	if (error) {
-		console.error('Error fetching orders', error)
-		return <div>Error loading orders.</div>
-	}
-
-	if (!data) {
+	if (isLoading) {
 		return <Loader />
 	}
 
-	if (data.orders.length === 0) {
-		return <EmptyState />
+	if (isError) {
+		return <div>Error fetching data.</div>
+	}
+
+	if (!data?.orders || data.orders.length === 0) {
+		return <EmptyState showReset />
 	}
 
 	const handleDelete = async (id: string) => {
@@ -61,9 +48,9 @@ const OrdersPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 		}
 	}
 
-	const ordersCount = data.count
+	const ordersCount = data?.count || 0
 
-	const page = searchParams.page
+	const page = searchParams.page ? Number(searchParams.page) : 1
 
 	const totalPages = Math.ceil(ordersCount / limit)
 	const pageNumbers = []

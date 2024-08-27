@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 type Props = {}
 
 const GuaranteePage = (props: Props) => {
@@ -51,18 +53,21 @@ const GuaranteePage = (props: Props) => {
 				</p>
 				<p className='text-lg text-gray-700 mb-2'>
 					<strong>Телефон:</strong>{' '}
-					<a href={`tel:${process.env.ADMIN_PHONE}`} className='text-primaryAccentColor underline'>
+					<Link
+						href={`tel:${process.env.ADMIN_PHONE}`}
+						className='text-primaryAccentColor underline'
+					>
 						{process.env.ADMIN_PHONE}
-					</a>
+					</Link>
 				</p>
 				<p className='text-lg text-gray-700'>
 					<strong>Електронна пошта:</strong>{' '}
-					<a
+					<Link
 						href={`mailto:${process.env.ADMIN_EMAIL}`}
 						className='text-primaryAccentColor underline'
 					>
 						{process.env.ADMIN_EMAIL}
-					</a>
+					</Link>
 				</p>
 			</section>
 		</div>

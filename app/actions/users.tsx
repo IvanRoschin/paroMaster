@@ -1,7 +1,7 @@
 'use server'
 
 import User from '@/models/User'
-import { ISearchParams } from '@/types/searchParams'
+import { ISearchParams } from '@/types/index'
 import { IUser } from '@/types/user/IUser'
 import { connectToDB } from '@/utils/dbConnect'
 import bcrypt from 'bcrypt'
