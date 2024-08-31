@@ -4,3 +4,9 @@ export interface ISlider {
 	desc: string
 	src: string
 }
+
+export interface IGetAllSlidersResponse {
+	success: boolean
+	count: number
+	sliders: ISlider[]
+}

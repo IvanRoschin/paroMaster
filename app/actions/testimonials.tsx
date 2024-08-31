@@ -4,8 +4,9 @@ import Testimonials from '@/models/Testimonials'
 import { ISearchParams, ITestimonial } from '@/types/index'
 import { connectToDB } from '@/utils/dbConnect'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 
-interface IGetAllTestimonials {
+export interface IGetAllTestimonials {
 	success: boolean
 	testimonials: ITestimonial[]
 	count: number
@@ -138,5 +139,6 @@ export async function updateTestimonial(formData: FormData) {
 		}
 	} finally {
 		revalidatePath('/admin/testimonials')
+		redirect('/admin/testimonials')
 	}
 }

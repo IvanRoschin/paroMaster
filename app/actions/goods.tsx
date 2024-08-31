@@ -7,20 +7,25 @@ import { connectToDB } from '@/utils/dbConnect'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
-interface IGetAllGoodsResponse {
+export interface IGetAllGoods {
 	success: boolean
 	goods: IGood[]
 	count: number
+}
+
+export interface IGetAllBrands {
+	success: boolean
+	brands: string[]
 }
 
 export async function getAllGoods(
 	searchParams: ISearchParams,
 	limit: number,
 	nextPage?: number,
-): Promise<IGetAllGoodsResponse> {
+): Promise<IGetAllGoods> {
 	console.log('searchParams', searchParams)
 
-	let skip
+	let skip: number
 
 	if (nextPage) {
 		skip = (nextPage - 1) * limit
@@ -32,12 +37,12 @@ export async function getAllGoods(
 	try {
 		await connectToDB()
 
+		// Initialize the filter object
 		let filter: any = {}
 
-		// search string filter
+		// Handle search filter
 		if (searchParams?.search) {
 			filter.$and = [
-				// Wrap conditions in $and operator
 				{
 					$or: [
 						{ title: { $regex: searchParams.search, $options: 'i' } },
@@ -49,41 +54,66 @@ export async function getAllGoods(
 			]
 		}
 
-		// brand filter
+		// Handle brand filter
 		if (searchParams?.brand) {
 			filter.brand = searchParams.brand
 		}
 
-		// category filter
+		// Handle category filter
+		let categoryFilter: any = {}
 		if (searchParams?.category) {
-			filter.category = searchParams.category
+			categoryFilter = { category: searchParams.category }
 		}
 
-		console.log('searchParams?.low', searchParams?.low)
-		console.log('searchParams?.high', searchParams?.high)
-
+		// Handle price filter with aggregation
+		let priceFilter: any = {}
 		if (searchParams?.low && searchParams?.high) {
-			filter.price = { $gte: Number(searchParams.low), $lte: Number(searchParams.high) }
+			const lowPrice = Number(searchParams.low)
+			const highPrice = Number(searchParams.high)
+
+			if (!isNaN(lowPrice) && !isNaN(highPrice)) {
+				priceFilter = {
+					$expr: {
+						$and: [
+							{ $gte: [{ $toDouble: '$price' }, lowPrice] },
+							{ $lte: [{ $toDouble: '$price' }, highPrice] },
+						],
+					},
+				}
+			}
 		}
 
-		// sort by price
+		// Combine category and price filters
+		filter = {
+			$and: [categoryFilter, priceFilter, ...(filter.$and || [])],
+		}
+
+		// Handle sort by price
 		let sortOption: any = {}
 		if (searchParams?.sort === 'desc') {
 			sortOption = { price: -1 }
 		} else {
 			sortOption = { price: 1 }
 		}
-		const count = await Good.countDocuments(filter)
 
+		// Query the count of documents matching the filter
+		const count = await Good.countDocuments(filter)
+		console.log('filter', filter)
+
+		// Query the actual documents with pagination
 		const goods: IGood[] = await Good.find(filter)
 			.sort(sortOption)
 			.skip(skip)
 			.limit(limit)
 			.exec()
 
-		return { success: true, goods: JSON.parse(JSON.stringify(goods)), count: count }
+		return {
+			success: true,
+			goods: JSON.parse(JSON.stringify(goods)),
+			count: count,
+		}
 	} catch (error) {
-		console.log(error)
+		console.log('Error fetching goods:', error)
 		return { success: false, goods: [], count: 0 }
 	}
 }
@@ -101,6 +131,7 @@ export async function getGoodById(id: string) {
 export async function addGood(formData: FormData) {
 	// const values = Object.fromEntries( formData.entries() )
 	const values: any = {}
+
 	formData.forEach((value, key) => {
 		if (!values[key]) {
 			values[key] = []
@@ -113,7 +144,12 @@ export async function addGood(formData: FormData) {
 			values[key] = values[key][0]
 		}
 	})
-
+	const price = Number(values.price)
+	if (isNaN(price)) {
+		console.error('Price must be a valid number')
+		return
+	}
+	values.price = price
 	if (
 		!values.category ||
 		!values.title ||
@@ -131,12 +167,14 @@ export async function addGood(formData: FormData) {
 	try {
 		await connectToDB()
 
+		console.log('Price before saving:', typeof values.price, values.price)
+
 		await Good.create({
 			category: values.category,
 			title: values.title,
-			brand: values.brand.toUpperCase(),
+			brand: values.brand.charAt(0).toUpperCase() + values.brand.slice(1).toLowerCase(),
 			model: values.model,
-			price: parseFloat(values.price as string),
+			price: Number(values.price),
 			description: values.description,
 			src: values.src instanceof Array ? values.src : [values.src],
 			vendor: values.vendor,
@@ -153,6 +191,7 @@ export async function addGood(formData: FormData) {
 		console.log(error)
 	} finally {
 		revalidatePath('/admin/goods')
+		redirect('/admin/goods')
 	}
 }
 
@@ -210,7 +249,7 @@ export async function updateGood(formData: FormData) {
 		vendor?: string
 		title?: string
 		description?: string
-		price?: any
+		price?: number
 		isAvailable?: string
 		isCompatible?: string
 		compatibility?: any
@@ -227,11 +266,17 @@ export async function updateGood(formData: FormData) {
 			vendor,
 			title,
 			description,
-			price: parseFloat(price),
+			price: Number(price),
 			isAvailable: isAvailable === 'true',
 			isCompatible: isCompatible === 'true',
 			compatibility,
 		}
+
+		// const price = Number(values.price)
+		// if (isNaN(price)) {
+		// 	console.error('Price must be a valid number')
+		// 	return
+		// }
 
 		Object.keys(updateFields).forEach(
 			key =>
@@ -254,15 +299,20 @@ export async function updateGood(formData: FormData) {
 	}
 }
 
-export async function uniqueBrands() {
+export async function uniqueBrands(): Promise<IGetAllBrands> {
 	try {
 		connectToDB()
 		const uniqueBrands = await Good.distinct('brand')
-		return uniqueBrands
+		return {
+			success: true,
+			brands: uniqueBrands,
+		}
 	} catch (error) {
 		console.log(error)
+		return { success: false, brands: [] }
+	} finally {
+		revalidatePath('/')
 	}
-	revalidatePath('/')
 }
 
 export async function getMinMaxPrice() {
@@ -311,10 +361,12 @@ export async function getMinMaxPrice() {
 			throw new Error('No valid goods found')
 		}
 
-		return result[0] // Return the min and max price
+		return {
+			success: true,
+			minPrice: result[0].minPrice,
+			maxPrice: result[0].maxPrice,
+		}
 	} catch (error) {
 		console.error('Error fetching min and max prices:', error)
-		// You can also throw the error if you want the calling function to handle it
-		throw error
 	}
 }

@@ -6,7 +6,7 @@ import { ISearchParams } from '@/types/searchParams'
 import { connectToDB } from '@/utils/dbConnect'
 import { revalidatePath } from 'next/cache'
 
-interface IGetAllCategories {
+export interface IGetAllSlides {
 	success: boolean
 	slides: ISlider[]
 	count: number
@@ -38,7 +38,7 @@ export async function addSlide(formData: FormData) {
 export async function getAllSlides(
 	searchParams: ISearchParams,
 	limit: number,
-): Promise<IGetAllCategories> {
+): Promise<IGetAllSlides> {
 	const page = searchParams.page || 1
 
 	try {

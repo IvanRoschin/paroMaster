@@ -47,5 +47,5 @@ export const goodFormSchema = Yup.object().shape({
 		.nullable(),
 	isAvailable: Yup.boolean().required(`Обов'язкове поле`),
 	isCompatible: Yup.boolean().required(`Обов'язкове поле`),
-	compatibility: Yup.array().of(Yup.string()),
+	compatibility: Yup.string(),
 })

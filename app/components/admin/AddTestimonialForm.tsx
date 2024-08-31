@@ -8,6 +8,7 @@ import Rating from 'react-rating'
 import { toast } from 'sonner'
 import { testimonialFormSchema } from '../../helpers/validationShemas'
 import FormField from '../input/FormField'
+import Switcher from '../Switcher'
 import CustomButton from './CustomFormikButton'
 interface InitialStateType extends Omit<ITestimonial, '_id'> {}
 
@@ -22,6 +23,10 @@ interface TestimoniaFormProps {
 }
 
 const TestimonialForm: React.FC<TestimoniaFormProps> = ({ testimonial, title, action }) => {
+	const textareaStyles: React.CSSProperties = {
+		height: '100px',
+		overflowY: 'auto',
+	}
 	const { data: session, status } = useSession()
 
 	const isAdmin = !!session?.user
@@ -36,27 +41,35 @@ const TestimonialForm: React.FC<TestimoniaFormProps> = ({ testimonial, title, ac
 		{
 			id: 'text',
 			label: 'Відгук',
-			type: 'text',
+			type: 'textarea',
 			required: true,
+			style: textareaStyles,
 		},
 	]
 
 	if (isAdmin) {
-		inputs.push({
-			id: 'isActive',
-			label: 'Публікується?',
-			type: 'select',
-			options: [
-				{
-					value: 'true',
-					label: 'Так',
-				},
-				{
-					value: 'false',
-					label: 'Ні',
-				},
-			],
-		})
+		inputs.push(
+			{
+				id: 'isActive',
+				label: 'Публікується?',
+				type: 'switcher',
+			},
+			// {
+			// id: 'isActive',
+			// label: 'Публікується?',
+			// type: 'select',
+			// options: [
+			// 	{
+			// 		value: 'true',
+			// 		label: 'Так',
+			// 	},
+			// 	{
+			// 		value: 'false',
+			// 		label: 'Ні',
+			// 	},
+			// ],
+			// }
+		)
 	}
 
 	const initialValues: InitialStateType = {
@@ -68,12 +81,17 @@ const TestimonialForm: React.FC<TestimoniaFormProps> = ({ testimonial, title, ac
 	}
 
 	const handleSubmit = async (values: InitialStateType, { resetForm }: ResetFormProps) => {
-		console.log('values', values)
 		try {
+			console.log('values', values)
+
 			const formData = new FormData()
 			Object.keys(values).forEach(key => {
 				formData.append(key, (values as any)[key])
 			})
+			// Append the ID if available
+			if (testimonial?._id) {
+				formData.append('id', testimonial._id as string)
+			}
 
 			await action(formData)
 			resetForm()
@@ -98,12 +116,16 @@ const TestimonialForm: React.FC<TestimoniaFormProps> = ({ testimonial, title, ac
 						<div>
 							{inputs.map((item, i) => (
 								<div key={i}>
-									{item.type === 'select' && (
-										<label htmlFor={item.id} className='block mb-2'>
-											{item.label}
-										</label>
+									{item.type === 'switcher' ? (
+										<Switcher
+											id={item.id}
+											label={item.label}
+											checked={values[item.id]}
+											onChange={checked => setFieldValue(item.id, checked)}
+										/>
+									) : (
+										<FormField item={item} errors={errors} setFieldValue={setFieldValue} />
 									)}
-									<FormField item={item} errors={errors} setFieldValue={setFieldValue} />
 								</div>
 							))}
 							<div className='mb-4'>

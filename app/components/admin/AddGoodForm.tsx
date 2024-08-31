@@ -1,13 +1,11 @@
 'use client'
 
+import { CustomButton, FormField, ImageUploadCloudinary, Switcher } from '@/components/index'
 import { IGood } from '@/types/good/IGood'
 import { categoryList } from 'app/config/constants'
 import { goodFormSchema } from 'app/helpers/validationShemas'
 import { Form, Formik, FormikState } from 'formik'
 import { toast } from 'sonner'
-import ImageUploadCloudinary from '../ImageUploadCloudinary'
-import FormField from '../input/FormField'
-import CustomButton from './CustomFormikButton'
 
 interface InitialStateType extends Omit<IGood, '_id'> {}
 
@@ -68,33 +66,43 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 		{
 			id: 'isAvailable',
 			label: 'В наявності?',
-			type: 'select',
-			options: [
-				{
-					value: 'false',
-					label: 'Ні',
-				},
-				{
-					value: 'true',
-					label: 'Так',
-				},
-			],
+			type: 'switcher',
 		},
 		{
 			id: 'isCompatible',
 			label: 'Сумісний з іншими?',
-			type: 'select',
-			options: [
-				{
-					value: 'false',
-					label: 'Ні',
-				},
-				{
-					value: 'true',
-					label: 'Так',
-				},
-			],
+			type: 'switcher',
 		},
+		// {
+		// 	id: 'isAvailable',
+		// 	label: 'В наявності?',
+		// 	type: 'select',
+		// 	options: [
+		// 		{
+		// 			value: 'false',
+		// 			label: 'Ні',
+		// 		},
+		// 		{
+		// 			value: 'true',
+		// 			label: 'Так',
+		// 		},
+		// 	],
+		// },
+		// {
+		// 	id: 'isCompatible',
+		// 	label: 'Сумісний з іншими?',
+		// 	type: 'select',
+		// 	options: [
+		// 		{
+		// 			value: 'false',
+		// 			label: 'Ні',
+		// 		},
+		// 		{
+		// 			value: 'true',
+		// 			label: 'Так',
+		// 		},
+		// 	],
+		// },
 		{
 			id: 'compatibility',
 			label: 'З якими моделями?',
@@ -171,12 +179,16 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 
 						{inputs.map((item, i) => (
 							<div key={i}>
-								{item.type === 'select' && (
-									<label htmlFor={item.id} className='block mb-2'>
-										{item.label}
-									</label>
+								{item.type === 'switcher' ? (
+									<Switcher
+										id={item.id}
+										label={item.label}
+										checked={values[item.id]}
+										onChange={checked => setFieldValue(item.id, checked)}
+									/>
+								) : (
+									<FormField item={item} errors={errors} setFieldValue={setFieldValue} />
 								)}
-								<FormField item={item} errors={errors} setFieldValue={setFieldValue} />
 							</div>
 						))}
 						<CustomButton label={'Зберегти'} />

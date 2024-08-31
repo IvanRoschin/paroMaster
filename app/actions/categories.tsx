@@ -6,7 +6,7 @@ import { ISearchParams } from '@/types/index'
 import { connectToDB } from '@/utils/dbConnect'
 import { revalidatePath } from 'next/cache'
 
-interface IGetAllCategories {
+export interface IGetAllCategories {
 	success: boolean
 	categories: ICategory[]
 	count: number

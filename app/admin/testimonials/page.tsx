@@ -1,9 +1,9 @@
 'use client'
 
-import { deleteTestimonial, getAllTestimonials } from '@/actions/testimonials'
+import { deleteTestimonial, getAllTestimonials, updateTestimonial } from '@/actions/testimonials'
 import Pagination from '@/components/admin/Pagination'
 import Button from '@/components/Button'
-import { EmptyState, Loader, Search } from '@/components/index'
+import { EmptyState, Loader, Search, Switcher } from '@/components/index'
 import { ISearchParams } from '@/types/searchParams'
 import useFetchData from 'app/hooks/useFetchData'
 import Link from 'next/link'
@@ -11,13 +11,7 @@ import { useState } from 'react'
 import { FaPen, FaTrash } from 'react-icons/fa'
 import { toast } from 'sonner'
 
-interface SearchParams {
-	page?: number
-	search?: string
-	[key: string]: any
-}
-
-const limit = 4
+const limit = 10
 
 const TestimonialsPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 	const [statusFilter, setStatusFilter] = useState<string | null>(null)
@@ -53,6 +47,19 @@ const TestimonialsPage = ({ searchParams }: { searchParams: ISearchParams }) => 
 		}
 	}
 
+	const handleStatusToggle = async (id: string, currentStatus: boolean) => {
+		try {
+			const formData = new FormData()
+			formData.append('id', id)
+			formData.append('isActive', (!currentStatus).toString())
+			await updateTestimonial(formData)
+			toast.success('Статус відгуку змінено!')
+		} catch (error) {
+			toast.error('Помилка при зміні статусу відгуку!')
+			console.error('Error updating testimonial status', error)
+		}
+	}
+
 	const testimonialsCount = data?.count || 0
 
 	const page = searchParams.page ? Number(searchParams.page) : 1
@@ -75,7 +82,6 @@ const TestimonialsPage = ({ searchParams }: { searchParams: ISearchParams }) => 
 				<Search placeholder='Знайти відгук' />
 
 				<div className='flex items-center'>
-					{/* Status Filter Dropdown */}
 					<select
 						value={statusFilter || ''}
 						onChange={e => setStatusFilter(e.target.value || null)}
@@ -108,37 +114,30 @@ const TestimonialsPage = ({ searchParams }: { searchParams: ISearchParams }) => 
 						{data.testimonials.map(testimonial => (
 							<tr key={testimonial._id} className='border-b-2'>
 								<td className='p-2 border-r-2 text-center'>{testimonial.name}</td>
-
 								<td className='p-2 border-r-2 text-start'>{testimonial.text}</td>
-
 								<td className='p-2 border-r-2 text-center'>{testimonial.rating}</td>
 								<td className='p-2 border-r-2 text-center'>
 									{new Date(testimonial.createdAt).toLocaleDateString('uk-UA')}
 								</td>
 								<td className='p-2 border-r-2 text-center'>
-									{testimonial.isActive ? 'Так' : 'Ні'}
+									<Switcher
+										checked={testimonial.isActive}
+										onChange={() => handleStatusToggle(testimonial._id, testimonial.isActive)}
+									/>
 								</td>
-
 								<td className='p-2 text-center'>
 									<Link href={`/admin/testimonials/${testimonial._id}`}>
 										<Button type='button' icon={FaPen} small outline color='border-yellow-400' />
 									</Link>
 								</td>
 								<td className='p-2 text-center'>
-									{' '}
 									<Button
 										type='button'
 										icon={FaTrash}
 										small
 										outline
 										color='border-red-400'
-										onClick={() => {
-											if (testimonial._id) {
-												handleDelete(testimonial._id)
-											} else {
-												console.error('Error: Good ID is undefined')
-											}
-										}}
+										onClick={() => handleDelete(testimonial._id)}
 									/>
 								</td>
 							</tr>

@@ -4,12 +4,12 @@ import { ISearchParams } from '@/types/searchParams'
 import useSWR from 'swr'
 
 function useSwrGetData<T>(
-	params: ISearchParams,
-	limit: number,
-	action: (params: ISearchParams, limit: number) => Promise<T>,
+	params: ISearchParams | undefined,
+	limit: number | undefined,
+	action: (params?: ISearchParams, limit?: number) => Promise<T>,
 	key: string,
 ) {
-	const { data, error, isValidating: isLoading } = useSWR([key, params], () =>
+	const { data, error, isValidating: isLoading } = useSWR<T>([key, params], () =>
 		action(params, limit),
 	)
 

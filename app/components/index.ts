@@ -1,18 +1,22 @@
 'use client'
 
+import AddCategoryForm from '@/components/admin/AddCategoryForm'
 import AddCustomerForm from '@/components/admin/AddCustromerForm'
 import AddGoodForm from '@/components/admin/AddGoodForm'
+import AddOrderForm from '@/components/admin/AddOrderForm'
+import AddSlideForm from '@/components/admin/AddSlideForm'
 import TestimonialForm from '@/components/admin/AddTestimonialForm'
 import AdminMenu from '@/components/admin/Navbar'
 import Advantages from '@/components/Advantages'
 import Cart from '@/components/Cart/Cart'
-import { default as Category, default as categoryList } from '@/components/Category'
 import Description from '@/components/Description'
 import EmptyState from '@/components/EmptyState'
 import Footer from '@/components/Footer'
 import Header from '@/components/Header'
 import ImagesBlock from '@/components/ImagesBlock'
 import ImagesUpload from '@/components/ImagesUpload'
+import ImageUploadCloudinary from '@/components/ImageUploadCloudinary'
+import FormField from '@/components/input/FormField'
 import ItemListCard from '@/components/Item/ItemListCard'
 import ItemsList from '@/components/Item/ItemsList'
 import Loader from '@/components/Loader'
@@ -20,11 +24,12 @@ import Search from '@/components/Search'
 import Sidebar from '@/components/Sidebar'
 import Slider from '@/components/Slider'
 import TestimonialsList from '@/components/Testimonials'
-import AddCategoryForm from './admin/AddCategoryForm'
-import AddOrderForm from './admin/AddOrderForm'
-import AddSlideForm from './admin/AddSlideForm'
-import { slides } from './Slides'
+// import { slides } from './Slides'
+import Switcher from '@/components/Switcher'
+import CustomButton from '@/components/admin/CustomFormikButton'
+
 export {
+	CustomButton,
 	AddCategoryForm,
 	AddCustomerForm,
 	AddGoodForm,
@@ -33,12 +38,12 @@ export {
 	AdminMenu,
 	Advantages,
 	Cart,
-	Category,
-	categoryList,
 	Description,
 	EmptyState,
 	Footer,
+	FormField,
 	Header,
+	ImageUploadCloudinary,
 	ImagesBlock,
 	ImagesUpload,
 	ItemListCard,
@@ -47,7 +52,8 @@ export {
 	Search,
 	Sidebar,
 	Slider,
-	slides,
+	// slides,
+	Switcher,
 	TestimonialForm,
 	TestimonialsList,
 }

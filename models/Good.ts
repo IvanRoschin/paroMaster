@@ -45,7 +45,7 @@ const goodSchema = new Schema(
 			unique: true,
 		},
 		price: {
-			type: String,
+			type: Number,
 			required: true,
 		},
 		isAvailable: {
@@ -57,7 +57,7 @@ const goodSchema = new Schema(
 			required: true,
 		},
 		compatibility: {
-			type: [String],
+			type: String,
 		},
 	},
 	{ versionKey: false, timestamps: true },
