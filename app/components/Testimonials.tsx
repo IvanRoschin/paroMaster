@@ -63,6 +63,7 @@ const TestimonialsList: React.FC<TestimonialsListProps> = ({ testimonials }) => 
 						stars={testimonial.rating}
 					/>
 				))}
+				testimonials
 			/>
 		</div>
 	)

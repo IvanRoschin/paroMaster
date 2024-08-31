@@ -1,22 +1,30 @@
 'use client'
 
 import { ISlider } from '@/types/index'
+import { useSession } from 'next-auth/react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { ReactNode, useEffect, useState } from 'react'
+import { FaPen } from 'react-icons/fa'
 import { IoIosArrowDropleft, IoIosArrowDropright } from 'react-icons/io'
 
 interface SliderProps {
 	slides: (ISlider | ReactNode)[]
+	testimonials?: boolean
 	DescriptionComponent?: React.ComponentType<{
 		activeImage: number
 		clickNext: () => void
 		clickPrev: () => void
 		slides: (ISlider | ReactNode)[]
+		testimonials?: boolean
 	}>
 }
 
-const Slider: React.FC<SliderProps> = ({ slides, DescriptionComponent }) => {
+const Slider: React.FC<SliderProps> = ({ slides, DescriptionComponent, testimonials }) => {
 	const [activeImage, setActiveImage] = useState(0)
+	const { data: session } = useSession()
+
+	const isAdmin = session?.user
 
 	const clickNext = () => {
 		setActiveImage(prevActiveImage =>
@@ -40,11 +48,16 @@ const Slider: React.FC<SliderProps> = ({ slides, DescriptionComponent }) => {
 	return (
 		<main
 			className={`grid 
-				place-items-center 
-				md:grid-cols-2
-				grid-cols-1
-				w-full mx-auto max-w-5xl shadow-2xl rounded-2xl mt-[40px]
-				relative mb-20`}
+        place-items-center 
+        ${testimonials ? 'grid-cols-1' : 'grid-cols-2'}
+        w-full 
+        mx-auto 
+        max-w-5xl 
+        shadow-2xl 
+        rounded-2xl 
+        mt-[40px] 
+        relative 
+        mb-20`}
 		>
 			<div
 				className={`w-full flex justify-center items-center gap-4 transition-transform ease-in-out duration-500 md:rounded-2xl p-6 md:p-0`}
@@ -54,10 +67,20 @@ const Slider: React.FC<SliderProps> = ({ slides, DescriptionComponent }) => {
 						key={idx}
 						className={`${
 							idx === activeImage
-								? 'block w-full h-full object-cover transition-all duration-500 ease-in-out items-center'
-								: 'hidden'
+								? 'block w-full h-full object-cover transition-all duration-500 ease-in-out items-center '
+								: 'hidden '
 						}`}
 					>
+						{isAdmin && (
+							<Link
+								href={`/admin/slider/${slide?._id}`}
+								className='absolute top-0 right-0 flex items-center justify-center'
+							>
+								<span className='cursor-pointer w-[30px] h-[30px] rounded-full bg-orange-600 flex justify-center items-center hover:opacity-80'>
+									<FaPen size={12} color='white' />
+								</span>
+							</Link>
+						)}
 						{/* Render Image or React Component based on slide type */}
 						{slide && typeof slide === 'object' && 'src' in slide ? (
 							<Image
@@ -98,6 +121,7 @@ const Slider: React.FC<SliderProps> = ({ slides, DescriptionComponent }) => {
 					clickNext={clickNext}
 					clickPrev={clickPrev}
 					slides={slides}
+					testimonials
 				/>
 			)}
 		</main>

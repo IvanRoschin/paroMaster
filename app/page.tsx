@@ -1,68 +1,96 @@
 'use client'
 
-import { Advantages, Description, ItemsList, Slider, TestimonialsList } from '@/components/index'
-import { ISearchParams } from '@/types/index'
-import { getAllGoods } from './actions/goods'
-import { getAllSlides } from './actions/slider'
-import { getAllTestimonials } from './actions/testimonials'
-import useFetchData from './hooks/useFetchData'
-import useSwrGetData from './hooks/useGoods'
+import {
+	Advantages,
+	Description,
+	EmptyState,
+	ItemsList,
+	Loader,
+	Slider,
+	TestimonialsList,
+} from '@/components/index'
+import { IGood, ISearchParams, ISlider, ITestimonial } from '@/types/index'
+import { useQuery } from '@tanstack/react-query'
+import { getAllGoods, IGetAllGoods } from './actions/goods'
+import { getAllSlides, IGetAllSlides } from './actions/slider'
+import { getAllTestimonials, IGetAllTestimonials } from './actions/testimonials'
 
 const limit = 4
 
 const Home = ({ searchParams }: { searchParams: ISearchParams }) => {
-	const { data: slidesData, isLoading: isSlidesLoading, isError: isSlidesError } = useFetchData(
-		searchParams,
-		limit,
-		getAllSlides,
-		'slides',
-	)
+	// const queryClient = useQueryClient()
+	// Prefetch data on component mount
+	// useEffect(() => {
+	// 	const prefetch = async () => {
+	// 		await queryClient.prefetchQuery({
+	// 			queryKey: ['slides'],
+	// 			queryFn: () => getAllSlides(searchParams, limit),
+	// 			staleTime: 60000,
+	// 		})
+	// 		await queryClient.prefetchQuery({
+	// 			queryKey: ['testimonials'],
+	// 			queryFn: () => getAllTestimonials(searchParams, limit),
+	// 			staleTime: 60000,
+	// 		})
+	// 		await queryClient.prefetchQuery({
+	// 			queryKey: ['goods'],
+	// 			queryFn: () => getAllGoods(searchParams, limit),
+	// 			staleTime: 60000,
+	// 		})
+	// 	}
 
-	const slides = slidesData?.slides ?? []
+	// 	prefetch()
+	// }, [queryClient, searchParams])
 
-	console.log('slides', slides)
+	const { data: slidesData, isLoading: isSlidesLoading, isError: isSlidesError } = useQuery<
+		IGetAllSlides
+	>({
+		queryKey: ['slides'],
+		queryFn: () => getAllSlides(searchParams, limit),
+	})
 
-	const { data: goodsData, isLoading: isGoodsLoading, error: isGoodsError } = useSwrGetData(
-		searchParams,
-		limit,
-		getAllGoods,
-		'goods',
-	)
+	const slides: ISlider[] = slidesData?.slides ?? []
 
-	const goods = goodsData?.goods ?? []
+	const { data: goodsData, isLoading: isGoodsLoading, isError: isGoodsError } = useQuery<
+		IGetAllGoods
+	>({
+		queryKey: ['goods'],
+		queryFn: () => getAllGoods(searchParams, limit),
+		enabled: !!searchParams,
+	})
 
-	console.log('goods', goods)
+	const goods: IGood[] = goodsData?.goods ?? []
 
 	const {
 		data: testimonialsData,
 		isLoading: isTestimonialsLoading,
-		error: isTestimonialsError,
-	} = useSwrGetData(searchParams, limit, getAllTestimonials, 'testimonials')
+		isError: isTestimonialsError,
+	} = useQuery<IGetAllTestimonials>({
+		queryKey: ['testimonials'],
+		queryFn: () => getAllTestimonials(searchParams, limit),
+		enabled: !!goodsData,
+	})
 
-	const testimonials = testimonialsData?.testimonials ?? []
+	const testimonials: ITestimonial[] = testimonialsData?.testimonials ?? []
 
+	//Handle loading
+	if (isSlidesLoading || isGoodsLoading || isTestimonialsLoading) {
+		return <Loader />
+	}
+
+	//Handle error
+	if (isSlidesError || isGoodsError || isTestimonialsError) {
+		return <div>Error fetching data.</div>
+	}
+
+	// Handle empty state
+	if (goods.length === 0 && slides.length === 0 && testimonials.length === 0) {
+		return <EmptyState showReset />
+	}
+
+	console.log('goods', goods)
 	console.log('slides', slides)
-
-	// if (isGoodsLoading || isSlidesLoading || isTestimonialsLoading) {
-	// 	return <Loader />
-	// }
-
-	// // Handle errors
-	// if (isGoodsError || isSlidesError || isTestimonialsError) {
-	// 	return <div>Error fetching data.</div>
-	// }
-
-	// // Handle empty state
-	// if (
-	// 	!goods ||
-	// 	!slides ||
-	// 	!testimonials ||
-	// 	goods?.length === 0 ||
-	// 	slides?.length === 0 ||
-	// 	testimonials?.length === 0
-	// ) {
-	// 	return <EmptyState showReset />
-	// }
+	console.log('testimonials', testimonials)
 
 	return (
 		<div className='container'>

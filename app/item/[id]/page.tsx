@@ -1,4 +1,5 @@
 'use client'
+
 import { getGoodById } from '@/actions/goods'
 import Button from '@/components/Button'
 import ImagesBlock from '@/components/ImagesBlock'

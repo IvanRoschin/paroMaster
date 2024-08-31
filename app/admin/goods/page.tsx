@@ -19,7 +19,7 @@ import {
 } from 'react-icons/fa'
 import { toast } from 'sonner'
 
-const limit = 4
+const limit = 10
 
 const ProductsPage = ({ searchParams }: { searchParams: ISearchParams }) => {
 	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')

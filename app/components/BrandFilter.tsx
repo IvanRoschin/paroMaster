@@ -1,15 +1,12 @@
 'use client'
 
-import { uniqueBrands } from '@/actions/goods'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback } from 'react'
 
-const BrandFilter = () => {
+const BrandFilter = ({ brands }: { brands: string[] }) => {
 	const searchParams = useSearchParams()
 	const pathname = usePathname()
 	const { push } = useRouter()
-
-	const [brands, setBrands] = useState<string[]>([])
 
 	const createQueryString = useCallback(
 		(name: string, value: string) => {
@@ -24,24 +21,12 @@ const BrandFilter = () => {
 		[searchParams],
 	)
 
-	useEffect(() => {
-		const fetchBrands = async () => {
-			try {
-				const uniqueBrandsData = await uniqueBrands()
-				setBrands(uniqueBrandsData || [])
-			} catch (error) {
-				console.error('Error fetching unique brands:', error)
-			}
-		}
-
-		fetchBrands()
-	}, [])
-
 	if (brands.length === 0) {
-		return <h2 className='subtitle mb-4'>Бренд не знайдений</h2>
+		return <h2 className='text-4xl mb-4'>Бренд не знайдений</h2>
 	}
 
 	const handleBrandCheckboxClick = (brand: string) => {
+		console.log('brand', brand)
 		const selectedBrand = searchParams.get('brand')
 		const newBrand = selectedBrand === brand ? null : brand
 		push(pathname + '?' + createQueryString('brand', newBrand as string), { scroll: false })
@@ -49,20 +34,22 @@ const BrandFilter = () => {
 
 	return (
 		<div>
-			<h2 className='subtitle mb-4'>Бренди</h2>
+			<h2 className='text-2xl text-primaryAccentColor mb-4 bold'>Бренди</h2>{' '}
 			<ul>
-				{brands.map((brand, index) => {
+				{brands?.map((brand, index) => {
 					const isChecked = searchParams.get('brand') === brand
 					return (
-						<li key={index}>
+						<li key={index} className='flex items-center space-x-2'>
 							<input
 								type='checkbox'
 								checked={isChecked}
 								onChange={() => handleBrandCheckboxClick(brand)}
+								className='custom-checkbox'
+								id={`checkbox-${index}`}
 							/>
-							{'  '}
-							{'  '}
-							{brand}
+							<label htmlFor={`checkbox-${index}`} className='text-primaryTextColor cursor-pointer'>
+								{brand}
+							</label>
 						</li>
 					)
 				})}
