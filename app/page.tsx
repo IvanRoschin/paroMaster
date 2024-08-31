@@ -71,7 +71,9 @@ const Home = ({ searchParams }: { searchParams: ISearchParams }) => {
 		enabled: !!goodsData,
 	})
 
-	const testimonials: ITestimonial[] = testimonialsData?.testimonials ?? []
+	const testimonials: ITestimonial[] = (testimonialsData?.testimonials ?? []).filter(
+		testimonial => testimonial.isActive,
+	)
 
 	//Handle loading
 	if (isSlidesLoading || isGoodsLoading || isTestimonialsLoading) {
@@ -88,9 +90,9 @@ const Home = ({ searchParams }: { searchParams: ISearchParams }) => {
 		return <EmptyState showReset />
 	}
 
-	console.log('goods', goods)
-	console.log('slides', slides)
-	console.log('testimonials', testimonials)
+	// console.log('goods', goods)
+	// console.log('slides', slides)
+	// console.log('testimonials', testimonials)
 
 	return (
 		<div className='container'>

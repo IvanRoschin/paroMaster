@@ -5,6 +5,7 @@ import { ISlider } from '@/types/index'
 import { ISearchParams } from '@/types/searchParams'
 import { connectToDB } from '@/utils/dbConnect'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 
 export interface IGetAllSlides {
 	success: boolean
@@ -102,7 +103,7 @@ export async function deleteSlide(formData: FormData) {
 
 export async function updateSlide(formData: FormData) {
 	const entries = Object.fromEntries(formData.entries())
-	const { id, title, src } = entries as {
+	const { id, title, desc, src } = entries as {
 		id: string
 		title?: string
 		desc?: string
@@ -113,6 +114,7 @@ export async function updateSlide(formData: FormData) {
 		const updateFields: Partial<ISlider> = {
 			title,
 			src,
+			desc,
 		}
 		Object.keys(updateFields).forEach(
 			key =>
@@ -135,5 +137,6 @@ export async function updateSlide(formData: FormData) {
 		}
 	} finally {
 		revalidatePath('/admin/slider')
+		redirect('/admin/slider')
 	}
 }
