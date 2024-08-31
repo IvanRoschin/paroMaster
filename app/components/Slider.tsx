@@ -1,11 +1,8 @@
 'use client'
 
 import { ISlider } from '@/types/index'
-import { useSession } from 'next-auth/react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { ReactNode, useEffect, useState } from 'react'
-import { FaPen } from 'react-icons/fa'
 import { IoIosArrowDropleft, IoIosArrowDropright } from 'react-icons/io'
 
 interface SliderProps {
@@ -22,9 +19,6 @@ interface SliderProps {
 
 const Slider: React.FC<SliderProps> = ({ slides, DescriptionComponent, testimonials }) => {
 	const [activeImage, setActiveImage] = useState(0)
-	const { data: session } = useSession()
-
-	const isAdmin = session?.user
 
 	const clickNext = () => {
 		setActiveImage(prevActiveImage =>
@@ -71,16 +65,6 @@ const Slider: React.FC<SliderProps> = ({ slides, DescriptionComponent, testimoni
 								: 'hidden '
 						}`}
 					>
-						{isAdmin && (
-							<Link
-								href={`/admin/slider/${slide?._id}`}
-								className='absolute top-0 right-0 flex items-center justify-center'
-							>
-								<span className='cursor-pointer w-[30px] h-[30px] rounded-full bg-orange-600 flex justify-center items-center hover:opacity-80'>
-									<FaPen size={12} color='white' />
-								</span>
-							</Link>
-						)}
 						{/* Render Image or React Component based on slide type */}
 						{slide && typeof slide === 'object' && 'src' in slide ? (
 							<Image
@@ -91,7 +75,7 @@ const Slider: React.FC<SliderProps> = ({ slides, DescriptionComponent, testimoni
 								className='w-full h-[80vh] object-cover md:rounded-tl-3xl md:rounded-bl-3xl'
 							/>
 						) : (
-							slide // Directly render ReactNode (like <Testimonials>)
+							<>{slide}</>
 						)}
 					</div>
 				))}

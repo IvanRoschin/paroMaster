@@ -21,6 +21,10 @@ interface SliderFormProps {
 }
 
 const AddSlideForm: React.FC<SliderFormProps> = ({ slide, title, action }) => {
+	const textareaStyles: React.CSSProperties = {
+		height: '100px',
+		overflowY: 'auto',
+	}
 	const [images, setImages] = useState<File[]>([])
 	const [isUploaded, setIsUploaded] = useState<boolean>(false)
 
@@ -40,8 +44,9 @@ const AddSlideForm: React.FC<SliderFormProps> = ({ slide, title, action }) => {
 		{
 			id: 'desc',
 			label: 'Опис',
-			type: 'text',
+			type: 'textarea',
 			required: true,
+			style: textareaStyles,
 		},
 	]
 
