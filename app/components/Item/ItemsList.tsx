@@ -1,17 +1,21 @@
 'use client'
 
-import { IItem } from '@/types/item/IItem'
-import { ItemListCard } from '..'
+import { IGood } from '@/types/good/IGood'
+import EmptyState from '../EmptyState'
+import ItemListCard from './ItemListCard'
 
-const ItemsList = ({ goods }: { goods: IItem[] }) => {
+const ItemsList = ({ goods }: { goods: IGood[] }) => {
 	if (goods.length === 0) {
-		return <h2 className='text-4xl mb-4'>Товар не знайдений</h2>
+		return <EmptyState />
 	}
 
 	return (
 		<>
-			<ul key={Math.random()} className='grid grid-cols-4 gap-4'>
-				{goods?.map((item: IItem, index) => (
+			<ul
+				key={Math.random()}
+				className='grid xl:grid-cols-4 gap-4 mb-20 md:grid-cols-2 grid-cols-1'
+			>
+				{goods?.map((item: IGood, index) => (
 					<ItemListCard key={index} item={item} />
 				))}
 			</ul>

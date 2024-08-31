@@ -23,9 +23,12 @@
 			"@/actions/*": ["app/actions/*"],
 			"@/api/*": ["app/api/*"],
 			"@/utils/*": ["app/utils/*"],
-			"@/types/*": ["types/*"]
+			"@/types/*": ["types/*"],
+			"@/models/*": ["models/*"],
+			"@/helpers/*": ["helpers/*"],
+			"@/config/*": ["config/*"]
 		}
 	},
-	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "auth.tjs", "auth.js"],
 	"exclude": ["node_modules"]
 }

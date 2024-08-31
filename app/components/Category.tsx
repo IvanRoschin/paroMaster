@@ -1,54 +1,13 @@
-'use client'
+import Image from 'next/image'
 import Link from 'next/link'
-import { Icon } from './Icon'
-
 import { useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
 
-export const categoryList = [
-	{
-		iconName: 'category_korpusniDetali',
-		categoryName: 'Корпус станції',
-	},
-	{
-		iconName: 'category_korpusUtuga',
-		categoryName: 'Корпус для прасок',
-	},
-	{
-		iconName: 'category_pidoshvaUtuga',
-		categoryName: 'Підошви для прасок',
-	},
-	{
-		iconName: 'category_platu',
-		categoryName: 'Плати керування',
-	},
-	{
-		iconName: 'category_boiler',
-		categoryName: 'Бойлери',
-	},
-	{
-		iconName: 'category_electroKlapan',
-		categoryName: 'Електроклапани',
-	},
-	{
-		iconName: 'category_nasos',
-		categoryName: 'Насоси(помпи)',
-	},
-	{
-		iconName: 'category_rezervuarVoda',
-		categoryName: 'Резервуари для води',
-	},
-	{
-		iconName: 'category_provoda',
-		categoryName: 'Провода та шланги',
-	},
-	{
-		iconName: 'category_accsecuari',
-		categoryName: 'Аксесуари та комплектуючі',
-	},
-]
+interface CategoryPage {
+	categories: { src: string; title: string }[]
+}
 
-const Category = () => {
+const Category: React.FC<CategoryPage> = ({ categories }) => {
 	const searchParams = useSearchParams()
 
 	const createQueryString = useCallback(
@@ -66,21 +25,25 @@ const Category = () => {
 
 	return (
 		<div className='pt-0 mr-4 text-sm w-[250px] mb-4'>
-			<h2 className='text-2xl text-primaryAccentColor mb-4 bold'>Категорії товарів</h2>
+			<h2 className='text-2xl text-primaryAccentColor mb-4 font-bold'>Категорії товарів</h2>
 			<ul className='bg-secondaryBackground p-4 rounded-lg'>
-				{categoryList.map(({ iconName, categoryName }, index) => {
-					return (
-						<li key={index} className='mb-3 nav'>
-							<Link
-								href={`/category/?${createQueryString('category', categoryName)}`}
-								className='flex justify-start items-start'
-							>
-								<Icon name={iconName} className='w-5 h-5  mr-3' />
-								{categoryName}
-							</Link>
-						</li>
-					)
-				})}
+				{categories.map(({ src, title }, index) => (
+					<li key={index} className='mb-3 nav'>
+						<Link
+							href={`/category/?${createQueryString('category', title)}`}
+							className='flex justify-start items-start group'
+						>
+							<Image
+								alt={title}
+								src={src}
+								width={20}
+								height={20}
+								className='w-5 h-5 mr-3 transition-filter duration-300 ease-in-out group-hover:filter-primary'
+							/>
+							{title}
+						</Link>
+					</li>
+				))}
 			</ul>
 		</div>
 	)

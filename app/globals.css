@@ -41,6 +41,40 @@ primaryAccentColor #ea580c => 234 88 12
 }
 
 @layer components {
+	.custom-checkbox {
+		appearance: none;
+		width: 16px;
+		height: 16px;
+		background-color: white;
+		border: 2px solid #ea580c;
+		border-radius: 4px;
+		position: relative;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.custom-checkbox:checked {
+		background-color: #ea580c;
+		border-color: #ea580c;
+	}
+
+	.custom-checkbox:checked::after {
+		content: '';
+		position: absolute;
+		top: 2px;
+		left: 5px;
+		width: 4px;
+		height: 8px;
+		border: solid white;
+		border-width: 0 2px 2px 0;
+		transform: rotate(45deg);
+	}
+
+	.custom-checkbox:focus {
+		outline: none;
+		box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5); /* Adjust as needed */
+	}
+
 	.nav {
 		@apply relative 
 		hover:text-white hover:fill-orange-600
@@ -65,6 +99,12 @@ primaryAccentColor #ea580c => 234 88 12
 	}
 	.nav:focus::after {
 		@apply w-full;
+	}
+	.filter-primary {
+		filter: invert(39%) sepia(95%) saturate(3935%) hue-rotate(350deg) brightness(94%) contrast(91%);
+	}
+	.filter-white {
+		filter: invert(100%) brightness(100%);
 	}
 
 	.swiper {
@@ -102,5 +142,19 @@ primaryAccentColor #ea580c => 234 88 12
 	.swiper-button-next::after,
 	.swiper-button-prev::after {
 		display: none;
+	}
+
+	.title {
+		color: #ea580c;
+		font-size: 36px;
+		text-align: center;
+		font-weight: 700;
+	}
+
+	.subtitle {
+		color: #ea580c;
+		font-size: 24px;
+		text-align: left;
+		font-weight: 700;
 	}
 }

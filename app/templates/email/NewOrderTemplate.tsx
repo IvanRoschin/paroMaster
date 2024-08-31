@@ -1,4 +1,4 @@
-import { IItem } from '@/types/item/IItem'
+import { IGood } from '@/types/good/IGood'
 
 enum PaymentMethod {
 	CashOnDelivery = 'Оплата після отримання',
@@ -8,30 +8,21 @@ enum PaymentMethod {
 
 export interface NewOrderTemplateProps {
 	name: string
+	surname: string
 	email: string
 	phone: string
 	payment: PaymentMethod
 	city: string
 	warehouse: string
-	cartItems: IItem[]
+	cartItems: IGood[]
 	totalAmount: number
 	quantity: number[]
 	orderNumber: string
 }
 
-// const date = new Date()
-// const year = date.getFullYear().toString()
-// const month = (date.getMonth() + 1).toString().padStart(2, '0')
-// const day = date
-// 	.getDate()
-// 	.toString()
-// 	.padStart(2, '0')
-// const formattedDate = `${day}${month}${year}`
-
-// const index = 1 // Your index value
-
 export function generateEmailContent({
 	name,
+	surname,
 	email,
 	phone,
 	payment,
@@ -65,7 +56,7 @@ export function generateEmailContent({
       <br />
       <br />
       <h3>
-        <p>Від користувача: ${name}</p>
+        <p>Від користувача: ${name} ${surname}</p>
         <p>Телефон:${phone}</p>
         <p>Вказаний e-mail: ${email}</p>
         <p>Вказаний спосіб оплати: ${payment}</p>
