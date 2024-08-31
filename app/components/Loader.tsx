@@ -1,7 +1,20 @@
-type Props = {}
+'use client'
+import { FallingLines } from 'react-loader-spinner'
 
-const Loader = (props: Props) => {
-	return <h2 className='text-4xl flex justify-center items-center'>🌀 Loading...</h2>
+const Loader = () => {
+	return (
+		<div
+			className='
+			h-[60vh]
+			flex
+			flex-col
+			gap-2
+			justify-center
+			items-center'
+		>
+			<FallingLines color='#EA580C' width='100' visible={true} />
+		</div>
+	)
 }
 
 export default Loader

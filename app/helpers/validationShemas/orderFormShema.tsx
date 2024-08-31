@@ -1,20 +1,30 @@
 import * as Yup from 'yup'
 
-const nameRegex = /^[а-яА-ЯіІїЇєЄґҐ']+ [а-яА-ЯіІїЇєЄґҐ']+$/u
+const nameRegex = /^[а-яА-ЯіІїЇєЄґҐ']+$/u
+
+const surnameRegex = /^[а-яА-ЯіІїЇєЄґҐ']+$/u
+
 const emailRegex = /^(?=.{1,63}$)(?=.{2,}@)[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 const phoneRegex = /^\+380\d{9}$/
 
 export const orderFormSchema = Yup.object().shape({
 	name: Yup.string()
-		.max(20)
-		.min(3)
+		.max(20, 'Максимум 20 символів')
+		.min(3, 'Мінімум 3 символи')
 		.matches(nameRegex, {
 			message: 'Тільки українські букви від 3 до 20 символів',
 		})
 		.required(`Обов'язкове поле`),
+	surname: Yup.string()
+		.max(20, 'Максимум 20 символів')
+		.min(3, 'Мінімум 3 символи')
+		.matches(surnameRegex, {
+			message: 'Тільки українські букви від 3 до 20 символів',
+		})
+		.required(`Обов'язкове поле`),
 	email: Yup.string()
-		.max(63)
-		.min(3)
+		.max(63, 'Максимуму 63 символи')
+		.min(3, 'Мінімум 3 символи')
 		.email()
 		.matches(emailRegex, {
 			message: 'Має включати @, від 3 до 63 символів',

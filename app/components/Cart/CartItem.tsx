@@ -1,7 +1,7 @@
 'use client'
 
 import { getGoodById } from '@/actions/goods'
-import { SItem } from '@/types/item/IItem'
+import { SGood } from '@/types/good/IGood'
 import { useShoppingCart } from 'app/context/ShoppingCartContext'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
@@ -28,7 +28,7 @@ const CartItem: React.FC<CartItemProps> = ({ id, quantity }) => {
 
 	useEffect(() => {
 		if (data) {
-			const good: SItem = data
+			const good: SGood = data
 			const newAmount = good.price * quantity
 			setAmount(newAmount)
 			localStorage.setItem(`amount-${id}`, JSON.stringify(newAmount))
@@ -44,7 +44,7 @@ const CartItem: React.FC<CartItemProps> = ({ id, quantity }) => {
 		return <Loader />
 	}
 
-	const good: SItem = data
+	const good: SGood = data
 
 	return (
 		<div>
@@ -52,7 +52,7 @@ const CartItem: React.FC<CartItemProps> = ({ id, quantity }) => {
 				<div className='flex items-center justify-center gap-10'>
 					<div className='w-[150px] '>
 						<Image
-							src={good.imgUrl[0]}
+							src={good.src[0]}
 							alt='item_photo'
 							width={150}
 							height={150}

@@ -1,21 +1,22 @@
 'use client'
 
-import { useFormik } from 'formik'
+import { useShoppingCart } from 'app/context/ShoppingCartContext'
+import { FormikProvider, useFormik } from 'formik'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
-import { useShoppingCart } from 'app/context/ShoppingCartContext'
-
+import { addCustomer } from '@/actions/customers'
 import { getGoodById } from '@/actions/goods'
 import { getData } from '@/actions/nova'
-import { sendEmail } from '@/actions/sendEmail'
-
 import { addOrder } from '@/actions/orders'
-import { SItem } from '@/types/item/IItem'
+import { sendCustomerEmail, sendEmail } from '@/actions/sendEmail'
+import { SGood } from '@/types/good/IGood'
 import { IOrder } from '@/types/order/IOrder'
-import { generateOrderNumber } from 'app/helpers/oderNumber'
+import { PaymentMethod } from '@/types/paymentMethod'
+import { generateOrderNumber } from 'app/helpers/orderNumber'
 import { orderFormSchema } from 'app/helpers/validationShemas/orderFormShema'
+import FormField from '../input/FormField'
 import Modal from './Modal'
 
 interface OrderModalProps {
@@ -29,6 +30,7 @@ interface Warehouse {
 
 interface FormValues {
 	name: string
+	surname: string
 	email: string
 	phone: string
 	city: string
@@ -38,23 +40,31 @@ interface FormValues {
 	totalAmount: number
 }
 
-enum PaymentMethod {
-	CashOnDelivery = 'Оплата після отримання',
-	CreditCard = 'Оплата на карту',
-	InvoiceForSPD = 'Рахунок для СПД',
-}
-
 const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 	const router = useRouter()
 	const { cartItems, closeOrderModal, resetCart, getItemQuantity } = useShoppingCart()
 	const [warehouses, setWarehouses] = useState<Warehouse[]>([])
 	const [isLoading, setIsLoading] = useState(false)
+	const [orderNumber, setOrderNumber] = useState('')
+	const [isCheckboxChecked, setIsCheckboxChecked] = useState(false)
 
-	const orderNumber = generateOrderNumber()
+	useEffect(() => {
+		const fetchOrderNumber = async () => {
+			try {
+				const getOrderNumber = await generateOrderNumber()
+				setOrderNumber(getOrderNumber)
+			} catch (error) {
+				console.error('Failed to generate order number:', error)
+			}
+		}
+
+		fetchOrderNumber()
+	}, [])
 
 	const formik = useFormik<FormValues>({
 		initialValues: {
 			name: '',
+			surname: '',
 			email: '',
 			phone: '+380',
 			payment: PaymentMethod.CashOnDelivery,
@@ -78,14 +88,14 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 			const orderData: IOrder = {
 				orderNumber: orderNumber,
 				customer: {
-					name: values.name,
+					name: `${values.name} ${values.surname}`,
 					email: values.email,
 					phone: values.phone,
 					city: values.city,
 					warehouse: values.warehouse,
 					payment: values.payment,
 				},
-				orderedGoods: values.cartItems.map((item: SItem) => ({
+				orderedGoods: values.cartItems.map((item: SGood) => ({
 					id: item._id,
 					title: item.title,
 					brand: item.brand,
@@ -99,6 +109,16 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 				status: 'Новий',
 			}
 
+			const formData = new FormData()
+
+			const fullName = `${values.name} ${values.surname}`.trim()
+			formData.append('name', fullName)
+			formData.append('email', values.email)
+			formData.append('phone', values.phone)
+			formData.append('city', values.city)
+			formData.append('warehouse', values.warehouse)
+			formData.append('payment', values.payment as string)
+
 			setIsLoading(true)
 
 			try {
@@ -107,9 +127,16 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 					setWarehouses(response.data.data)
 				}
 				const emailResult = await sendEmail(values, orderNumber)
+				const customerEmailRusult = await sendCustomerEmail(values, orderNumber)
 				const orderResult = await addOrder(orderData)
+				const customerResult = await addCustomer(formData)
 
-				if (emailResult?.success && orderResult?.success) {
+				if (
+					emailResult?.success &&
+					customerEmailRusult?.success &&
+					orderResult?.success &&
+					customerResult?.success
+				) {
 					router.push('/')
 					actions.resetForm()
 					closeOrderModal()
@@ -195,147 +222,82 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 		fetchWarehouses()
 	}, [formik.values.city])
 
-	const renderInputField = (
-		id: keyof FormValues,
-		label: string,
-		type: string = 'text',
-		placeholder: string = ' ',
-	) => (
-		<div className='relative'>
-			<input
-				id={id}
-				name={id}
-				type={type}
-				placeholder={placeholder}
-				onChange={handleChange}
-				value={id === 'phone' && !values[id].startsWith('+380') ? '+380' + values[id] : values[id]}
-				onBlur={handleBlur}
-				className={`
-                    peer
-                    w-full
-                    h-10
-                    p-6
-                    bg-white
-                    border-2
-                    rounded-md
-                    outline-none
-                    transition
-                    disabled:opacity-70 disabled:cursor-not-allowed
-                    text-neutral-700
-                    placeholder-white
-                    placeholder:b-black
-                    placeholder:text-base 
-                    ${errors[id] && touched[id] ? 'border-rose-300' : 'border-neutral-300'} ${
-					errors[id] && touched[id] ? 'focus:border-rose-300' : 'focus:border-neutral-500'
-				}`}
-			/>
-			<label
-				htmlFor={id}
-				className='
-                    absolute
-                    left-0
-                    p-2
-                    pl-7
-                    -top-8
-                    text-neutral-500
-                    peer-placeholder-shown:text-base
-                    peer-placeholder-shown:text-neutral-500
-                    peer-placeholder-shown:top-2
-                    transition-all'
-			>
-				{label}
-			</label>
-			{errors[id] && touched[id] && (
-				<p className='text-rose-300 pl-7 transition-all'>{errors[id] as any} </p>
-			)}
-		</div>
-	)
-
-	const renderSelectField = (
-		id: keyof FormValues,
-		label: string,
-		options: { value: string; label: string }[],
-		onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void,
-	) => (
-		<div className='relative'>
-			<select
-				id={id}
-				name={id}
-				className={`
-                peer
-                w-full
-                h-12
-                px-6
-                bg-white
-                border-2
-                rounded-md
-                outline-none
-                transition
-                disabled:opacity-70 disabled:cursor-not-allowed
-                text-neutral-700
-                placeholder-white
-                placeholder:b-black
-                placeholder:text-base 
-                ${errors[id] && touched[id] ? 'border-rose-300' : 'border-neutral-300'} ${
-					errors[id] && touched[id] ? 'focus:border-rose-300' : 'focus:border-neutral-500'
-				}`}
-				style={{ display: 'block' }}
-				value={values[id]}
-				onBlur={handleBlur}
-				onChange={onChange || handleChange}
-				// onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-				// 	setFieldValue(id, e.currentTarget.value)
-				// }}
-			>
-				{options.map((option, index) => (
-					<option value={option.value} label={option.label} key={index}>
-						{option.label}
-					</option>
-				))}
-			</select>
-
-			<label
-				htmlFor={id}
-				className='
-                absolute
-                left-0
-                p-2
-                pl-7
-                -top-8
-                text-neutral-500
-                peer-placeholder-shown:text-base
-                peer-placeholder-shown:text-neutral-500
-                peer-placeholder-shown:top-2
-                transition-all'
-			>
-				{label}
-			</label>
-			{errors[id] && touched[id] && (
-				<p className='text-rose-300 pl-7 transition-all'>{errors[id] as any} </p>
-			)}
-		</div>
-	)
-
-	const paymentOptions = Object.values(PaymentMethod).map(method => ({
-		value: method,
-		label: method,
-	}))
-
-	const warehouseOptions = warehouses.map(warehouse => ({
-		value: warehouse.Description,
-		label: warehouse.Description,
-	}))
+	const inputItems = [
+		{
+			id: 'name',
+			label: 'Ім`я',
+			type: 'text',
+			required: true,
+		},
+		{
+			id: 'surname',
+			label: 'Прізвище',
+			type: 'text',
+			required: true,
+		},
+		{
+			id: 'email',
+			label: 'Email',
+			type: 'email',
+			required: true,
+		},
+		{
+			id: 'phone',
+			label: 'Телефон',
+			type: 'tel',
+			required: true,
+		},
+		{
+			id: 'city',
+			label: 'Місто',
+		},
+		{
+			id: 'warehouse',
+			label: 'Оберіть відділення',
+			options: warehouses.map(warehouse => ({
+				value: warehouse.Description,
+				label: warehouse.Description,
+			})),
+			type: 'select',
+		},
+		{
+			id: 'payment',
+			label: 'Оберіть спосіб оплати',
+			options: Object.values(PaymentMethod).map(method => ({
+				value: method,
+				label: method,
+			})),
+			type: 'select',
+		},
+	]
 
 	const bodyContent = (
 		<div className='flex flex-col gap-4'>
-			<form onSubmit={handleSubmit} autoComplete='off' className='flex flex-col space-y-8'>
-				{renderInputField('name', "Введіть iм'я та прізвище")}
-				{renderInputField('email', 'Введіть  email')}
-				{renderInputField('phone', 'Введіть телефон', 'tel')}
-				{renderSelectField('payment', 'Оберіть спосіб оплати', paymentOptions)}
-				{renderInputField('city', 'Введіть назву міста')}
-				{renderSelectField('warehouse', 'Оберіть відділення', warehouseOptions)}
-			</form>
+			<FormikProvider value={formik}>
+				<form onSubmit={handleSubmit} autoComplete='off' className='flex flex-col space-y-8'>
+					{inputItems.map(item => (
+						<div key={item.id}>
+							{item.type === 'select' && (
+								<label htmlFor={item.id} className='block mb-2'>
+									{item.label}
+								</label>
+							)}
+							<FormField key={item.id} item={item} errors={errors} setFieldValue={setFieldValue} />
+						</div>
+					))}
+
+					<div className='flex items-center'>
+						<input
+							id='termsCheckbox'
+							type='checkbox'
+							checked={isCheckboxChecked}
+							onChange={e => setIsCheckboxChecked(e.target.checked)}
+							className='mr-2'
+						/>
+						<label htmlFor='termsCheckbox'>Я погоджуюсь з умовами та правилами</label>
+					</div>
+				</form>
+			</FormikProvider>
 		</div>
 	)
 
@@ -356,6 +318,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 			isOpen={isOrderModalOpen}
 			onClose={closeOrderModal}
 			onSubmit={formik.handleSubmit}
+			disabled={!isCheckboxChecked} // Disable button if checkbox is not checked
 		/>
 	)
 }
