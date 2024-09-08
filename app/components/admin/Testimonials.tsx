@@ -5,6 +5,7 @@ import Pagination from '@/components/admin/Pagination'
 import Button from '@/components/Button'
 import { EmptyState, Loader, Search, Switcher } from '@/components/index'
 import { ISearchParams } from '@/types/searchParams'
+import { useDeleteData } from 'app/hooks/useDeleteData'
 import useFetchData from 'app/hooks/useFetchData'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -26,6 +27,11 @@ export default function Testimonials({
 		getAllTestimonials,
 		'testimonials',
 	)
+	const { mutate: deleteTestimonialById } = useDeleteData(deleteTestimonial, 'testimonials')
+
+	const handleDelete = (id: string) => {
+		deleteTestimonialById(id)
+	}
 
 	if (isLoading) {
 		return <Loader />
@@ -37,18 +43,6 @@ export default function Testimonials({
 
 	if (!data?.testimonials || data.testimonials.length === 0) {
 		return <EmptyState showReset />
-	}
-
-	const handleDelete = async (id: string) => {
-		try {
-			const formData = new FormData()
-			formData.append('id', id)
-			await deleteTestimonial(formData)
-			toast.success('Відгук успішно видалено!')
-		} catch (error) {
-			toast.error('Помилка при видаленні Відгуку!')
-			console.error('Error deleting testimonial', error)
-		}
 	}
 
 	const handleStatusToggle = async (id: string, currentStatus: boolean) => {
@@ -125,7 +119,9 @@ export default function Testimonials({
 								<td className='p-2 border-r-2 text-center'>
 									<Switcher
 										checked={testimonial.isActive}
-										onChange={() => handleStatusToggle(testimonial._id, testimonial.isActive)}
+										onChange={() =>
+											testimonial._id && handleStatusToggle(testimonial._id, testimonial.isActive)
+										}
 									/>
 								</td>
 								<td className='p-2 text-center'>
@@ -140,7 +136,7 @@ export default function Testimonials({
 										small
 										outline
 										color='border-red-400'
-										onClick={() => handleDelete(testimonial._id)}
+										onClick={() => testimonial._id && handleDelete(testimonial._id.toString())}
 									/>
 								</td>
 							</tr>

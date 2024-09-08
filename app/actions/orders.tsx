@@ -47,7 +47,7 @@ export async function addOrder(values: IOrder) {
 		await connectToDB()
 
 		const orderData = {
-			orderNumber: values.orderNumber,
+			orderNumber: values.number,
 			customer: values.customer,
 			orderedGoods: values.orderedGoods.map(item => ({
 				id: item.id,
@@ -157,8 +157,7 @@ export async function addOrderAction(formData: FormData) {
 	}
 }
 
-export async function deleteOrder(formData: FormData): Promise<void> {
-	const { id } = Object.fromEntries(formData) as { id: string }
+export async function deleteOrder(id: string) {
 	if (!id) {
 		console.error('No ID provided')
 		return
@@ -201,9 +200,9 @@ export async function updateOrder(formData: Record<string, any>) {
 		}
 	})
 
-	const { id, orderNumber, customer, orderedGoods, goodsQuantity, totalPrice, status } = values as {
+	const { id, number, customer, orderedGoods, goodsQuantity, totalPrice, status } = values as {
 		id: string
-		orderNumber?: string
+		number?: string
 		customer?: any
 		orderedGoods?: any
 		goodsQuantity?: number
@@ -215,7 +214,7 @@ export async function updateOrder(formData: Record<string, any>) {
 		await connectToDB()
 
 		const updateFields: Partial<IOrder> = {
-			orderNumber,
+			number,
 			customer,
 			orderedGoods,
 			goodsQuantity,
@@ -229,6 +228,8 @@ export async function updateOrder(formData: Record<string, any>) {
 					updateFields[key as keyof IOrder] === undefined) &&
 				delete updateFields[key as keyof IOrder],
 		)
+		console.log('id', id)
+		console.log('updateFields', updateFields)
 
 		await Order.findByIdAndUpdate(id, updateFields)
 	} catch (error) {

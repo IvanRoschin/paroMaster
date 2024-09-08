@@ -9,13 +9,11 @@ const SingleOrderPage = async ({ params }: { params: Params }) => {
 	const { id } = params
 	const order = await getOrderById(id)
 
-	console.log('order', order)
-
 	return (
 		<div className='mb-20'>
 			<AddOrderForm
 				order={order}
-				title={`Редагувати дані ордера ${order.orderNumber}`}
+				title={`Редагувати дані ордера ${order.number}`}
 				action={updateOrder}
 			/>
 		</div>

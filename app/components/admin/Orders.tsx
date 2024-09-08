@@ -6,11 +6,11 @@ import Button from '@/components/Button'
 import EmptyState from '@/components/EmptyState'
 import { Loader, Search } from '@/components/index'
 import { ISearchParams } from '@/types/searchParams'
+import { useDeleteData } from 'app/hooks/useDeleteData'
 import useFetchData from 'app/hooks/useFetchData'
 import Link from 'next/link'
 import { useState } from 'react'
 import { FaPen, FaTrash } from 'react-icons/fa'
-import { toast } from 'sonner'
 
 export default function Orders({
 	searchParams,
@@ -27,6 +27,12 @@ export default function Orders({
 		'orders',
 	)
 
+	const { mutate: deleteOrderById } = useDeleteData(deleteOrder, 'orders')
+
+	const handleDelete = (id: string) => {
+		deleteOrderById(id)
+	}
+
 	if (isLoading) {
 		return <Loader />
 	}
@@ -37,19 +43,6 @@ export default function Orders({
 
 	if (!data?.orders || data.orders.length === 0) {
 		return <EmptyState showReset />
-	}
-	const handleDelete = async (id: string) => {
-		try {
-			const formData = new FormData()
-			formData.append('id', id)
-			await deleteOrder(formData)
-			toast.success('Ордер успішно видалено!')
-		} catch (error) {
-			toast.error('Помилка при видаленні ордеру!')
-			console.error('Error deleting order', error)
-		} finally {
-			window.location.reload()
-		}
 	}
 
 	const ordersCount = data?.count || 0
@@ -108,8 +101,8 @@ export default function Orders({
 					</thead>
 					<tbody>
 						{data.orders.map(order => (
-							<tr key={order.orderNumber} className='border-b-2'>
-								<td className='p-2 border-r-2 text-center'>{order.orderNumber}</td>
+							<tr key={order.number} className='border-b-2'>
+								<td className='p-2 border-r-2 text-center'>{order.number}</td>
 								<td className='p-2 border-r-2 text-left'>
 									<strong>Ім'я:</strong> {order.customer.name} <br />
 									<strong>Телефон:</strong> {order.customer.phone} <br />
@@ -142,13 +135,7 @@ export default function Orders({
 										small
 										outline
 										color='border-red-400'
-										onClick={() => {
-											if (order._id) {
-												handleDelete(order._id)
-											} else {
-												console.error('Error: Good ID is undefined')
-											}
-										}}
+										onClick={() => order._id && handleDelete(order._id.toString())}
 									/>
 								</td>
 							</tr>

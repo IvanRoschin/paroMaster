@@ -82,8 +82,7 @@ export async function getCategoryById(id: string) {
 	}
 }
 
-export async function deleteCategory(formData: FormData) {
-	const { id } = Object.fromEntries(formData) as { id: string }
+export async function deleteCategory(id: string) {
 	if (!id) {
 		console.error('No ID provided')
 		return

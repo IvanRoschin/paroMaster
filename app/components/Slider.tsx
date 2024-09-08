@@ -1,24 +1,57 @@
-'use client'
-
-import { ISlider } from '@/types/index'
+import { getAllSlides } from '@/actions/slider'
+import { getAllTestimonials } from '@/actions/testimonials'
+import useFetchData from 'app/hooks/useFetchData'
 import Image from 'next/image'
-import { ReactNode, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { IoIosArrowDropleft, IoIosArrowDropright } from 'react-icons/io'
+import EmptyState from './EmptyState'
+import Loader from './Loader'
+import Testimonial from './Testimonial'
 
 interface SliderProps {
-	slides: (ISlider | ReactNode)[]
+	searchParams?: any
+	limit: number
+	DescriptionComponent?: any
 	testimonials?: boolean
-	DescriptionComponent?: React.ComponentType<{
-		activeImage: number
-		clickNext: () => void
-		clickPrev: () => void
-		slides: (ISlider | ReactNode)[]
-		testimonials?: boolean
-	}>
 }
 
-const Slider: React.FC<SliderProps> = ({ slides, DescriptionComponent, testimonials }) => {
+const Slider: React.FC<SliderProps> = ({
+	searchParams,
+	limit,
+	DescriptionComponent,
+	testimonials = false,
+}) => {
 	const [activeImage, setActiveImage] = useState(0)
+
+	const fetchFunction = testimonials ? getAllTestimonials : getAllSlides
+	const { data, isLoading, isError } = useFetchData(
+		searchParams,
+		limit,
+		fetchFunction,
+		testimonials ? 'testimonials' : 'slides',
+	)
+
+	const slides = testimonials ? data?.testimonials : data?.slides
+
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			clickNext()
+		}, 5000)
+
+		return () => clearTimeout(timer)
+	}, [activeImage, slides?.length])
+
+	if (isLoading) {
+		return <Loader />
+	}
+
+	if (isError) {
+		return <div>Error fetching data.</div>
+	}
+
+	if (!slides || slides.length === 0) {
+		return <EmptyState showReset />
+	}
 
 	const clickNext = () => {
 		setActiveImage(prevActiveImage =>
@@ -32,41 +65,31 @@ const Slider: React.FC<SliderProps> = ({ slides, DescriptionComponent, testimoni
 		)
 	}
 
-	useEffect(() => {
-		const timer = setTimeout(() => {
-			clickNext()
-		}, 5000)
-		return () => clearTimeout(timer)
-	}, [activeImage])
-
 	return (
 		<main
-			className={`grid 
-        place-items-center 
-        ${testimonials ? 'grid-cols-1' : 'grid-cols-2'}
-        w-full 
-        mx-auto 
-        max-w-5xl 
-        shadow-2xl 
-        rounded-2xl 
-        mt-[40px] 
-        relative 
-        mb-20`}
+			className={`grid place-items-center ${
+				testimonials ? 'grid-cols-1' : 'grid-cols-2'
+			} w-full mx-auto max-w-5xl shadow-2xl rounded-2xl mt-[40px] relative mb-20`}
 		>
-			<div
-				className={`w-full flex justify-center items-center gap-4 transition-transform ease-in-out duration-500 md:rounded-2xl p-6 md:p-0`}
-			>
-				{slides.map((slide, idx) => (
+			<div className='w-full flex justify-center items-center gap-4 transition-transform ease-in-out duration-500 md:rounded-2xl p-6 md:p-0'>
+				{slides.map((slide: any, idx: number) => (
 					<div
 						key={idx}
 						className={`${
 							idx === activeImage
-								? 'block w-full h-full object-cover transition-all duration-500 ease-in-out items-center '
-								: 'hidden '
+								? 'block w-full h-full object-cover transition-all duration-500 ease-in-out items-center'
+								: 'hidden'
 						}`}
 					>
-						{/* Render Image or React Component based on slide type */}
-						{slide && typeof slide === 'object' && 'src' in slide ? (
+						{testimonials ? (
+							<Testimonial
+								key={idx}
+								id={slide._id}
+								name={slide.name}
+								text={slide.text}
+								stars={slide.rating}
+							/>
+						) : (
 							<Image
 								src={slide.src}
 								alt={slide.title}
@@ -74,38 +97,31 @@ const Slider: React.FC<SliderProps> = ({ slides, DescriptionComponent, testimoni
 								height={400}
 								className='w-full h-[80vh] object-cover md:rounded-tl-3xl md:rounded-bl-3xl'
 							/>
-						) : (
-							<>{slide}</>
 						)}
 					</div>
 				))}
 			</div>
 
-			{/* Render Navigation Buttons if no DescriptionComponent is passed */}
-			{!DescriptionComponent && (
-				<div className='absolute md:bottom-1 bottom-10 right-10 md:right-0 w-full flex justify-center items-center'>
-					<div className='absolute bottom-2 right-10 cursor-pointer' onClick={clickPrev}>
-						<div className='swiper-button-prev'>
-							<IoIosArrowDropleft />
-						</div>{' '}
-					</div>
-
-					<div className='absolute bottom-2 right-2 cursor-pointer' onClick={clickNext}>
-						<div className='swiper-button-next'>
-							<IoIosArrowDropright />
-						</div>
+			<div className='absolute md:bottom-1 bottom-10 right-10 md:right-0 w-full flex justify-center items-center'>
+				<div className='absolute bottom-2 right-10 cursor-pointer' onClick={clickPrev}>
+					<div className='swiper-button-prev'>
+						<IoIosArrowDropleft />
 					</div>
 				</div>
-			)}
+				<div className='absolute bottom-2 right-2 cursor-pointer' onClick={clickNext}>
+					<div className='swiper-button-next'>
+						<IoIosArrowDropright />
+					</div>
+				</div>
+			</div>
 
-			{/* Optionally render the DescriptionComponent */}
 			{DescriptionComponent && (
 				<DescriptionComponent
 					activeImage={activeImage}
 					clickNext={clickNext}
 					clickPrev={clickPrev}
 					slides={slides}
-					testimonials
+					testimonials={testimonials}
 				/>
 			)}
 		</main>

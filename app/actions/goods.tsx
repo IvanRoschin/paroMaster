@@ -195,8 +195,7 @@ export async function addGood(formData: FormData) {
 	}
 }
 
-export async function deleteGood(formData: FormData): Promise<void> {
-	const { id } = Object.fromEntries(formData) as { id: string }
+export async function deleteGood(id: string) {
 	if (!id) {
 		console.error('No ID provided')
 		return

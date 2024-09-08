@@ -7,11 +7,11 @@ import EmptyState from '@/components/EmptyState'
 import Loader from '@/components/Loader'
 import Search from '@/components/Search'
 import { ISearchParams } from '@/types/searchParams'
+import { useDeleteData } from 'app/hooks/useDeleteData'
 import useFetchData from 'app/hooks/useFetchData'
 import Image from 'next/image'
 import Link from 'next/link'
 import { FaPen, FaTrash } from 'react-icons/fa'
-import { toast } from 'sonner'
 
 export default function Slides({
 	searchParams,
@@ -21,6 +21,12 @@ export default function Slides({
 	limit: number
 }) {
 	const { data, isLoading, isError } = useFetchData(searchParams, limit, getAllSlides, 'slides')
+
+	const { mutate: deleteSliderById } = useDeleteData(deleteSlide, 'slides')
+
+	const handleDelete = (id: string) => {
+		deleteSliderById(id)
+	}
 
 	if (isLoading) {
 		return <Loader />
@@ -32,18 +38,6 @@ export default function Slides({
 
 	if (!data?.slides || data.slides.length === 0) {
 		return <EmptyState showReset />
-	}
-
-	const handleDelete = async (id: string) => {
-		try {
-			const formData = new FormData()
-			formData.append('id', id)
-			await deleteSlide(formData)
-			toast.success('Слайд успішно видалено!')
-		} catch (error) {
-			toast.error('Помилка при видаленні Слайду!')
-			console.error('Error deleting slide', error)
-		}
 	}
 
 	const slidesCount = data?.count || 0
@@ -105,13 +99,7 @@ export default function Slides({
 									small
 									outline
 									color='border-red-400'
-									onClick={() => {
-										if (slide._id) {
-											handleDelete(slide._id)
-										} else {
-											console.error('Error: Slide ID is undefined')
-										}
-									}}
+									onClick={() => slide._id && handleDelete(slide._id.toString())}
 								/>
 							</td>
 						</tr>

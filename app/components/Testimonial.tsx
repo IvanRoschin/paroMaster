@@ -1,9 +1,7 @@
-import { ITestimonial } from '@/types/index'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import React from 'react'
 import { FaPen, FaRegStar, FaStar, FaStarHalfAlt } from 'react-icons/fa'
-import Slider from './Slider'
 
 interface TestimonialProps {
 	id: string
@@ -12,10 +10,11 @@ interface TestimonialProps {
 	stars: number
 }
 
-const Testimonials: React.FC<TestimonialProps> = ({ id, name, text, stars }) => {
+const Testimonial: React.FC<TestimonialProps> = ({ id, name, text, stars }) => {
 	const { data: session } = useSession()
 
-	const isAdmin = session?.user
+	// Assuming isAdmin is based on user presence. Adjust logic if needed.
+	const isAdmin = session?.user !== undefined
 
 	const renderStars = (rating: number) => {
 		const fullStars = Math.floor(rating)
@@ -27,24 +26,24 @@ const Testimonials: React.FC<TestimonialProps> = ({ id, name, text, stars }) => 
 				{Array(fullStars)
 					.fill(0)
 					.map((_, index) => (
-						<FaStar key={index} className='text-yellow-400' />
+						<FaStar key={`full-${index}`} className='text-yellow-400' />
 					))}
 				{Array(halfStars)
 					.fill(0)
 					.map((_, index) => (
-						<FaStarHalfAlt key={index} className='text-yellow-400' />
+						<FaStarHalfAlt key={`half-${index}`} className='text-yellow-400' />
 					))}
 				{Array(emptyStars)
 					.fill(0)
 					.map((_, index) => (
-						<FaRegStar key={index} className='text-yellow-400' />
+						<FaRegStar key={`empty-${index}`} className='text-yellow-400' />
 					))}
 			</>
 		)
 	}
 
 	return (
-		<>
+		<div className='relative'>
 			{isAdmin && (
 				<Link
 					href={`/admin/testimonials/${id}`}
@@ -62,31 +61,8 @@ const Testimonials: React.FC<TestimonialProps> = ({ id, name, text, stars }) => 
 				</div>
 				<p className='text-gray-600'>{text}</p>
 			</div>
-		</>
-	)
-}
-
-interface TestimonialsListProps {
-	testimonials: ITestimonial[]
-}
-
-const TestimonialsList: React.FC<TestimonialsListProps> = ({ testimonials }) => {
-	return (
-		<div className='flex flex-wrap justify-center'>
-			<Slider
-				slides={testimonials.map((testimonial, index) => (
-					<Testimonials
-						key={index}
-						id={testimonial._id}
-						name={testimonial.name}
-						text={testimonial.text}
-						stars={testimonial.rating}
-					/>
-				))}
-				testimonials
-			/>
 		</div>
 	)
 }
 
-export default TestimonialsList
+export default Testimonial

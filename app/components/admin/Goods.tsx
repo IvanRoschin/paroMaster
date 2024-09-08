@@ -6,6 +6,7 @@ import Button from '@/components/Button'
 import EmptyState from '@/components/EmptyState'
 import { Loader, Search } from '@/components/index'
 import { ISearchParams } from '@/types/index'
+import { useDeleteData } from 'app/hooks/useDeleteData'
 import useFetchData from 'app/hooks/useFetchData'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -17,7 +18,6 @@ import {
 	FaSortAmountUp,
 	FaTrash,
 } from 'react-icons/fa'
-import { toast } from 'sonner'
 
 export default function Goods({
 	searchParams,
@@ -35,6 +35,11 @@ export default function Goods({
 		getAllGoods,
 		'goods',
 	)
+	const { mutate: deleteGoodById } = useDeleteData(deleteGood, 'goods')
+
+	const handleDelete = (id: string) => {
+		deleteGoodById(id)
+	}
 
 	if (isLoading) {
 		return <Loader />
@@ -46,19 +51,6 @@ export default function Goods({
 
 	if (!data?.goods || data.goods.length === 0) {
 		return <EmptyState showReset />
-	}
-
-	const handleDelete = async (id: string) => {
-		try {
-			const formData = new FormData()
-			formData.append('id', id)
-			await deleteGood(formData)
-			toast.success('Товар успішно видалено!')
-			window.location.reload()
-		} catch (error) {
-			toast.error('Помилка при видаленні товару!')
-			console.error('Error deleting good', error)
-		}
 	}
 
 	const goodsCount = data?.count || 0
@@ -190,13 +182,7 @@ export default function Goods({
 									small
 									outline
 									color='border-red-400'
-									onClick={() => {
-										if (good._id) {
-											handleDelete(good._id)
-										} else {
-											console.error('Error: Good ID is undefined')
-										}
-									}}
+									onClick={() => good._id && handleDelete(good._id.toString())}
 								/>
 							</td>
 						</tr>

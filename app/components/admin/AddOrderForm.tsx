@@ -1,8 +1,7 @@
 import { getData } from '@/actions/nova'
+import { orderFormSchema } from '@/helpers/index'
 import { IOrder } from '@/types/index'
 import { PaymentMethod } from '@/types/paymentMethod'
-
-import { orderFormSchema } from '@/helpers/index'
 import { useMutation } from '@tanstack/react-query'
 import { Field, FieldArray, Form, Formik } from 'formik'
 import React, { useEffect, useState } from 'react'
@@ -22,7 +21,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 	const [name, surname] = order?.customer.name?.split(' ') || ['', '']
 
 	const initialValues: IOrder = {
-		orderNumber: order?.orderNumber || '',
+		number: order?.number || '',
 		customer: {
 			name: name || '',
 			surname: surname || '',
@@ -39,42 +38,6 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 		status: order?.status || 'Новий',
 		goodsQuantity: order?.goodsQuantity || 0,
 	}
-
-	// const validationSchema = Yup.object().shape({
-	// 	orderNumber: Yup.string().required('Order number is required'),
-	// 	customer: Yup.object().shape({
-	// 		name: Yup.string().required('Name is required'),
-	// 		email: Yup.string()
-	// 			.email('Invalid email')
-	// 			.required('Email is required'),
-	// 		phone: Yup.string().required('Phone number is required'),
-	// 		city: Yup.string().required('City is required'),
-	// 		warehouse: Yup.string().required('Warehouse is required'),
-	// 		payment: Yup.string()
-	// 			.oneOf(Object.values(PaymentMethod))
-	// 			.required('Payment method is required'),
-	// 	}),
-	// 	orderedGoods: Yup.array().of(
-	// 		Yup.object().shape({
-	// 			id: Yup.string().required('ID is required'),
-	// 			title: Yup.string().required('Title is required'),
-	// 			brand: Yup.string().required('Brand is required'),
-	// 			model: Yup.string().required('Model is required'),
-	// 			vendor: Yup.string().required('Vendor is required'),
-	// 			quantity: Yup.number()
-	// 				.positive()
-	// 				.integer()
-	// 				.required(`Обов'язкове поле`),
-	// 			price: Yup.number()
-	// 				.positive()
-	// 				.required(`Обов'язкове поле`),
-	// 		}),
-	// 	),
-	// 	totalPrice: Yup.number()
-	// 		.positive()
-	// 		.required(`Обов'язкове поле`),
-	// 	status: Yup.string().required(`Обов'язкове поле`),
-	// })
 
 	useEffect(() => {
 		if (initialValues.customer.city) {
@@ -97,44 +60,30 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 		}
 	}
 
-	const useSubmitOrder = () => {
-		// Define the mutation
-		const mutation = useMutation(
-			async (values: IOrder) => {
-				// Perform the action (e.g., API call to submit order)
-				return await action(values)
-			},
-			{
-				onSuccess: () => {
-					toast.success('Order submitted successfully')
-				},
-				onError: error => {
-					console.error('Error submitting order:', error)
-					toast.error('Failed to submit the order. Please try again.')
-				},
-			},
-		)
-
-		return mutation
-	}
+	// Define the mutation directly inside the component
+	const mutation = useMutation({
+		mutationFn: async (values: IOrder) => {
+			return await action(values)
+		},
+		onSuccess: () => {
+			toast.success('Order submitted successfully')
+		},
+		onError: error => {
+			console.error('Error submitting order:', error)
+			toast.error('Failed to submit the order. Please try again.')
+		},
+	})
 
 	const handleSubmit = async (values: IOrder) => {
+		console.log('values', values)
+		console.log('handleClick')
+
 		try {
-			// Use the mutation for form submission
-			const mutation = useSubmitOrder()
 			await mutation.mutateAsync(values)
 		} catch (error) {
 			console.error('Error submitting form:', error)
 		}
 	}
-
-	// const handleSubmit = async (values: IOrder) => {
-	// 	try {
-	// 		await action(values)
-	// 	} catch (error) {
-	// 		console.error('Error submitting form:', error)
-	// 	}
-	// }
 
 	const customerInputs = [
 		{ name: 'customer.name', type: 'text', id: 'name', label: `І'мя`, required: true },
@@ -170,86 +119,6 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 						{customerInputs.map((input, index) => (
 							<FormField item={input} key={index} />
 						))}
-						{/* <div className='flex flex-col space-y-2'>
-							<div>
-								<label className='block text-sm font-medium'>Name</label>
-								<Field
-									name='customer.name'
-									type='text'
-									className='mt-1 p-2 border border-gray-300 rounded-md w-full'
-								/>
-								{errors.customer?.name && touched.customer?.name && (
-									<div className='text-red-500 text-sm'>{errors.customer.name}</div>
-								)}
-							</div>
-							<div>
-								<label className='block text-sm font-medium'>Email</label>
-								<Field
-									name='customer.email'
-									type='email'
-									className='mt-1 p-2 border border-gray-300 rounded-md'
-								/>
-								{errors.customer?.email && touched.customer?.email && (
-									<div className='text-red-500 text-sm'>{errors.customer.email}</div>
-								)}
-							</div>
-							<div>
-								<label className='block text-sm font-medium'>Phone</label>
-								<Field
-									name='customer.phone'
-									type='tel'
-									className='mt-1 p-2 border border-gray-300 rounded-md'
-								/>
-								{errors.customer?.phone && touched.customer?.phone && (
-									<div className='text-red-500 text-sm'>{errors.customer.phone}</div>
-								)}
-							</div>
-							<div>
-								<label className='block text-sm font-medium'>City</label>
-								<Field
-									name='customer.city'
-									type='text'
-									className='mt-1 p-2 border border-gray-300 rounded-md'
-								/>
-								{errors.customer?.city && touched.customer?.city && (
-									<div className='text-red-500 text-sm'>{errors.customer.city}</div>
-								)}
-							</div>
-							<div>
-								<label className='block text-sm font-medium'>Warehouse</label>
-								<Field
-									name='customer.warehouse'
-									as='select'
-									className='mt-1 p-2 border border-gray-300 rounded-md'
-								>
-									{warehouses.map(wh => (
-										<option key={wh.Ref} value={wh.Description}>
-											{wh.Description}
-										</option>
-									))}
-								</Field>
-								{errors.customer?.warehouse && touched.customer?.warehouse && (
-									<div className='text-red-500 text-sm'>{errors.customer.warehouse}</div>
-								)}
-							</div>
-							<div>
-								<label className='block text-sm font-medium'>Payment Method</label>
-								<Field
-									name='customer.payment'
-									as='select'
-									className='mt-1 p-2 border border-gray-300 rounded-md'
-								>
-									{Object.values(PaymentMethod).map(method => (
-										<option key={method} value={method}>
-											{method}
-										</option>
-									))}
-								</Field>
-								{errors.customer?.payment && touched.customer?.payment && (
-									<div className='text-red-500 text-sm'>{errors.customer.payment}</div>
-								)}
-							</div>
-						</div> */}
 
 						<h3 className='text-xl font-semibold'>Товари у замовленні</h3>
 						<FieldArray name='orderedGoods'>
@@ -365,7 +234,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 								<option value='Опрацьовується'>Опрацьовується</option>
 								<option value='Оплачено'>Оплачено</option>
 								<option value='На відправку'>На відправку</option>
-								<option value='Закритий'>Закритий</option>
+								<option value='Завершено'>Завершено</option>
 							</Field>
 							{errors.status && touched.status && (
 								<div className='text-red-500 text-sm'>{errors.status}</div>
@@ -373,7 +242,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 						</div>
 
 						<div className='flex justify-end'>
-							<CustomButton label={'Отправить'} />
+							<CustomButton label={order ? 'Оновити замовлення' : 'Створити замовлення'} />
 						</div>
 					</Form>
 				)}
