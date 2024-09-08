@@ -3,6 +3,7 @@ export interface IOrder {
 	orderNumber: string
 	customer: {
 		name: string
+		surname?: string
 		phone: string
 		email: string
 		city: string

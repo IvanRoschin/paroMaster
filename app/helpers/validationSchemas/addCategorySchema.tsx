@@ -1,6 +1,6 @@
 import * as Yup from 'yup'
 
-export const categoryFormSchema = Yup.object().shape({
+const categoryFormSchema = Yup.object().shape({
 	title: Yup.string()
 		.max(20)
 		.min(3)
@@ -9,3 +9,5 @@ export const categoryFormSchema = Yup.object().shape({
 		.url('Некоректне посилання')
 		.required(`Обов'язкове поле`),
 })
+
+export default categoryFormSchema

@@ -1,7 +1,0 @@
-export { customerFormSchema } from './addCustomerSchema'
-export { goodFormSchema } from './addGoodSchema'
-export { sliderFormSchema } from './addSliderShema.tsx'
-export { testimonialFormSchema } from './addTestimonial.tsx'
-export { userFormSchema } from './addUserSchema.tsx'
-export { orderFormSchema } from './orderFormShema.tsx'
-export { userLoginSchema } from './userLoginSchema.tsx'

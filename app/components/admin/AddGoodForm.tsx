@@ -1,9 +1,9 @@
 'use client'
 
 import { CustomButton, FormField, ImageUploadCloudinary, Switcher } from '@/components/index'
+import { goodFormSchema } from '@/helpers/index'
 import { IGood } from '@/types/good/IGood'
 import { categoryList } from 'app/config/constants'
-import { goodFormSchema } from 'app/helpers/validationShemas'
 import { Form, Formik, FormikState } from 'formik'
 import { toast } from 'sonner'
 
@@ -73,36 +73,6 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 			label: 'Сумісний з іншими?',
 			type: 'switcher',
 		},
-		// {
-		// 	id: 'isAvailable',
-		// 	label: 'В наявності?',
-		// 	type: 'select',
-		// 	options: [
-		// 		{
-		// 			value: 'false',
-		// 			label: 'Ні',
-		// 		},
-		// 		{
-		// 			value: 'true',
-		// 			label: 'Так',
-		// 		},
-		// 	],
-		// },
-		// {
-		// 	id: 'isCompatible',
-		// 	label: 'Сумісний з іншими?',
-		// 	type: 'select',
-		// 	options: [
-		// 		{
-		// 			value: 'false',
-		// 			label: 'Ні',
-		// 		},
-		// 		{
-		// 			value: 'true',
-		// 			label: 'Так',
-		// 		},
-		// 	],
-		// },
 		{
 			id: 'compatibility',
 			label: 'З якими моделями?',
@@ -183,7 +153,7 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 									<Switcher
 										id={item.id}
 										label={item.label}
-										checked={values[item.id]}
+										checked={!!(values as Record<string, any>)[item.id]} // Ensure boolean
 										onChange={checked => setFieldValue(item.id, checked)}
 									/>
 								) : (

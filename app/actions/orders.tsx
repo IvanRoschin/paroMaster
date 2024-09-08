@@ -18,10 +18,7 @@ export async function getAllOrders(
 	limit: number,
 ): Promise<IGetAllOrdesResponse> {
 	const page = searchParams.page || 1
-	const status = searchParams.status === null ? 'all' : searchParams.status // Default status to 'all' if null
-
-	console.log('searchParams', searchParams)
-	console.log('status', status)
+	const status = searchParams.status === null ? 'all' : searchParams.status
 
 	try {
 		await connectToDB()
@@ -62,7 +59,7 @@ export async function addOrder(values: IOrder) {
 				price: item.price,
 			})),
 			totalPrice: values.totalPrice,
-			status: 'Новий',
+			status: values.status,
 		}
 		await Order.create(orderData)
 		revalidatePath('/')
@@ -75,6 +72,42 @@ export async function addOrder(values: IOrder) {
 			console.error('Unknown error:', error)
 			throw new Error('Failed to add order: Unknown error')
 		}
+	}
+}
+
+export const deleteGoodsFromOrder = async (orderId: string, goodsId: string) => {
+	try {
+		const order = await Order.findById(orderId)
+
+		if (!order) {
+			throw new Error('Order not found')
+		}
+		type OrderedGood = {
+			id: string
+			price: number
+			quantity: number
+		}
+
+		const updatedGoods = order.orderedGoods.filter((good: OrderedGood) => good.id !== goodsId)
+
+		order.orderedGoods = updatedGoods
+
+		order.goodsQuantity = updatedGoods.reduce(
+			(total: number, good: OrderedGood) => total + good.quantity,
+			0,
+		)
+		order.totalPrice = updatedGoods.reduce(
+			(total: number, good: OrderedGood) => total + good.price * good.quantity,
+			0,
+		)
+
+		// Save the updated order
+		await order.save()
+
+		return { success: true, message: 'Goods deleted successfully' }
+	} catch (error) {
+		console.error('Error deleting goods:', error)
+		return { success: false, message: 'Failed to delete goods' }
 	}
 }
 
@@ -96,10 +129,10 @@ export async function addOrderAction(formData: FormData) {
 		await connectToDB()
 
 		const orderData = {
-			orderNumber: values.orderNumber,
+			number: values.number,
 			customer: values.customer,
 			orderedGoods: values.orderedGoods.map((item: SGood) => ({
-				id: item.id,
+				id: item._id,
 				title: item.title,
 				brand: item.brand,
 				model: item.model,
@@ -151,13 +184,15 @@ export async function getOrderById(id: string) {
 	}
 }
 
-export async function updateOrder(formData: FormData) {
+export async function updateOrder(formData: Record<string, any>) {
 	const values: any = {}
-	formData.forEach((value, key) => {
+
+	// Loop through the object instead of using forEach
+	Object.keys(formData).forEach(key => {
 		if (!values[key]) {
 			values[key] = []
 		}
-		values[key].push(value)
+		values[key].push(formData[key])
 	})
 
 	Object.keys(values).forEach(key => {
@@ -165,6 +200,7 @@ export async function updateOrder(formData: FormData) {
 			values[key] = values[key][0]
 		}
 	})
+
 	const { id, orderNumber, customer, orderedGoods, goodsQuantity, totalPrice, status } = values as {
 		id: string
 		orderNumber?: string
@@ -174,6 +210,7 @@ export async function updateOrder(formData: FormData) {
 		totalPrice?: number
 		status?: 'Новий' | 'Опрацьовується' | 'Оплачено' | 'На відправку' | 'Закритий'
 	}
+
 	try {
 		await connectToDB()
 
@@ -192,6 +229,7 @@ export async function updateOrder(formData: FormData) {
 					updateFields[key as keyof IOrder] === undefined) &&
 				delete updateFields[key as keyof IOrder],
 		)
+
 		await Order.findByIdAndUpdate(id, updateFields)
 	} catch (error) {
 		if (error instanceof Error) {
@@ -206,6 +244,7 @@ export async function updateOrder(formData: FormData) {
 		redirect('/admin/orders')
 	}
 }
+
 // const newOrderData = {
 // 	orderNumber: values.orderNumber,
 // 	customer: values.customer,

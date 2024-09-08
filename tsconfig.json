@@ -25,7 +25,7 @@
 			"@/utils/*": ["app/utils/*"],
 			"@/types/*": ["types/*"],
 			"@/models/*": ["models/*"],
-			"@/helpers/*": ["helpers/*"],
+			"@/helpers/*": ["app/helpers/*"],
 			"@/config/*": ["config/*"]
 		}
 	},

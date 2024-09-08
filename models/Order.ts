@@ -3,7 +3,7 @@ const { Schema } = mongoose
 
 const orderSchema = new Schema(
 	{
-		orderNumber: {
+		number: {
 			type: String,
 			required: true,
 		},
