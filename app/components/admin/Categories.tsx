@@ -6,12 +6,12 @@ import EmptyState from '@/components/EmptyState'
 import Loader from '@/components/Loader'
 import Search from '@/components/Search'
 import { ISearchParams } from '@/types/index'
+import { useDeleteData } from 'app/hooks/useDeleteData'
 import useFetchData from 'app/hooks/useFetchData'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 import { FaPen, FaSortAlphaDown, FaSortAlphaUp, FaTrash } from 'react-icons/fa'
-import { toast } from 'sonner'
 export default function Categories({
 	searchParams,
 	limit,
@@ -28,6 +28,12 @@ export default function Categories({
 		'categories',
 	)
 
+	const { mutate: deleteCategoryById } = useDeleteData(deleteCategory, 'categories')
+
+	const handleDelete = (id: string) => {
+		deleteCategoryById(id)
+	}
+
 	if (isLoading) {
 		return <Loader />
 	}
@@ -42,18 +48,6 @@ export default function Categories({
 
 	const handleSort = () => {
 		setSortOrder(prevOrder => (prevOrder === 'asc' ? 'desc' : 'asc'))
-	}
-
-	const handleDelete = async (id: string) => {
-		try {
-			const formData = new FormData()
-			formData.append('id', id)
-			await deleteCategory(formData)
-			toast.success('Категорію успішно видалено!')
-		} catch (error) {
-			toast.error('Помилка при видаленні Категорії!')
-			console.error('Error deleting order', error)
-		}
 	}
 
 	const categoriesCount = data?.count || 0
@@ -127,13 +121,7 @@ export default function Categories({
 									small
 									outline
 									color='border-red-400'
-									onClick={() => {
-										if (category._id) {
-											handleDelete(category._id)
-										} else {
-											console.error('Error: Category ID is undefined')
-										}
-									}}
+									onClick={() => category._id && handleDelete(category._id.toString())}
 								/>
 							</td>
 						</tr>

@@ -7,6 +7,7 @@ import Button from '@/components/Button'
 import EmptyState from '@/components/EmptyState'
 import Loader from '@/components/Loader'
 import { ISearchParams, IUser } from '@/types/index'
+import { useDeleteData } from 'app/hooks/useDeleteData'
 import useFetchData from 'app/hooks/useFetchData'
 import Link from 'next/link'
 import { FaPen, FaTrash } from 'react-icons/fa'
@@ -19,6 +20,12 @@ export default function Users({
 	limit: number
 }) {
 	const { data, isLoading, isError } = useFetchData(searchParams, limit, getAllUsers, 'users')
+
+	const { mutate: deleteUserById } = useDeleteData(deleteUser, 'users')
+
+	const handleDelete = (id: string) => {
+		deleteUserById(id)
+	}
 
 	if (isLoading) {
 		return <Loader />
@@ -92,11 +99,14 @@ export default function Users({
 									</Link>
 								</td>
 								<td className='p-2 text-center'>
-									{' '}
-									<form action={deleteUser} className='flex justify-center items-center'>
-										<input type='hidden' name='id' value={user._id} />
-										<Button type='submit' icon={FaTrash} small outline color='border-red-400' />
-									</form>
+									<Button
+										type='button'
+										icon={FaTrash}
+										small
+										outline
+										color='border-red-400'
+										onClick={() => user._id && handleDelete(user._id.toString())}
+									/>
 								</td>
 							</tr>
 						)

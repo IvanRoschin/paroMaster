@@ -83,8 +83,7 @@ export async function getTestimonialById(id: string) {
 	}
 }
 
-export async function deleteTestimonial(formData: FormData) {
-	const { id } = Object.fromEntries(formData) as { id: string }
+export async function deleteTestimonial(id: string) {
 	if (!id) {
 		console.error('No ID provided')
 		return

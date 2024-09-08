@@ -2,7 +2,7 @@ import { PaymentMethod } from '@/types/paymentMethod'
 import * as Yup from 'yup'
 
 const orderFormSchema = Yup.object().shape({
-	orderNumber: Yup.string().required(`Обов'язкове поле`),
+	number: Yup.string().required(`Обов'язкове поле`),
 	customer: Yup.object().shape({
 		name: Yup.string().required(`Обов'язкове поле`),
 		email: Yup.string()

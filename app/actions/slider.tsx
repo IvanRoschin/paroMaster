@@ -79,8 +79,7 @@ export async function getSlideById(id: string) {
 	}
 }
 
-export async function deleteSlide(formData: FormData) {
-	const { id } = Object.fromEntries(formData) as { id: string }
+export async function deleteSlide(id: string) {
 	if (!id) {
 		console.error('No ID provided')
 		return

@@ -6,6 +6,7 @@ import Button from '@/components/Button'
 import EmptyState from '@/components/EmptyState'
 import { Loader, Search } from '@/components/index'
 import { ISearchParams } from '@/types/searchParams'
+import { useDeleteData } from 'app/hooks/useDeleteData'
 import useFetchData from 'app/hooks/useFetchData'
 import Link from 'next/link'
 import { FaPen, FaTrash } from 'react-icons/fa'
@@ -23,6 +24,11 @@ export default function Customers({
 		getAllCustomers,
 		'customers',
 	)
+	const { mutate: deleteCustomerById } = useDeleteData(deleteCustomer, 'customers')
+
+	const handleDelete = (id: string) => {
+		deleteCustomerById(id)
+	}
 
 	if (isLoading) {
 		return <Loader />
@@ -51,6 +57,7 @@ export default function Customers({
 			}
 		}
 	}
+
 	return (
 		<div className='p-3'>
 			<div className='flex items-center justify-between mb-8'>
@@ -91,10 +98,14 @@ export default function Customers({
 								</Link>
 							</td>
 							<td className='p-2 text-center'>
-								<form action={deleteCustomer} className='flex justify-center items-center'>
-									<input type='hidden' name='id' value={customer._id} />
-									<Button type='submit' icon={FaTrash} small outline color='border-red-400' />
-								</form>
+								<Button
+									type='button'
+									icon={FaTrash}
+									small
+									outline
+									color='border-red-400'
+									onClick={() => customer._id && handleDelete(customer._id.toString())}
+								/>
 							</td>
 						</tr>
 					))}

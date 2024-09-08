@@ -1,6 +1,6 @@
 export interface IOrder {
 	_id?: string
-	orderNumber: string
+	number: string
 	customer: {
 		name: string
 		surname?: string
