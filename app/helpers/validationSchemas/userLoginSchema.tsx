@@ -3,7 +3,7 @@ import * as Yup from 'yup'
 const emailRegex = /^(?=.{1,63}$)(?=.{2,}@)[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 const passwordRegexp = /^\S+$/
 
-export const userLoginSchema = Yup.object().shape({
+const userLoginSchema = Yup.object().shape({
 	email: Yup.string()
 		.max(63, 'Максимум 63 символи')
 		.min(3, 'Мінімум 3 символи')
@@ -16,3 +16,5 @@ export const userLoginSchema = Yup.object().shape({
 		message: 'Password can`t contain white spaces',
 	}),
 })
+
+export default userLoginSchema

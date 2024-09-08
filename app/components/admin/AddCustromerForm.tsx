@@ -3,7 +3,8 @@
 import { getData } from '@/actions/nova'
 import { ICustomer } from '@/types/customer/ICustomer'
 import { PaymentMethod } from '@/types/paymentMethod'
-import { customerFormSchema } from 'app/helpers/validationShemas'
+
+import { customerFormSchema } from '@/helpers/index'
 import { FormikProvider, useFormik } from 'formik'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'

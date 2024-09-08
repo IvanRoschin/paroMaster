@@ -18,6 +18,7 @@ interface FormFieldProps {
 		required?: boolean
 		options?: Option[]
 		style?: React.CSSProperties
+		name?: string
 	}
 	errors?: { [key: string]: string | string[] | FormikErrors<any> | FormikErrors<any>[] }
 	setFieldValue?: (field: string, value: any, shouldValidate?: boolean) => void
@@ -32,7 +33,8 @@ const FormField: React.FC<FormFieldProps> = ({ item, errors, setFieldValue }) =>
 				<>
 					<Field
 						as='select'
-						name={item.id}
+						id={item.id}
+						name={item.name}
 						className={`peer w-full p-4 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed 
             ${meta.error && meta.touched ? 'border-rose-500' : 'border-neutral-300'} 
             ${meta.error && meta.touched ? 'focus:border-rose-500' : 'focus:border-green-500'}
@@ -71,7 +73,7 @@ const FormField: React.FC<FormFieldProps> = ({ item, errors, setFieldValue }) =>
 				<>
 					<Field
 						as={item.as}
-						name={item.id}
+						name={item.name}
 						type={item.type}
 						disabled={item.disabled}
 						className={`text-primaryTextColor peer w-full p-4 pt-6 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed 

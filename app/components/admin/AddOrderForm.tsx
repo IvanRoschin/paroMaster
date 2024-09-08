@@ -1,278 +1,380 @@
-'use client'
-
-import { Form, Formik, FormikState } from 'formik'
-import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
-import { toast } from 'sonner'
-
 import { getData } from '@/actions/nova'
 import { IOrder } from '@/types/index'
 import { PaymentMethod } from '@/types/paymentMethod'
-import { orderFormSchema } from 'app/helpers/validationShemas'
+
+import { orderFormSchema } from '@/helpers/index'
+import { useMutation } from '@tanstack/react-query'
+import { Field, FieldArray, Form, Formik } from 'formik'
+import React, { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import FormField from '../input/FormField'
 import CustomButton from './CustomFormikButton'
 
-interface InitialStateType extends Omit<IOrder, '_id'> {}
-
-interface ResetFormProps {
-	resetForm: (nextState?: Partial<FormikState<InitialStateType>>) => void
-}
-
-interface Warehouse {
-	Ref: string
-	Description: string
-}
-
 interface OrderFormProps {
 	order?: IOrder
+	action: (data: IOrder) => Promise<void>
 	title?: string
-	action: (
-		data: FormData,
-	) => Promise<{
-		success: boolean
-		data: {
-			orderNumber: string
-			customer: {
-				name: string
-				phone: string
-				email: string
-				city: string
-				warehouse: string
-				payment: string
-			}
-			orderedGoods: {}
-		}
-	}>
 }
 
-const customerInputs = [
-	{
-		id: 'name',
-		label: 'Ім`я',
-		type: 'text',
-		required: true,
-	},
-	{
-		id: 'surname',
-		label: 'Прізвище',
-		type: 'text',
-		required: true,
-	},
-	{
-		id: 'email',
-		label: 'Email',
-		type: 'email',
-		required: true,
-	},
-	{
-		id: 'phone',
-		label: 'Телефон',
-		type: 'tel',
-		required: true,
-	},
-	{
-		id: 'city',
-		label: 'Місто',
-	},
-	{
-		id: 'warehouse',
-		label: 'Оберіть відділення',
-		type: 'select',
-	},
-	{
-		id: 'payment',
-		label: 'Оберіть спосіб оплати',
-		type: 'select',
-		options: Object.values(PaymentMethod).map(method => ({
-			value: method,
-			label: method,
-		})),
-	},
-]
+const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
+	const [warehouses, setWarehouses] = useState<{ Ref: string; Description: string }[]>([])
 
-const goodsInputs = [
-	{
-		id: 'title',
-		label: 'Назва товару',
-		type: 'text',
-		required: true,
-	},
-	{
-		id: 'brand',
-		label: 'Бренд',
-		type: 'text',
-		required: true,
-	},
-	{
-		id: 'model',
-		label: 'Модель',
-		type: 'text',
-		required: true,
-	},
-	{
-		id: 'vendor',
-		label: 'Артикул',
-		type: 'text',
-		required: true,
-	},
-	{
-		id: 'quantity',
-		label: 'Кількість',
-		type: 'number',
-		required: true,
-	},
-	{
-		id: 'price',
-		label: 'Ціна',
-		type: 'number',
-		required: true,
-	},
-]
+	const [name, surname] = order?.customer.name?.split(' ') || ['', '']
 
-const AddOrderForm: React.FC<OrderFormProps> = ({ order, title, action }) => {
-	const [warehouses, setWarehouses] = useState<Warehouse[]>([])
-	const [isLoading, setIsLoading] = useState<boolean>(false)
-	const router = useRouter()
-
-	const initialValues: InitialStateType = {
+	const initialValues: IOrder = {
 		orderNumber: order?.orderNumber || '',
 		customer: {
-			name: order?.customer.name || '',
+			name: name || '',
+			surname: surname || '',
 			email: order?.customer.email || '',
 			phone: order?.customer.phone || '+380',
-			payment: order?.customer.payment || PaymentMethod.CashOnDelivery.toString(),
-			city: order?.customer.city || 'Київ',
+			city: order?.customer.city || '',
 			warehouse: order?.customer.warehouse || '',
+			payment: order?.customer.payment || PaymentMethod.CashOnDelivery,
 		},
-		orderedGoods: order?.orderedGoods?.map(item => ({
-			id: item.id || '', // Ensure id has a default value
-			title: item.title || '',
-			brand: item.brand || '',
-			model: item.model || '',
-			vendor: item.vendor || '',
-			quantity: item.quantity || 0,
-			price: item.price || 0,
-		})) || [
-			// Provide at least one empty item if no orderedGoods are provided
-			{
-				id: '',
-				title: '',
-				brand: '',
-				model: '',
-				vendor: '',
-				quantity: 0,
-				price: 0,
-			},
+		orderedGoods: order?.orderedGoods || [
+			{ id: '', title: '', brand: '', model: '', vendor: '', quantity: 1, price: 0 },
 		],
-		goodsQuantity: order?.goodsQuantity || 0,
 		totalPrice: order?.totalPrice || 0,
 		status: order?.status || 'Новий',
+		goodsQuantity: order?.goodsQuantity || 0,
 	}
 
-	const fetchWarehouses = useCallback(async (city: string) => {
-		if (!city) {
-			setWarehouses([])
-			return
-		}
-
-		const request = {
-			apiKey: process.env.NOVA_API,
-			modelName: 'Address',
-			calledMethod: 'getWarehouses',
-			methodProperties: {
-				CityName: city,
-				Limit: '50',
-				Language: 'UA',
-			},
-		}
-
-		setIsLoading(true)
-		try {
-			const response = await getData(request)
-			if (response && response.data.data) {
-				setWarehouses(response.data.data)
-			}
-		} catch (error) {
-			console.error('Error fetching warehouses:', error)
-		} finally {
-			setIsLoading(false)
-		}
-	}, [])
+	// const validationSchema = Yup.object().shape({
+	// 	orderNumber: Yup.string().required('Order number is required'),
+	// 	customer: Yup.object().shape({
+	// 		name: Yup.string().required('Name is required'),
+	// 		email: Yup.string()
+	// 			.email('Invalid email')
+	// 			.required('Email is required'),
+	// 		phone: Yup.string().required('Phone number is required'),
+	// 		city: Yup.string().required('City is required'),
+	// 		warehouse: Yup.string().required('Warehouse is required'),
+	// 		payment: Yup.string()
+	// 			.oneOf(Object.values(PaymentMethod))
+	// 			.required('Payment method is required'),
+	// 	}),
+	// 	orderedGoods: Yup.array().of(
+	// 		Yup.object().shape({
+	// 			id: Yup.string().required('ID is required'),
+	// 			title: Yup.string().required('Title is required'),
+	// 			brand: Yup.string().required('Brand is required'),
+	// 			model: Yup.string().required('Model is required'),
+	// 			vendor: Yup.string().required('Vendor is required'),
+	// 			quantity: Yup.number()
+	// 				.positive()
+	// 				.integer()
+	// 				.required(`Обов'язкове поле`),
+	// 			price: Yup.number()
+	// 				.positive()
+	// 				.required(`Обов'язкове поле`),
+	// 		}),
+	// 	),
+	// 	totalPrice: Yup.number()
+	// 		.positive()
+	// 		.required(`Обов'язкове поле`),
+	// 	status: Yup.string().required(`Обов'язкове поле`),
+	// })
 
 	useEffect(() => {
 		if (initialValues.customer.city) {
 			fetchWarehouses(initialValues.customer.city)
 		}
-	}, [initialValues.customer.city, fetchWarehouses])
+	}, [initialValues.customer.city])
 
-	const handleSubmit = async (values: InitialStateType, { resetForm }: ResetFormProps) => {
-		const formData = new FormData()
-
-		// Append customer information
-		formData.append('name', values.customer.name)
-		formData.append('surname', values.customer.surname)
-		formData.append('email', values.customer.email)
-		formData.append('phone', values.customer.phone)
-		formData.append('payment', values.customer.payment)
-		formData.append('city', values.customer.city)
-		formData.append('warehouse', values.customer.warehouse)
-
-		// Append ordered goods information
-		values.orderedGoods.forEach((item, index) => {
-			Object.entries(item).forEach(([key, value]) => {
-				formData.append(`orderedGoods[${index}][${key}]`, value.toString())
-			})
-		})
-
-		// Append the ID if available
-		if (order?._id) {
-			formData.append('id', order._id as string)
+	const fetchWarehouses = async (city: string) => {
+		const request = {
+			apiKey: process.env.NOVA_API,
+			modelName: 'Address',
+			calledMethod: 'getWarehouses',
+			methodProperties: { CityName: city, Limit: '50', Language: 'UA' },
 		}
-
 		try {
-			await action(formData)
-			resetForm()
-			toast.success(order?._id ? 'Замовлення оновлено!' : 'Нове замовлення додано!')
+			const response = await getData(request)
+			setWarehouses(response.data.data || [])
 		} catch (error) {
-			toast.error('Помилка!')
-			console.error(error)
+			console.error('Error fetching warehouses:', error)
 		}
 	}
 
+	const useSubmitOrder = () => {
+		// Define the mutation
+		const mutation = useMutation(
+			async (values: IOrder) => {
+				// Perform the action (e.g., API call to submit order)
+				return await action(values)
+			},
+			{
+				onSuccess: () => {
+					toast.success('Order submitted successfully')
+				},
+				onError: error => {
+					console.error('Error submitting order:', error)
+					toast.error('Failed to submit the order. Please try again.')
+				},
+			},
+		)
+
+		return mutation
+	}
+
+	const handleSubmit = async (values: IOrder) => {
+		try {
+			// Use the mutation for form submission
+			const mutation = useSubmitOrder()
+			await mutation.mutateAsync(values)
+		} catch (error) {
+			console.error('Error submitting form:', error)
+		}
+	}
+
+	// const handleSubmit = async (values: IOrder) => {
+	// 	try {
+	// 		await action(values)
+	// 	} catch (error) {
+	// 		console.error('Error submitting form:', error)
+	// 	}
+	// }
+
+	const customerInputs = [
+		{ name: 'customer.name', type: 'text', id: 'name', label: `І'мя`, required: true },
+		{ name: 'customer.surname', type: 'text', id: 'surname', label: `Прізвище`, required: true },
+		{ name: 'customer.email', type: 'email', id: 'email', label: `Email`, required: true },
+		{ name: 'customer.phone', type: 'tel', id: 'phone', label: `Телефон`, required: true },
+		{ name: 'customer.city', type: 'text', id: 'city', label: `Місто`, required: true },
+		{
+			name: 'customer.city',
+			id: 'warehouse',
+			label: 'Склад',
+			type: 'select',
+			options: warehouses.map(warehouse => ({
+				value: warehouse.Ref,
+				label: warehouse.Description,
+			})),
+			required: true,
+		},
+	]
+
 	return (
-		<div className='flex flex-col justify-center items-center'>
-			<h2 className='text-4xl mb-4'>{title}</h2>
+		<div className='flex flex-col justify-center items-center p-4 bg-white rounded-lg shadow-md'>
+			<h2 className='text-3xl mb-4 font-bold'>{title || 'Order Form'}</h2>
 			<Formik
 				initialValues={initialValues}
-				onSubmit={handleSubmit}
 				validationSchema={orderFormSchema}
+				onSubmit={handleSubmit}
 				enableReinitialize
 			>
-				{({ errors, setFieldValue, values }) => (
-					<Form className='flex flex-col w-[600px]'>
-						<p>Customer Data</p>
-						{customerInputs.map((item, i) => (
-							<FormField
-								key={i}
-								item={{
-									...item,
-									options:
-										item.id === 'warehouse'
-											? warehouses.map(wh => ({
-													value: wh.Description,
-													label: wh.Description,
-											  }))
-											: item.options,
-								}}
-								errors={errors}
-								setFieldValue={setFieldValue}
+				{({ values, errors, touched, setFieldValue }) => (
+					<Form className='space-y-4'>
+						<h3 className='text-xl font-semibold'>Замовник</h3>
+						{customerInputs.map((input, index) => (
+							<FormField item={input} key={index} />
+						))}
+						{/* <div className='flex flex-col space-y-2'>
+							<div>
+								<label className='block text-sm font-medium'>Name</label>
+								<Field
+									name='customer.name'
+									type='text'
+									className='mt-1 p-2 border border-gray-300 rounded-md w-full'
+								/>
+								{errors.customer?.name && touched.customer?.name && (
+									<div className='text-red-500 text-sm'>{errors.customer.name}</div>
+								)}
+							</div>
+							<div>
+								<label className='block text-sm font-medium'>Email</label>
+								<Field
+									name='customer.email'
+									type='email'
+									className='mt-1 p-2 border border-gray-300 rounded-md'
+								/>
+								{errors.customer?.email && touched.customer?.email && (
+									<div className='text-red-500 text-sm'>{errors.customer.email}</div>
+								)}
+							</div>
+							<div>
+								<label className='block text-sm font-medium'>Phone</label>
+								<Field
+									name='customer.phone'
+									type='tel'
+									className='mt-1 p-2 border border-gray-300 rounded-md'
+								/>
+								{errors.customer?.phone && touched.customer?.phone && (
+									<div className='text-red-500 text-sm'>{errors.customer.phone}</div>
+								)}
+							</div>
+							<div>
+								<label className='block text-sm font-medium'>City</label>
+								<Field
+									name='customer.city'
+									type='text'
+									className='mt-1 p-2 border border-gray-300 rounded-md'
+								/>
+								{errors.customer?.city && touched.customer?.city && (
+									<div className='text-red-500 text-sm'>{errors.customer.city}</div>
+								)}
+							</div>
+							<div>
+								<label className='block text-sm font-medium'>Warehouse</label>
+								<Field
+									name='customer.warehouse'
+									as='select'
+									className='mt-1 p-2 border border-gray-300 rounded-md'
+								>
+									{warehouses.map(wh => (
+										<option key={wh.Ref} value={wh.Description}>
+											{wh.Description}
+										</option>
+									))}
+								</Field>
+								{errors.customer?.warehouse && touched.customer?.warehouse && (
+									<div className='text-red-500 text-sm'>{errors.customer.warehouse}</div>
+								)}
+							</div>
+							<div>
+								<label className='block text-sm font-medium'>Payment Method</label>
+								<Field
+									name='customer.payment'
+									as='select'
+									className='mt-1 p-2 border border-gray-300 rounded-md'
+								>
+									{Object.values(PaymentMethod).map(method => (
+										<option key={method} value={method}>
+											{method}
+										</option>
+									))}
+								</Field>
+								{errors.customer?.payment && touched.customer?.payment && (
+									<div className='text-red-500 text-sm'>{errors.customer.payment}</div>
+								)}
+							</div>
+						</div> */}
+
+						<h3 className='text-xl font-semibold'>Товари у замовленні</h3>
+						<FieldArray name='orderedGoods'>
+							{({ push, remove }) => (
+								<div className='space-y-4'>
+									{values.orderedGoods.map((good, index) => {
+										const orderedGoodsInputs = [
+											{
+												name: `orderedGoods.${index}.title`,
+												type: 'text',
+												id: `title-${index}`,
+												label: 'Назва',
+												required: true,
+											},
+											{
+												name: `orderedGoods.${index}.brand`,
+												type: 'text',
+												id: `brand-${index}`,
+												label: 'Бренд',
+												required: true,
+											},
+											{
+												name: `orderedGoods.${index}.model`,
+												type: 'text',
+												id: `model-${index}`,
+												label: 'Модель',
+												required: true,
+											},
+											{
+												name: `orderedGoods.${index}.vendor`,
+												type: 'text',
+												id: `vendor-${index}`,
+												label: 'Vendor',
+												required: true,
+											},
+											{
+												name: `orderedGoods.${index}.quantity`,
+												type: 'number',
+												id: `quantity-${index}`,
+												label: 'Кількість',
+												required: true,
+											},
+											{
+												name: `orderedGoods.${index}.price`,
+												type: 'number',
+												id: `price-${index}`,
+												label: 'Ціна',
+												required: true,
+											},
+										]
+
+										return (
+											<div key={index} className='p-4 border border-gray-300 rounded-md'>
+												<div className='grid grid-cols-2 gap-4'>
+													{orderedGoodsInputs.map(input => (
+														<div key={input.id}>
+															<label className='block text-sm font-medium'>{input.label}</label>
+															<FormField item={input} />
+														</div>
+													))}
+													<button
+														type='button'
+														onClick={() => remove(index)}
+														className='mt-4 p-2 bg-red-500 text-white rounded-md hover:bg-red-600'
+													>
+														Видалити
+													</button>
+												</div>
+											</div>
+										)
+									})}
+									<button
+										type='button'
+										onClick={() =>
+											push({
+												id: '',
+												title: '',
+												brand: '',
+												model: '',
+												vendor: '',
+												quantity: 1,
+												price: 0,
+											})
+										}
+										className='mt-4 p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600'
+									>
+										Додати
+									</button>
+								</div>
+							)}
+						</FieldArray>
+
+						<div>
+							<label className='block text-sm font-medium'>Всього ціна</label>
+							<Field
+								name='totalPrice'
+								type='number'
+								className='mt-1 p-2 border border-gray-300 rounded-md'
 							/>
-						))}
-						<p>Ordered Goods Data</p>
-						{goodsInputs.map((item, i) => (
-							<FormField key={i} item={item} errors={errors} setFieldValue={setFieldValue} />
-						))}
-						<CustomButton label='Зберегти' />
+							{errors.totalPrice && touched.totalPrice && (
+								<div className='text-red-500 text-sm'>{errors.totalPrice}</div>
+							)}
+						</div>
+
+						<div>
+							<label className='block text-sm font-medium'>Статус</label>
+							<Field
+								name='status'
+								as='select'
+								className='mt-1 p-2 border border-gray-300 rounded-md'
+							>
+								<option value='Новый'>Новый</option>
+								<option value='Опрацьовується'>Опрацьовується</option>
+								<option value='Оплачено'>Оплачено</option>
+								<option value='На відправку'>На відправку</option>
+								<option value='Закритий'>Закритий</option>
+							</Field>
+							{errors.status && touched.status && (
+								<div className='text-red-500 text-sm'>{errors.status}</div>
+							)}
+						</div>
+
+						<div className='flex justify-end'>
+							<CustomButton label={'Отправить'} />
+						</div>
 					</Form>
 				)}
 			</Formik>
@@ -280,4 +382,4 @@ const AddOrderForm: React.FC<OrderFormProps> = ({ order, title, action }) => {
 	)
 }
 
-export default AddOrderForm
+export default OrderForm

@@ -2,7 +2,7 @@ import * as Yup from 'yup'
 
 const nameRegex = /^(?:[а-яА-Я]+(?:\s[а-яА-Я]+)?|[а-яА-Я]+)$/
 
-export const testimonialFormSchema = Yup.object().shape({
+const testimonialFormSchema = Yup.object().shape({
 	name: Yup.string()
 		.min(2, 'Мінімум 2 символи')
 		.max(10, 'Максимум 10 символів')
@@ -20,3 +20,5 @@ export const testimonialFormSchema = Yup.object().shape({
 		.nullable(),
 	isActive: Yup.boolean().required(`Обов'язкове поле`),
 })
+
+export default testimonialFormSchema
