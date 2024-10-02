@@ -8,37 +8,52 @@ import { useInView } from 'react-intersection-observer'
 import { TailSpin } from 'react-loader-spinner'
 import ItemsList from './Item/ItemsList'
 
-const InfiniteScrollGods = ({
-	search,
+const InfiniteScrollGoods = ({
 	initialGoods,
-	NUMBER_OF_GOODS_TO_FETCH,
+	searchParams,
+	limit,
 }: {
-	search: ISearchParams
 	initialGoods: IGood[]
-	NUMBER_OF_GOODS_TO_FETCH: number
+	searchParams: ISearchParams
+	limit: number
 }) => {
-	const [goods, setGoods] = useState<IGood[]>(initialGoods)
+	const [goods, setGoods] = useState<IGood[]>(initialGoods || [])
 	const [pagesLoaded, setPagesLoaded] = useState(1)
 	const [allGoodsLoaded, setAllGoodsLoaded] = useState(false)
-	const { ref, inView } = useInView()
+	const [isFetchingMore, setIsFetchingMore] = useState(false)
+	const { ref, inView } = useInView({
+		threshold: 0.5, // Trigger load when the element is halfway in view
+	})
+
+	useEffect(() => {
+		if (initialGoods) {
+			setGoods(initialGoods)
+		}
+	}, [initialGoods])
 
 	async function loadMoreGoods() {
+		if (isFetchingMore || allGoodsLoaded) return // Prevent multiple fetches
+
+		setIsFetchingMore(true)
+
 		const nextPage = pagesLoaded + 1
-		const newGoods = (await getAllGoods(search, NUMBER_OF_GOODS_TO_FETCH, nextPage)) ?? []
+		const newGoods = (await getAllGoods(searchParams, limit, nextPage)) ?? []
 
 		if (newGoods?.goods?.length > 0) {
-			setGoods((prevGoods: IGood[]) => [...prevGoods, ...newGoods.goods])
+			setGoods(prevGoods => [...prevGoods, ...newGoods.goods])
 			setPagesLoaded(nextPage)
 		} else {
 			setAllGoodsLoaded(true)
 		}
+
+		setIsFetchingMore(false)
 	}
 
 	useEffect(() => {
-		if (inView) {
+		if (inView && !allGoodsLoaded && !isFetchingMore) {
 			loadMoreGoods()
 		}
-	}, [inView])
+	}, [inView, allGoodsLoaded, isFetchingMore])
 
 	return (
 		<>
@@ -47,7 +62,7 @@ const InfiniteScrollGods = ({
 			</section>
 			<section>
 				{allGoodsLoaded ? (
-					<p className=' subtitle mb-4 text-center py-10'> Це всі 🤷‍♂️ наявні Товари 🛒</p>
+					<p className='subtitle mb-4 text-center py-10'>Це всі 🤷‍♂️ наявні Товари 🛒</p>
 				) : (
 					<div ref={ref} className='flex items-center justify-center py-10'>
 						<TailSpin
@@ -57,8 +72,6 @@ const InfiniteScrollGods = ({
 							color='#ea580c'
 							ariaLabel='tail-spin-loading'
 							radius='1'
-							wrapperStyle={{}}
-							wrapperClass=''
 						/>
 					</div>
 				)}
@@ -67,4 +80,4 @@ const InfiniteScrollGods = ({
 	)
 }
 
-export default InfiniteScrollGods
+export default InfiniteScrollGoods

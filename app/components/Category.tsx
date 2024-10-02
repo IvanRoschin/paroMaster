@@ -1,7 +1,8 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
+// import { Icon } from './Icon'
+import Image from 'next/image'
 
 interface CategoryPage {
 	categories: { src: string; title: string }[]
@@ -33,6 +34,7 @@ const Category: React.FC<CategoryPage> = ({ categories }) => {
 							href={`/category/?${createQueryString('category', title)}`}
 							className='flex justify-start items-start group'
 						>
+							{/* <Icon name={src} className='w-5 h-5 mr-3' /> */}
 							<Image
 								alt={title}
 								src={src}

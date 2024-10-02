@@ -26,7 +26,7 @@ const Description = ({ activeImage, clickNext, clickPrev, slides }: Props) => {
 			<div className='uppercase text-sm absolute right-4 top-2 underline-offset-4 underline'></div>
 			{slides &&
 				slides.map((elem, idx) => (
-					<>
+					<div key={idx}>
 						{isAdmin && (
 							<Link
 								href={`/admin/slider/${elem?._id}`}
@@ -89,7 +89,7 @@ const Description = ({ activeImage, clickNext, clickPrev, slides }: Props) => {
 								</div>
 							</div>
 						</div>
-					</>
+					</div>
 				))}
 		</div>
 	)

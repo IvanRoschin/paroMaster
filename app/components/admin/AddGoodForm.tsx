@@ -2,9 +2,12 @@
 
 import { CustomButton, FormField, ImageUploadCloudinary, Switcher } from '@/components/index'
 import { goodFormSchema } from '@/helpers/index'
+import { useAddData, useUpdateData } from '@/hooks/index'
 import { IGood } from '@/types/good/IGood'
 import { categoryList } from 'app/config/constants'
 import { Form, Formik, FormikState } from 'formik'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { toast } from 'sonner'
 
 interface InitialStateType extends Omit<IGood, '_id'> {}
@@ -16,10 +19,17 @@ interface ResetFormProps {
 interface GoodFormProps {
 	good?: IGood
 	title?: string
-	action: (data: FormData) => Promise<void>
+	action: (data: FormData) => Promise<{ success: boolean; message: string }>
 }
 
 const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
+	const [isLoading, setIsLoading] = useState(false)
+	const router = useRouter()
+	const isUpdating = Boolean(good?._id)
+
+	const addGoodMutation = useAddData(action, 'goods')
+	const updateGoodMutation = useUpdateData(action, 'goods')
+
 	const textareaStyles: React.CSSProperties = {
 		height: '100px',
 		overflowY: 'auto',
@@ -28,7 +38,6 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 	const inputs = [
 		{
 			id: 'category',
-			label: 'Категорія',
 			type: 'select',
 			options: categoryList.map(category => ({ value: category.title, label: category.title })),
 			required: true,
@@ -82,7 +91,6 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 			id: 'description',
 			label: 'Опис',
 			type: 'textarea',
-			required: true,
 			style: textareaStyles,
 		},
 	]
@@ -103,30 +111,47 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 
 	const handleSubmit = async (values: InitialStateType, { resetForm }: ResetFormProps) => {
 		try {
-			const formData = new FormData()
+			setIsLoading(true)
 
+			// Create FormData
+			const formData = new FormData()
 			Object.keys(values).forEach(key => {
 				const value = (values as Record<string, any>)[key]
-
 				if (Array.isArray(value)) {
-					value.forEach((val: any) => formData.append(key, val))
+					value.forEach(val => formData.append(key, val))
 				} else {
 					formData.append(key, value)
 				}
 			})
-			// Append the ID if available
-			if (good?._id) {
+			if (isUpdating && good) {
 				formData.append('id', good._id as string)
 			}
 
-			await action(formData)
+			// Perform the mutation (add or update)
+			const result = isUpdating
+				? await updateGoodMutation.mutateAsync(formData)
+				: await addGoodMutation.mutateAsync(formData)
+
+			// Ensure result contains 'success'
+			if (result?.success === false) {
+				toast.error(result.message || 'Something went wrong')
+				return
+			}
+
+			// If success, reset the form and navigate away
 			resetForm()
+			toast.success(isUpdating ? 'Товар оновлено!' : 'Новий товар додано!')
+			router.push('/admin/goods')
 		} catch (error) {
-			// Handle any errors
-			toast.error('Помилка!')
-			console.error(error)
+			if (error instanceof Error) {
+				toast.error(error.message)
+				console.error(error.message)
+			} else {
+				toast.error('An unknown error occurred')
+				console.error(error)
+			}
 		} finally {
-			toast.success(good?._id ? 'Товар оновлено!' : 'Новий товар додано!')
+			setIsLoading(false)
 		}
 	}
 
@@ -153,7 +178,7 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 									<Switcher
 										id={item.id}
 										label={item.label}
-										checked={!!(values as Record<string, any>)[item.id]} // Ensure boolean
+										checked={!!(values as Record<string, any>)[item.id]}
 										onChange={checked => setFieldValue(item.id, checked)}
 									/>
 								) : (
@@ -161,7 +186,7 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 								)}
 							</div>
 						))}
-						<CustomButton label={'Зберегти'} />
+						<CustomButton label='Зберегти' disabled={isLoading} />
 					</Form>
 				)}
 			</Formik>

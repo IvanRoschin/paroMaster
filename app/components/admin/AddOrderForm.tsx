@@ -75,9 +75,6 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 	})
 
 	const handleSubmit = async (values: IOrder) => {
-		console.log('values', values)
-		console.log('handleClick')
-
 		try {
 			await mutation.mutateAsync(values)
 		} catch (error) {

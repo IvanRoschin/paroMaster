@@ -1,15 +1,13 @@
 'use client'
 
-import { getAllCategories } from '@/actions/categories'
 import { addNewLid } from '@/actions/lids'
-import { useQuery } from '@tanstack/react-query'
+import { ICategory } from '@/types/index'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
 import AddLidForm from './AddLidForm'
 import EmptyState from './EmptyState'
-import Loader from './Loader'
 import Logo from './Logo'
 import Socials from './Socials'
 
@@ -41,7 +39,7 @@ const links = [
 	},
 ]
 
-const Footer = () => {
+const Footer = ({ categories }: { categories: ICategory[] }) => {
 	const searchParams = useSearchParams()
 
 	const createQueryString = useCallback(
@@ -57,25 +55,6 @@ const Footer = () => {
 		[searchParams],
 	)
 
-	const {
-		data: categoriesData,
-		isLoading: isCategorisLoading,
-		isError: isCategoriesError,
-	} = useQuery({
-		queryKey: ['categories', searchParams],
-		queryFn: () => getAllCategories(searchParams, limit),
-	})
-
-	const categories = categoriesData?.categories
-
-	// Handle loading states
-	if (isCategorisLoading) {
-		return <Loader />
-	}
-
-	if (isCategoriesError) {
-		return <div>Error fetching data.</div>
-	}
 	// Handle errors
 	if (!categories?.length) {
 		return <EmptyState showReset />
