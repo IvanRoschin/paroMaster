@@ -29,6 +29,7 @@ const ImageUploadCloudinary: React.FC<ImageUploadProps> = ({
 		setResource(prevResources => {
 			const updatedResources = [...prevResources, uploadedImageUrl]
 			setFieldValue('src', updatedResources)
+
 			return updatedResources
 		})
 	}

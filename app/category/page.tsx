@@ -1,48 +1,33 @@
-'use client'
-
 import { getAllGoods } from '@/actions/goods'
 import InfiniteScrollGoods from '@/components/InfiniteScrollGoods'
 import { IGood } from '@/types/index'
 import { ISearchParams } from '@/types/searchParams'
-import useSWR from 'swr'
-import { EmptyState, Loader } from '../components'
+import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 
-interface IGetAllGoodsResponse {
-	success: boolean
+interface GoodsData {
 	goods: IGood[]
-	count: number
 }
 
-const limit = 2
-
-const fetcher = async (url: string, params: ISearchParams): Promise<IGetAllGoodsResponse> => {
-	return getAllGoods(params, limit)
-}
+const limit = 4
 
 export default async function categoryPage({ searchParams }: { searchParams: ISearchParams }) {
-	const { data, error } = useSWR(['goods', searchParams], () => fetcher('goods', searchParams))
+	const queryClient = new QueryClient()
+	await queryClient.prefetchQuery({
+		queryKey: ['goods'],
+		queryFn: () => getAllGoods(searchParams, limit),
+	})
+	const queryState = queryClient.getQueryState(['goods'])
 
-	if (error) {
-		console.error('Error fetching goods', error)
-	}
-	if (data?.goods.length === 0) {
-		return <EmptyState showReset />
-	}
-	if (!data) {
-		return <Loader />
-	}
+	const goods = (queryState?.data as GoodsData)?.goods || []
 
 	return (
-		<div>
-			<h2 className='text-4xl mb-4'>{searchParams?.category}</h2>
-			{/* <ItemsList goods={data.goods} /> */}
-			<div key={Math.random()}>
-				<InfiniteScrollGoods
-					initialGoods={data.goods}
-					search={searchParams}
-					NUMBER_OF_GOODS_TO_FETCH={limit}
-				/>
+		<HydrationBoundary state={dehydrate(queryClient)}>
+			<div>
+				<h2 className='text-4xl mb-4'>{searchParams?.category}</h2>
+				<div key={Math.random()}>
+					<InfiniteScrollGoods initialGoods={goods} searchParams={searchParams} limit={limit} />
+				</div>
 			</div>
-		</div>
+		</HydrationBoundary>
 	)
 }

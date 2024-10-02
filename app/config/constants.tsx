@@ -18,43 +18,43 @@
 
 export const categoryList = [
 	{
-		icon: 'category_korpusniDetali',
+		src: 'category_korpusniDetali',
 		title: 'Корпус станції',
 	},
 	{
-		icon: 'category_korpusUtuga',
+		src: 'category_korpusUtuga',
 		title: 'Корпус для прасок',
 	},
 	{
-		icon: 'category_pidoshvaUtuga',
+		src: 'category_pidoshvaUtuga',
 		title: 'Підошви для прасок',
 	},
 	{
-		icon: 'category_platu',
+		src: 'category_platu',
 		title: 'Плати керування',
 	},
 	{
-		icon: 'category_boiler',
+		src: 'category_boiler',
 		title: 'Бойлери',
 	},
 	{
-		icon: 'category_electroKlapan',
+		src: 'category_electroKlapan',
 		title: 'Електроклапани',
 	},
 	{
-		icon: 'category_nasos',
+		src: 'category_nasos',
 		title: 'Насоси(помпи)',
 	},
 	{
-		icon: 'category_rezervuarVoda',
+		src: 'category_rezervuarVoda',
 		title: 'Резервуари для води',
 	},
 	{
-		icon: 'category_provoda',
+		src: 'category_provoda',
 		title: 'Провода та шланги',
 	},
 	{
-		icon: 'category_accsecuari',
+		src: 'category_accsecuari',
 		title: 'Аксесуари та комплектуючі',
 	},
 ]

@@ -1,16 +1,10 @@
-import { ISearchParams } from '@/types/index'
+import { IGetAllTestimonials } from '@/actions/testimonials'
 import Slider from './Slider'
 
-const TestimonialsList = ({
-	searchParams,
-	limit,
-}: {
-	searchParams: ISearchParams
-	limit: number
-}) => {
+const TestimonialsList = ({ testimonialsData }: { testimonialsData: IGetAllTestimonials }) => {
 	return (
 		<div className='flex flex-wrap justify-center'>
-			<Slider searchParams={searchParams} limit={limit} testimonials />
+			<Slider testimonialsData={testimonialsData} testimonials />
 		</div>
 	)
 }

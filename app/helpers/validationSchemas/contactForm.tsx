@@ -1,6 +1,6 @@
 import * as Yup from 'yup'
 
-const nameRegex = /^[а-яА-ЯіІїЇєЄґҐ']+$/
+const nameRegex = /^[а-яА-ЯіІїЇєЄґҐ']+(\s[а-яА-ЯіІїЇєЄґҐ']+)?$/
 const emailRegex = /^(?=.{1,63}$)(?=.{2,}@)[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 const phoneRegex = /^\+380\d{9}$/
 

@@ -18,13 +18,16 @@ export interface IGetAllBrands {
 	brands: string[]
 }
 
+export interface IGetPrices {
+	success: boolean
+	minPrice: number
+	maxPrice: number
+}
 export async function getAllGoods(
 	searchParams: ISearchParams,
 	limit: number,
 	nextPage?: number,
 ): Promise<IGetAllGoods> {
-	console.log('searchParams', searchParams)
-
 	let skip: number
 
 	if (nextPage) {
@@ -36,11 +39,8 @@ export async function getAllGoods(
 
 	try {
 		await connectToDB()
-
-		// Initialize the filter object
 		let filter: any = {}
 
-		// Handle search filter
 		if (searchParams?.search) {
 			filter.$and = [
 				{
@@ -54,18 +54,6 @@ export async function getAllGoods(
 			]
 		}
 
-		// Handle brand filter
-		if (searchParams?.brand) {
-			filter.brand = searchParams.brand
-		}
-
-		// Handle category filter
-		let categoryFilter: any = {}
-		if (searchParams?.category) {
-			categoryFilter = { category: searchParams.category }
-		}
-
-		// Handle price filter with aggregation
 		let priceFilter: any = {}
 		if (searchParams?.low && searchParams?.high) {
 			const lowPrice = Number(searchParams.low)
@@ -83,9 +71,16 @@ export async function getAllGoods(
 			}
 		}
 
-		// Combine category and price filters
 		filter = {
-			$and: [categoryFilter, priceFilter, ...(filter.$and || [])],
+			$and: [priceFilter, ...(filter.$and || [])],
+		}
+
+		if (searchParams?.brand) {
+			filter.brand = searchParams.brand
+		}
+
+		if (searchParams?.category) {
+			filter.category = searchParams.category
 		}
 
 		// Handle sort by price
@@ -98,7 +93,6 @@ export async function getAllGoods(
 
 		// Query the count of documents matching the filter
 		const count = await Good.countDocuments(filter)
-		console.log('filter', filter)
 
 		// Query the actual documents with pagination
 		const goods: IGood[] = await Good.find(filter)
@@ -106,7 +100,6 @@ export async function getAllGoods(
 			.skip(skip)
 			.limit(limit)
 			.exec()
-
 		return {
 			success: true,
 			goods: JSON.parse(JSON.stringify(goods)),
@@ -129,9 +122,9 @@ export async function getGoodById(id: string) {
 }
 
 export async function addGood(formData: FormData) {
-	// const values = Object.fromEntries( formData.entries() )
-	const values: any = {}
+	const values: Record<string, any> = {}
 
+	// Convert FormData to an object
 	formData.forEach((value, key) => {
 		if (!values[key]) {
 			values[key] = []
@@ -139,35 +132,52 @@ export async function addGood(formData: FormData) {
 		values[key].push(value)
 	})
 
+	// If an array has only one item, convert it to a single value
 	Object.keys(values).forEach(key => {
 		if (values[key].length === 1) {
 			values[key] = values[key][0]
 		}
 	})
+
+	// Ensure price is a number
 	const price = Number(values.price)
 	if (isNaN(price)) {
 		console.error('Price must be a valid number')
-		return
+		return {
+			success: false,
+			message: 'Invalid price',
+		}
 	}
 	values.price = price
+
+	// Validate required fields
 	if (
 		!values.category ||
 		!values.title ||
 		!values.brand ||
 		!values.model ||
-		!values.model ||
+		!values.vendor ||
 		!values.price ||
 		!values.description ||
 		!values.src
 	) {
 		console.error('Missing required fields')
-		return
+		return {
+			success: false,
+			message: 'Missing required fields',
+		}
 	}
 
 	try {
 		await connectToDB()
 
-		console.log('Price before saving:', typeof values.price, values.price)
+		const existingGood = await Good.findOne({ vendor: values.vendor })
+		if (existingGood) {
+			return {
+				success: false,
+				message: 'Good with this vendor already exists',
+			}
+		}
 
 		await Good.create({
 			category: values.category,
@@ -176,22 +186,25 @@ export async function addGood(formData: FormData) {
 			model: values.model,
 			price: Number(values.price),
 			description: values.description,
-			src: values.src instanceof Array ? values.src : [values.src],
+			src: Array.isArray(values.src) ? values.src : [values.src],
 			vendor: values.vendor,
 			isAvailable: values.isAvailable === 'true',
-			isCompatible: values.isCompatible === 'false',
-			compatibility:
-				values.compatibility instanceof Array ? values.compatibility : [values.compatibility],
+			isCompatible: values.isCompatible === 'true',
+			compatibility: values.compatibility,
 		})
+
 		return {
 			success: true,
 			message: 'Good added successfully',
 		}
 	} catch (error) {
-		console.log(error)
-	} finally {
-		revalidatePath('/admin/goods')
-		redirect('/admin/goods')
+		if (error instanceof Error) {
+			console.error('Error adding good:', error)
+			return {
+				success: false,
+				message: error.message || 'Error adding good',
+			}
+		}
 	}
 }
 
@@ -205,9 +218,6 @@ export async function deleteGood(id: string) {
 		await Good.findByIdAndDelete(id)
 	} catch (error) {
 		console.error('Failed to delete the good:', error)
-	} finally {
-		revalidatePath('/admin/goods')
-		redirect('/admin/goods')
 	}
 }
 

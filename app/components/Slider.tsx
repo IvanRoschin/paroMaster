@@ -1,37 +1,27 @@
-import { getAllSlides } from '@/actions/slider'
-import { getAllTestimonials } from '@/actions/testimonials'
-import useFetchData from 'app/hooks/useFetchData'
+import { IGetAllSlides } from '@/actions/slider'
+import { IGetAllTestimonials } from '@/actions/testimonials'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { IoIosArrowDropleft, IoIosArrowDropright } from 'react-icons/io'
 import EmptyState from './EmptyState'
-import Loader from './Loader'
 import Testimonial from './Testimonial'
 
 interface SliderProps {
-	searchParams?: any
-	limit: number
 	DescriptionComponent?: any
+	testimonialsData?: IGetAllTestimonials
+	slidesData?: IGetAllSlides
 	testimonials?: boolean
 }
 
 const Slider: React.FC<SliderProps> = ({
-	searchParams,
-	limit,
 	DescriptionComponent,
 	testimonials = false,
+	slidesData,
+	testimonialsData,
 }) => {
 	const [activeImage, setActiveImage] = useState(0)
 
-	const fetchFunction = testimonials ? getAllTestimonials : getAllSlides
-	const { data, isLoading, isError } = useFetchData(
-		searchParams,
-		limit,
-		fetchFunction,
-		testimonials ? 'testimonials' : 'slides',
-	)
-
-	const slides = testimonials ? data?.testimonials : data?.slides
+	const slides = testimonials ? testimonialsData?.testimonials : slidesData?.slides
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
@@ -40,14 +30,6 @@ const Slider: React.FC<SliderProps> = ({
 
 		return () => clearTimeout(timer)
 	}, [activeImage, slides?.length])
-
-	if (isLoading) {
-		return <Loader />
-	}
-
-	if (isError) {
-		return <div>Error fetching data.</div>
-	}
 
 	if (!slides || slides.length === 0) {
 		return <EmptyState showReset />
