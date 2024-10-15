@@ -81,7 +81,7 @@ export default function Orders({
 					</select>
 
 					<Link href='/admin/orders/add'>
-						<Button type='button' label='Додати' small outline color='border-green-400' />
+						<Button label='Додати' small outline color='border-green-400' />
 					</Link>
 				</div>
 			</div>
@@ -113,7 +113,7 @@ export default function Orders({
 								<td className='p-2 border-r-2 text-start'>
 									<ul className='list-disc pl-4'>
 										{order.orderedGoods.map(good => (
-											<li key={good.id}>
+											<li key={good._id}>
 												<strong>{good.title}</strong> - {good.brand}, {good.model}, {good.vendor}{' '}
 												(Кількість: {good.quantity}, Ціна: {good.price})
 											</li>
@@ -124,12 +124,11 @@ export default function Orders({
 								<td className='p-2 border-r-2 text-center'>{order.status}</td>
 								<td className='p-2 border-r-2 text-center'>
 									<Link href={`/admin/orders/${order._id}`}>
-										<Button type='button' icon={FaPen} small outline color='border-yellow-400' />
+										<Button icon={FaPen} small outline color='border-yellow-400' />
 									</Link>
 								</td>
 								<td className='p-2 text-center'>
 									<Button
-										type='button'
 										icon={FaTrash}
 										small
 										outline

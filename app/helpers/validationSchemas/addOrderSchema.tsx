@@ -1,5 +1,6 @@
 import { PaymentMethod } from '@/types/paymentMethod'
 import * as Yup from 'yup'
+const phoneRegex = /^\+380\d{9}$/
 
 const orderFormSchema = Yup.object().shape({
 	number: Yup.string().required(`Обов'язкове поле`),
@@ -8,7 +9,11 @@ const orderFormSchema = Yup.object().shape({
 		email: Yup.string()
 			.email('Некоректний e-mail')
 			.required(`Обов'язкове поле`),
-		phone: Yup.string().required(`Обов'язкове поле`),
+		phone: Yup.string()
+			.matches(phoneRegex, {
+				message: 'Має починатись на +380 та 9 цифр номеру',
+			})
+			.required(`Обов'язкове поле`),
 		city: Yup.string().required(`Обов'язкове поле`),
 		warehouse: Yup.string().required(`Обов'язкове поле`),
 		payment: Yup.string()
@@ -24,8 +29,7 @@ const orderFormSchema = Yup.object().shape({
 			vendor: Yup.string().required(`Обов'язкове поле`),
 			quantity: Yup.number()
 				.positive()
-				.integer()
-				.required(`Обов'язкове поле`),
+				.integer(),
 			price: Yup.number()
 				.positive()
 				.required(`Обов'язкове поле`),

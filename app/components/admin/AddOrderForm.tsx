@@ -1,24 +1,36 @@
 import { getData } from '@/actions/nova'
 import { orderFormSchema } from '@/helpers/index'
+import { useAddData } from '@/hooks/useAddData'
+import { useUpdateData } from '@/hooks/useUpdateData'
 import { IOrder } from '@/types/index'
 import { PaymentMethod } from '@/types/paymentMethod'
-import { useMutation } from '@tanstack/react-query'
-import { Field, FieldArray, Form, Formik } from 'formik'
+import { Field, FieldArray, Form, Formik, FormikState } from 'formik'
+import router from 'next/router'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import FormField from '../input/FormField'
 import CustomButton from './CustomFormikButton'
 
+interface InitialStateType extends Omit<IOrder, '_id'> {}
+
+interface ResetFormProps {
+	resetForm: (nextState?: Partial<FormikState<InitialStateType>>) => void
+}
+
 interface OrderFormProps {
 	order?: IOrder
-	action: (data: IOrder) => Promise<void>
+	action: (data: FormData) => Promise<{ success: boolean; message: string }>
 	title?: string
 }
 
 const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
+	const [isLoading, setIsLoading] = useState(false)
 	const [warehouses, setWarehouses] = useState<{ Ref: string; Description: string }[]>([])
-
+	const isUpdating = Boolean(order?._id)
 	const [name, surname] = order?.customer.name?.split(' ') || ['', '']
+
+	const addOrderMutation = useAddData(action, 'orders')
+	const updateOrderMutation = useUpdateData(action, 'orders')
 
 	const initialValues: IOrder = {
 		number: order?.number || '',
@@ -32,7 +44,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 			payment: order?.customer.payment || PaymentMethod.CashOnDelivery,
 		},
 		orderedGoods: order?.orderedGoods || [
-			{ id: '', title: '', brand: '', model: '', vendor: '', quantity: 1, price: 0 },
+			{ _id: '', title: '', brand: '', model: '', vendor: '', quantity: 1, price: 0 },
 		],
 		totalPrice: order?.totalPrice || 0,
 		status: order?.status || 'Новий',
@@ -61,24 +73,58 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 	}
 
 	// Define the mutation directly inside the component
-	const mutation = useMutation({
-		mutationFn: async (values: IOrder) => {
-			return await action(values)
-		},
-		onSuccess: () => {
-			toast.success('Order submitted successfully')
-		},
-		onError: error => {
-			console.error('Error submitting order:', error)
-			toast.error('Failed to submit the order. Please try again.')
-		},
-	})
+	// const mutation = useMutation({
+	// 	mutationFn: async (values: IOrder) => {
+	// 		return await action(values)
+	// 	},
+	// 	onSuccess: () => {
+	// 		toast.success('Order submitted successfully')
+	// 	},
+	// 	onError: error => {
+	// 		console.error('Error submitting order:', error)
+	// 		toast.error('Failed to submit the order. Please try again.')
+	// 	},
+	// })
 
-	const handleSubmit = async (values: IOrder) => {
+	const handleSubmit = async (values: IOrder, { resetForm }: ResetFormProps) => {
 		try {
-			await mutation.mutateAsync(values)
+			setIsLoading(true)
+
+			const formData = new FormData()
+			Object.keys(values).forEach(key => {
+				const value = (values as Record<string, any>)[key]
+				if (Array.isArray(value)) {
+					value.forEach(val => formData.append(key, val))
+				} else {
+					formData.append(key, value)
+				}
+			})
+			if (isUpdating && order) {
+				formData.append('id', order._id as string)
+			}
+
+			const result = isUpdating
+				? await updateOrderMutation.mutateAsync(formData)
+				: await addOrderMutation.mutateAsync(formData)
+
+			// Ensure result contains 'success'
+			if (result?.success === false) {
+				toast.error(result.message || 'Something went wrong')
+				return
+			}
+			resetForm()
+			toast.success(isUpdating ? 'Товар оновлено!' : 'Новий товар додано!')
+			router.push('/admin/orders')
 		} catch (error) {
-			console.error('Error submitting form:', error)
+			if (error instanceof Error) {
+				toast.error(error.message)
+				console.error(error.message)
+			} else {
+				toast.error('An unknown error occurred')
+				console.error(error)
+			}
+		} finally {
+			setIsLoading(false)
 		}
 	}
 
@@ -114,7 +160,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 					<Form className='space-y-4'>
 						<h3 className='text-xl font-semibold'>Замовник</h3>
 						{customerInputs.map((input, index) => (
-							<FormField item={input} key={index} />
+							<FormField item={input} key={index} setFieldValue={setFieldValue} />
 						))}
 
 						<h3 className='text-xl font-semibold'>Товари у замовленні</h3>

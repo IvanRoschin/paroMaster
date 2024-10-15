@@ -43,24 +43,27 @@ export async function getAllOrders(
 }
 
 export async function addOrder(values: IOrder) {
+	console.log('valuesBackend:', values)
 	try {
 		await connectToDB()
 
 		const orderData = {
-			orderNumber: values.number,
+			number: values.number,
 			customer: values.customer,
 			orderedGoods: values.orderedGoods.map(item => ({
-				id: item.id,
+				id: item._id,
 				title: item.title,
 				brand: item.brand,
 				model: item.model,
 				vendor: item.vendor,
-				quantity: item.quantity,
 				price: item.price,
+				quantity: item.quantity,
 			})),
 			totalPrice: values.totalPrice,
 			status: values.status,
 		}
+		// console.log('orderData', orderData)
+
 		await Order.create(orderData)
 		revalidatePath('/')
 		return { success: true, data: orderData }
@@ -141,11 +144,11 @@ export async function addOrderAction(formData: FormData) {
 				price: item.price,
 			})),
 			totalPrice: values.totalPrice,
-			status: 'Новий',
+			status: values.status || 'Новий',
 		}
 		await Order.create(orderData)
 		revalidatePath('/')
-		return { success: true, data: orderData }
+		return { success: true, message: 'The New Order Successfully Added' }
 	} catch (error) {
 		if (error instanceof Error) {
 			console.error('Error adding order:', error)
