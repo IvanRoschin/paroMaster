@@ -35,7 +35,7 @@ const AddNewOrderForm: React.FC<OrderFormProps> = ({
 }) => {
 	const [warehouses, setWarehouses] = useState<{ Ref: string; Description: string }[]>([])
 	const [isLoading, setIsLoading] = useState(false)
-	const router = useRouter()
+	const { push } = useRouter()
 
 	// const addOrderMutation = useAddData(action, 'orders')
 
@@ -53,7 +53,7 @@ const AddNewOrderForm: React.FC<OrderFormProps> = ({
 		orderedGoods,
 		totalPrice,
 		status: 'Новий',
-		goodsQuantity: goodsQuantity,
+		// goodsQuantity: goodsQuantity,
 	}
 
 	useEffect(() => {
@@ -108,7 +108,7 @@ const AddNewOrderForm: React.FC<OrderFormProps> = ({
 			// Success
 			// .resetForm()
 			toast.success('Order submitted successfully!')
-			router.push('/')
+			push('/')
 		} catch (error) {
 			if (error instanceof Error) {
 				toast.error(error.message)

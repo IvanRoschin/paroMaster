@@ -14,26 +14,23 @@ export interface NewCustomerTemplateProps {
 	payment: PaymentMethod
 	city: string
 	warehouse: string
-	cartItems: IGood[]
-	totalAmount: number
-	quantity: number[]
+	orderedGoods: IGood[]
+	totalPrice: number
 	orderNumber: string
 }
 
 export function generateCustomerEmailContent({
 	name,
 	surname,
-	email,
 	phone,
 	payment,
 	city,
 	warehouse,
-	cartItems,
-	totalAmount,
-	quantity,
+	orderedGoods,
+	totalPrice,
 	orderNumber,
 }: NewCustomerTemplateProps): string {
-	const itemsContent = cartItems
+	const itemsContent = orderedGoods
 		.map(
 			(item, index) => `
         <tr key="${item._id}">
@@ -42,7 +39,7 @@ export function generateCustomerEmailContent({
           <td style="text-align: center">${item.brand}</td>
           <td style="text-align: center">${item.model}</td>
 					<td style="text-align: center">${item.vendor}</td>
-          <td style="text-align: center">${quantity[index]}</td>
+          <td style="text-align: center">${item.quantity}</td>
           <td style="text-align: center">${item.price}</td>
         </tr>
       `,
@@ -80,7 +77,7 @@ export function generateCustomerEmailContent({
       <br />
       <br />
       
-           <h2 style="text-align: center; color: #333;">Всього за замовленням: ${totalAmount} грн.</br> + доставка за тарифами перевізника
+           <h2 style="text-align: center; color: #333;">Всього за замовленням: ${totalPrice} грн.</br> + доставка за тарифами перевізника
       </h2>
 <h3>
         <p>Просимо перевірити наступну контактну інформацію, необхідну нам для найшвидчего оформлення замовлення:</p>

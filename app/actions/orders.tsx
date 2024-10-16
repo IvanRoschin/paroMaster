@@ -220,7 +220,7 @@ export async function updateOrder(formData: Record<string, any>) {
 			number,
 			customer,
 			orderedGoods,
-			goodsQuantity,
+			// goodsQuantity,
 			totalPrice,
 			status,
 		}

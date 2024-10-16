@@ -11,6 +11,7 @@ export interface IGood {
 	isAvailable: boolean
 	isCompatible: boolean
 	compatibility: string
+	quantity?: number
 }
 
 export interface SGood {

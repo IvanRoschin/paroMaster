@@ -1,16 +1,18 @@
 'use client'
 
+import { addCustomer } from '@/actions/customers'
 import { getGoodById } from '@/actions/goods'
-import { generateOrderNumber } from '@/helpers/orderNumber'
-import { ICustomer, IGood, IOrder } from '@/types/index'
-import { useShoppingCart } from 'app/context/ShoppingCartContext'
-import { Form, Formik, FormikState } from 'formik'
-import { useEffect, useState } from 'react'
-// import AddNewOrderForm from '../AddOrderForm'
 import { getData } from '@/actions/nova'
 import { addOrder } from '@/actions/orders'
+import { sendCustomerEmail, sendEmail } from '@/actions/sendEmail'
 import { orderFormSchema } from '@/helpers/index'
+import { generateOrderNumber } from '@/helpers/orderNumber'
+import { ICustomer, IGood, IOrder } from '@/types/index'
 import { PaymentMethod } from '@/types/paymentMethod'
+import { useShoppingCart } from 'app/context/ShoppingCartContext'
+import { Form, Formik, FormikState } from 'formik'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import FormField from '../input/FormField'
 import Modal from './Modal'
@@ -41,12 +43,14 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 			Description: string
 		}[]
 	>([])
+	const [isCheckboxChecked, setIsCheckboxChecked] = useState(false)
+
 	const [orderNumber, setOrderNumber] = useState<string>('')
 	const [orderedGoods, setOrderedGoods] = useState<IGood[]>([])
 	const [totalPrice, setTotalPrice] = useState<number>(0)
-	const [goodsQuantity, setGoodsQuantity] = useState<number>(0)
 	const [customer, setCustomer] = useState<ICustomer>()
-	const [quantity, setQuantity] = useState<number>(0)
+
+	const { push } = useRouter()
 
 	const customerInputs = [
 		{
@@ -121,7 +125,10 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 				cartItemsId.map(async item => {
 					const fetchedItem = await getGoodById(item.id)
 					const quantity = getItemQuantity(item.id)
-					const itemObject = { ...fetchedItem, quantity }
+					const itemObject = {
+						...fetchedItem,
+						quantity,
+					}
 
 					if (itemObject) {
 						return itemObject
@@ -133,16 +140,11 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 
 			const retrievedAmounts = cartItemsId.map(item => {
 				const storedAmount = localStorage.getItem(`amount-${item.id}`)
-				setQuantity(item.quantity)
-
 				return storedAmount ? JSON.parse(storedAmount) : 0
 			})
 			const totalAmount = retrievedAmounts.reduce((total, amount) => total + amount, 0)
 
-			const totalQuantity = cartItemsId.reduce((sum, item) => sum + item.quantity, 0)
-
 			setOrderedGoods(retrievedGoods.filter(item => item !== null) as IGood[])
-			setGoodsQuantity(totalQuantity)
 			setTotalPrice(totalAmount)
 		}
 		const fetchOrderNumber = () => {
@@ -190,7 +192,35 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 					totalPrice,
 					status: 'Новий',
 				}
-				await addOrder(orderData)
+				const mailData = {
+					...customer,
+					orderNumber,
+					orderedGoods,
+					totalPrice,
+				}
+				console.log('mailData', mailData)
+
+				const emailResult = await sendEmail(mailData)
+				const customerEmailRusult = await sendCustomerEmail(mailData)
+				const orderResult = await addOrder(orderData)
+				const customerResult = await addCustomer(customer)
+
+				if (
+					emailResult?.success &&
+					customerEmailRusult?.success &&
+					orderResult?.success &&
+					customerResult?.success
+				) {
+					push('/')
+					closeOrderModal()
+					resetCart()
+					toast.success('Замовлення відправлене', {
+						duration: 3000,
+					})
+				} else {
+					toast.error('Щось зломалось')
+				}
+
 				closeOrderModal()
 				resetCart()
 				toast.success('Замовлення відправлене')
@@ -273,8 +303,9 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 								<input
 									id='termsCheckbox'
 									type='checkbox'
+									checked={isCheckboxChecked}
+									onChange={e => setIsCheckboxChecked(e.target.checked)}
 									className='mr-2'
-									onChange={e => setFieldValue('termsAccepted', e.target.checked)}
 								/>
 								<label htmlFor='termsCheckbox'>Я погоджуюсь з умовами та правилами</label>
 							</div>
@@ -295,6 +326,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 			isOpen={isOrderModalOpen}
 			onClose={closeOrderModal}
 			onSubmit={handleSubmit}
+			disabled={!isCheckboxChecked}
 		/>
 	)
 }

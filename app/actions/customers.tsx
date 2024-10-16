@@ -36,13 +36,11 @@ export async function getAllCustomers(
 	}
 }
 
-export async function addCustomer(formData: FormData) {
-	const values = Object.fromEntries(formData.entries())
+export async function addCustomer(values: ICustomer) {
 	try {
 		await connectToDB()
 
-		const phone = formData.get('phone') as string
-
+		const phone = values?.phone
 		const existingCustomer = await Customer.findOne({ phone })
 		if (existingCustomer) {
 			return {
