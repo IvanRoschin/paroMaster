@@ -198,8 +198,6 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 					orderedGoods,
 					totalPrice,
 				}
-				console.log('mailData', mailData)
-
 				const emailResult = await sendEmail(mailData)
 				const customerEmailRusult = await sendCustomerEmail(mailData)
 				const orderResult = await addOrder(orderData)

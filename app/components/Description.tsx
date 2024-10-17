@@ -2,7 +2,6 @@ import { motion } from 'framer-motion'
 // import left from '../public/left.svg'
 // import right from '../public/right.svg'
 import Link from 'next/link'
-import { IoIosArrowDropleft, IoIosArrowDropright } from 'react-icons/io'
 // import { slides } from '../config/constants'
 import { ISlider } from '@/types/index'
 import { useSession } from 'next-auth/react'
@@ -74,20 +73,6 @@ const Description = ({ activeImage, clickNext, clickPrev, slides }: Props) => {
 									</Link>
 								</div>
 							</motion.div>
-							<div className='absolute md:bottom-1 bottom-10 right-10 md:right-0 w-full flex justify-center items-center'>
-								<div className='absolute bottom-2 right-10 cursor-pointer' onClick={clickPrev}>
-									{/* <Image src={left} alt='' /> */}
-									<div className='swiper-button-prev'>
-										<IoIosArrowDropleft />
-									</div>{' '}
-								</div>
-
-								<div className='absolute bottom-2 right-2 cursor-pointer' onClick={clickNext}>
-									<div className='swiper-button-next'>
-										<IoIosArrowDropright />
-									</div>
-								</div>
-							</div>
 						</div>
 					</div>
 				))}
