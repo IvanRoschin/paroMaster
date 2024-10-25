@@ -186,15 +186,14 @@ export async function getOrderById(id: string) {
 	}
 }
 
-export async function updateOrder(formData: Record<string, any>) {
+export async function updateOrder(formData: FormData) {
+	// Initialize an empty values object
 	const values: any = {}
-
-	// Loop through the object instead of using forEach
-	Object.keys(formData).forEach(key => {
+	formData.forEach((value, key) => {
 		if (!values[key]) {
 			values[key] = []
 		}
-		values[key].push(formData[key])
+		values[key].push(value)
 	})
 
 	Object.keys(values).forEach(key => {
@@ -203,6 +202,9 @@ export async function updateOrder(formData: Record<string, any>) {
 		}
 	})
 
+	console.log('values', values) // Ensure values are logged for debugging
+
+	// Destructure values
 	const { id, number, customer, orderedGoods, totalPrice, status } = values as {
 		id: string
 		number?: string
@@ -212,17 +214,23 @@ export async function updateOrder(formData: Record<string, any>) {
 		status?: 'Новий' | 'Опрацьовується' | 'Оплачено' | 'На відправку' | 'Закритий'
 	}
 
+	// Parse customer and orderedGoods if they are strings
+	const parsedCustomer = typeof customer === 'string' ? JSON.parse(customer) : customer
+	const parsedOrderedGoods =
+		typeof orderedGoods === 'string' ? JSON.parse(orderedGoods) : orderedGoods
+
 	try {
 		await connectToDB()
 
 		const updateFields: Partial<IOrder> = {
 			number,
-			customer,
-			orderedGoods,
+			customer: parsedCustomer, // Use the parsed customer
+			orderedGoods: parsedOrderedGoods, // Use the parsed orderedGoods
 			totalPrice,
 			status,
 		}
 
+		// Remove undefined or empty fields
 		Object.keys(updateFields).forEach(
 			key =>
 				(updateFields[key as keyof IOrder] === '' ||
@@ -230,18 +238,16 @@ export async function updateOrder(formData: Record<string, any>) {
 				delete updateFields[key as keyof IOrder],
 		)
 
-		console.log('id', id)
-		console.log('updateFields', updateFields)
-
+		// Perform the update
 		await Order.findByIdAndUpdate(id, updateFields)
 		return { success: true, message: 'Замовлення оновлено успішно' }
 	} catch (error) {
 		if (error instanceof Error) {
-			console.error('Error updating good:', error)
-			throw new Error('Failed to update good: ' + error.message)
+			console.error('Error updating order:', error)
+			throw new Error('Failed to update order: ' + error.message)
 		} else {
 			console.error('Unknown error:', error)
-			throw new Error('Failed to update good: Unknown error')
+			throw new Error('Failed to update order: Unknown error')
 		}
 	} finally {
 		revalidatePath('/admin/orders')
