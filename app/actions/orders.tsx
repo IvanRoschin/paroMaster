@@ -28,7 +28,7 @@ export async function getAllOrders(
 			query = { status }
 		}
 
-		const count = await Order.countDocuments(query)
+		const count = await Order.countDocuments()
 
 		const orders: IOrder[] = await Order.find(query)
 			.skip(limit * (page - 1))
@@ -203,12 +203,11 @@ export async function updateOrder(formData: Record<string, any>) {
 		}
 	})
 
-	const { id, number, customer, orderedGoods, goodsQuantity, totalPrice, status } = values as {
+	const { id, number, customer, orderedGoods, totalPrice, status } = values as {
 		id: string
 		number?: string
 		customer?: any
 		orderedGoods?: any
-		goodsQuantity?: number
 		totalPrice?: number
 		status?: 'Новий' | 'Опрацьовується' | 'Оплачено' | 'На відправку' | 'Закритий'
 	}
@@ -220,7 +219,6 @@ export async function updateOrder(formData: Record<string, any>) {
 			number,
 			customer,
 			orderedGoods,
-			// goodsQuantity,
 			totalPrice,
 			status,
 		}
@@ -231,10 +229,12 @@ export async function updateOrder(formData: Record<string, any>) {
 					updateFields[key as keyof IOrder] === undefined) &&
 				delete updateFields[key as keyof IOrder],
 		)
+
 		console.log('id', id)
 		console.log('updateFields', updateFields)
 
 		await Order.findByIdAndUpdate(id, updateFields)
+		return { success: true, message: 'Замовлення оновлено успішно' }
 	} catch (error) {
 		if (error instanceof Error) {
 			console.error('Error updating good:', error)

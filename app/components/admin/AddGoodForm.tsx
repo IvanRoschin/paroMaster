@@ -24,7 +24,7 @@ interface GoodFormProps {
 
 const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 	const [isLoading, setIsLoading] = useState(false)
-	const router = useRouter()
+	const { push } = useRouter()
 	const isUpdating = Boolean(good?._id)
 
 	const addGoodMutation = useAddData(action, 'goods')
@@ -141,7 +141,7 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 			// If success, reset the form and navigate away
 			resetForm()
 			toast.success(isUpdating ? 'Товар оновлено!' : 'Новий товар додано!')
-			router.push('/admin/goods')
+			push('/admin/goods')
 		} catch (error) {
 			if (error instanceof Error) {
 				toast.error(error.message)

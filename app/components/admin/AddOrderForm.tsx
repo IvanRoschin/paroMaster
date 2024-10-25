@@ -1,11 +1,13 @@
+'use client'
+
 import { getData } from '@/actions/nova'
 import { orderFormSchema } from '@/helpers/index'
 import { useAddData } from '@/hooks/useAddData'
 import { useUpdateData } from '@/hooks/useUpdateData'
 import { IOrder } from '@/types/index'
 import { PaymentMethod } from '@/types/paymentMethod'
-import { Field, FieldArray, Form, Formik, FormikState } from 'formik'
-import router from 'next/router'
+import { FieldArray, Form, Formik, FormikState } from 'formik'
+import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import FormField from '../input/FormField'
@@ -19,13 +21,38 @@ interface ResetFormProps {
 
 interface OrderFormProps {
 	order?: IOrder
-	action: (data: FormData) => Promise<{ success: boolean; message: string }>
 	title?: string
+	action: (data: FormData) => Promise<{ success: boolean; message: string }>
 }
+
+const statusList = [
+	{
+		id: 1,
+		title: 'Новый',
+	},
+
+	{
+		id: 2,
+		title: 'Опрацьовується',
+	},
+	{
+		id: 3,
+		title: 'Оплачено',
+	},
+	{
+		id: 4,
+		title: 'На відправку',
+	},
+	{
+		id: 5,
+		title: 'Закритий',
+	},
+]
 
 const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 	const [isLoading, setIsLoading] = useState(false)
 	const [warehouses, setWarehouses] = useState<{ Ref: string; Description: string }[]>([])
+	const { push } = useRouter()
 	const isUpdating = Boolean(order?._id)
 	const [name, surname] = order?.customer.name?.split(' ') || ['', '']
 
@@ -44,11 +71,24 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 			payment: order?.customer.payment || PaymentMethod.CashOnDelivery,
 		},
 		orderedGoods: order?.orderedGoods || [
-			{ _id: '', title: '', brand: '', model: '', vendor: '', quantity: 1, price: 0 },
+			{
+				_id: '',
+				category: '',
+				src: [],
+				brand: '',
+				model: '',
+				vendor: '',
+				title: '',
+				description: '',
+				price: 0,
+				isAvailable: false,
+				isCompatible: false,
+				compatibility: '',
+				quantity: 0,
+			},
 		],
 		totalPrice: order?.totalPrice || 0,
 		status: order?.status || 'Новий',
-		goodsQuantity: order?.goodsQuantity || 0,
 	}
 
 	useEffect(() => {
@@ -87,25 +127,33 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 	// })
 
 	const handleSubmit = async (values: IOrder, { resetForm }: ResetFormProps) => {
+		console.log('values', values)
+
 		try {
 			setIsLoading(true)
 
-			const formData = new FormData()
-			Object.keys(values).forEach(key => {
-				const value = (values as Record<string, any>)[key]
-				if (Array.isArray(value)) {
-					value.forEach(val => formData.append(key, val))
-				} else {
-					formData.append(key, value)
-				}
-			})
-			if (isUpdating && order) {
-				formData.append('id', order._id as string)
-			}
+			const updateOrder = { ...values, id: order?._id }
+			// console.log('updateOrder', updateOrder)
+
+			// const formData = new FormData()
+			// Object.keys(values).forEach(key => {
+			// 	const value = (values as Record<string, any>)[key]
+			// 	if (Array.isArray(value)) {
+			// 		value.forEach(val => formData.append(key, val))
+			// 	} else {
+			// 		formData.append(key, value)
+			// 	}
+			// })
+
+			console.log('isUpdating', isUpdating)
+
+			// if (isUpdating && order) {
+			// 	formData.append('id', order?._id as string)
+			// }
 
 			const result = isUpdating
-				? await updateOrderMutation.mutateAsync(formData)
-				: await addOrderMutation.mutateAsync(formData)
+				? await updateOrderMutation.mutateAsync(updateOrder)
+				: await addOrderMutation.mutateAsync(values)
 
 			// Ensure result contains 'success'
 			if (result?.success === false) {
@@ -114,7 +162,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 			}
 			resetForm()
 			toast.success(isUpdating ? 'Товар оновлено!' : 'Новий товар додано!')
-			router.push('/admin/orders')
+			// push('/admin/orders')
 		} catch (error) {
 			if (error instanceof Error) {
 				toast.error(error.message)
@@ -160,7 +208,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 					<Form className='space-y-4'>
 						<h3 className='text-xl font-semibold'>Замовник</h3>
 						{customerInputs.map((input, index) => (
-							<FormField item={input} key={index} setFieldValue={setFieldValue} />
+							<FormField item={input} key={index} setFieldValue={setFieldValue} errors={errors} />
 						))}
 
 						<h3 className='text-xl font-semibold'>Товари у замовленні</h3>
@@ -219,7 +267,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 													{orderedGoodsInputs.map(input => (
 														<div key={input.id}>
 															<label className='block text-sm font-medium'>{input.label}</label>
-															<FormField item={input} />
+															<FormField item={input} errors={errors} />
 														</div>
 													))}
 													<button
@@ -254,35 +302,56 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 							)}
 						</FieldArray>
 
-						<div>
+						<div className='w-[195px]'>
 							<label className='block text-sm font-medium'>Всього ціна</label>
-							<Field
-								name='totalPrice'
-								type='number'
-								className='mt-1 p-2 border border-gray-300 rounded-md'
+							<FormField
+								item={{
+									type: 'number',
+									id: 'totalPrice',
+									label: 'Всього ціна',
+
+									required: true,
+								}}
+								errors={errors}
+								setFieldValue={setFieldValue}
 							/>
-							{errors.totalPrice && touched.totalPrice && (
-								<div className='text-red-500 text-sm'>{errors.totalPrice}</div>
-							)}
+						</div>
+						<div className='w-[195px]'>
+							<FormField
+								item={{
+									id: 'status',
+									type: 'select',
+									options: statusList.map(status => ({
+										value: status.title,
+										label: status.title,
+									})),
+									required: true,
+								}}
+								errors={errors}
+								setFieldValue={setFieldValue}
+							/>
 						</div>
 
+						{/* 
 						<div>
 							<label className='block text-sm font-medium'>Статус</label>
 							<Field
+								id
 								name='status'
 								as='select'
 								className='mt-1 p-2 border border-gray-300 rounded-md'
+								onChange={setFieldValue}
 							>
 								<option value='Новый'>Новый</option>
 								<option value='Опрацьовується'>Опрацьовується</option>
 								<option value='Оплачено'>Оплачено</option>
 								<option value='На відправку'>На відправку</option>
-								<option value='Завершено'>Завершено</option>
+								<option value='Закритий'>Закритий</option>
 							</Field>
 							{errors.status && touched.status && (
 								<div className='text-red-500 text-sm'>{errors.status}</div>
 							)}
-						</div>
+						</div> */}
 
 						<div className='flex justify-end'>
 							<CustomButton label={order ? 'Оновити замовлення' : 'Створити замовлення'} />

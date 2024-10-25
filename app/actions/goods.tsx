@@ -294,13 +294,18 @@ export async function updateGood(formData: FormData) {
 				delete updateFields[key as keyof IGood],
 		)
 		await Good.findByIdAndUpdate(id, updateFields)
+
+		return {
+			success: true,
+			message: 'Good updated successfully',
+		}
 	} catch (error) {
 		if (error instanceof Error) {
 			console.error('Error updating good:', error)
-			throw new Error('Failed to update good: ' + error.message)
-		} else {
-			console.error('Unknown error:', error)
-			throw new Error('Failed to update good: Unknown error')
+			return {
+				success: false,
+				message: error.message || 'Error updating good',
+			}
 		}
 	} finally {
 		revalidatePath('/admin/goods')
