@@ -132,37 +132,36 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 		try {
 			setIsLoading(true)
 
-			const updateOrder = { ...values, id: order?._id }
-			// console.log('updateOrder', updateOrder)
+			const formData = new FormData()
+			Object.keys(values).forEach(key => {
+				const value = (values as Record<string, any>)[key]
 
-			// const formData = new FormData()
-			// Object.keys(values).forEach(key => {
-			// 	const value = (values as Record<string, any>)[key]
-			// 	if (Array.isArray(value)) {
-			// 		value.forEach(val => formData.append(key, val))
-			// 	} else {
-			// 		formData.append(key, value)
-			// 	}
-			// })
+				if (Array.isArray(value)) {
+					// Serialize arrays (e.g., orderedGoods) properly
+					formData.append(key, JSON.stringify(value))
+				} else if (typeof value === 'object' && value !== null) {
+					// Serialize objects (e.g., customer) properly
+					formData.append(key, JSON.stringify(value))
+				} else {
+					// For primitive types, just append them directly
+					formData.append(key, value)
+				}
+			})
 
-			console.log('isUpdating', isUpdating)
-
-			// if (isUpdating && order) {
-			// 	formData.append('id', order?._id as string)
-			// }
+			if (isUpdating && order) {
+				formData.append('id', order._id as string)
+			}
 
 			const result = isUpdating
-				? await updateOrderMutation.mutateAsync(updateOrder)
-				: await addOrderMutation.mutateAsync(values)
+				? await updateOrderMutation.mutateAsync(formData)
+				: await addOrderMutation.mutateAsync(formData)
 
-			// Ensure result contains 'success'
 			if (result?.success === false) {
 				toast.error(result.message || 'Something went wrong')
 				return
 			}
 			resetForm()
-			toast.success(isUpdating ? 'Товар оновлено!' : 'Новий товар додано!')
-			// push('/admin/orders')
+			toast.success(isUpdating ? 'Замовлення оновлено!' : 'Нове замовлення додано!')
 		} catch (error) {
 			if (error instanceof Error) {
 				toast.error(error.message)
