@@ -38,7 +38,6 @@ const orderSchema = new Schema(
 			{
 				id: {
 					type: String,
-					required: true,
 				},
 				title: {
 					type: String,
@@ -58,6 +57,9 @@ const orderSchema = new Schema(
 				},
 				quantity: {
 					type: Number,
+				},
+				src: {
+					type: [String],
 				},
 				price: {
 					type: Number,

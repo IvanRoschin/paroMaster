@@ -1,7 +1,6 @@
 'use server'
 
 import Order from '@/models/Order'
-import { SGood } from '@/types/good/IGood'
 import { ISearchParams } from '@/types/index'
 import { IOrder } from '@/types/order/IOrder'
 import { connectToDB } from '@/utils/dbConnect'
@@ -51,13 +50,13 @@ export async function addOrder(values: IOrder) {
 			number: values.number,
 			customer: values.customer,
 			orderedGoods: values.orderedGoods.map(item => ({
-				id: item._id,
 				title: item.title,
 				brand: item.brand,
 				model: item.model,
 				vendor: item.vendor,
 				price: item.price,
 				quantity: item.quantity,
+				src: item.src,
 			})),
 			totalPrice: values.totalPrice,
 			status: values.status,
@@ -134,15 +133,7 @@ export async function addOrderAction(formData: FormData) {
 		const orderData = {
 			number: values.number,
 			customer: values.customer,
-			orderedGoods: values.orderedGoods.map((item: SGood) => ({
-				id: item._id,
-				title: item.title,
-				brand: item.brand,
-				model: item.model,
-				vendor: item.vendor,
-				quantity: item.quantity,
-				price: item.price,
-			})),
+			orderedGoods: values.orderedGoods,
 			totalPrice: values.totalPrice,
 			status: values.status || 'Новий',
 		}
@@ -152,7 +143,9 @@ export async function addOrderAction(formData: FormData) {
 	} catch (error) {
 		if (error instanceof Error) {
 			console.error('Error adding order:', error)
-			throw new Error('Failed to add order: ' + error.message)
+			return { success: false, message: 'Failed to add order: ' + error.message }
+
+			// throw new Error('Failed to add order: ' + error.message)
 		} else {
 			console.error('Unknown error:', error)
 			throw new Error('Failed to add order: Unknown error')

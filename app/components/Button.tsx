@@ -11,7 +11,7 @@ interface ButtonProps {
 	icon?: IconType
 	color?: string
 	width?: string
-	type?: "submit" | "reset" | "button"
+	type?: 'submit' | 'reset' | 'button'
 }
 
 const Button: React.FC<ButtonProps> = ({
