@@ -179,60 +179,30 @@ export async function getOrderById(id: string) {
 	}
 }
 
-export async function updateOrder(formData: FormData) {
-	// Initialize an empty values object
-	const values: any = {}
-	formData.forEach((value, key) => {
-		if (!values[key]) {
-			values[key] = []
-		}
-		values[key].push(value)
-	})
+export async function updateOrder(values: IOrder) {
+	console.log('values on UO back', values)
 
-	Object.keys(values).forEach(key => {
-		if (values[key].length === 1) {
-			values[key] = values[key][0]
-		}
-	})
+	const id = values._id
 
-	console.log('values', values) // Ensure values are logged for debugging
-
-	// Destructure values
-	const { id, number, customer, orderedGoods, totalPrice, status } = values as {
-		id: string
-		number?: string
-		customer?: any
-		orderedGoods?: any
-		totalPrice?: number
-		status?: 'Новий' | 'Опрацьовується' | 'Оплачено' | 'На відправку' | 'Закритий'
-	}
-
-	// Parse customer and orderedGoods if they are strings
-	const parsedCustomer = typeof customer === 'string' ? JSON.parse(customer) : customer
-	const parsedOrderedGoods =
-		typeof orderedGoods === 'string' ? JSON.parse(orderedGoods) : orderedGoods
+	// const { id, number, customer, orderedGoods, totalPrice, status } = values as {
+	// 	id: string
+	// 	number?: string
+	// 	customer?: {
+	// 		name?: string
+	// 		email?: string
+	// 		phone?: string
+	// 		address?: string
+	// 		comment?: string
+	// 	}
+	// 	orderedGoods?: any
+	// 	totalPrice?: number
+	// 	status?: 'Новий' | 'Опрацьовується' | 'Оплачено' | 'На відправку' | 'Закритий'
+	// }
 
 	try {
 		await connectToDB()
 
-		const updateFields: Partial<IOrder> = {
-			number,
-			customer: parsedCustomer, // Use the parsed customer
-			orderedGoods: parsedOrderedGoods, // Use the parsed orderedGoods
-			totalPrice,
-			status,
-		}
-
-		// Remove undefined or empty fields
-		Object.keys(updateFields).forEach(
-			key =>
-				(updateFields[key as keyof IOrder] === '' ||
-					updateFields[key as keyof IOrder] === undefined) &&
-				delete updateFields[key as keyof IOrder],
-		)
-
-		// Perform the update
-		await Order.findByIdAndUpdate(id, updateFields)
+		await Order.findByIdAndUpdate(id, values)
 		return { success: true, message: 'Замовлення оновлено успішно' }
 	} catch (error) {
 		if (error instanceof Error) {

@@ -10,6 +10,7 @@ export interface IOrder {
 		warehouse: string
 		payment: string
 	}
+	warehouse?: string
 	orderedGoods: {
 		_id?: string
 		category: string

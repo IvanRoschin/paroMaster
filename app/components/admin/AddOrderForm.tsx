@@ -23,7 +23,7 @@ interface ResetFormProps {
 interface OrderFormProps {
 	order?: IOrder
 	title?: string
-	action: (data: FormData) => Promise<{ success: boolean; message: string }>
+	action: (values: IOrder) => Promise<{ success: boolean; message: string }>
 }
 
 const statusList = [
@@ -35,10 +35,9 @@ const statusList = [
 ]
 
 const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
-	console.log('order', order)
-
 	const [isLoading, setIsLoading] = useState(false)
 	const [warehouses, setWarehouses] = useState<{ Ref: string; Description: string }[]>([])
+
 	const { push } = useRouter()
 	const isUpdating = Boolean(order?._id)
 	const [name, surname] = order?.customer.name?.split(' ') || ['', '']
@@ -103,22 +102,32 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 		try {
 			setIsLoading(true)
 
-			const formData = new FormData()
-			Object.entries(values).forEach(([key, value]) => {
-				if (Array.isArray(value) || typeof value === 'object') {
-					formData.append(key, JSON.stringify(value))
-				} else if (value !== null) {
-					formData.append(key, value)
-				}
-			})
+			const newOrderData = {
+				...values,
+				customer: {
+					...values.customer,
+					name: `${values.customer.name} ${values.customer.surname}`,
+					warehouse: values.warehouse,
+				},
+			}
+
+			let updateOrderData = {}
 
 			if (isUpdating && order) {
-				formData.append('id', order._id as string)
+				updateOrderData = {
+					...values,
+					_id: order._id,
+					customer: {
+						...values.customer,
+						name: `${values.customer.name} ${values.customer.surname}`,
+						warehouse: values.warehouse,
+					},
+				}
 			}
 
 			const result = isUpdating
-				? await updateOrderMutation.mutateAsync(formData)
-				: await addOrderMutation.mutateAsync(formData)
+				? await updateOrderMutation.mutateAsync(updateOrderData)
+				: await addOrderMutation.mutateAsync(newOrderData)
 
 			if (result?.success === false) {
 				toast.error('Something went wrong')
@@ -127,6 +136,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 
 			resetForm()
 			toast.success(isUpdating ? 'Замовлення оновлено!' : 'Нове замовлення додано!')
+			push('/admin/orders')
 		} catch (error) {
 			const errorMsg = error instanceof Error ? error.message : 'An unknown error occurred'
 			toast.error(errorMsg)
@@ -140,54 +150,70 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 		<div className='flex flex-col justify-center items-center p-4 bg-white rounded-lg shadow-md'>
 			<h2 className='text-3xl mb-4 font-bold'>{title || 'Order Form'}</h2>
 			<Formik initialValues={initialValues || []} onSubmit={handleSubmit}>
-				{({ values, errors, setFieldValue }) => (
-					<Form>
-						<h3 className='text-xl font-semibold'>Замовник</h3>
-						{[
-							{ name: 'customer.name', type: 'text', id: 'name', label: `І'мя`, required: true },
-							{
-								name: 'customer.surname',
-								type: 'text',
-								id: 'surname',
-								label: `Прізвище`,
-								required: true,
-							},
-							{
-								name: 'customer.email',
-								type: 'email',
-								id: 'email',
-								label: `Email`,
-								required: true,
-							},
-							{
-								name: 'customer.phone',
-								type: 'tel',
-								id: 'phone',
-								label: `Телефон`,
-								required: true,
-							},
-							{ name: 'customer.city', type: 'text', id: 'city', label: `Місто`, required: true },
-							{
-								name: 'customer.warehouse',
-								id: 'warehouse',
-								label: 'Склад',
-								type: 'select',
-								required: true,
-								options: warehouses.map(warehouse => ({
-									value: warehouse.Ref,
-									label: warehouse.Description,
-								})),
-							},
-						].map((input, index) => (
-							<FormField item={input} key={index} setFieldValue={setFieldValue} errors={errors} />
-						))}
-						<h3 className='text-xl font-semibold'>Товари у замовленні</h3>
-						<FieldArray
-							name='orderedGoods'
-							render={({ remove, push }) => (
-								<div>
-									{values.orderedGoods.map((good, index) => (
-										<>
+				{({ values, errors, setFieldValue }) => {
+					useEffect(() => {
+						if (values.customer.city) {
+							fetchWarehouses(values.customer.city)
+						}
+					}, [values.customer.city])
+
+					return (
+						<Form>
+							<h3 className='text-xl font-semibold'>Замовник</h3>
+							{[
+								{
+									name: 'customer.name',
+									type: 'text',
+									id: 'name',
+									label: `І'мя`,
+									required: true,
+								},
+								{
+									name: 'customer.surname',
+									type: 'text',
+									id: 'surname',
+									label: `Прізвище`,
+									required: true,
+								},
+								{
+									name: 'customer.email',
+									type: 'email',
+									id: 'email',
+									label: `Email`,
+									required: true,
+								},
+								{
+									name: 'customer.phone',
+									type: 'tel',
+									id: 'phone',
+									label: `Телефон`,
+									required: true,
+								},
+								{
+									name: 'customer.city',
+									type: 'text',
+									id: 'city',
+									label: `Місто`,
+									required: true,
+								},
+								{
+									type: 'select',
+									id: 'warehouse',
+									label: 'Оберіть відділення',
+									options: warehouses.map(warehouse => ({
+										value: warehouse.Description,
+										label: warehouse.Description,
+									})),
+								},
+							].map((input, index) => (
+								<FormField item={input} key={index} setFieldValue={setFieldValue} errors={errors} />
+							))}
+							<h3 className='text-xl font-semibold'>Товари у замовленні</h3>
+							<FieldArray
+								name='orderedGoods'
+								render={({ remove }) => (
+									<div>
+										{values.orderedGoods.map((good, index) => (
 											<div
 												key={index}
 												className='border p-4 mb-4 flex grow-0 justify-between gap-2 items-center'
@@ -236,153 +262,34 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 													Видалити
 												</button>
 											</div>
-										</>
-									))}
-								</div>
-							)}
-						/>
-						<FormField
-							item={{
-								id: 'status',
-								type: 'select',
-								required: true,
-								options: statusList.map(status => ({ value: status.title, label: status.title })),
-							}}
-							errors={errors}
-							setFieldValue={setFieldValue}
-						/>
-						<div className='flex justify-end'>
-							<CustomButton
-								type='submit'
-								label={order ? 'Оновити замовлення' : 'Створити замовлення'}
-								disabled={isLoading}
+										))}
+									</div>
+								)}
 							/>
-						</div>{' '}
-					</Form>
-				)}
+							<FormField
+								item={{
+									id: 'status',
+									type: 'select',
+									required: true,
+									options: statusList.map(status => ({
+										value: status.title,
+										label: status.title,
+									})),
+								}}
+								errors={errors}
+								setFieldValue={setFieldValue}
+							/>
+							<div className='flex justify-end'>
+								<CustomButton
+									type='submit'
+									label={order ? 'Оновити замовлення' : 'Створити замовлення'}
+									disabled={isLoading}
+								/>
+							</div>{' '}
+						</Form>
+					)
+				}}
 			</Formik>
-			{/* <Formik
-				initialValues={initialValues}
-				validationSchema={orderFormSchema}
-				onSubmit={handleSubmit}
-				enableReinitialize
-			>
-				{({ values, errors, setFieldValue }) => (
-					<Form className='space-y-4'>
-						{/* <h3 className='text-xl font-semibold'>Замовник</h3>
-						{[
-							{ name: 'customer.name', type: 'text', id: 'name', label: `І'мя`, required: true },
-							{
-								name: 'customer.surname',
-								type: 'text',
-								id: 'surname',
-								label: `Прізвище`,
-								required: true,
-							},
-							{
-								name: 'customer.email',
-								type: 'email',
-								id: 'email',
-								label: `Email`,
-								required: true,
-							},
-							{
-								name: 'customer.phone',
-								type: 'tel',
-								id: 'phone',
-								label: `Телефон`,
-								required: true,
-							},
-							{ name: 'customer.city', type: 'text', id: 'city', label: `Місто`, required: true },
-							{
-								name: 'customer.warehouse',
-								id: 'warehouse',
-								label: 'Склад',
-								type: 'select',
-								required: true,
-								options: warehouses.map(warehouse => ({
-									value: warehouse.Ref,
-									label: warehouse.Description,
-								})),
-							},
-						].map((input, index) => (
-							<FormField item={input} key={index} setFieldValue={setFieldValue} errors={errors} />
-						))} */}
-			{/* 
-						<h3 className='text-xl font-semibold'>Товари у замовленні</h3>
-						<FieldArray name='orderedGoods'>
-							{({ remove }) => (
-								<div>
-									{values.orderedGoods.map((good, index) => (
-										<div
-											key={index}
-											className='border p-4 mb-4 flex grow-0 justify-between gap-2 items-center'
-										>
-											<div className='w-[150px]'>
-												<Image
-													src={good.src[0] || '/placeholder.png'}
-													alt='item_photo'
-													width={150}
-													height={150}
-													className='self-center flex items-center justify-center'
-												/>
-											</div>
-											<span>{good.title || 'Unnamed Item'}</span>
-											<Button
-												label='-'
-												onClick={() =>
-													setFieldValue(
-														`orderedGoods.${index}.quantity`,
-														Math.max((good.quantity || 0) - 1, 0),
-													)
-												}
-											/>
-											<span>{good.quantity || 0}</span>
-											<Button
-												label='+'
-												onClick={() =>
-													setFieldValue(`orderedGoods.${index}.quantity`, (good.quantity || 0) + 1)
-												}
-											/>
-											<span>Ціна товару: {good.price * (good.quantity || 1)}</span>
-											<button
-												type='button'
-												onClick={() => remove(index)}
-												className='mt-4 p-2 bg-red-500 text-white rounded-md hover:bg-red-600'
-											>
-												Видалити
-											</button>
-										</div>
-									))}
-								</div>
-							)}
-						</FieldArray> */}
-			{/* <FormField
-							item={{ type: 'number', id: 'totalPrice', label: 'Всього ціна', required: true }}
-							errors={errors}
-							setFieldValue={setFieldValue}
-						/> */}
-			{/* <FormField
-							item={{
-								id: 'status',
-								type: 'select',
-								required: true,
-								options: statusList.map(status => ({ value: status.title, label: status.title })),
-							}}
-							errors={errors}
-							setFieldValue={setFieldValue}
-						/>
-
-						<div className='flex justify-end'>
-							<CustomButton
-								type='submit'
-								label={order ? 'Оновити замовлення' : 'Створити замовлення'}
-								disabled={isLoading}
-							/>
-						</div>
-					</Form>
-				)}
-			</Formik> */}{' '}
 		</div>
 	)
 }
