@@ -25,7 +25,7 @@ interface IGetSendData {
 const resend = new Resend(process.env.RESEND_API)
 
 export async function sendEmail(data: IGetSendData) {
-	console.log('data', data)
+	console.log('mailData:', data)
 
 	const {
 		name,
@@ -162,7 +162,7 @@ export async function sendCustomerEmail(data: IGetSendData) {
 }
 
 export async function sendEmailToLid(data: FieldValues) {
-	console.log('data', data)
+	console.log('lidMaildata', data)
 
 	const { email, name, phone } = data
 

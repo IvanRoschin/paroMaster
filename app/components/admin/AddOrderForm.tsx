@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import Button from '../Button'
+import { Icon } from '../Icon'
 import FormField from '../input/FormField'
 import CustomButton from './CustomFormikButton'
 
@@ -75,6 +76,21 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 		],
 		totalPrice: order?.totalPrice || 0,
 		status: order?.status || 'Новий',
+	}
+	const calculateTotalPrice = (goods: typeof initialValues.orderedGoods) => {
+		return goods.reduce((total, good) => total + good.price * (good.quantity ?? 0), 0)
+	}
+
+	const handleQuantityChange = (
+		index: number,
+		change: number,
+		values: InitialStateType,
+		setFieldValue: any,
+	) => {
+		const newQuantity = Math.max((values.orderedGoods[index].quantity || 0) + change, 1)
+		setFieldValue(`orderedGoods.${index}.quantity`, newQuantity)
+		const updatedTotal = calculateTotalPrice(values.orderedGoods)
+		setFieldValue('totalPrice', updatedTotal)
 	}
 
 	useEffect(() => {
@@ -152,6 +168,11 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 			<Formik initialValues={initialValues || []} onSubmit={handleSubmit}>
 				{({ values, errors, setFieldValue }) => {
 					useEffect(() => {
+						const updatedTotal = calculateTotalPrice(values.orderedGoods)
+						setFieldValue('totalPrice', updatedTotal)
+					}, [values.orderedGoods, setFieldValue])
+
+					useEffect(() => {
 						if (values.customer.city) {
 							fetchWarehouses(values.customer.city)
 						}
@@ -216,56 +237,144 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 										{values.orderedGoods.map((good, index) => (
 											<div
 												key={index}
-												className='border p-4 mb-4 flex grow-0 justify-between gap-2 items-center'
+												className='border p-4 mb-4 flex items-center gap-4 justify-between'
 											>
-												<div className='w-[150px] '>
+												{/* Image container */}
+												<div className='flex-shrink-0 w-[150px]'>
 													<Image
 														src={good.src[0] || '/placeholder.png'}
 														alt='item_photo'
 														width={150}
 														height={150}
-														className='self-center flex items-center justify-center'
+														className='object-cover'
 													/>
 												</div>
-												<span>{good?.title || 'Unnamed Item'}</span>
-												<span className='w-[15px] h-[15px]'>
+
+												{/* Item title */}
+												<div className='flex-1 text-center'>
+													<span>{good?.title || 'Unnamed Item'}</span>
+												</div>
+
+												{/* Quantity decrement button */}
+												<div className='w-[30px] flex justify-center'>
 													<Button
 														type='button'
 														label='-'
-														onClick={() =>
-															setFieldValue(
-																`orderedGoods.${index}.quantity`,
-																Math.max((good?.quantity || 0) - 1, 0),
-															)
+														onClick={() => handleQuantityChange(index, -1, values, setFieldValue)}
+														disabled={
+															values.orderedGoods?.[index]?.quantity !== undefined &&
+															values.orderedGoods[index].quantity <= 1
 														}
 													/>
-												</span>
-												<span>{good.quantity || 0}</span>
-												<span className='w-[15px] h-[15px]'>
+												</div>
+
+												{/* Quantity display */}
+												<div className='w-[40px] text-center'>
+													<span>{good.quantity || 0}</span>
+												</div>
+
+												{/* Quantity increment button */}
+												<div className='w-[30px] flex justify-center'>
 													<Button
 														type='button'
 														label='+'
-														onClick={() =>
-															setFieldValue(
-																`orderedGoods.${index}.quantity`,
-																(good?.quantity || 0) + 1,
-															)
-														}
+														onClick={() => handleQuantityChange(index, 1, values, setFieldValue)}
 													/>
-												</span>
-												<span>Ціна товару: {good.price * (good?.quantity || 1)}</span>
-												<button
-													type='button'
-													onClick={() => remove(index)}
-													className='mt-4 p-2 bg-red-500 text-white rounded-md hover:bg-red-600'
-												>
-													Видалити
-												</button>
+												</div>
+
+												{/* Price per unit */}
+												<div className='w-[100px] text-center'>
+													<span>Ціна за 1: {good.price}</span>
+												</div>
+
+												{/* Total price for the item */}
+												<div className='w-[120px] text-center'>
+													<span>Ціна за Товар: {good.price * (good?.quantity || 1)}</span>
+												</div>
+
+												{/* Remove button */}
+												<div className='flex-shrink-0'>
+													<button
+														type='button'
+														onClick={() => {
+															remove(index)
+															const updatedTotal = calculateTotalPrice(values.orderedGoods)
+															setFieldValue('totalPrice', updatedTotal)
+														}}
+														className='
+				flex items-center justify-center
+				bg-red-600 hover:bg-red-700 focus:bg-red-700 
+				text-white transition-all text-sm rounded-md py-2 px-3'
+													>
+														<Icon
+															name='icon_trash'
+															className='w-5 h-5 text-white hover:text-primaryAccentColor'
+														/>
+													</button>
+												</div>
 											</div>
+
+											// 	<div
+											// 		key={index}
+											// 		className='border p-4 mb-4 flex grow-0 justify-between gap-2 items-center'
+											// 	>
+											// 		<div className='w-[150px] '>
+											// 			<Image
+											// 				src={good.src[0] || '/placeholder.png'}
+											// 				alt='item_photo'
+											// 				width={150}
+											// 				height={150}
+											// 				className='self-center flex items-center justify-center'
+											// 			/>
+											// 		</div>
+											// 		<span>{good?.title || 'Unnamed Item'}</span>
+											// 		<span className='w-[15px] h-[15px]'>
+											// 			<Button
+											// 				type='button'
+											// 				label='-'
+											// 				onClick={() => handleQuantityChange(index, -1, values, setFieldValue)}
+											// 				disabled={!values.orderedGoods || !values.orderedGoods[index]}
+											// 			/>
+											// 		</span>
+											// 		<span>{good.quantity || 0}</span>
+											// 		<span className='w-[15px] h-[15px]'>
+											// 			<Button
+											// 				type='button'
+											// 				label='+'
+											// 				onClick={() => handleQuantityChange(index, 1, values, setFieldValue)}
+											// 			/>
+											// 		</span>
+											// 		<span>Ціна за 1: {good.price}</span>
+											// 		<span>Ціна за Товар: {good.price * (good?.quantity || 1)}</span>
+
+											// 		<button
+											// 			type='button'
+											// 			onClick={() => {
+											// 				remove(index)
+											// 				const updatedTotal = calculateTotalPrice(values.orderedGoods)
+											// 				setFieldValue('totalPrice', updatedTotal)
+											// 			}}
+											// 			className='
+											// flex
+											// items-center
+											// justify-center
+											//  bg-red-600 hover:bg-red-700 focus:bg-red-700 text-white transition-all text-sm rounded-md py-2 px-3'
+											// 		>
+											// 			<Icon
+											// 				name='icon_trash'
+											// 				className='
+											// 	w-5
+											// 	h-5
+											// 	text-white
+											// 	hover:text-primaryAccentColor'
+											// 			/>
+											// 		</button>
+											// 	</div>
 										))}
 									</div>
 								)}
 							/>
+							<label className='text-xl font-semibold'>Статус замовлення</label>
 							<FormField
 								item={{
 									id: 'status',
@@ -286,6 +395,10 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 									disabled={isLoading}
 								/>
 							</div>{' '}
+							{/* Order status and submit button */}
+							<div className='mt-4 text-lg font-semibold'>
+								Загальна ціна: {values.totalPrice} грн
+							</div>
 						</Form>
 					)
 				}}
