@@ -151,7 +151,6 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 			const getOrderNumber = generateOrderNumber()
 			setOrderNumber(getOrderNumber)
 		}
-
 		fetchGoods()
 		fetchOrderNumber()
 	}, [cartItemsId])
