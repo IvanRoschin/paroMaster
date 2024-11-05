@@ -127,7 +127,7 @@ export default function Categories({
 					))}
 				</tbody>
 			</table>
-			<Pagination count={categoriesCount} pageNumbers={pageNumbers} />
+			{totalPages > 1 && <Pagination count={categoriesCount} pageNumbers={pageNumbers} />}
 		</div>
 	)
 }

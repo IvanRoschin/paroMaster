@@ -143,8 +143,7 @@ export default function Testimonials({
 					</tbody>
 				</table>
 			</div>
-
-			<Pagination count={testimonialsCount} pageNumbers={pageNumbers} />
+			{totalPages > 1 && <Pagination count={testimonialsCount} pageNumbers={pageNumbers} />}
 		</div>
 	)
 }

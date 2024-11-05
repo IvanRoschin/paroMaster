@@ -102,19 +102,7 @@ export async function getCustomerById(id: string) {
 	}
 }
 
-export async function updateCustomer(
-	formData: FormData,
-): Promise<{
-	success: boolean
-	data: {
-		name: FormDataEntryValue
-		phone: FormDataEntryValue
-		email: FormDataEntryValue
-		city: FormDataEntryValue
-		warehouse: FormDataEntryValue
-		payment: FormDataEntryValue
-	}
-}> {
+export async function updateCustomer(formData: FormData) {
 	const entries = Object.fromEntries(formData.entries())
 
 	const { id, name, phone, email, city, warehouse, payment } = entries as {
@@ -146,7 +134,9 @@ export async function updateCustomer(
 				delete updateFields[key as keyof ICustomer],
 		)
 
-		const updatedCustomer = await Customer.findByIdAndUpdate(id, updateFields, { new: true }).lean()
+		const updatedCustomer = await Customer.findByIdAndUpdate(id, updateFields, {
+			new: true,
+		}).lean()
 
 		if (!updatedCustomer || Array.isArray(updatedCustomer)) {
 			throw new Error(
@@ -156,14 +146,7 @@ export async function updateCustomer(
 
 		return {
 			success: true,
-			data: {
-				name: updatedCustomer.name as FormDataEntryValue,
-				phone: updatedCustomer.phone as FormDataEntryValue,
-				email: updatedCustomer.email as FormDataEntryValue,
-				city: updatedCustomer.city as FormDataEntryValue,
-				warehouse: updatedCustomer.warehouse as FormDataEntryValue,
-				payment: updatedCustomer.payment as FormDataEntryValue,
-			},
+			message: 'updatedCustomer',
 		}
 	} catch (error) {
 		console.error('Error updating customer:', error)

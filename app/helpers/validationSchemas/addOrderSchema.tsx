@@ -1,11 +1,25 @@
 import { PaymentMethod } from '@/types/paymentMethod'
 import * as Yup from 'yup'
 const phoneRegex = /^\+380\d{9}$/
+const nameRegex = /^[а-яА-ЯіІїЇєЄґҐ']+$/
 
 const orderFormSchema = Yup.object().shape({
 	number: Yup.string().required(`Обов'язкове поле`),
 	customer: Yup.object().shape({
-		name: Yup.string().required(`Обов'язкове поле`),
+		name: Yup.string()
+			.min(2, 'Мінімум 2 символи')
+			.max(20, 'Максимум 20 символів')
+			.matches(nameRegex, {
+				message: 'Тільки українські букви',
+			})
+			.required(`Обов'язкове поле`),
+		surname: Yup.string()
+			.min(2, 'Мінімум 2 символи')
+			.max(20, 'Максимум 20 символів')
+			.matches(nameRegex, {
+				message: 'Тільки українські букви',
+			})
+			.required(`Обов'язкове поле`),
 		email: Yup.string()
 			.email('Некоректний e-mail')
 			.required(`Обов'язкове поле`),

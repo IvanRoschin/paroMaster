@@ -36,8 +36,7 @@ export default async function Home({ searchParams }: { searchParams: ISearchPara
 	const goods = (queryState?.data as GoodsData)?.goods || []
 
 	const slidesData = queryClient.getQueryData<IGetAllSlides>(['slides'])
-
-	const testimonialsData = queryClient.getQueryData<IGetAllTestimonials>(['testimonials'] || [])
+	const testimonialsData = queryClient.getQueryData<IGetAllTestimonials>(['testimonials'])
 
 	return (
 		<HydrationBoundary state={dehydrate(queryClient)}>

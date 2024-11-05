@@ -70,18 +70,21 @@ const ItemListCard: React.FC<ItemListCardProps> = ({ item }) => {
 			</div>
 
 			<CartActions
+				isAvailable={item.isAvailable}
 				itemId={item._id!}
 				quantity={quantity}
 				increaseCartQuantity={increaseCartQuantity}
 				decreaseCartQuantity={decreaseCartQuantity}
 				removeFromCart={removeFromCart}
 			/>
+
 			{/* <ItemDetails item={item} /> */}
 		</li>
 	)
 }
 
 interface CartActionsProps {
+	isAvailable: boolean
 	itemId: string
 	quantity: number
 	increaseCartQuantity: (id: string) => void
@@ -90,6 +93,7 @@ interface CartActionsProps {
 }
 
 const CartActions: React.FC<CartActionsProps> = ({
+	isAvailable,
 	itemId,
 	quantity,
 	increaseCartQuantity,
@@ -99,7 +103,12 @@ const CartActions: React.FC<CartActionsProps> = ({
 	return (
 		<div>
 			{quantity === 0 ? (
-				<Button type='button' label='Купити' onClick={() => increaseCartQuantity(itemId)} />
+				<Button
+					type='button'
+					label='Купити'
+					disabled={isAvailable === false}
+					onClick={() => increaseCartQuantity(itemId)}
+				/>
 			) : (
 				<div className='flex items-center flex-col gap-10'>
 					<div className='flex items-center justify-center gap-20'>

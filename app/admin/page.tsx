@@ -1,3 +1,5 @@
+'use client'
+
 import { getAllCategories } from '@/actions/categories'
 import { getAllCustomers } from '@/actions/customers'
 import { getAllGoods } from '@/actions/goods'
@@ -6,6 +8,7 @@ import { getAllSlides } from '@/actions/slider'
 import { getAllTestimonials } from '@/actions/testimonials'
 import { getAllUsers } from '@/actions/users'
 import Card from '@/components/admin/Card'
+import { ISearchParams } from '@/types/searchParams'
 import { QueryClient } from '@tanstack/react-query'
 import { IconType } from 'react-icons'
 import { FaShoppingCart, FaUser } from 'react-icons/fa'
@@ -27,16 +30,49 @@ interface CardData {
 export default async function Admin() {
 	const queryClient = new QueryClient()
 
+	// Define wrapper functions for prefetching with default parameters
+	const fetchUsers = async () => {
+		const response = await getAllUsers({} as ISearchParams, 10)
+		return { success: true, users: response.users, count: response.count }
+	}
+
+	const fetchCustomers = async () => {
+		const response = await getAllCustomers({} as ISearchParams, 10)
+		return { success: true, users: response.customers, count: response.count }
+	}
+	const fetchOrders = async () => {
+		const response = await getAllOrders({} as ISearchParams, 10)
+		return { success: true, users: response.orders, count: response.count }
+	}
+	const fetchSlides = async () => {
+		const response = await getAllSlides({} as ISearchParams, 10)
+		return { success: true, users: response.slides, count: response.count }
+	}
+
+	const fetchTestimonials = async () => {
+		const response = await getAllTestimonials({} as ISearchParams, 10)
+		return { success: true, users: response.testimonials, count: response.count }
+	}
+
+	const fetchGoods = async () => {
+		const response = await getAllGoods({} as ISearchParams, 10)
+		return { success: true, users: response.goods, count: response.count }
+	}
+
+	const fetchCategories = async () => {
+		const response = await getAllCategories()
+		return { success: true, users: response.categories, count: response.count }
+	}
+
 	// Define an array of queries to prefetch
 	const queries = [
-		{ key: 'users', fetchFn: getAllUsers },
-		{ key: 'customers', fetchFn: getAllCustomers },
-		{ key: 'orders', fetchFn: getAllOrders },
-		{ key: 'slides', fetchFn: getAllSlides },
-		{ key: 'testimonials', fetchFn: getAllTestimonials },
-		{ key: 'goods', fetchFn: getAllGoods },
-		{ key: 'categories', fetchFn: getAllCategories },
-		{ key: 'testimonials', fetchFn: getAllTestimonials },
+		{ key: 'users', fetchFn: fetchUsers },
+		{ key: 'customers', fetchFn: fetchCustomers },
+		{ key: 'orders', fetchFn: fetchOrders },
+		{ key: 'slides', fetchFn: fetchSlides },
+		{ key: 'testimonials', fetchFn: fetchTestimonials },
+		{ key: 'goods', fetchFn: fetchGoods },
+		{ key: 'categories', fetchFn: fetchCategories },
 	]
 
 	// Prefetch all queries

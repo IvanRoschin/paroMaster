@@ -38,8 +38,8 @@ const AddCategoryForm: React.FC<CategoryFormProps> = ({ category, title, action 
 
 	const isUpdating = Boolean(category?._id)
 
-	const addCustomerMutation = useAddData(action, 'categories')
-	const updateCustomerMutation = useUpdateData(action, 'categories')
+	const addCategoryMutation = useAddData(action, 'categories')
+	const updateCategoryMutation = useUpdateData(action, 'categories')
 
 	const handleSubmit = async (values: InitialStateType, { resetForm }: ResetFormProps) => {
 		try {
@@ -59,9 +59,9 @@ const AddCategoryForm: React.FC<CategoryFormProps> = ({ category, title, action 
 			}
 
 			if (isUpdating) {
-				await updateCustomerMutation.mutateAsync(formData)
+				await updateCategoryMutation.mutateAsync(formData)
 			} else {
-				await addCustomerMutation.mutateAsync(formData)
+				await addCategoryMutation.mutateAsync(formData)
 			}
 			resetForm()
 			toast.success(isUpdating ? 'Категорію оновлено!' : 'Нову категорію додано!')

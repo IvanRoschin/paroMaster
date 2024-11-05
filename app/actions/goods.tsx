@@ -281,12 +281,6 @@ export async function updateGood(formData: FormData) {
 			compatibility,
 		}
 
-		// const price = Number(values.price)
-		// if (isNaN(price)) {
-		// 	console.error('Price must be a valid number')
-		// 	return
-		// }
-
 		Object.keys(updateFields).forEach(
 			key =>
 				(updateFields[key as keyof IGood] === '' ||
