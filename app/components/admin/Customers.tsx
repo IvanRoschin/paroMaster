@@ -110,7 +110,7 @@ export default function Customers({
 					))}
 				</tbody>
 			</table>
-			<Pagination count={customersCount} pageNumbers={pageNumbers} />
+			{totalPages > 1 && <Pagination count={customersCount} pageNumbers={pageNumbers} />}
 		</div>
 	)
 }

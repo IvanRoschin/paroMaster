@@ -141,8 +141,7 @@ export default function Orders({
 					</tbody>
 				</table>
 			</div>
-
-			<Pagination count={ordersCount} pageNumbers={pageNumbers} />
+			{totalPages > 1 && <Pagination count={ordersCount} pageNumbers={pageNumbers} />}
 		</div>
 	)
 }

@@ -6,6 +6,24 @@ interface Params {
 }
 const SingleCustomerPage = async ({ params }: { params: Params }) => {
 	const { id } = params
+
+	// const { data, isLoading, isError, error } = useFetchDataById(id, getCustomerById, 'customer')
+
+	// if (isLoading) {
+	// 	return <div>Loading...</div>
+	// }
+
+	// if (isError) {
+	// 	return (
+	// 		<div>
+	// 			Error fetching customer data: {error instanceof Error ? error.message : 'Unknown error'}
+	// 		</div>
+	// 	)
+	// }
+
+	// const customer = data
+	// consolole.log('customer')
+
 	const customer = await getCustomerById(id)
 	return (
 		<div className='mb-20'>

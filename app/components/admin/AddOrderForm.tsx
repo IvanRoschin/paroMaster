@@ -1,6 +1,7 @@
 'use client'
 
 import { getData } from '@/actions/nova'
+import orderFormSchema from '@/helpers/validationSchemas/orderFormShema'
 import { useAddData } from '@/hooks/useAddData'
 import { useUpdateData } from '@/hooks/useUpdateData'
 import { IOrder } from '@/types/index'
@@ -165,7 +166,11 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 	return (
 		<div className='flex flex-col justify-center items-center p-4 bg-white rounded-lg shadow-md'>
 			<h2 className='text-3xl mb-4 font-bold'>{title || 'Order Form'}</h2>
-			<Formik initialValues={initialValues || []} onSubmit={handleSubmit}>
+			<Formik
+				initialValues={initialValues || []}
+				onSubmit={handleSubmit}
+				validationSchema={orderFormSchema}
+			>
 				{({ values, errors, setFieldValue }) => {
 					useEffect(() => {
 						const updatedTotal = calculateTotalPrice(values.orderedGoods)

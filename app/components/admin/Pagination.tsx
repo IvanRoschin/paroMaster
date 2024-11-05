@@ -12,7 +12,7 @@ const Pagination = ({ count, pageNumbers }: Props) => {
 	const searchParams = useSearchParams()
 	const pathname = usePathname()
 	const { replace } = useRouter()
-	const params = new URLSearchParams(searchParams)
+	const params = new URLSearchParams(searchParams.toString())
 	const page = parseInt(searchParams.get('page') || '1')
 	const ITEM_PER_PAGE = 4
 

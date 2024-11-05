@@ -188,7 +188,7 @@ export default function Goods({
 					))}
 				</tbody>
 			</table>
-			<Pagination count={goodsCount} pageNumbers={pageNumbers} />
+			{totalPages > 1 && <Pagination count={goodsCount} pageNumbers={pageNumbers} />}{' '}
 		</div>
 	)
 }
