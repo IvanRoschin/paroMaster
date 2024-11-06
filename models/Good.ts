@@ -42,7 +42,6 @@ const goodSchema = new Schema(
 		vendor: {
 			type: String,
 			required: true,
-			unique: true,
 		},
 		price: {
 			type: Number,

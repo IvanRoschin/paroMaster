@@ -15,8 +15,8 @@ export interface NewOrderTemplateProps {
 	city: string
 	warehouse: string
 	orderedGoods: IGood[]
-	totalPrice: number
 	orderNumber: string
+	totalPrice: number
 }
 
 export function generateEmailContent({
@@ -28,8 +28,8 @@ export function generateEmailContent({
 	city,
 	warehouse,
 	orderedGoods,
-	totalPrice,
 	orderNumber,
+	totalPrice,
 }: NewOrderTemplateProps): string {
 	const itemsContent = orderedGoods
 		.map(

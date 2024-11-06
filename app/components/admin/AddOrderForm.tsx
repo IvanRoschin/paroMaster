@@ -47,6 +47,62 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 	const addOrderMutation = useAddData(action, 'orders')
 	const updateOrderMutation = useUpdateData(action, 'orders')
 
+	const customerInputs = [
+		{
+			name: 'customer.name',
+			type: 'text',
+			id: 'customer.name',
+			label: `І'мя`,
+			required: true,
+		},
+		{
+			name: 'customer.surname',
+			type: 'text',
+			id: 'customer.surname',
+			label: `Прізвище`,
+			required: true,
+		},
+		{
+			name: 'customer.email',
+			type: 'email',
+			id: 'customer.email',
+			label: `Email`,
+			required: true,
+		},
+		{
+			name: 'customer.phone',
+			type: 'tel',
+			id: 'customer.phone',
+			label: `Телефон`,
+			required: true,
+		},
+		{
+			name: 'customer.city',
+			type: 'text',
+			id: 'customer.city',
+			label: `Місто`,
+			required: true,
+		},
+		{
+			id: 'customer.warehouse',
+			label: 'Оберіть відділення',
+			options: warehouses.map(warehouse => ({
+				value: warehouse.Description,
+				label: warehouse.Description,
+			})),
+			type: 'select',
+		},
+		{
+			id: 'customer.payment',
+			label: 'Оберіть спосіб оплати',
+			options: Object.values(PaymentMethod).map(method => ({
+				value: method,
+				label: method,
+			})),
+			type: 'select',
+		},
+	]
+
 	const initialValues: InitialStateType = {
 		number: order?.number || '',
 		customer: {
@@ -55,7 +111,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 			email: order?.customer.email || '',
 			phone: order?.customer.phone || '+380',
 			city: order?.customer.city || '',
-			warehouse: order?.customer.warehouse || '',
+			warehouse: order?.customer.warehouse || 'Київ',
 			payment: order?.customer.payment || PaymentMethod.CashOnDelivery,
 		},
 		orderedGoods: order?.orderedGoods || [
@@ -186,45 +242,48 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 					return (
 						<Form>
 							<h3 className='text-xl font-semibold'>Замовник</h3>
-							{[
+							{customerInputs.map((item, i) => (
+								<FormField key={i} item={item} setFieldValue={setFieldValue} errors={errors} />
+							))}
+							{/* {[
 								{
 									name: 'customer.name',
 									type: 'text',
-									id: 'name',
+									id: 'customer.name',
 									label: `І'мя`,
 									required: true,
 								},
 								{
 									name: 'customer.surname',
 									type: 'text',
-									id: 'surname',
+									id: 'customer.surname',
 									label: `Прізвище`,
 									required: true,
 								},
 								{
 									name: 'customer.email',
 									type: 'email',
-									id: 'email',
+									id: 'customer.email',
 									label: `Email`,
 									required: true,
 								},
 								{
 									name: 'customer.phone',
 									type: 'tel',
-									id: 'phone',
+									id: 'customer.phone',
 									label: `Телефон`,
 									required: true,
 								},
 								{
 									name: 'customer.city',
 									type: 'text',
-									id: 'city',
+									id: 'customer.city',
 									label: `Місто`,
 									required: true,
 								},
 								{
 									type: 'select',
-									id: 'warehouse',
+									id: 'customer.warehouse',
 									label: 'Оберіть відділення',
 									options: warehouses.map(warehouse => ({
 										value: warehouse.Description,
@@ -233,7 +292,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 								},
 							].map((input, index) => (
 								<FormField item={input} key={index} setFieldValue={setFieldValue} errors={errors} />
-							))}
+							))} */}
 							<h3 className='text-xl font-semibold'>Товари у замовленні</h3>
 							<FieldArray
 								name='orderedGoods'

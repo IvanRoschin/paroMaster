@@ -54,42 +54,42 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 
 	const customerInputs = [
 		{
-			name: 'name',
+			name: 'customer.name',
 			type: 'text',
-			id: 'name',
+			id: 'customer.name',
 			label: `І'мя`,
 			required: true,
 		},
 		{
-			name: 'surname',
+			name: 'customer.surname',
 			type: 'text',
-			id: 'surname',
+			id: 'customer.surname',
 			label: `Прізвище`,
 			required: true,
 		},
 		{
-			name: 'email',
+			name: 'customer.email',
 			type: 'email',
-			id: 'email',
+			id: 'customer.email',
 			label: `Email`,
 			required: true,
 		},
 		{
-			name: 'phone',
+			name: 'customer.phone',
 			type: 'tel',
-			id: 'phone',
+			id: 'customer.phone',
 			label: `Телефон`,
 			required: true,
 		},
 		{
-			name: 'city',
+			name: 'customer.city',
 			type: 'text',
-			id: 'city',
+			id: 'customer.city',
 			label: `Місто`,
 			required: true,
 		},
 		{
-			id: 'warehouse',
+			id: 'customer.warehouse',
 			label: 'Оберіть відділення',
 			options: warehouses.map(warehouse => ({
 				value: warehouse.Description,
@@ -98,7 +98,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 			type: 'select',
 		},
 		{
-			id: 'payment',
+			id: 'customer.payment',
 			label: 'Оберіть спосіб оплати',
 			options: Object.values(PaymentMethod).map(method => ({
 				value: method,
@@ -109,13 +109,19 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 	]
 
 	const initialValues = {
-		name: '',
-		surname: '',
-		email: '',
-		phone: '+380',
-		city: 'Київ',
-		warehouse: '',
-		payment: PaymentMethod.CashOnDelivery,
+		number: '123',
+		customer: {
+			name: '',
+			surname: '',
+			email: '',
+			phone: '+380',
+			city: 'Київ',
+			warehouse: '',
+			payment: PaymentMethod.CashOnDelivery,
+		},
+		orderedGoods,
+		totalPrice,
+		status: 'Новий',
 	}
 
 	// Fetch goods and update form values
@@ -241,20 +247,36 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 			>
 				{({ values, errors, setFieldValue }) => {
 					useEffect(() => {
-						if (values.city) {
-							fetchWarehouses(values.city)
+						if (values.customer.city) {
+							fetchWarehouses(values.customer.city)
 						}
-					}, [values.city])
+					}, [values.customer.city])
 
 					useEffect(() => {
-						setCustomer(values)
-					}, [values])
+						setCustomer(values.customer)
+					}, [values.customer])
 
 					return (
 						<Form className='flex flex-col space-y-8'>
-							{customerInputs.map((input, index) => (
-								<FormField item={input} key={index} setFieldValue={setFieldValue} errors={errors} />
+							{/* <Field
+								name='customer.name'
+								onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+									handleFieldChange('customer.name', e.target.value)
+								}
+								className={`text-primaryTextColor peer w-full p-4 pt-6 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed 
+					${errors.customer?.name && errors.customer?.name ? 'border-rose-500' : 'border-neutral-300'} 
+					${
+						errors.customer?.name && touched.customer?.name
+							? 'focus:border-rose-500'
+							: 'focus:border-green-500'
+					}
+					`}
+							/>
+							<ErrorMessage name='customer.name' render={msg => <div>{msg}</div>} /> */}
+							{customerInputs.map((item, i) => (
+								<FormField key={i} item={item} setFieldValue={setFieldValue} errors={errors} />
 							))}
+
 							<div className='flex items-center'>
 								<input
 									id='termsCheckbox'
