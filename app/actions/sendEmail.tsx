@@ -50,7 +50,10 @@ export async function sendEmail(data: IGetSendData) {
 		!payment ||
 		!orderNumber ||
 		!orderedGoods ||
-		!totalPrice
+		!totalPrice ||
+		!Array.isArray(orderedGoods) ||
+		orderedGoods.length === 0 ||
+		totalPrice <= 0
 	) {
 		throw new Error('Error not all data passed')
 	}
@@ -65,7 +68,6 @@ export async function sendEmail(data: IGetSendData) {
 			warehouse,
 			payment,
 			orderedGoods,
-			totalPrice,
 			orderNumber,
 		} as NewOrderTemplateProps)
 
@@ -95,18 +97,7 @@ export async function sendEmail(data: IGetSendData) {
 }
 
 export async function sendCustomerEmail(data: IGetSendData) {
-	const {
-		email,
-		name,
-		surname,
-		phone,
-		city,
-		warehouse,
-		payment,
-		orderNumber,
-		orderedGoods,
-		totalPrice,
-	} = data
+	const { email, name, surname, phone, city, warehouse, payment, orderNumber, orderedGoods } = data
 
 	if (
 		!email ||
@@ -117,7 +108,6 @@ export async function sendCustomerEmail(data: IGetSendData) {
 		!warehouse ||
 		!payment ||
 		!orderedGoods ||
-		!totalPrice ||
 		!orderNumber
 	) {
 		throw new Error('Error not all data passed')
@@ -133,7 +123,6 @@ export async function sendCustomerEmail(data: IGetSendData) {
 			warehouse,
 			payment,
 			orderedGoods,
-			totalPrice,
 			orderNumber,
 		} as NewCustomerTemplateProps)
 

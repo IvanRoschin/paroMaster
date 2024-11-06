@@ -1,3 +1,5 @@
+export interface IGoods {}
+
 export interface IGood {
 	_id?: string
 	category: string

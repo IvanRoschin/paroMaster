@@ -16,79 +16,57 @@ type CartItemProps = {
 }
 
 const CartItem: React.FC<CartItemProps> = ({ id, quantity }) => {
-	const {
-		getItemQuantity,
-		increaseCartQuantity,
-		decreaseCartQuantity,
-		removeFromCart,
-	} = useShoppingCart()
-
-	const { data, error } = useSWR(`data-${id}`, () => getGoodById(id))
+	const { increaseCartQuantity, decreaseCartQuantity, removeFromCart } = useShoppingCart()
+	const { data, error } = useSWR<SGood>(`data-${id}`, () => getGoodById(id))
 	const [amount, setAmount] = useState(0)
 
 	useEffect(() => {
 		if (data) {
-			const good: SGood = data
-			const newAmount = good.price * quantity
+			const newAmount = data.price * quantity
 			setAmount(newAmount)
 			localStorage.setItem(`amount-${id}`, JSON.stringify(newAmount))
 		}
 	}, [data, id, quantity])
 
-	if (error) {
-		console.error('Error fetching good:', error)
-		return <p>Error loading item.</p>
-	}
+	if (error) return <p>Error loading item.</p>
+	if (!data) return <Loader />
 
-	if (!data) {
-		return <Loader />
-	}
-
-	const good: SGood = data
+	const { _id, title, price, src } = data
 
 	return (
 		<div>
-			<li className='relative flex flex-col justify-between border border-gray-300 rounded-md p-4 hover:shadow-[10px_10px_15px_-3px_rgba(0,0,0,0.3)] transition-all mb-4'>
-				<div className='flex items-center justify-center gap-10'>
-					<div className='w-[150px] '>
-						<Image
-							src={good.src[0]}
-							alt='item_photo'
-							width={150}
-							height={150}
-							className='self-center flex items-center justify-center'
-						/>
+			<li className='relative flex flex-col justify-between border border-gray-300 rounded-md p-4 hover:shadow-md transition-all mb-4'>
+				<div className='flex items-center gap-10'>
+					{/* Product Image */}
+					<div className='w-[150px]'>
+						<Image src={src[0]} alt='item_photo' width={150} height={150} className='self-center' />
 					</div>
-					<p className='text-md'>{good.title}</p>
-					<div className='flex items-center flex-col gap-5'>
-						<div className='flex items-center justify-center gap-5'>
-							{/* Quantity controls with buttons */}
-							<div className='flex items-center justify-between gap-2'>
-								<Button
-									label='-'
-									onClick={() => {
-										decreaseCartQuantity(good._id)
-									}}
-									small
-									outline
-								/>
-								<span className='text-xl'>{quantity}</span>
-								<Button label='+' onClick={() => increaseCartQuantity(good._id)} small outline />
-							</div>{' '}
-							x <p>{good.price}</p>
+
+					{/* Product Title */}
+					<p className='text-md'>{title}</p>
+
+					{/* Quantity Controls */}
+					<div className='flex items-center gap-5'>
+						<div className='flex items-center gap-2'>
+							<Button label='-' onClick={() => decreaseCartQuantity(_id)} small outline />
+							<span className='text-xl'>{quantity}</span>
+							<Button label='+' onClick={() => increaseCartQuantity(_id)} small outline />
 						</div>
+						x <p>{price}</p>
 					</div>
+
+					{/* Total Amount */}
 					<span>=</span>
-					{/* Calculated total price for the quantity */}
-					<p> {amount}</p>
-					{/* Button to remove item from cart */}
+					<p>{amount}</p>
+
+					{/* Remove Item Button */}
 					<button
 						onClick={() => {
-							removeFromCart(good._id)
+							removeFromCart(_id)
 							localStorage.removeItem(`amount-${id}`)
 						}}
 					>
-						<Icon name='icon_trash' className='w-5 h-5 mr-1 hover:text-primaryAccentColor' />
+						<Icon name='icon_trash' className='w-5 h-5 hover:text-primaryAccentColor' />
 					</button>
 				</div>
 			</li>

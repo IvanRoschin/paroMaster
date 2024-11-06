@@ -164,14 +164,13 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 				validationSchema={goodFormSchema}
 				enableReinitialize
 			>
-				{({ errors, setFieldValue, values }) => (
+				{({ errors, setFieldValue, values, touched }) => (
 					<Form className='flex flex-col w-[600px]'>
 						<ImageUploadCloudinary
 							setFieldValue={setFieldValue}
 							values={values.src}
 							errors={errors}
 						/>
-
 						{inputs.map((item, i) => (
 							<div key={i}>
 								{item.type === 'switcher' ? (
@@ -182,7 +181,7 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 										onChange={checked => setFieldValue(item.id, checked)}
 									/>
 								) : (
-									<FormField item={item} errors={errors} setFieldValue={setFieldValue} />
+									<FormField item={item} setFieldValue={setFieldValue} errors={errors} />
 								)}
 							</div>
 						))}

@@ -49,9 +49,7 @@ const orderFormSchema = Yup.object().shape({
 				.required(`Обов'язкове поле`),
 		}),
 	),
-	totalPrice: Yup.number()
-		.positive()
-		.required(`Обов'язкове поле`),
+	totalPrice: Yup.number().positive(),
 	status: Yup.string().required(`Обов'язкове поле`),
 })
 
