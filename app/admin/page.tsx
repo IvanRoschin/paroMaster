@@ -1,5 +1,3 @@
-'use client'
-
 import { getAllCategories } from '@/actions/categories'
 import { getAllCustomers } from '@/actions/customers'
 import { getAllGoods } from '@/actions/goods'

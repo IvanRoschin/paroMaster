@@ -97,7 +97,7 @@ export default function Testimonials({
 				<table className='w-full text-xs mb-8'>
 					<thead>
 						<tr className='bg-slate-300 font-semibold'>
-							<td className='p-2 border-r-2 text-center'>Ім'я користувача</td>
+							<td className='p-2 border-r-2 text-center'>Ім&apos;я користувача</td>
 							<td className='p-2 border-r-2 text-center'>Текст відгуку</td>
 							<td className='p-2 border-r-2 text-center'>Рейтинг</td>
 							<td className='p-2 border-r-2 text-center'>Дата додавання</td>

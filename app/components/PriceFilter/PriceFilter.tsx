@@ -37,7 +37,7 @@ const PriceFilter = ({ minPrice, maxPrice }: { minPrice: number; maxPrice: numbe
 			}
 			handleClick(values[0], values[1])
 		}
-	}, [values])
+	}, [values, createQueryString, pathname, push])
 
 	return (
 		<div className='double-slider-box'>
