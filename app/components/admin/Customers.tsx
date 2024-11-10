@@ -68,7 +68,7 @@ export default function Customers({
 			<table className='w-full text-xs mb-8'>
 				<thead>
 					<tr className='bg-slate-300 font-semibold'>
-						<td className='p-2 border-r-2 text-center'>Ім'я та Прізвище</td>
+						<td className='p-2 border-r-2 text-center'>Ім&apos;я та Прізвище</td>
 						<td className='p-2 border-r-2 text-center'>Телефон</td>
 						<td className='p-2 border-r-2 text-center'>E-mail</td>
 						<td className='p-2 border-r-2 text-center'>Місто</td>

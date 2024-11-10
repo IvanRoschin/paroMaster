@@ -53,7 +53,7 @@ const InfiniteScrollGoods = ({
 		if (inView && !allGoodsLoaded && !isFetchingMore) {
 			loadMoreGoods()
 		}
-	}, [inView, allGoodsLoaded, isFetchingMore])
+	}, [inView, allGoodsLoaded, isFetchingMore, loadMoreGoods])
 
 	return (
 		<>

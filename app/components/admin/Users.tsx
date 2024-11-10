@@ -65,7 +65,7 @@ export default function Users({
 			<table className='w-full text-xs'>
 				<thead>
 					<tr className='bg-slate-300 font-semibold'>
-						<td className='p-2 border-r-2 text-center'>Ім'я</td>
+						<td className='p-2 border-r-2 text-center'>Ім&apos;я</td>
 						<td className='p-2 border-r-2 text-center'>Email</td>
 						<td className='p-2 border-r-2 text-center'>Телефон</td>
 						<td className='p-2 border-r-2 text-center'>Створений</td>
