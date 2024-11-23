@@ -69,6 +69,7 @@ export async function sendEmail(data: IGetSendData) {
 			payment,
 			orderedGoods,
 			orderNumber,
+			totalPrice,
 		} as NewOrderTemplateProps)
 
 		const { data: responseData, error } = await resend.emails.send({
@@ -97,7 +98,18 @@ export async function sendEmail(data: IGetSendData) {
 }
 
 export async function sendCustomerEmail(data: IGetSendData) {
-	const { email, name, surname, phone, city, warehouse, payment, orderNumber, orderedGoods } = data
+	const {
+		email,
+		name,
+		surname,
+		phone,
+		city,
+		warehouse,
+		payment,
+		orderNumber,
+		orderedGoods,
+		totalPrice,
+	} = data
 
 	if (
 		!email ||
@@ -108,7 +120,8 @@ export async function sendCustomerEmail(data: IGetSendData) {
 		!warehouse ||
 		!payment ||
 		!orderedGoods ||
-		!orderNumber
+		!orderNumber ||
+		!totalPrice
 	) {
 		throw new Error('Error not all data passed')
 	}
@@ -124,6 +137,7 @@ export async function sendCustomerEmail(data: IGetSendData) {
 			payment,
 			orderedGoods,
 			orderNumber,
+			totalPrice,
 		} as NewCustomerTemplateProps)
 
 		const { data: responseData, error } = await resend.emails.send({

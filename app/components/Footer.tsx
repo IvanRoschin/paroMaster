@@ -35,7 +35,7 @@ const links = [
 	},
 	{
 		title: 'Політика Конфіденційності',
-		link: 'privacyPolicy',
+		link: 'privacypolicy',
 	},
 ]
 
