@@ -51,6 +51,7 @@ export async function getAllTestimonials(
 		const count = await Testimonials.countDocuments()
 
 		const testimonials: ITestimonial[] = await Testimonials.find()
+			.sort({ createdAt: -1 })
 			.skip(limit * (page - 1))
 			.limit(limit)
 			.exec()

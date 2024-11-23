@@ -19,3 +19,4 @@ export type IconName =
 	| 'category_boiler'
 	| 'icon_close'
 	| 'icon_trash'
+	| 'lucide/email'

@@ -1,3 +1,5 @@
+'use client'
+
 import { ServiceCard } from './SeviceCard'
 
 const services = [

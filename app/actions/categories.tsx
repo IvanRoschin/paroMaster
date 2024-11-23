@@ -64,6 +64,7 @@ export async function getAllCategories(
 		const count = await Category.countDocuments()
 
 		const categories: ICategory[] = await Category.find()
+			.sort({ createdAt: -1 })
 			.skip(limit * (page - 1))
 			.limit(limit)
 			.exec()
