@@ -30,6 +30,7 @@ export async function getAllOrders(
 		const count = await Order.countDocuments()
 
 		const orders: IOrder[] = await Order.find(query)
+			.sort({ createdAt: -1 })
 			.skip(limit * (page - 1))
 			.limit(limit)
 			.exec()
