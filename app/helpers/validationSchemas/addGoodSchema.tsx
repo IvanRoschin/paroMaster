@@ -1,6 +1,6 @@
 import * as Yup from 'yup'
 
-export const goodFormSchema = Yup.object().shape({
+const goodFormSchema = Yup.object().shape({
 	category: Yup.string()
 		.oneOf(
 			[
@@ -47,5 +47,7 @@ export const goodFormSchema = Yup.object().shape({
 		.nullable(),
 	isAvailable: Yup.boolean().required(`Обов'язкове поле`),
 	isCompatible: Yup.boolean().required(`Обов'язкове поле`),
-	compatibility: Yup.string(),
+	compatibility: Yup.string().notRequired(),
 })
+
+export default goodFormSchema

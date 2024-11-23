@@ -1,9 +1,11 @@
 'use client'
+
 import { ErrorMessage, Field } from 'formik'
 
 interface InputProps {
 	item: {
 		id: string
+		name?: string
 		label: string
 		type?: string
 		value?: string
@@ -12,15 +14,26 @@ interface InputProps {
 		required?: boolean
 	}
 	errors?: { [key: string]: string }
+	setFieldValue?: (field: string, value: any, shouldValidate?: boolean) => void
 }
 
-const Input: React.FC<InputProps> = ({ item, errors }) => {
+const Input: React.FC<InputProps> = ({ item, errors, setFieldValue }) => {
+	const handleChange = (
+		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+	) => {
+		if (setFieldValue) {
+			setFieldValue(item.id, e.target.value)
+		}
+	}
+
+	console.log('errors', errors)
 	return (
 		<div className='w-full relative'>
 			<Field
-				name={item.id}
+				name={item.name}
 				disabled={item.disabled}
 				type={item.type}
+				onChange={handleChange}
 				className={`peer w-full p-4 mb-2 pt-6 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed 
 				${errors?.[item.id] ? 'border-rose-500' : 'border-neutral-300'} 
 				${errors?.[item.id] ? 'focus:border-rose-500' : 'focus:border-green-500'}

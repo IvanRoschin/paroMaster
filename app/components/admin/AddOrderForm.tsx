@@ -1,14 +1,18 @@
 'use client'
 
-import { Form, Formik, FormikState } from 'formik'
-import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
-import { toast } from 'sonner'
-
 import { getData } from '@/actions/nova'
-import { IOrder } from '@/types/index'
+import orderFormSchema from '@/helpers/validationSchemas/orderFormShema'
+import { useAddData } from '@/hooks/useAddData'
+import { useUpdateData } from '@/hooks/useUpdateData'
+import { IGood, IOrder } from '@/types/index'
 import { PaymentMethod } from '@/types/paymentMethod'
-import { orderFormSchema } from 'app/helpers/validationShemas'
+import { FieldArray, Formik, FormikState } from 'formik'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import React, { useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
+import Button from '../Button'
+import { Icon } from '../Icon'
 import FormField from '../input/FormField'
 import CustomButton from './CustomFormikButton'
 
@@ -18,266 +22,750 @@ interface ResetFormProps {
 	resetForm: (nextState?: Partial<FormikState<InitialStateType>>) => void
 }
 
-interface Warehouse {
-	Ref: string
-	Description: string
-}
-
 interface OrderFormProps {
 	order?: IOrder
 	title?: string
-	action: (
-		data: FormData,
-	) => Promise<{
-		success: boolean
-		data: {
-			orderNumber: string
-			customer: {
-				name: string
-				phone: string
-				email: string
-				city: string
-				warehouse: string
-				payment: string
-			}
-			orderedGoods: {}
-		}
-	}>
+	action: (values: IOrder) => Promise<{ success: boolean; message: string }>
 }
 
-const customerInputs = [
-	{
-		id: 'name',
-		label: 'Ім`я',
-		type: 'text',
-		required: true,
-	},
-	{
-		id: 'surname',
-		label: 'Прізвище',
-		type: 'text',
-		required: true,
-	},
-	{
-		id: 'email',
-		label: 'Email',
-		type: 'email',
-		required: true,
-	},
-	{
-		id: 'phone',
-		label: 'Телефон',
-		type: 'tel',
-		required: true,
-	},
-	{
-		id: 'city',
-		label: 'Місто',
-	},
-	{
-		id: 'warehouse',
-		label: 'Оберіть відділення',
-		type: 'select',
-	},
-	{
-		id: 'payment',
-		label: 'Оберіть спосіб оплати',
-		type: 'select',
-		options: Object.values(PaymentMethod).map(method => ({
-			value: method,
-			label: method,
-		})),
-	},
+const statusList = [
+	{ id: 1, title: 'Новый' },
+	{ id: 2, title: 'Опрацьовується' },
+	{ id: 3, title: 'Оплачено' },
+	{ id: 4, title: 'На відправку' },
+	{ id: 5, title: 'Закритий' },
 ]
 
-const goodsInputs = [
-	{
-		id: 'title',
-		label: 'Назва товару',
-		type: 'text',
-		required: true,
-	},
-	{
-		id: 'brand',
-		label: 'Бренд',
-		type: 'text',
-		required: true,
-	},
-	{
-		id: 'model',
-		label: 'Модель',
-		type: 'text',
-		required: true,
-	},
-	{
-		id: 'vendor',
-		label: 'Артикул',
-		type: 'text',
-		required: true,
-	},
-	{
-		id: 'quantity',
-		label: 'Кількість',
-		type: 'number',
-		required: true,
-	},
-	{
-		id: 'price',
-		label: 'Ціна',
-		type: 'number',
-		required: true,
-	},
-]
+const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
+	const [isLoading, setIsLoading] = useState(false)
+	const [warehouses, setWarehouses] = useState<
+		{
+			Ref: string
+			Description: string
+		}[]
+	>([])
+	const [totalPrice, setTotalPrice] = useState(0)
 
-const AddOrderForm: React.FC<OrderFormProps> = ({ order, title, action }) => {
-	const [warehouses, setWarehouses] = useState<Warehouse[]>([])
-	const [isLoading, setIsLoading] = useState<boolean>(false)
-	const router = useRouter()
+	const { push } = useRouter()
+	const isUpdating = Boolean(order?._id)
+	const [name = '', surname = ''] = (order?.customer.name || '').split(' ')
+
+	const addOrderMutation = useAddData(action, 'orders')
+	const updateOrderMutation = useUpdateData(action, 'orders')
 
 	const initialValues: InitialStateType = {
-		orderNumber: order?.orderNumber || '',
+		number: order?.number || '',
 		customer: {
-			name: order?.customer.name || '',
+			name: name || '',
+			surname: surname || '',
 			email: order?.customer.email || '',
 			phone: order?.customer.phone || '+380',
-			payment: order?.customer.payment || PaymentMethod.CashOnDelivery.toString(),
-			city: order?.customer.city || 'Київ',
-			warehouse: order?.customer.warehouse || '',
+			city: order?.customer.city || '',
+			warehouse: order?.customer.warehouse || 'Київ',
+			payment: order?.customer.payment || PaymentMethod.CashOnDelivery,
 		},
-		orderedGoods: order?.orderedGoods?.map(item => ({
-			id: item.id || '', // Ensure id has a default value
-			title: item.title || '',
-			brand: item.brand || '',
-			model: item.model || '',
-			vendor: item.vendor || '',
-			quantity: item.quantity || 0,
-			price: item.price || 0,
-		})) || [
-			// Provide at least one empty item if no orderedGoods are provided
+		orderedGoods: order?.orderedGoods || [
 			{
-				id: '',
-				title: '',
+				_id: '',
+				category: '',
+				src: [],
 				brand: '',
 				model: '',
 				vendor: '',
-				quantity: 0,
+				title: '',
+				description: '',
 				price: 0,
+				isAvailable: false,
+				isCompatible: false,
+				compatibility: '',
+				quantity: 0,
 			},
 		],
-		goodsQuantity: order?.goodsQuantity || 0,
 		totalPrice: order?.totalPrice || 0,
 		status: order?.status || 'Новий',
 	}
 
-	const fetchWarehouses = useCallback(async (city: string) => {
-		if (!city) {
-			setWarehouses([])
-			return
-		}
+	const customerInputs = [
+		{
+			name: 'customer.name',
+			type: 'text',
+			id: 'customer.name',
+			label: `І'мя`,
+			required: true,
+		},
+		{
+			name: 'customer.surname',
+			type: 'text',
+			id: 'customer.surname',
+			label: `Прізвище`,
+			required: true,
+		},
+		{
+			name: 'customer.email',
+			type: 'email',
+			id: 'customer.email',
+			label: `Email`,
+			required: true,
+		},
+		{
+			name: 'customer.phone',
+			type: 'tel',
+			id: 'customer.phone',
+			label: `Телефон`,
+			required: true,
+		},
+		{
+			name: 'customer.city',
+			type: 'text',
+			id: 'customer.city',
+			label: `Місто`,
+			required: true,
+		},
+		{
+			id: 'customer.warehouse',
+			label: 'Оберіть відділення',
+			options: warehouses.map(warehouse => ({
+				value: warehouse.Description,
+				label: warehouse.Description,
+			})),
+			type: 'select',
+		},
+		{
+			id: 'customer.payment',
+			label: 'Оберіть спосіб оплати',
+			options: Object.values(PaymentMethod).map(method => ({
+				value: method,
+				label: method,
+			})),
+			type: 'select',
+		},
+	]
 
-		const request = {
-			apiKey: process.env.NOVA_API,
-			modelName: 'Address',
-			calledMethod: 'getWarehouses',
-			methodProperties: {
-				CityName: city,
-				Limit: '50',
-				Language: 'UA',
-			},
-		}
+	// useEffect(() => {
+	// 	if (initialValues.customer.city) {
+	// 		fetchWarehouses(initialValues.customer.city)
+	// 	}
+	// }, [initialValues.customer.city])
 
-		setIsLoading(true)
+	const fetchWarehouses = async (city: string): Promise<{ Ref: string; Description: string }[]> => {
 		try {
-			const response = await getData(request)
-			if (response && response.data.data) {
-				setWarehouses(response.data.data)
-			}
+			const response = await getData({
+				apiKey: process.env.NOVA_API,
+				modelName: 'Address',
+				calledMethod: 'getWarehouses',
+				methodProperties: { CityName: city, Limit: '50', Language: 'UA' },
+			})
+			return response.data.data || []
 		} catch (error) {
 			console.error('Error fetching warehouses:', error)
-		} finally {
-			setIsLoading(false)
+			return []
 		}
+	}
+
+	const calculateTotalPrice = useCallback((orderedGoods: IGood[]): number => {
+		return orderedGoods.reduce((total: number, item: IGood) => {
+			const quantity = item.quantity ?? 1
+			return total + item.price * quantity
+		}, 0)
 	}, [])
 
 	useEffect(() => {
+		setTotalPrice(calculateTotalPrice(initialValues.orderedGoods))
+	}, [initialValues.orderedGoods, calculateTotalPrice])
+
+	// const calculateTotalPrice = (goods: typeof initialValues.orderedGoods) => {
+	// 	return goods.reduce((total, good) => total + good.price * (good.quantity ?? 0), 0)
+	// }
+
+	useEffect(() => {
 		if (initialValues.customer.city) {
-			fetchWarehouses(initialValues.customer.city)
+			const fetchAndSetWarehouses = async () => {
+				try {
+					const fetchedWarehouses = await fetchWarehouses(initialValues.customer.city)
+					setWarehouses(fetchedWarehouses)
+				} catch (error) {
+					console.error('Error fetching warehouses:', error)
+				}
+			}
+			fetchAndSetWarehouses()
 		}
-	}, [initialValues.customer.city, fetchWarehouses])
+	}, [initialValues.customer.city])
 
-	const handleSubmit = async (values: InitialStateType, { resetForm }: ResetFormProps) => {
-		const formData = new FormData()
+	const handlePriceChange = (values: InitialStateType) => {
+		setTotalPrice(calculateTotalPrice(values.orderedGoods))
+	}
 
-		// Append customer information
-		formData.append('name', values.customer.name)
-		formData.append('surname', values.customer.surname)
-		formData.append('email', values.customer.email)
-		formData.append('phone', values.customer.phone)
-		formData.append('payment', values.customer.payment)
-		formData.append('city', values.customer.city)
-		formData.append('warehouse', values.customer.warehouse)
-
-		// Append ordered goods information
-		values.orderedGoods.forEach((item, index) => {
-			Object.entries(item).forEach(([key, value]) => {
-				formData.append(`orderedGoods[${index}][${key}]`, value.toString())
-			})
-		})
-
-		// Append the ID if available
-		if (order?._id) {
-			formData.append('id', order._id as string)
-		}
-
+	const handleCityChange = async (values: InitialStateType) => {
 		try {
-			await action(formData)
-			resetForm()
-			toast.success(order?._id ? 'Замовлення оновлено!' : 'Нове замовлення додано!')
+			const warehouses = await fetchWarehouses(values.customer.city)
+			setWarehouses(warehouses)
 		} catch (error) {
-			toast.error('Помилка!')
+			console.error('Error fetching warehouses:', error)
+		}
+	}
+
+	const handleQuantityChange = (
+		index: number,
+		change: number,
+		values: InitialStateType,
+		setFieldValue: any,
+	) => {
+		const newQuantity = Math.max((values.orderedGoods[index].quantity || 0) + change, 1)
+		setFieldValue(`orderedGoods.${index}.quantity`, newQuantity)
+		setTotalPrice(calculateTotalPrice(values.orderedGoods))
+	}
+
+	const handleSubmit = async (values: IOrder, { resetForm }: ResetFormProps) => {
+		try {
+			setIsLoading(true)
+
+			const newOrderData = {
+				...values,
+				customer: {
+					...values.customer,
+					name: `${values.customer.name} ${values.customer.surname}`,
+					warehouse: values.warehouse,
+				},
+			}
+
+			let updateOrderData = {}
+
+			if (isUpdating && order) {
+				updateOrderData = {
+					...values,
+					_id: order._id,
+					customer: {
+						...values.customer,
+						name: `${values.customer.name} ${values.customer.surname}`,
+						warehouse: values.warehouse,
+					},
+				}
+			}
+
+			const result = isUpdating
+				? await updateOrderMutation.mutateAsync(updateOrderData)
+				: await addOrderMutation.mutateAsync(newOrderData)
+
+			if (result?.success === false) {
+				toast.error('Something went wrong')
+				return
+			}
+
+			resetForm()
+			toast.success(isUpdating ? 'Замовлення оновлено!' : 'Нове замовлення додано!')
+			push('/admin/orders')
+		} catch (error) {
+			const errorMsg = error instanceof Error ? error.message : 'An unknown error occurred'
+			toast.error(errorMsg)
 			console.error(error)
+		} finally {
+			setIsLoading(false)
 		}
 	}
 
 	return (
-		<div className='flex flex-col justify-center items-center'>
-			<h2 className='text-4xl mb-4'>{title}</h2>
+		<div className='flex flex-col justify-center items-center p-4 bg-white rounded-lg shadow-md'>
+			<h2 className='text-3xl mb-4 font-bold'>{title || 'Order Form'}</h2>
 			<Formik
 				initialValues={initialValues}
 				onSubmit={handleSubmit}
 				validationSchema={orderFormSchema}
-				enableReinitialize
 			>
-				{({ errors, setFieldValue, values }) => (
-					<Form className='flex flex-col w-[600px]'>
-						<p>Customer Data</p>
-						{customerInputs.map((item, i) => (
+				{({ values, setFieldValue, errors }) => {
+					handlePriceChange(values)
+					handleCityChange(values)
+
+					return (
+						<>
+							{/* Form content */}
+							<h3 className='text-xl font-semibold'>Замовник</h3>
+							{customerInputs.map((item, i) => (
+								<FormField key={i} item={item} setFieldValue={setFieldValue} errors={errors} />
+							))}
+							<h3 className='text-xl font-semibold'>Товари у замовленні</h3>
+							<FieldArray
+								name='orderedGoods'
+								render={({ remove }) => (
+									<div>
+										{values?.orderedGoods.map((good, index) => (
+											<div
+												key={index}
+												className='border p-4 mb-4 flex items-center gap-4 justify-between'
+											>
+												{/* Image container */}
+												<div className='flex-shrink-0 w-[150px]'>
+													<Image
+														src={good.src[0] || '/placeholder.png'}
+														alt='item_photo'
+														width={150}
+														height={150}
+														className='object-cover'
+													/>
+												</div>
+
+												{/* Item title */}
+												<div className='flex-1 text-center'>
+													<span>{good?.title || 'Unnamed Item'}</span>
+												</div>
+
+												{/* Quantity decrement button */}
+												<div className='w-[30px] flex justify-center'>
+													<Button
+														type='button'
+														label='-'
+														onClick={() => handleQuantityChange(index, -1, values, setFieldValue)}
+														disabled={good?.quantity !== undefined && good?.quantity <= 1}
+													/>
+												</div>
+
+												{/* Quantity display */}
+												<div className='w-[40px] text-center'>
+													<span>{good.quantity || 0}</span>
+												</div>
+
+												{/* Quantity increment button */}
+												<div className='w-[30px] flex justify-center'>
+													<Button
+														type='button'
+														label='+'
+														onClick={() => handleQuantityChange(index, 1, values, setFieldValue)}
+													/>
+												</div>
+
+												{/* Price per unit */}
+												<div className='w-[100px] text-center'>
+													<span>Ціна за 1: {good.price}</span>
+												</div>
+
+												{/* Total price for the item */}
+												<div className='w-[120px] text-center'>
+													<span>Ціна за Товар: {good.price * (good?.quantity || 1)}</span>
+												</div>
+
+												{/* Remove button */}
+												<div className='flex-shrink-0'>
+													<button
+														type='button'
+														onClick={() => {
+															remove(index)
+															const updatedTotal = calculateTotalPrice(values.orderedGoods)
+															setFieldValue('totalPrice', updatedTotal)
+														}}
+														className='
+				flex items-center justify-center
+				bg-red-600 hover:bg-red-700 focus:bg-red-700
+				text-white transition-all text-sm rounded-md py-2 px-3'
+													>
+														<Icon
+															name='icon_trash'
+															className='w-5 h-5 text-white hover:text-primaryAccentColor'
+														/>
+													</button>
+												</div>
+											</div>
+										))}
+									</div>
+								)}
+							/>
+							<label className='text-xl font-semibold'>Статус замовлення</label>
 							<FormField
-								key={i}
 								item={{
-									...item,
-									options:
-										item.id === 'warehouse'
-											? warehouses.map(wh => ({
-													value: wh.Description,
-													label: wh.Description,
-											  }))
-											: item.options,
+									id: 'status',
+									type: 'select',
+									required: true,
+									options: statusList.map(status => ({
+										value: status.title,
+										label: status.title,
+									})),
 								}}
 								errors={errors}
 								setFieldValue={setFieldValue}
 							/>
-						))}
-						<p>Ordered Goods Data</p>
-						{goodsInputs.map((item, i) => (
-							<FormField key={i} item={item} errors={errors} setFieldValue={setFieldValue} />
-						))}
-						<CustomButton label='Зберегти' />
-					</Form>
-				)}
+							<div className='flex justify-end'>
+								<CustomButton
+									type='submit'
+									label={order ? 'Оновити замовлення' : 'Створити замовлення'}
+									disabled={isLoading}
+								/>
+							</div>{' '}
+							{/* Order status and submit button */}
+							<div className='mt-4 text-lg font-semibold'>Загальна ціна: {totalPrice} грн</div>
+						</>
+					)
+				}}
 			</Formik>
 		</div>
 	)
 }
 
-export default AddOrderForm
+export default OrderForm
+
+// 'use client'
+
+// import { getData } from '@/actions/nova'
+// import orderFormSchema from '@/helpers/validationSchemas/orderFormShema'
+// import { useAddData } from '@/hooks/useAddData'
+// import { useUpdateData } from '@/hooks/useUpdateData'
+// import { IOrder } from '@/types/index'
+// import { PaymentMethod } from '@/types/paymentMethod'
+// import { FieldArray, Formik, FormikState } from 'formik'
+// import Image from 'next/image'
+// import { useRouter } from 'next/navigation'
+// import React, { useEffect, useState } from 'react'
+// import { toast } from 'sonner'
+// import Button from '../Button'
+// import { Icon } from '../Icon'
+// import FormField from '../input/FormField'
+// import CustomButton from './CustomFormikButton'
+
+// interface InitialStateType extends Omit<IOrder, '_id'> {}
+
+// interface ResetFormProps {
+// 	resetForm: (nextState?: Partial<FormikState<InitialStateType>>) => void
+// }
+
+// interface OrderFormProps {
+// 	order?: IOrder
+// 	title?: string
+// 	action: (values: IOrder) => Promise<{ success: boolean; message: string }>
+// }
+
+// const statusList = [
+// 	{ id: 1, title: 'Новый' },
+// 	{ id: 2, title: 'Опрацьовується' },
+// 	{ id: 3, title: 'Оплачено' },
+// 	{ id: 4, title: 'На відправку' },
+// 	{ id: 5, title: 'Закритий' },
+// ]
+
+// const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
+// 	const [isLoading, setIsLoading] = useState(false)
+// 	const [warehouses, setWarehouses] = useState<{ Ref: string; Description: string }[]>([])
+
+// 	const { push } = useRouter()
+// 	const isUpdating = Boolean(order?._id)
+// 	const [name, surname] = order?.customer.name?.split(' ') || ['', '']
+
+// 	const addOrderMutation = useAddData(action, 'orders')
+// 	const updateOrderMutation = useUpdateData(action, 'orders')
+
+// 	const customerInputs = [
+// 		{
+// 			name: 'customer.name',
+// 			type: 'text',
+// 			id: 'customer.name',
+// 			label: `І'мя`,
+// 			required: true,
+// 		},
+// 		{
+// 			name: 'customer.surname',
+// 			type: 'text',
+// 			id: 'customer.surname',
+// 			label: `Прізвище`,
+// 			required: true,
+// 		},
+// 		{
+// 			name: 'customer.email',
+// 			type: 'email',
+// 			id: 'customer.email',
+// 			label: `Email`,
+// 			required: true,
+// 		},
+// 		{
+// 			name: 'customer.phone',
+// 			type: 'tel',
+// 			id: 'customer.phone',
+// 			label: `Телефон`,
+// 			required: true,
+// 		},
+// 		{
+// 			name: 'customer.city',
+// 			type: 'text',
+// 			id: 'customer.city',
+// 			label: `Місто`,
+// 			required: true,
+// 		},
+// 		{
+// 			id: 'customer.warehouse',
+// 			label: 'Оберіть відділення',
+// 			options: warehouses.map(warehouse => ({
+// 				value: warehouse.Description,
+// 				label: warehouse.Description,
+// 			})),
+// 			type: 'select',
+// 		},
+// 		{
+// 			id: 'customer.payment',
+// 			label: 'Оберіть спосіб оплати',
+// 			options: Object.values(PaymentMethod).map(method => ({
+// 				value: method,
+// 				label: method,
+// 			})),
+// 			type: 'select',
+// 		},
+// 	]
+
+// 	const initialValues: InitialStateType = {
+// 		number: order?.number || '',
+// 		customer: {
+// 			name: name || '',
+// 			surname: surname || '',
+// 			email: order?.customer.email || '',
+// 			phone: order?.customer.phone || '+380',
+// 			city: order?.customer.city || '',
+// 			warehouse: order?.customer.warehouse || 'Київ',
+// 			payment: order?.customer.payment || PaymentMethod.CashOnDelivery,
+// 		},
+// 		orderedGoods: order?.orderedGoods || [
+// 			{
+// 				_id: '',
+// 				category: '',
+// 				src: [],
+// 				brand: '',
+// 				model: '',
+// 				vendor: '',
+// 				title: '',
+// 				description: '',
+// 				price: 0,
+// 				isAvailable: false,
+// 				isCompatible: false,
+// 				compatibility: '',
+// 				quantity: 0,
+// 			},
+// 		],
+// 		totalPrice: order?.totalPrice || 0,
+// 		status: order?.status || 'Новий',
+// 	}
+// 	const calculateTotalPrice = (goods: typeof initialValues.orderedGoods) => {
+// 		return goods.reduce((total, good) => total + good.price * (good.quantity ?? 0), 0)
+// 	}
+
+// 	const handleQuantityChange = (
+// 		index: number,
+// 		change: number,
+// 		values: InitialStateType,
+// 		setFieldValue: any,
+// 	) => {
+// 		const newQuantity = Math.max((values.orderedGoods[index].quantity || 0) + change, 1)
+// 		setFieldValue(`orderedGoods.${index}.quantity`, newQuantity)
+// 		const updatedTotal = calculateTotalPrice(values.orderedGoods)
+// 		setFieldValue('totalPrice', updatedTotal)
+// 	}
+
+// 	useEffect(() => {
+// 		if (initialValues.customer.city) {
+// 			fetchWarehouses(initialValues.customer.city)
+// 		}
+// 	}, [initialValues.customer.city])
+
+// 	const fetchWarehouses = async (city: string) => {
+// 		const request = {
+// 			apiKey: process.env.NOVA_API,
+// 			modelName: 'Address',
+// 			calledMethod: 'getWarehouses',
+// 			methodProperties: { CityName: city, Limit: '50', Language: 'UA' },
+// 		}
+// 		try {
+// 			const response = await getData(request)
+// 			setWarehouses(response.data.data || [])
+// 		} catch (error) {
+// 			console.error('Error fetching warehouses:', error)
+// 		}
+// 	}
+
+// 	const handleSubmit = async (values: IOrder, { resetForm }: ResetFormProps) => {
+// 		try {
+// 			setIsLoading(true)
+
+// 			const newOrderData = {
+// 				...values,
+// 				customer: {
+// 					...values.customer,
+// 					name: `${values.customer.name} ${values.customer.surname}`,
+// 					warehouse: values.warehouse,
+// 				},
+// 			}
+
+// 			let updateOrderData = {}
+
+// 			if (isUpdating && order) {
+// 				updateOrderData = {
+// 					...values,
+// 					_id: order._id,
+// 					customer: {
+// 						...values.customer,
+// 						name: `${values.customer.name} ${values.customer.surname}`,
+// 						warehouse: values.warehouse,
+// 					},
+// 				}
+// 			}
+
+// 			const result = isUpdating
+// 				? await updateOrderMutation.mutateAsync(updateOrderData)
+// 				: await addOrderMutation.mutateAsync(newOrderData)
+
+// 			if (result?.success === false) {
+// 				toast.error('Something went wrong')
+// 				return
+// 			}
+
+// 			resetForm()
+// 			toast.success(isUpdating ? 'Замовлення оновлено!' : 'Нове замовлення додано!')
+// 			push('/admin/orders')
+// 		} catch (error) {
+// 			const errorMsg = error instanceof Error ? error.message : 'An unknown error occurred'
+// 			toast.error(errorMsg)
+// 			console.error(error)
+// 		} finally {
+// 			setIsLoading(false)
+// 		}
+// 	}
+
+// 	return (
+// 		<div className='flex flex-col justify-center items-center p-4 bg-white rounded-lg shadow-md'>
+// 			<h2 className='text-3xl mb-4 font-bold'>{title || 'Order Form'}</h2>
+// 			<Formik
+// 				initialValues={initialValues || []}
+// 				onSubmit={handleSubmit}
+// 				validationSchema={orderFormSchema}
+// 			>
+// 				{({ values, errors, setFieldValue }) => {
+// 					useEffect(() => {
+// 						const updatedTotal = calculateTotalPrice(values.orderedGoods)
+// 						setFieldValue('totalPrice', updatedTotal)
+// 					}, [values.orderedGoods, setFieldValue])
+
+// 					useEffect(() => {
+// 						if (values.customer.city) {
+// 							fetchWarehouses(values.customer.city)
+// 						}
+// 					}, [values.customer.city])
+
+// 					return (
+// 						<>
+// 							<h3 className='text-xl font-semibold'>Замовник</h3>
+// 							{customerInputs.map((item, i) => (
+// 								<FormField key={i} item={item} setFieldValue={setFieldValue} errors={errors} />
+// 							))}
+// 							<h3 className='text-xl font-semibold'>Товари у замовленні</h3>
+// 							<FieldArray
+// 								name='orderedGoods'
+// 								render={({ remove }) => (
+// 									<div>
+// 										{values.orderedGoods.map((good, index) => (
+// 											<div
+// 												key={index}
+// 												className='border p-4 mb-4 flex items-center gap-4 justify-between'
+// 											>
+// 												{/* Image container */}
+// 												<div className='flex-shrink-0 w-[150px]'>
+// 													<Image
+// 														src={good.src[0] || '/placeholder.png'}
+// 														alt='item_photo'
+// 														width={150}
+// 														height={150}
+// 														className='object-cover'
+// 													/>
+// 												</div>
+
+// 												{/* Item title */}
+// 												<div className='flex-1 text-center'>
+// 													<span>{good?.title || 'Unnamed Item'}</span>
+// 												</div>
+
+// 												{/* Quantity decrement button */}
+// 												<div className='w-[30px] flex justify-center'>
+// 													<Button
+// 														type='button'
+// 														label='-'
+// 														onClick={() => handleQuantityChange(index, -1, values, setFieldValue)}
+// 														disabled={
+// 															values.orderedGoods?.[index]?.quantity !== undefined &&
+// 															values.orderedGoods[index].quantity <= 1
+// 														}
+// 													/>
+// 												</div>
+
+// 												{/* Quantity display */}
+// 												<div className='w-[40px] text-center'>
+// 													<span>{good.quantity || 0}</span>
+// 												</div>
+
+// 												{/* Quantity increment button */}
+// 												<div className='w-[30px] flex justify-center'>
+// 													<Button
+// 														type='button'
+// 														label='+'
+// 														onClick={() => handleQuantityChange(index, 1, values, setFieldValue)}
+// 													/>
+// 												</div>
+
+// 												{/* Price per unit */}
+// 												<div className='w-[100px] text-center'>
+// 													<span>Ціна за 1: {good.price}</span>
+// 												</div>
+
+// 												{/* Total price for the item */}
+// 												<div className='w-[120px] text-center'>
+// 													<span>Ціна за Товар: {good.price * (good?.quantity || 1)}</span>
+// 												</div>
+
+// 												{/* Remove button */}
+// 												<div className='flex-shrink-0'>
+// 													<button
+// 														type='button'
+// 														onClick={() => {
+// 															remove(index)
+// 															const updatedTotal = calculateTotalPrice(values.orderedGoods)
+// 															setFieldValue('totalPrice', updatedTotal)
+// 														}}
+// 														className='
+// 				flex items-center justify-center
+// 				bg-red-600 hover:bg-red-700 focus:bg-red-700
+// 				text-white transition-all text-sm rounded-md py-2 px-3'
+// 													>
+// 														<Icon
+// 															name='icon_trash'
+// 															className='w-5 h-5 text-white hover:text-primaryAccentColor'
+// 														/>
+// 													</button>
+// 												</div>
+// 											</div>
+// 										))}
+// 									</div>
+// 								)}
+// 							/>
+// 							<label className='text-xl font-semibold'>Статус замовлення</label>
+// 							<FormField
+// 								item={{
+// 									id: 'status',
+// 									type: 'select',
+// 									required: true,
+// 									options: statusList.map(status => ({
+// 										value: status.title,
+// 										label: status.title,
+// 									})),
+// 								}}
+// 								errors={errors}
+// 								setFieldValue={setFieldValue}
+// 							/>
+// 							<div className='flex justify-end'>
+// 								<CustomButton
+// 									type='submit'
+// 									label={order ? 'Оновити замовлення' : 'Створити замовлення'}
+// 									disabled={isLoading}
+// 								/>
+// 							</div>{' '}
+// 							{/* Order status and submit button */}
+// 							<div className='mt-4 text-lg font-semibold'>
+// 								Загальна ціна: {values.totalPrice} грн
+// 							</div>
+// 						</>
+// 					)
+// 				}}
+// 			</Formik>
+// 		</div>
+// 	)
+// }
+
+// export default OrderForm

@@ -5,6 +5,7 @@ import { ICategory } from '@/types/category/ICategory'
 import { ISearchParams } from '@/types/index'
 import { connectToDB } from '@/utils/dbConnect'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 
 export interface IGetAllCategories {
 	success: boolean
@@ -13,7 +14,20 @@ export interface IGetAllCategories {
 }
 
 export async function addCategory(formData: FormData) {
-	const values = Object.fromEntries(formData.entries())
+	const values: Record<string, any> = {}
+
+	formData.forEach((value, key) => {
+		if (!values[key]) {
+			values[key] = []
+		}
+		values[key].push(value)
+	})
+
+	Object.keys(values).forEach(key => {
+		if (values[key].length === 1) {
+			values[key] = values[key][0]
+		}
+	})
 	try {
 		await connectToDB()
 		const title = values.title
@@ -24,26 +38,25 @@ export async function addCategory(formData: FormData) {
 		await Category.create(values)
 		return {
 			success: true,
-			message: 'Category added successfully',
+			message: ' Category added successfully',
 		}
 	} catch (error) {
-		if (error instanceof Error) {
-			console.error('Error adding category:', error)
-			throw new Error('Failed to add category: ' + error.message)
-		} else {
-			console.error('Unknown error:', error)
-			throw new Error('Failed to add category: Unknown error')
+		console.error('Error adding Category:', error)
+		return {
+			success: false,
+			message: 'Error adding Category',
 		}
 	} finally {
 		revalidatePath('/admin/categories')
+		redirect('/admin/categories')
 	}
 }
 
 export async function getAllCategories(
-	searchParams: ISearchParams,
-	limit: number,
+	searchParams?: ISearchParams,
+	limit: number = 10,
 ): Promise<IGetAllCategories> {
-	const page = searchParams.page || 1
+	const page = searchParams?.page || 1
 
 	try {
 		await connectToDB()
@@ -82,8 +95,7 @@ export async function getCategoryById(id: string) {
 	}
 }
 
-export async function deleteCategory(formData: FormData) {
-	const { id } = Object.fromEntries(formData) as { id: string }
+export async function deleteCategory(id: string) {
 	if (!id) {
 		console.error('No ID provided')
 		return

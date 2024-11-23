@@ -23,13 +23,12 @@ import Loader from '@/components/Loader'
 import Search from '@/components/Search'
 import Sidebar from '@/components/Sidebar'
 import Slider from '@/components/Slider'
-import TestimonialsList from '@/components/Testimonials'
+import TestimonialsList from '@/components/TestimonialsList'
 // import { slides } from './Slides'
-import Switcher from '@/components/Switcher'
 import CustomButton from '@/components/admin/CustomFormikButton'
+import Switcher from '@/components/Switcher'
 
 export {
-	CustomButton,
 	AddCategoryForm,
 	AddCustomerForm,
 	AddGoodForm,
@@ -38,6 +37,7 @@ export {
 	AdminMenu,
 	Advantages,
 	Cart,
+	CustomButton,
 	Description,
 	EmptyState,
 	Footer,

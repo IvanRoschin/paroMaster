@@ -3,10 +3,10 @@
 import { sendEmailToLid } from '@/actions/sendEmail'
 import CustomButton from '@/components/admin/CustomFormikButton'
 import FormField from '@/components/input/FormField'
+import { contactFormSchema } from '@/helpers/index'
 import { ILid } from '@/types/lid/ILid'
 import { Form, Formik, FormikState } from 'formik'
 import { toast } from 'sonner'
-import { contactFormSchema } from '../helpers//validationShemas/contactForm'
 
 interface InitialStateType extends Omit<ILid, '_id'> {}
 

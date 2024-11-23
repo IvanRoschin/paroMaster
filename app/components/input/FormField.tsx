@@ -11,7 +11,7 @@ interface FormFieldProps {
 	item: {
 		as?: string
 		id: string
-		label: string
+		label?: string
 		type?: string
 		value?: string
 		disabled?: boolean
@@ -33,8 +33,8 @@ const FormField: React.FC<FormFieldProps> = ({ item, errors, setFieldValue }) =>
 					<Field
 						as='select'
 						name={item.id}
-						className={`peer w-full p-4 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed 
-            ${meta.error && meta.touched ? 'border-rose-500' : 'border-neutral-300'} 
+						className={`peer w-full p-4 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
+            ${meta.error && meta.touched ? 'border-rose-500' : 'border-neutral-300'}
             ${meta.error && meta.touched ? 'focus:border-rose-500' : 'focus:border-green-500'}
             `}
 						onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -54,8 +54,8 @@ const FormField: React.FC<FormFieldProps> = ({ item, errors, setFieldValue }) =>
 						as='textarea'
 						name={item.id}
 						disabled={item.disabled}
-						className={`peer w-full p-4 font-light bg-white border-2 rounded-md outline-none transition 
-            ${meta.error && meta.touched ? 'border-rose-500' : 'border-neutral-300'} 
+						className={`peer w-full p-4 font-light bg-white border-2 rounded-md outline-none transition
+            ${meta.error && meta.touched ? 'border-rose-500' : 'border-neutral-300'}
             ${meta.error && meta.touched ? 'focus:border-rose-500' : 'focus:border-green-500'}
             disabled:opacity-70 disabled:cursor-not-allowed resize-none`} // Added `resize-none` to prevent resizing
 						style={item.style} // Apply any additional styles from `item`
@@ -74,8 +74,8 @@ const FormField: React.FC<FormFieldProps> = ({ item, errors, setFieldValue }) =>
 						name={item.id}
 						type={item.type}
 						disabled={item.disabled}
-						className={`text-primaryTextColor peer w-full p-4 pt-6 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed 
-            ${meta.error && meta.touched ? 'border-rose-500' : 'border-neutral-300'} 
+						className={`text-primaryTextColor peer w-full p-4 pt-6 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
+            ${meta.error && meta.touched ? 'border-rose-500' : 'border-neutral-300'}
             ${meta.error && meta.touched ? 'focus:border-rose-500' : 'focus:border-green-500'}
             `}
 					/>

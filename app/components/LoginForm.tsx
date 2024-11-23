@@ -1,6 +1,6 @@
 'use client'
 
-import { userLoginSchema } from 'app/helpers/validationShemas'
+import { userLoginSchema } from '@/helpers/index'
 import { Form, Formik, FormikHelpers } from 'formik'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'

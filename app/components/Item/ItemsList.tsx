@@ -1,14 +1,9 @@
 'use client'
 
 import { IGood } from '@/types/good/IGood'
-import EmptyState from '../EmptyState'
 import ItemListCard from './ItemListCard'
 
 const ItemsList = ({ goods }: { goods: IGood[] }) => {
-	if (goods.length === 0) {
-		return <EmptyState />
-	}
-
 	return (
 		<>
 			<ul

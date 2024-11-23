@@ -11,7 +11,11 @@ const SingleOrderPage = async ({ params }: { params: Params }) => {
 
 	return (
 		<div className='mb-20'>
-			<AddOrderForm order={order} title={'Редагувати дані ордера'} action={updateOrder} />
+			<AddOrderForm
+				order={order}
+				title={`Редагувати дані ордера ${order.number}`}
+				action={updateOrder}
+			/>
 		</div>
 	)
 }

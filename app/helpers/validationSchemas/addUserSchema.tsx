@@ -5,7 +5,7 @@ const emailRegex = /^(?=.{1,63}$)(?=.{2,}@)[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA
 const phoneRegex = /^\+380\d{9}$/
 const passwordRegexp = /^\S+$/
 
-export const userFormSchema = Yup.object().shape({
+const userFormSchema = Yup.object().shape({
 	name: Yup.string()
 		.min(2, 'Мінімум 2 символи')
 		.max(20, 'Максимум 20 символів')
@@ -33,3 +33,5 @@ export const userFormSchema = Yup.object().shape({
 	isAdmin: Yup.boolean(),
 	isActive: Yup.boolean(),
 })
+
+export default userFormSchema

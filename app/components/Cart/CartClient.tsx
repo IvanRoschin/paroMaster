@@ -7,23 +7,23 @@ import CartItem from './CartItem'
 type Props = {}
 
 export const CartClient = (props: Props) => {
-	const { cartItems } = useShoppingCart()
+	const { cartItemsId } = useShoppingCart()
 	const [amounts, setAmounts] = useState<number[]>([])
 
 	useEffect(() => {
-		const retrievedAmounts = cartItems.map(item => {
+		const retrievedAmounts = cartItemsId.map(item => {
 			const storedAmount = localStorage.getItem(`amount-${item.id}`)
 			return storedAmount ? JSON.parse(storedAmount) : 0
 		})
 		setAmounts(retrievedAmounts)
-	}, [cartItems])
+	}, [cartItemsId])
 
 	const totalAmount = amounts.reduce((total, amount) => total + amount, 0)
 
 	return (
 		<div>
 			<h2 className='text-2xl'>Товари у замовленні</h2>
-			{cartItems.map(item => (
+			{cartItemsId.map(item => (
 				<CartItem key={item.id} id={item.id} quantity={item.quantity} />
 			))}
 			<p className='text-end pt-10'>

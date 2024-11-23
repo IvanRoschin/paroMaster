@@ -102,7 +102,8 @@ export default function ItemClient({ id }: { id: string }) {
 						<p className='font-light text-gray-500'>Сумісність з брендами: {item.compatibility}</p>
 					</div>
 					<p className='font-light text-gray-500'>
-						Сумісність з моделями: {item.compatibility.join(', ')}
+						Сумісність з моделями:{' '}
+						{Array.isArray(item.compatibility) ? item.compatibility.join(', ') : item.compatibility}
 					</p>
 				</div>
 			</div>

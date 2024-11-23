@@ -14,10 +14,9 @@ export interface NewOrderTemplateProps {
 	payment: PaymentMethod
 	city: string
 	warehouse: string
-	cartItems: IGood[]
-	totalAmount: number
-	quantity: number[]
+	orderedGoods: IGood[]
 	orderNumber: string
+	totalPrice: number
 }
 
 export function generateEmailContent({
@@ -28,12 +27,11 @@ export function generateEmailContent({
 	payment,
 	city,
 	warehouse,
-	cartItems,
-	totalAmount,
-	quantity,
+	orderedGoods,
 	orderNumber,
+	totalPrice,
 }: NewOrderTemplateProps): string {
-	const itemsContent = cartItems
+	const itemsContent = orderedGoods
 		.map(
 			(item, index) => `
         <tr key="${item._id}">
@@ -42,7 +40,7 @@ export function generateEmailContent({
           <td style="text-align: center">${item.brand}</td>
           <td style="text-align: center">${item.model}</td>
 					<td style="text-align: center">${item.vendor}</td>
-          <td style="text-align: center">${quantity[index]}</td>
+          <td style="text-align: center">${item.quantity}</td>
           <td style="text-align: center">${item.price}</td>
         </tr>
       `,
@@ -85,7 +83,7 @@ export function generateEmailContent({
           ${itemsContent}
         </tbody>
       </table>
-      <h2 style="text-align: center; color: #333;">Всього за замовленням: ${totalAmount} грн.</br> + доставка за тарифами перевізника
+      <h2 style="text-align: center; color: #333;">Всього за замовленням: ${totalPrice} грн.</br> + доставка за тарифами перевізника
       </h2>
 
     </div>

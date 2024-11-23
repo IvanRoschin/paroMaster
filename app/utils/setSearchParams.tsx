@@ -1,17 +1,18 @@
-'use client'
-import { useCallback } from 'react'
+// 'use client'
 
-const createQueryString = useCallback(
-	(name: string, value: string) => {
-		const params = new URLSearchParams(searchParams.toString())
-		if (value) {
-			params.set(name, value)
-		} else {
-			params.delete(name)
-		}
-		return params.toString()
-	},
-	[searchParams],
-)
+// import { useCallback } from 'react'
 
-export default setSearchParams
+// const createQueryString = useCallback(
+// 	(name: string, value: string) => {
+// 		const params = new URLSearchParams(searchParams.toString())
+// 		if (value) {
+// 			params.set(name, value)
+// 		} else {
+// 			params.delete(name)
+// 		}
+// 		return params.toString()
+// 	},
+// 	[searchParams],
+// )
+
+// export default setSearchParams

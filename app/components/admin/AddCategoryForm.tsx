@@ -1,8 +1,11 @@
 'use client'
 
+import { useAddData } from '@/hooks/useAddData'
+import { useUpdateData } from '@/hooks/useUpdateData'
 import { ICategory } from '@/types/category/ICategory'
 import { Field, Form, Formik, FormikState } from 'formik'
-import React from 'react'
+import { useRouter } from 'next/router'
+import React, { useState } from 'react'
 import { toast } from 'sonner'
 import ImageUploadCloudinary from '../ImageUploadCloudinary'
 import CustomButton from './CustomFormikButton'
@@ -30,11 +33,19 @@ const AddCategoryForm: React.FC<CategoryFormProps> = ({ category, title, action 
 		src: category?.src || '',
 		title: category?.title || '',
 	}
+	const [isLoading, setIsLoading] = useState(false)
+	const router = useRouter()
+
+	const isUpdating = Boolean(category?._id)
+
+	const addCategoryMutation = useAddData(action, 'categories')
+	const updateCategoryMutation = useUpdateData(action, 'categories')
 
 	const handleSubmit = async (values: InitialStateType, { resetForm }: ResetFormProps) => {
 		try {
-			const formData = new FormData()
+			setIsLoading(true)
 
+			const formData = new FormData()
 			Object.keys(values).forEach(key => {
 				const value = (values as Record<string, any>)[key]
 				if (Array.isArray(value)) {
@@ -43,17 +54,28 @@ const AddCategoryForm: React.FC<CategoryFormProps> = ({ category, title, action 
 					formData.append(key, value)
 				}
 			})
-
-			if (category?._id) {
+			if (isUpdating && category) {
 				formData.append('id', category._id as string)
 			}
 
-			await action(formData)
+			if (isUpdating) {
+				await updateCategoryMutation.mutateAsync(formData)
+			} else {
+				await addCategoryMutation.mutateAsync(formData)
+			}
 			resetForm()
-			toast.success(category?._id ? 'Категорію оновлено!' : 'Нову категорію додано!')
+			toast.success(isUpdating ? 'Категорію оновлено!' : 'Нову категорію додано!')
 		} catch (error) {
-			toast.error('Помилка!')
-			console.error('Error submitting form:', error)
+			if (error instanceof Error) {
+				toast.error(error.message)
+				console.error(error.message)
+			} else {
+				toast.error('An unknown error occurred')
+				console.error(error)
+			}
+		} finally {
+			setIsLoading(false)
+			router.push('/admin/categories')
 		}
 	}
 
@@ -81,7 +103,7 @@ const AddCategoryForm: React.FC<CategoryFormProps> = ({ category, title, action 
 							values={values.src}
 							errors={errors}
 						/>
-						<CustomButton label={'Зберегти'} />
+						<CustomButton label='Зберегти' disabled={isLoading} />
 					</Form>
 				)}
 			</Formik>
