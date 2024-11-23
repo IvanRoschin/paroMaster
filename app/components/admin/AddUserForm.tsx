@@ -1,10 +1,10 @@
 'use client'
 
+import { FormField } from '@/components/index'
+import { userFormSchema } from '@/helpers/index'
 import { IUser } from '@/types/user/IUser'
 import { Form, Formik, FormikState } from 'formik'
 import { toast } from 'sonner'
-import { userFormSchema } from '../../helpers/validationShemas'
-import FormField from '../input/FormField'
 import CustomButton from './CustomFormikButton'
 
 interface InitialStateType extends Omit<IUser, '_id'> {}

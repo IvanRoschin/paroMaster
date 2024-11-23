@@ -1,9 +1,10 @@
 'use client'
 
 import { getData } from '@/actions/nova'
+import { customerFormSchema } from '@/helpers/index'
+import { useAddData, useUpdateData } from '@/hooks/index'
 import { ICustomer } from '@/types/customer/ICustomer'
 import { PaymentMethod } from '@/types/paymentMethod'
-import { customerFormSchema } from 'app/helpers/validationShemas'
 import { FormikProvider, useFormik } from 'formik'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -31,19 +32,7 @@ interface FormValues {
 interface CustomerFormProps {
 	customer?: ICustomer
 	title?: string
-	action: (
-		data: FormData,
-	) => Promise<{
-		success: boolean
-		data: {
-			name: FormDataEntryValue
-			phone: FormDataEntryValue
-			email: FormDataEntryValue
-			city: FormDataEntryValue
-			warehouse: FormDataEntryValue
-			payment: FormDataEntryValue
-		}
-	}>
+	action: (values: ICustomer) => Promise<{ success: boolean; message: string }>
 }
 
 const AddCustomerForm: React.FC<CustomerFormProps> = ({
@@ -54,10 +43,18 @@ const AddCustomerForm: React.FC<CustomerFormProps> = ({
 	const [warehouses, setWarehouses] = useState<Warehouse[]>([])
 	const [isLoading, setIsLoading] = useState(false)
 	const router = useRouter()
+
+	const isUpdating = Boolean(customer?._id)
+
+	const addCustomerMutation = useAddData(action, 'customers')
+	const updateCustomerMutation = useUpdateData(action, 'customers')
+
+	const [name, surname] = customer?.name?.split(' ') || ['', '']
+
 	const formik = useFormik<FormValues>({
 		initialValues: {
-			name: customer?.name || '',
-			surname: '',
+			name: name || '',
+			surname: surname || '',
 			email: customer?.email || '',
 			phone: customer?.phone || '+380',
 			payment: customer?.payment || PaymentMethod.CashOnDelivery,
@@ -70,8 +67,8 @@ const AddCustomerForm: React.FC<CustomerFormProps> = ({
 			try {
 				const formData = new FormData()
 				const fullName = `${values.name} ${values.surname}`.trim()
-				{
-					customer && formData.append('id', customer._id as string)
+				if (isUpdating && customer) {
+					formData.append('id', customer._id as string)
 				}
 				formData.append('name', fullName)
 				formData.append('email', values.email)
@@ -80,10 +77,13 @@ const AddCustomerForm: React.FC<CustomerFormProps> = ({
 				formData.append('warehouse', values.warehouse)
 				formData.append('payment', values.payment as string)
 
-				await action(formData)
-
+				if (isUpdating) {
+					await updateCustomerMutation.mutateAsync(formData)
+				} else {
+					await addCustomerMutation.mutateAsync(formData)
+				}
 				resetForm()
-				toast.success(customer?._id ? 'Клієнта оновлено!' : 'Нового клієнта додано!')
+				toast.success(isUpdating ? 'Клієнта оновлено!' : 'Нового клієнта додано!')
 			} catch (error) {
 				console.error('Error in onSubmit:', error)
 				toast.error('Помилка створення замовника')
@@ -122,7 +122,13 @@ const AddCustomerForm: React.FC<CustomerFormProps> = ({
 					setWarehouses(response.data.data)
 				}
 			} catch (error) {
-				console.error('Error fetching warehouses:', error)
+				if (error instanceof Error) {
+					toast.error(error.message)
+					console.error(error.message)
+				} else {
+					toast.error('An unknown error occurred')
+					console.error(error)
+				}
 			} finally {
 				setIsLoading(false)
 			}

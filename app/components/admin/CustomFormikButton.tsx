@@ -5,6 +5,7 @@ interface CustomFormikButtonProps {
 	disabled?: boolean
 	outline?: boolean
 	small?: boolean
+	type?: 'submit' | 'reset' | 'button' | undefined
 }
 
 const CustomButton: React.FC<CustomFormikButtonProps> = ({
@@ -12,13 +13,14 @@ const CustomButton: React.FC<CustomFormikButtonProps> = ({
 	disabled,
 	outline,
 	small,
+	type,
 	...props
 }) => {
 	const { submitForm } = useFormikContext()
 
 	return (
 		<button
-			type='button'
+			type={type}
 			onClick={submitForm}
 			disabled={disabled}
 			className={`relative disabled:opacity-70 disabled:cursor-not-allowed rounded-lg hover:opacity-80 transition  ${

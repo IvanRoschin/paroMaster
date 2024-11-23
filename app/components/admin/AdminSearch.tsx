@@ -14,7 +14,7 @@ const Search = ({ placeholder }: { placeholder: string }) => {
 	const [inputValue, setInputValue] = useState<string>('')
 
 	const handleSearch = useDebouncedCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-		const params = new URLSearchParams(searchParams)
+		const params = new URLSearchParams(searchParams.toString())
 		params.set('page', '1')
 
 		const searchValue = e.target.value

@@ -36,13 +36,11 @@ export async function getAllCustomers(
 	}
 }
 
-export async function addCustomer(formData: FormData) {
-	const values = Object.fromEntries(formData.entries())
+export async function addCustomer(values: ICustomer) {
 	try {
 		await connectToDB()
 
-		const phone = formData.get('phone') as string
-
+		const phone = values?.phone
 		const existingCustomer = await Customer.findOne({ phone })
 		if (existingCustomer) {
 			return {
@@ -63,7 +61,7 @@ export async function addCustomer(formData: FormData) {
 		await Customer.create(newCustomer)
 		return {
 			success: true,
-			data: newCustomer,
+			message: 'New Customer created successfully',
 		}
 	} catch (error) {
 		if (error instanceof Error) {
@@ -78,8 +76,7 @@ export async function addCustomer(formData: FormData) {
 	}
 }
 
-export async function deleteCustomer(formData: FormData): Promise<void> {
-	const { id } = Object.fromEntries(formData) as { id: string }
+export async function deleteCustomer(id: string) {
 	if (!id) {
 		console.error('No ID provided')
 		return
@@ -105,22 +102,10 @@ export async function getCustomerById(id: string) {
 	}
 }
 
-export async function updateCustomer(
-	formData: FormData,
-): Promise<{
-	success: boolean
-	data: {
-		name: FormDataEntryValue
-		phone: FormDataEntryValue
-		email: FormDataEntryValue
-		city: FormDataEntryValue
-		warehouse: FormDataEntryValue
-		payment: FormDataEntryValue
-	}
-}> {
-	const entries = Object.fromEntries(formData.entries())
+export async function updateCustomer(values: ICustomer) {
+	// const entries = Object.fromEntries(formData.entries())
 
-	const { id, name, phone, email, city, warehouse, payment } = entries as {
+	const { id, name, phone, email, city, warehouse, payment } = values as {
 		id: string
 		name?: string
 		phone?: string
@@ -149,7 +134,9 @@ export async function updateCustomer(
 				delete updateFields[key as keyof ICustomer],
 		)
 
-		const updatedCustomer = await Customer.findByIdAndUpdate(id, updateFields, { new: true }).lean()
+		const updatedCustomer = await Customer.findByIdAndUpdate(id, updateFields, {
+			new: true,
+		}).lean()
 
 		if (!updatedCustomer || Array.isArray(updatedCustomer)) {
 			throw new Error(
@@ -159,14 +146,7 @@ export async function updateCustomer(
 
 		return {
 			success: true,
-			data: {
-				name: updatedCustomer.name as FormDataEntryValue,
-				phone: updatedCustomer.phone as FormDataEntryValue,
-				email: updatedCustomer.email as FormDataEntryValue,
-				city: updatedCustomer.city as FormDataEntryValue,
-				warehouse: updatedCustomer.warehouse as FormDataEntryValue,
-				payment: updatedCustomer.payment as FormDataEntryValue,
-			},
+			message: 'updatedCustomer',
 		}
 	} catch (error) {
 		console.error('Error updating customer:', error)

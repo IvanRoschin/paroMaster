@@ -12,8 +12,7 @@ export interface IGetAllTestimonials {
 	count: number
 }
 
-export async function addTestimonial(formData: FormData) {
-	const values = Object.fromEntries(formData.entries())
+export async function addTestimonial(values: ITestimonial) {
 	try {
 		await connectToDB()
 
@@ -21,7 +20,7 @@ export async function addTestimonial(formData: FormData) {
 			name: values.name,
 			text: values.text,
 			rating: Number(values.rating),
-			isActive: values.isActive === 'true',
+			isActive: values.isActive,
 		})
 		return {
 			success: true,
@@ -83,8 +82,7 @@ export async function getTestimonialById(id: string) {
 	}
 }
 
-export async function deleteTestimonial(formData: FormData) {
-	const { id } = Object.fromEntries(formData) as { id: string }
+export async function deleteTestimonial(id: string) {
 	if (!id) {
 		console.error('No ID provided')
 		return
@@ -105,37 +103,43 @@ export async function deleteTestimonial(formData: FormData) {
 	}
 }
 
-export async function updateTestimonial(formData: FormData) {
-	const entries = Object.fromEntries(formData.entries())
-	const { id, name, text, rating, isActive } = entries as {
-		id: string
-		name?: string
-		text?: string
-		rating?: string
-		isActive?: string
-	}
+export async function updateTestimonial(values: any) {
 	try {
 		await connectToDB()
-		const updateFields: Partial<ITestimonial> = {
-			name: name || undefined,
-			text: text || undefined,
-			rating: rating ? Number(rating) : undefined,
-			isActive: isActive === 'true',
-		}
-		Object.keys(updateFields).forEach(
-			key =>
-				(updateFields[key as keyof ITestimonial] === '' ||
-					updateFields[key as keyof ITestimonial] === undefined) &&
-				delete updateFields[key as keyof ITestimonial],
+
+		const updateFields = Object.fromEntries(
+			Object.entries(values).filter(([key, value]) => key !== '_id' && value !== undefined),
 		)
-		await Testimonials.findByIdAndUpdate(id, updateFields)
+
+		if (Object.keys(updateFields).length === 0) {
+			return {
+				success: false,
+				message: 'No valid fields to update.',
+			}
+		}
+
+		const updatedTestimonial = await Testimonials.findByIdAndUpdate(
+			values._id,
+			{ $set: updateFields },
+			{ new: true },
+		)
+
+		if (!updatedTestimonial) {
+			return {
+				success: false,
+				message: 'Testimonial not found.',
+			}
+		}
+
+		return {
+			success: true,
+			message: 'Testimonial updated successfully',
+		}
 	} catch (error) {
-		if (error instanceof Error) {
-			console.error('Error update testimonal:', error)
-			throw new Error('Failed to testimonal user: ' + error.message)
-		} else {
-			console.error('Unknown error:', error)
-			throw new Error('Failed to update testimonal: Unknown error')
+		console.error('Error updating testimonial:', error)
+		return {
+			success: false,
+			message: error instanceof Error ? error.message : 'Unknown error occurred',
 		}
 	} finally {
 		revalidatePath('/admin/testimonials')

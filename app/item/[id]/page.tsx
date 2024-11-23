@@ -4,13 +4,13 @@ import { getGoodById } from '@/actions/goods'
 import Button from '@/components/Button'
 import ImagesBlock from '@/components/ImagesBlock'
 import Loader from '@/components/Loader'
+import { useFetchDataById } from '@/hooks/useFetchDataById'
 import { IGood } from '@/types/index'
 import { useShoppingCart } from 'app/context/ShoppingCartContext'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { FaPen } from 'react-icons/fa'
-import useSWR from 'swr'
 
 export default function Item({ params }: { params: any }) {
 	const { data: session } = useSession()
@@ -25,7 +25,9 @@ export default function Item({ params }: { params: any }) {
 		removeFromCart,
 	} = useShoppingCart()
 
-	const { data, error } = useSWR(`good-${params.id}`, () => getGoodById(params.id))
+	// const { data, error } = useSWR(`good-${params.id}`, () => getGoodById(params.id))
+
+	const { data, isLoading, isError, error } = useFetchDataById(params.id, getGoodById, 'good')
 
 	useEffect(() => {
 		if (data) {
@@ -35,14 +37,16 @@ export default function Item({ params }: { params: any }) {
 		}
 	}, [data, getItemQuantity])
 
-	if (error) {
-		console.error('Error fetching good:', error)
-		return <div>Error loading item. Please try again later.</div>
+	if (isLoading) return <Loader />
+	if (isError) {
+		return (
+			<div>
+				Error fetching good data: {error instanceof Error ? error.message : 'Unknown error'}
+			</div>
+		)
 	}
 
-	if (!data) {
-		return <Loader />
-	}
+	if (!data) return <Loader />
 
 	const quantity = getItemQuantity(data._id)
 
@@ -74,6 +78,7 @@ export default function Item({ params }: { params: any }) {
 							type='button'
 							label='Купити'
 							onClick={() => increaseCartQuantity(data._id)}
+							disabled={!data.isAvailable}
 						/>
 					) : (
 						<div className='flex items-center flex-col gap-10'>
@@ -102,6 +107,7 @@ export default function Item({ params }: { params: any }) {
 								width='40'
 								type='button'
 								label='Видалити'
+								disabled={data.isAvailable === 'false'}
 								onClick={() => {
 									removeFromCart(data._id)
 									localStorage.removeItem(`amount-${data._id}`)

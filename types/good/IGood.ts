@@ -1,3 +1,5 @@
+export interface IGoods {}
+
 export interface IGood {
 	_id?: string
 	category: string
@@ -11,11 +13,12 @@ export interface IGood {
 	isAvailable: boolean
 	isCompatible: boolean
 	compatibility: string
+	quantity?: number
 }
 
 export interface SGood {
 	quantity: number
-	id: string
+	_id: string
 	category: string
 	src: string[]
 	brand: string
@@ -26,5 +29,5 @@ export interface SGood {
 	price: number
 	isAvailable: boolean
 	isCompatible: boolean
-	compatibility: string[]
+	compatibility: string
 }

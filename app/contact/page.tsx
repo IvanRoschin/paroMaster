@@ -42,7 +42,7 @@ const ContactPage = () => {
 						<FaCalendarAlt className='inline-block mr-1' /> Режим роботи
 					</h3>
 					<p className='text-lg text-gray-700'>
-						<strong>Понеділок - П'ятниця:</strong> <br /> 9:00 - 18:00
+						<strong>Понеділок - П&apos;ятниця:</strong> <br /> 9:00 - 18:00
 					</p>
 					<p className='text-lg text-gray-700'>
 						<strong>Субота:</strong> 10:00 - 16:00

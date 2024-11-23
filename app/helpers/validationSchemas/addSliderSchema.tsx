@@ -1,6 +1,6 @@
 import * as Yup from 'yup'
 
-export const sliderFormSchema = Yup.object().shape({
+const sliderFormSchema = Yup.object().shape({
 	title: Yup.string()
 		.min(2, 'Мінімум 2 символи')
 		.max(10, 'Максимум 10 символів')
@@ -13,3 +13,5 @@ export const sliderFormSchema = Yup.object().shape({
 		.url('Некоректне посилання')
 		.required(`Обов'язкове поле`),
 })
+
+export default sliderFormSchema

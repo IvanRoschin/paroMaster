@@ -1,7 +1,6 @@
 'use server'
 
 import Order from '@/models/Order'
-import { SGood } from '@/types/good/IGood'
 import { ISearchParams } from '@/types/index'
 import { IOrder } from '@/types/order/IOrder'
 import { connectToDB } from '@/utils/dbConnect'
@@ -18,10 +17,7 @@ export async function getAllOrders(
 	limit: number,
 ): Promise<IGetAllOrdesResponse> {
 	const page = searchParams.page || 1
-	const status = searchParams.status === null ? 'all' : searchParams.status // Default status to 'all' if null
-
-	console.log('searchParams', searchParams)
-	console.log('status', status)
+	const status = searchParams.status === null ? 'all' : searchParams.status
 
 	try {
 		await connectToDB()
@@ -31,7 +27,7 @@ export async function getAllOrders(
 			query = { status }
 		}
 
-		const count = await Order.countDocuments(query)
+		const count = await Order.countDocuments()
 
 		const orders: IOrder[] = await Order.find(query)
 			.skip(limit * (page - 1))
@@ -46,24 +42,27 @@ export async function getAllOrders(
 }
 
 export async function addOrder(values: IOrder) {
+	console.log('valuesBackend:', values)
 	try {
 		await connectToDB()
 
 		const orderData = {
-			orderNumber: values.orderNumber,
+			number: values.number,
 			customer: values.customer,
 			orderedGoods: values.orderedGoods.map(item => ({
-				id: item.id,
 				title: item.title,
 				brand: item.brand,
 				model: item.model,
 				vendor: item.vendor,
-				quantity: item.quantity,
 				price: item.price,
+				quantity: item.quantity,
+				src: item.src,
 			})),
 			totalPrice: values.totalPrice,
-			status: 'Новий',
+			status: values.status,
 		}
+		// console.log('orderData', orderData)
+
 		await Order.create(orderData)
 		revalidatePath('/')
 		return { success: true, data: orderData }
@@ -78,45 +77,62 @@ export async function addOrder(values: IOrder) {
 	}
 }
 
-export async function addOrderAction(formData: FormData) {
-	const values: any = {}
-	formData.forEach((value, key) => {
-		if (!values[key]) {
-			values[key] = []
-		}
-		values[key].push(value)
-	})
+export const deleteGoodsFromOrder = async (orderId: string, goodsId: string) => {
+	try {
+		const order = await Order.findById(orderId)
 
-	Object.keys(values).forEach(key => {
-		if (values[key].length === 1) {
-			values[key] = values[key][0]
+		if (!order) {
+			throw new Error('Order not found')
 		}
-	})
+		type OrderedGood = {
+			id: string
+			price: number
+			quantity: number
+		}
+
+		const updatedGoods = order.orderedGoods.filter((good: OrderedGood) => good.id !== goodsId)
+
+		order.orderedGoods = updatedGoods
+
+		order.goodsQuantity = updatedGoods.reduce(
+			(total: number, good: OrderedGood) => total + good.quantity,
+			0,
+		)
+		order.totalPrice = updatedGoods.reduce(
+			(total: number, good: OrderedGood) => total + good.price * good.quantity,
+			0,
+		)
+
+		// Save the updated order
+		await order.save()
+
+		return { success: true, message: 'Goods deleted successfully' }
+	} catch (error) {
+		console.error('Error deleting goods:', error)
+		return { success: false, message: 'Failed to delete goods' }
+	}
+}
+
+export async function addOrderAction(values: IOrder) {
 	try {
 		await connectToDB()
 
-		const orderData = {
-			orderNumber: values.orderNumber,
-			customer: values.customer,
-			orderedGoods: values.orderedGoods.map((item: SGood) => ({
-				id: item.id,
-				title: item.title,
-				brand: item.brand,
-				model: item.model,
-				vendor: item.vendor,
-				quantity: item.quantity,
-				price: item.price,
-			})),
-			totalPrice: values.totalPrice,
-			status: 'Новий',
-		}
-		await Order.create(orderData)
+		// const orderData = {
+		// 	number: values.number,
+		// 	customer: values.customer,
+		// 	orderedGoods: values.orderedGoods,
+		// 	totalPrice: values.totalPrice,
+		// 	status: values.status || 'Новий',
+		// }
+		await Order.create(values)
 		revalidatePath('/')
-		return { success: true, data: orderData }
+		return { success: true, message: 'The New Order Successfully Added' }
 	} catch (error) {
 		if (error instanceof Error) {
 			console.error('Error adding order:', error)
-			throw new Error('Failed to add order: ' + error.message)
+			return { success: false, message: 'Failed to add order: ' + error.message }
+
+			// throw new Error('Failed to add order: ' + error.message)
 		} else {
 			console.error('Unknown error:', error)
 			throw new Error('Failed to add order: Unknown error')
@@ -124,8 +140,7 @@ export async function addOrderAction(formData: FormData) {
 	}
 }
 
-export async function deleteOrder(formData: FormData): Promise<void> {
-	const { id } = Object.fromEntries(formData) as { id: string }
+export async function deleteOrder(id: string) {
 	if (!id) {
 		console.error('No ID provided')
 		return
@@ -151,61 +166,43 @@ export async function getOrderById(id: string) {
 	}
 }
 
-export async function updateOrder(formData: FormData) {
-	const values: any = {}
-	formData.forEach((value, key) => {
-		if (!values[key]) {
-			values[key] = []
-		}
-		values[key].push(value)
-	})
+export async function updateOrder(values: IOrder) {
+	const id = values._id
 
-	Object.keys(values).forEach(key => {
-		if (values[key].length === 1) {
-			values[key] = values[key][0]
-		}
-	})
-	const { id, orderNumber, customer, orderedGoods, goodsQuantity, totalPrice, status } = values as {
-		id: string
-		orderNumber?: string
-		customer?: any
-		orderedGoods?: any
-		goodsQuantity?: number
-		totalPrice?: number
-		status?: 'Новий' | 'Опрацьовується' | 'Оплачено' | 'На відправку' | 'Закритий'
-	}
+	// const { id, number, customer, orderedGoods, totalPrice, status } = values as {
+	// 	id: string
+	// 	number?: string
+	// 	customer?: {
+	// 		name?: string
+	// 		email?: string
+	// 		phone?: string
+	// 		address?: string
+	// 		comment?: string
+	// 	}
+	// 	orderedGoods?: any
+	// 	totalPrice?: number
+	// 	status?: 'Новий' | 'Опрацьовується' | 'Оплачено' | 'На відправку' | 'Закритий'
+	// }
+
 	try {
 		await connectToDB()
 
-		const updateFields: Partial<IOrder> = {
-			orderNumber,
-			customer,
-			orderedGoods,
-			goodsQuantity,
-			totalPrice,
-			status,
-		}
-
-		Object.keys(updateFields).forEach(
-			key =>
-				(updateFields[key as keyof IOrder] === '' ||
-					updateFields[key as keyof IOrder] === undefined) &&
-				delete updateFields[key as keyof IOrder],
-		)
-		await Order.findByIdAndUpdate(id, updateFields)
+		await Order.findByIdAndUpdate(id, values)
+		return { success: true, message: 'Замовлення оновлено успішно' }
 	} catch (error) {
 		if (error instanceof Error) {
-			console.error('Error updating good:', error)
-			throw new Error('Failed to update good: ' + error.message)
+			console.error('Error updating order:', error)
+			throw new Error('Failed to update order: ' + error.message)
 		} else {
 			console.error('Unknown error:', error)
-			throw new Error('Failed to update good: Unknown error')
+			throw new Error('Failed to update order: Unknown error')
 		}
 	} finally {
 		revalidatePath('/admin/orders')
 		redirect('/admin/orders')
 	}
 }
+
 // const newOrderData = {
 // 	orderNumber: values.orderNumber,
 // 	customer: values.customer,

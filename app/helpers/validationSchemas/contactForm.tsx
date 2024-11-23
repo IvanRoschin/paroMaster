@@ -1,10 +1,10 @@
 import * as Yup from 'yup'
 
-const nameRegex = /^[а-яА-ЯіІїЇєЄґҐ']+$/
+const nameRegex = /^[а-яА-ЯіІїЇєЄґҐ']+(\s[а-яА-ЯіІїЇєЄґҐ']+)?$/
 const emailRegex = /^(?=.{1,63}$)(?=.{2,}@)[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 const phoneRegex = /^\+380\d{9}$/
 
-export const contactFormSchema = Yup.object().shape({
+const contactFormSchema = Yup.object().shape({
 	name: Yup.string()
 		.min(3, 'Мінімум 3 символи')
 		.max(20, 'Максимум 20 символів')
@@ -26,3 +26,5 @@ export const contactFormSchema = Yup.object().shape({
 		})
 		.required(`Обов'язкове поле`),
 })
+
+export default contactFormSchema

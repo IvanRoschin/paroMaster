@@ -1,4 +1,5 @@
 'use server'
+import { IGood } from '@/types/index'
 import {
 	generateCustomerEmailContent,
 	NewCustomerTemplateProps,
@@ -8,37 +9,51 @@ import { Resend } from 'resend'
 import { generateLidEmailContent, NewLidTemplateProps } from '../templates/email/NewLidTemplate'
 import { generateEmailContent, NewOrderTemplateProps } from '../templates/email/NewOrderTemplate'
 
-console.log('process.env.RESEND_API', process.env.RESEND_API)
+interface IGetSendData {
+	name: string
+	surname?: string
+	email: string
+	phone: string
+	city: string
+	warehouse: string
+	payment: string
+	orderNumber: string
+	orderedGoods: IGood[]
+	totalPrice: number
+}
+
 const resend = new Resend(process.env.RESEND_API)
 
-export async function sendEmail(data: FieldValues, orderNumber: string) {
-	console.log('data', data)
+export async function sendEmail(data: IGetSendData) {
+	console.log('mailData:', data)
 
 	const {
-		email,
 		name,
 		surname,
+		email,
 		phone,
 		city,
 		warehouse,
 		payment,
-		cartItems,
-		totalAmount,
-		quantity,
+		orderNumber,
+		orderedGoods,
+		totalPrice,
 	} = data
 
 	if (
-		!email ||
 		!name ||
 		!surname ||
+		!email ||
 		!phone ||
 		!city ||
 		!warehouse ||
 		!payment ||
-		!cartItems ||
-		!totalAmount ||
-		!quantity ||
-		!orderNumber
+		!orderNumber ||
+		!orderedGoods ||
+		!totalPrice ||
+		!Array.isArray(orderedGoods) ||
+		orderedGoods.length === 0 ||
+		totalPrice <= 0
 	) {
 		throw new Error('Error not all data passed')
 	}
@@ -52,9 +67,7 @@ export async function sendEmail(data: FieldValues, orderNumber: string) {
 			city,
 			warehouse,
 			payment,
-			cartItems,
-			totalAmount,
-			quantity,
+			orderedGoods,
 			orderNumber,
 		} as NewOrderTemplateProps)
 
@@ -83,19 +96,8 @@ export async function sendEmail(data: FieldValues, orderNumber: string) {
 	}
 }
 
-export async function sendCustomerEmail(data: FieldValues, orderNumber: string) {
-	const {
-		email,
-		name,
-		surname,
-		phone,
-		city,
-		warehouse,
-		payment,
-		cartItems,
-		totalAmount,
-		quantity,
-	} = data
+export async function sendCustomerEmail(data: IGetSendData) {
+	const { email, name, surname, phone, city, warehouse, payment, orderNumber, orderedGoods } = data
 
 	if (
 		!email ||
@@ -105,9 +107,7 @@ export async function sendCustomerEmail(data: FieldValues, orderNumber: string) 
 		!city ||
 		!warehouse ||
 		!payment ||
-		!cartItems ||
-		!totalAmount ||
-		!quantity ||
+		!orderedGoods ||
 		!orderNumber
 	) {
 		throw new Error('Error not all data passed')
@@ -122,9 +122,7 @@ export async function sendCustomerEmail(data: FieldValues, orderNumber: string) 
 			city,
 			warehouse,
 			payment,
-			cartItems,
-			totalAmount,
-			quantity,
+			orderedGoods,
 			orderNumber,
 		} as NewCustomerTemplateProps)
 
@@ -153,7 +151,7 @@ export async function sendCustomerEmail(data: FieldValues, orderNumber: string) 
 }
 
 export async function sendEmailToLid(data: FieldValues) {
-	console.log('data', data)
+	console.log('lidMaildata', data)
 
 	const { email, name, phone } = data
 

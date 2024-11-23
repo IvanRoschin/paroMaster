@@ -12,6 +12,7 @@ secondaryBackground #d1d5db => 209 213 219
 primaryTextColor #282828 => 40 40 40
 primaryAccentColor #ea580c => 234 88 12
 #FFFD84 => 255 255 216
+container sizes: xsm: max-480px sm: 480px md: 768px lg: 1280px  
 */
 
 @layer base {

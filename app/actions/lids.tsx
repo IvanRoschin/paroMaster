@@ -26,7 +26,7 @@ export async function addNewLid(formData: FormData) {
 		await newLid.save()
 		return {
 			success: true,
-			data: newLid,
+			data: JSON.parse(JSON.stringify(newLid)),
 		}
 	} catch (error) {
 		if (error instanceof Error) {
