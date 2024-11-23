@@ -32,7 +32,7 @@ interface FormValues {
 interface CustomerFormProps {
 	customer?: ICustomer
 	title?: string
-	action: (data: FormData) => Promise<{ success: boolean; message: string }>
+	action: (values: ICustomer) => Promise<{ success: boolean; message: string }>
 }
 
 const AddCustomerForm: React.FC<CustomerFormProps> = ({

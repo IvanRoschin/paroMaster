@@ -5,6 +5,7 @@ import Pagination from '@/components/admin/Pagination'
 import Button from '@/components/Button'
 import { EmptyState, Loader, Search, Switcher } from '@/components/index'
 import { useDeleteData, useFetchData } from '@/hooks/index'
+import { ITestimonial } from '@/types/index'
 import { ISearchParams } from '@/types/searchParams'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -20,7 +21,7 @@ export default function Testimonials({
 }) {
 	const [statusFilter, setStatusFilter] = useState<string | null>(null)
 
-	const { data, isLoading, isError } = useFetchData(
+	const { data, isLoading, isError, refetch } = useFetchData(
 		{ ...searchParams, statusFilter },
 		limit,
 		getAllTestimonials,
@@ -32,35 +33,29 @@ export default function Testimonials({
 		deleteTestimonialById(id)
 	}
 
-	if (isLoading) {
-		return <Loader />
-	}
-
-	if (isError) {
-		return <div>Error fetching data.</div>
-	}
-
-	if (!data?.testimonials || data.testimonials.length === 0) {
-		return <EmptyState showReset />
-	}
-
-	const handleStatusToggle = async (id: string, currentStatus: boolean) => {
+	const handleStatusToggle = async (_id: string | undefined, isActive: boolean) => {
+		if (!_id) {
+			toast.error('Invalid testimonial ID.')
+			return
+		}
 		try {
-			const formData = new FormData()
-			formData.append('id', id)
-			formData.append('isActive', (!currentStatus).toString())
-			await updateTestimonial(formData)
+			const values = { _id, isActive: !isActive }
+			await updateTestimonial(values as Partial<ITestimonial> & { _id: string })
+			refetch()
 			toast.success('Статус відгуку змінено!')
 		} catch (error) {
-			toast.error('Помилка при зміні статусу відгуку!')
-			console.error('Error updating testimonial status', error)
+			toast.error('Unknown error occurred.')
+			console.error('Error updating testimonial status:', error)
 		}
 	}
 
+	if (isLoading) return <Loader />
+	if (isError) return <div>Error fetching data.</div>
+	if (!data?.testimonials || data.testimonials.length === 0) return <EmptyState showReset />
+
+	// Pagination setup
 	const testimonialsCount = data?.count || 0
-
 	const page = searchParams.page ? Number(searchParams.page) : 1
-
 	const totalPages = Math.ceil(testimonialsCount / limit)
 	const pageNumbers = []
 	const offsetNumber = 3

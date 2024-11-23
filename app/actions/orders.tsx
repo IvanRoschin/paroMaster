@@ -113,31 +113,18 @@ export const deleteGoodsFromOrder = async (orderId: string, goodsId: string) => 
 	}
 }
 
-export async function addOrderAction(formData: FormData) {
-	const values: any = {}
-	formData.forEach((value, key) => {
-		if (!values[key]) {
-			values[key] = []
-		}
-		values[key].push(value)
-	})
-
-	Object.keys(values).forEach(key => {
-		if (values[key].length === 1) {
-			values[key] = values[key][0]
-		}
-	})
+export async function addOrderAction(values: IOrder) {
 	try {
 		await connectToDB()
 
-		const orderData = {
-			number: values.number,
-			customer: values.customer,
-			orderedGoods: values.orderedGoods,
-			totalPrice: values.totalPrice,
-			status: values.status || 'Новий',
-		}
-		await Order.create(orderData)
+		// const orderData = {
+		// 	number: values.number,
+		// 	customer: values.customer,
+		// 	orderedGoods: values.orderedGoods,
+		// 	totalPrice: values.totalPrice,
+		// 	status: values.status || 'Новий',
+		// }
+		await Order.create(values)
 		revalidatePath('/')
 		return { success: true, message: 'The New Order Successfully Added' }
 	} catch (error) {
@@ -180,8 +167,6 @@ export async function getOrderById(id: string) {
 }
 
 export async function updateOrder(values: IOrder) {
-	console.log('values on UO back', values)
-
 	const id = values._id
 
 	// const { id, number, customer, orderedGoods, totalPrice, status } = values as {

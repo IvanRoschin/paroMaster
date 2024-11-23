@@ -4,12 +4,12 @@ import { getData } from '@/actions/nova'
 import orderFormSchema from '@/helpers/validationSchemas/orderFormShema'
 import { useAddData } from '@/hooks/useAddData'
 import { useUpdateData } from '@/hooks/useUpdateData'
-import { IOrder } from '@/types/index'
+import { IGood, IOrder } from '@/types/index'
 import { PaymentMethod } from '@/types/paymentMethod'
 import { FieldArray, Formik, FormikState } from 'formik'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import Button from '../Button'
 import { Icon } from '../Icon'
@@ -48,7 +48,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 
 	const { push } = useRouter()
 	const isUpdating = Boolean(order?._id)
-	const [name, surname] = order?.customer.name?.split(' ') || ['', '']
+	const [name = '', surname = ''] = (order?.customer.name || '').split(' ')
 
 	const addOrderMutation = useAddData(action, 'orders')
 	const updateOrderMutation = useUpdateData(action, 'orders')
@@ -141,49 +141,67 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 		},
 	]
 
+	// useEffect(() => {
+	// 	if (initialValues.customer.city) {
+	// 		fetchWarehouses(initialValues.customer.city)
+	// 	}
+	// }, [initialValues.customer.city])
+
+	const fetchWarehouses = async (city: string): Promise<{ Ref: string; Description: string }[]> => {
+		try {
+			const response = await getData({
+				apiKey: process.env.NOVA_API,
+				modelName: 'Address',
+				calledMethod: 'getWarehouses',
+				methodProperties: { CityName: city, Limit: '50', Language: 'UA' },
+			})
+			return response.data.data || []
+		} catch (error) {
+			console.error('Error fetching warehouses:', error)
+			return []
+		}
+	}
+
+	const calculateTotalPrice = useCallback((orderedGoods: IGood[]): number => {
+		return orderedGoods.reduce((total: number, item: IGood) => {
+			const quantity = item.quantity ?? 1
+			return total + item.price * quantity
+		}, 0)
+	}, [])
+
+	useEffect(() => {
+		setTotalPrice(calculateTotalPrice(initialValues.orderedGoods))
+	}, [initialValues.orderedGoods, calculateTotalPrice])
+
+	// const calculateTotalPrice = (goods: typeof initialValues.orderedGoods) => {
+	// 	return goods.reduce((total, good) => total + good.price * (good.quantity ?? 0), 0)
+	// }
+
 	useEffect(() => {
 		if (initialValues.customer.city) {
-			fetchWarehouses(initialValues.customer.city)
+			const fetchAndSetWarehouses = async () => {
+				try {
+					const fetchedWarehouses = await fetchWarehouses(initialValues.customer.city)
+					setWarehouses(fetchedWarehouses)
+				} catch (error) {
+					console.error('Error fetching warehouses:', error)
+				}
+			}
+			fetchAndSetWarehouses()
 		}
 	}, [initialValues.customer.city])
 
-	const fetchWarehouses = async (city: string) => {
-		const request = {
-			apiKey: process.env.NOVA_API,
-			modelName: 'Address',
-			calledMethod: 'getWarehouses',
-			methodProperties: {
-				CityName: city,
-				Limit: '50',
-				Language: 'UA',
-			},
-		}
-		try {
-			const response = await getData(request)
-			setWarehouses(response.data.data || [])
-		} catch (error) {
-			console.error('Error fetching warehouses:', error)
-		}
-	}
-
-	useEffect(() => {
-		if (order) {
-			setTotalPrice(calculateTotalPrice(order.orderedGoods))
-		}
-	}, [order])
-
-	const calculateTotalPrice = (goods: typeof initialValues.orderedGoods) => {
-		return goods.reduce((total, good) => total + good.price * (good.quantity ?? 0), 0)
-	}
-
-	// Run useEffect on form submission or changes
-	const handleFormChange = (values: InitialStateType) => {
+	const handlePriceChange = (values: InitialStateType) => {
 		setTotalPrice(calculateTotalPrice(values.orderedGoods))
 	}
 
-	const handleCityChange = (values: InitialStateType) => {
-		const warehouses = fetchWarehouses(values.customer.city)
-		setWarehouses(warehouses)
+	const handleCityChange = async (values: InitialStateType) => {
+		try {
+			const warehouses = await fetchWarehouses(values.customer.city)
+			setWarehouses(warehouses)
+		} catch (error) {
+			console.error('Error fetching warehouses:', error)
+		}
 	}
 
 	const handleQuantityChange = (
@@ -194,7 +212,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 	) => {
 		const newQuantity = Math.max((values.orderedGoods[index].quantity || 0) + change, 1)
 		setFieldValue(`orderedGoods.${index}.quantity`, newQuantity)
-		setFieldValue('totalPrice', totalPrice)
+		setTotalPrice(calculateTotalPrice(values.orderedGoods))
 	}
 
 	const handleSubmit = async (values: IOrder, { resetForm }: ResetFormProps) => {
@@ -254,7 +272,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 				validationSchema={orderFormSchema}
 			>
 				{({ values, setFieldValue, errors }) => {
-					handleFormChange(values)
+					handlePriceChange(values)
 					handleCityChange(values)
 
 					return (
@@ -269,7 +287,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 								name='orderedGoods'
 								render={({ remove }) => (
 									<div>
-										{values.orderedGoods.map((good, index) => (
+										{values?.orderedGoods.map((good, index) => (
 											<div
 												key={index}
 												className='border p-4 mb-4 flex items-center gap-4 justify-between'
@@ -296,10 +314,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 														type='button'
 														label='-'
 														onClick={() => handleQuantityChange(index, -1, values, setFieldValue)}
-														disabled={
-															values.orderedGoods?.[index]?.quantity !== undefined &&
-															values.orderedGoods[index].quantity <= 1
-														}
+														disabled={good?.quantity !== undefined && good?.quantity <= 1}
 													/>
 												</div>
 

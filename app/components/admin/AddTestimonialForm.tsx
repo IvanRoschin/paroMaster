@@ -1,9 +1,13 @@
 'use client'
 
 import { testimonialFormSchema } from '@/helpers/index'
+import { useAddData } from '@/hooks/useAddData'
+import { useUpdateData } from '@/hooks/useUpdateData'
 import { ITestimonial } from '@/types/index'
 import { Form, Formik, FormikState } from 'formik'
 import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/router'
+import { useState } from 'react'
 import { FaStar } from 'react-icons/fa'
 import { toast } from 'sonner'
 import FormField from '../input/FormField'
@@ -19,17 +23,23 @@ interface ResetFormProps {
 interface TestimonialFormProps {
 	testimonial?: Partial<ITestimonial>
 	title?: string
-	action: (data: FormData) => Promise<void>
+	action: (values: ITestimonial) => Promise<{ success: boolean; message: string }>
 }
 
 const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, action }) => {
 	const Rating: any = require('react-rating')
+	const [isLoading, setIsLoading] = useState(false)
+	const { push } = useRouter()
+	const { data: session } = useSession()
+	const addTestimonialMutation = useAddData(action, 'testimonials')
+	const updateTestimonialMutation = useUpdateData(action, 'testimonials')
+
+	const isUpdating = Boolean(testimonial?._id)
 
 	const textareaStyles: React.CSSProperties = {
 		height: '100px',
 		overflowY: 'auto',
 	}
-	const { data: session } = useSession()
 
 	const isAdmin = !!session?.user
 
@@ -66,23 +76,35 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
 		isActive: testimonial?.isActive || false,
 	}
 
-	const handleSubmit = async (values: InitialStateType, { resetForm }: ResetFormProps) => {
-		try {
-			const formData = new FormData()
-			Object.keys(values).forEach(key => {
-				formData.append(key, (values as any)[key])
-			})
-			// Append the ID if available
-			if (testimonial?._id) {
-				formData.append('id', testimonial._id as string)
-			}
+	const handleSubmit = async (values: ITestimonial, { resetForm }: ResetFormProps) => {
+		setIsLoading(true)
 
-			await action(formData)
+		try {
+			let updateTestimonialData = {}
+
+			if (isUpdating && testimonial) {
+				updateTestimonialData = {
+					...values,
+					_id: testimonial._id,
+				}
+			}
+			const result = isUpdating
+				? await updateTestimonialMutation.mutateAsync(updateTestimonialData)
+				: await addTestimonialMutation.mutateAsync(values)
+
+			if (result?.success === false) {
+				toast.error('Something went wrong')
+				return
+			}
 			resetForm()
-			toast.success(testimonial?._id ? 'Відгук оновлено!' : 'Новий відгук додано!')
+			toast.success(isUpdating ? 'Відгук оновлено!' : 'Новий відгук додано!')
+			push('/admin/orders')
 		} catch (error) {
-			toast.error('Помилка!')
-			console.log(error)
+			const errorMsg = error instanceof Error ? error.message : 'An unknown error occurred'
+			toast.error(errorMsg)
+			console.error(error)
+		} finally {
+			setIsLoading(false)
 		}
 	}
 
