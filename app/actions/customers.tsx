@@ -61,7 +61,7 @@ export async function addCustomer(values: ICustomer) {
 		await Customer.create(newCustomer)
 		return {
 			success: true,
-			data: newCustomer,
+			message: 'New Customer created successfully',
 		}
 	} catch (error) {
 		if (error instanceof Error) {
@@ -102,10 +102,10 @@ export async function getCustomerById(id: string) {
 	}
 }
 
-export async function updateCustomer(formData: FormData) {
-	const entries = Object.fromEntries(formData.entries())
+export async function updateCustomer(values: ICustomer) {
+	// const entries = Object.fromEntries(formData.entries())
 
-	const { id, name, phone, email, city, warehouse, payment } = entries as {
+	const { id, name, phone, email, city, warehouse, payment } = values as {
 		id: string
 		name?: string
 		phone?: string

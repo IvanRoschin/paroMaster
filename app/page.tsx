@@ -1,5 +1,5 @@
 import { Advantages, Description, ItemsList, Slider, TestimonialsList } from '@/components/index'
-import { IGood, ISearchParams } from '@/types/index'
+import { IGood, ISearchParams, ITestimonial } from '@/types/index'
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { getAllGoods } from './actions/goods'
 import { getAllSlides, IGetAllSlides } from './actions/slider'
@@ -50,7 +50,16 @@ export default async function Home({ searchParams }: { searchParams: ISearchPara
 				<ItemsList goods={goods} />
 				<div className='flex flex-col'>
 					<h2 className='m-4 ml-0 text-2xl text-primaryAccentColor mb-4 bold'>Відгуки клієнтів</h2>
-					{testimonialsData && <TestimonialsList testimonialsData={testimonialsData} />}
+					{testimonialsData && (
+						<TestimonialsList
+							testimonialsData={{
+								...testimonialsData,
+								testimonials: testimonialsData.testimonials.filter(
+									(testimonial: ITestimonial) => testimonial.isActive,
+								),
+							}}
+						/>
+					)}
 					<h2 className='m-4 ml-0 text-2xl text-primaryAccentColor mb-4 bold'>Переваги</h2>
 					<Advantages />
 				</div>

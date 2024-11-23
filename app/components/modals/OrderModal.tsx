@@ -159,26 +159,53 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 		}
 		fetchGoods()
 		fetchOrderNumber()
-	}, [cartItemsId])
+	}, [cartItemsId, getItemQuantity])
 
-	const fetchWarehouses = async (city: string) => {
-		const request = {
-			apiKey: process.env.NOVA_API,
-			modelName: 'Address',
-			calledMethod: 'getWarehouses',
-			methodProperties: {
-				CityName: city,
-				Limit: '50',
-				Language: 'UA',
-			},
-		}
+	const handleCityChange = async (city: string) => {
 		try {
-			const response = await getData(request)
-			setWarehouses(response.data.data || [])
+			const warehouses = await fetchWarehouses(city)
+			setWarehouses(warehouses)
 		} catch (error) {
 			console.error('Error fetching warehouses:', error)
 		}
 	}
+	const handleCustomerChange = async (values: ICustomer) => {
+		setCustomer(values)
+	}
+
+	const fetchWarehouses = async (city: string): Promise<{ Ref: string; Description: string }[]> => {
+		try {
+			const response = await getData({
+				apiKey: process.env.NOVA_API,
+				modelName: 'Address',
+				calledMethod: 'getWarehouses',
+				methodProperties: { CityName: city, Limit: '50', Language: 'UA' },
+			})
+			return response.data.data || []
+		} catch (error) {
+			console.error('Error fetching warehouses:', error)
+			return []
+		}
+	}
+
+	// const fetchWarehouses = async (city: string) => {
+	// 	const request = {
+	// 		apiKey: process.env.NOVA_API,
+	// 		modelName: 'Address',
+	// 		calledMethod: 'getWarehouses',
+	// 		methodProperties: {
+	// 			CityName: city,
+	// 			Limit: '50',
+	// 			Language: 'UA',
+	// 		},
+	// 	}
+	// 	try {
+	// 		const response = await getData(request)
+	// 		setWarehouses(response.data.data || [])
+	// 	} catch (error) {
+	// 		console.error('Error fetching warehouses:', error)
+	// 	}
+	// }
 
 	const handleSubmit = async () => {
 		try {
@@ -246,15 +273,16 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 				enableReinitialize
 			>
 				{({ values, errors, setFieldValue }) => {
-					useEffect(() => {
-						if (values.customer.city) {
-							fetchWarehouses(values.customer.city)
-						}
-					}, [values.customer.city])
-
-					useEffect(() => {
-						setCustomer(values.customer)
-					}, [values.customer])
+					handleCityChange(values.customer.city)
+					// useEffect(() => {
+					// 	if (values.customer.city) {
+					// 		fetchWarehouses(values.customer.city)
+					// 	}
+					// }, [values.customer.city])
+					handleCustomerChange(values.customer)
+					// useEffect(() => {
+					// 	setCustomer(values.customer)
+					// }, [values.customer])
 
 					return (
 						<Form className='flex flex-col space-y-8'>

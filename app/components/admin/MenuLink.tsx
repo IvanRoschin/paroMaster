@@ -13,8 +13,7 @@ const MenuLink = ({ item }: { item: MenuLinkProps }) => {
 	const pathname = usePathname()
 	return (
 		<Link href={item.path} className='flex items-center gap-2'>
-			{item.icon}
-			<span>{item.title}</span>
+			{item?.icon && <item.icon />} <span>{item.title}</span>
 		</Link>
 	)
 }

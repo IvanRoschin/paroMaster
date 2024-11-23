@@ -41,7 +41,7 @@ const ImagesBlock: React.FC<ImagesBlockProps> = ({ item, values }) => {
 					</ul>
 				</div>
 			) : (
-				values &&
+				Array.isArray(values) &&
 				values.length > 0 && (
 					<div className='mr-[50px] pb-[40px]'>
 						<div className='w-[400px] h-[400px]'>
