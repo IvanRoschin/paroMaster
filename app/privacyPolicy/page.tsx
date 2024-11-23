@@ -1,8 +1,7 @@
 import Logo from '@/components/Logo'
+import Link from 'next/link'
 
-type Props = {}
-
-const PrivacyPolicyPage = (props: Props) => {
+const PrivacyPolicyPage = (color: string) => {
 	return (
 		<div className='bg-white text-black p-6'>
 			<h1 className='text-center text-2xl font-bold mb-8'>
@@ -16,11 +15,39 @@ const PrivacyPolicyPage = (props: Props) => {
 				<h3 className='text-lg font-semibold mb-2'>§ 1 ОСНОВНІ ПОЛОЖЕННЯ</h3>
 				<p className='mb-2'>
 					1. Адміністратором персональних даних, зібраних через інтернет-магазин paromaster.com, є
-					фізична особа – підприємець Віталій Ситарук, зареєстрований у Реєстрі юридичних осіб та
-					фізичних осіб - підприємців під номером: 0000962945, юридична адреса: вул. Соліпська 3/5,
-					м. Ірпінь, Київська область, РНОКПП: 5223222214, адреса електронної пошти:
-					paromaster2@gmail.com, номер телефону: +38 097 744 09 79, іменований надалі
-					«Адміністратор», а також «Постачальник».
+					фізична особа – підприємець
+					<span className='font-semibold'> {process.env.ADMIN_NAME}</span>, зареєстрований у Реєстрі
+					юридичних осіб та фізичних осіб - підприємців запис № {process.env.ADMIN_REGON} <br />
+					<br />
+					<span className='font-semibold'>юридична адреса: </span>
+					{process.env.ADMIN_ADDRESS} <br /> <br />
+					<span className='font-semibold'>адреса електронної пошти: </span>
+					<a
+						href={`mailto:${process.env.ADMIN_EMAIL}`}
+						className='hover:text-primaryAccentColor nav '
+					>
+						{process.env.ADMIN_EMAIL}
+					</a>
+					<br /> <br />
+					<span className='flex'>
+						<span className='font-semibold'>номер телефону:</span>
+						<Link
+							href={`tel:${process.env.ADMIN_PHONE}`}
+							target='_blank'
+							rel='noopener noreferrer'
+							className={`flex items-center justify-start hover:text-primaryAccentColor 
+				${color ? 'text-black' : ' text-white'}
+        `}
+						>
+							<span
+								className={`nav hover:text-primaryAccentColor
+				${color ? 'text-black' : ' text-white'}`}
+							>
+								{process.env.ADMIN_PHONE}
+							</span>
+						</Link>
+					</span>{' '}
+					<br /> іменований надалі «Адміністратор», а також «Постачальник».
 				</p>
 				<p className='mb-2'>
 					2. Персональні дані, зібрані Адміністратором через веб-сайт, обробляються відповідно до
@@ -104,13 +131,18 @@ const PrivacyPolicyPage = (props: Props) => {
 				</p>
 				<p className='mb-2'>
 					3. Для реалізації своїх прав Користувачі можуть зв&apos;язатися з Адміністратором через
-					контактну форму на веб-сайті або надіславши електронний лист за адресою
-					paromaster2@gmail.com.
+					контактну форму на веб-сайті або надіславши електронний лист за адресою:{' '}
+					<a
+						href={`mailto:${process.env.ADMIN_EMAIL}`}
+						className='hover:text-primaryAccentColor nav '
+					>
+						{process.env.ADMIN_EMAIL}
+					</a>
 				</p>
 			</section>
 
 			<section className='mb-8'>
-				<h3 className='text-lg font-semibold mb-2'>§ 5 ПЕЧИВО (COOKIES)</h3>
+				<h3 className='text-lg font-semibold mb-2'>§ 5 ПОЛІТИКА (COOKIES)</h3>
 				<p className='mb-2'>
 					1. Інтернет-магазин paromaster.com використовує файли cookies, які зберігаються на
 					пристрої користувача для забезпечення повного функціонування веб-сайту.

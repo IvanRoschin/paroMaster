@@ -1,7 +1,6 @@
 'use client'
 
 import { getData } from '@/actions/nova'
-import orderFormSchema from '@/helpers/validationSchemas/orderFormShema'
 import { useAddData } from '@/hooks/useAddData'
 import { useUpdateData } from '@/hooks/useUpdateData'
 import { IGood, IOrder } from '@/types/index'
@@ -44,6 +43,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 			Description: string
 		}[]
 	>([])
+	const [warehouse, setWarehouse] = useState(order?.customer.warehouse)
 	const [totalPrice, setTotalPrice] = useState(0)
 
 	const { push } = useRouter()
@@ -199,6 +199,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 		try {
 			const warehouses = await fetchWarehouses(values.customer.city)
 			setWarehouses(warehouses)
+			setWarehouse(values.customer.warehouse)
 		} catch (error) {
 			console.error('Error fetching warehouses:', error)
 		}
@@ -221,10 +222,11 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 
 			const newOrderData = {
 				...values,
+				totalPrice,
 				customer: {
 					...values.customer,
 					name: `${values.customer.name} ${values.customer.surname}`,
-					warehouse: values.warehouse,
+					warehouse,
 				},
 			}
 
@@ -233,14 +235,16 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 			if (isUpdating && order) {
 				updateOrderData = {
 					...values,
+					totalPrice,
 					_id: order._id,
 					customer: {
 						...values.customer,
 						name: `${values.customer.name} ${values.customer.surname}`,
-						warehouse: values.warehouse,
+						warehouse,
 					},
 				}
 			}
+			console.log('updateOrderData', updateOrderData)
 
 			const result = isUpdating
 				? await updateOrderMutation.mutateAsync(updateOrderData)
@@ -266,11 +270,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 	return (
 		<div className='flex flex-col justify-center items-center p-4 bg-white rounded-lg shadow-md'>
 			<h2 className='text-3xl mb-4 font-bold'>{title || 'Order Form'}</h2>
-			<Formik
-				initialValues={initialValues}
-				onSubmit={handleSubmit}
-				validationSchema={orderFormSchema}
-			>
+			<Formik initialValues={initialValues} onSubmit={handleSubmit}>
 				{({ values, setFieldValue, errors }) => {
 					handlePriceChange(values)
 					handleCityChange(values)

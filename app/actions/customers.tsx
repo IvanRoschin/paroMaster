@@ -25,6 +25,7 @@ export async function getAllCustomers(
 		const count = await Customer.countDocuments()
 
 		const customers: ICustomer[] = await Customer.find()
+			.sort({ createdAt: -1 })
 			.skip(limit * (page - 1))
 			.limit(limit)
 			.exec()

@@ -59,6 +59,7 @@ export async function getAllUsers(searchParams: ISearchParams, limit: number) {
 		await connectToDB()
 		const count = await User.find({ name: { $regex: regex } }).countDocuments()
 		const users: IUser[] = await User.find({ name: { $regex: regex } })
+			.sort({ createdAt: -1 })
 			.limit(ITEM_PER_PAGE)
 			.skip(ITEM_PER_PAGE * (page - 1))
 		return { success: true, users: JSON.parse(JSON.stringify(users)), count: count }

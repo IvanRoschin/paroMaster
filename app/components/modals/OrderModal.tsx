@@ -188,25 +188,6 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 		}
 	}
 
-	// const fetchWarehouses = async (city: string) => {
-	// 	const request = {
-	// 		apiKey: process.env.NOVA_API,
-	// 		modelName: 'Address',
-	// 		calledMethod: 'getWarehouses',
-	// 		methodProperties: {
-	// 			CityName: city,
-	// 			Limit: '50',
-	// 			Language: 'UA',
-	// 		},
-	// 	}
-	// 	try {
-	// 		const response = await getData(request)
-	// 		setWarehouses(response.data.data || [])
-	// 	} catch (error) {
-	// 		console.error('Error fetching warehouses:', error)
-	// 	}
-	// }
-
 	const handleSubmit = async () => {
 		try {
 			if (customer) {
