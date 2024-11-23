@@ -104,10 +104,11 @@ export async function getCustomerById(id: string) {
 }
 
 export async function updateCustomer(values: ICustomer) {
+	const id = values._id
+
 	// const entries = Object.fromEntries(formData.entries())
 
-	const { id, name, phone, email, city, warehouse, payment } = values as {
-		id: string
+	const { name, phone, email, city, warehouse, payment } = values as {
 		name?: string
 		phone?: string
 		email?: string

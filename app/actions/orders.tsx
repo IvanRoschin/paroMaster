@@ -170,25 +170,44 @@ export async function getOrderById(id: string) {
 export async function updateOrder(values: IOrder) {
 	const id = values._id
 
-	// const { id, number, customer, orderedGoods, totalPrice, status } = values as {
-	// 	id: string
-	// 	number?: string
-	// 	customer?: {
-	// 		name?: string
-	// 		email?: string
-	// 		phone?: string
-	// 		address?: string
-	// 		comment?: string
-	// 	}
-	// 	orderedGoods?: any
-	// 	totalPrice?: number
-	// 	status?: 'Новий' | 'Опрацьовується' | 'Оплачено' | 'На відправку' | 'Закритий'
-	// }
+	const { number, customer, orderedGoods, totalPrice, status } = values
 
 	try {
 		await connectToDB()
 
-		await Order.findByIdAndUpdate(id, values)
+		const updateFields: Partial<IOrder> = {
+			number,
+			customer: customer
+				? {
+						name: customer.name || '',
+						surname: customer.surname || '',
+						phone: customer.phone || '',
+						email: customer.email || '',
+						city: customer.city || '',
+						warehouse: customer.warehouse || '',
+						payment: customer.payment || '',
+				  }
+				: undefined,
+			orderedGoods,
+			totalPrice,
+			status,
+		}
+
+		Object.keys(updateFields).forEach(
+			key =>
+				(updateFields[key as keyof IOrder] === '' ||
+					updateFields[key as keyof IOrder] === undefined) &&
+				delete updateFields[key as keyof IOrder],
+		)
+
+		const updatedOrder = await Order.findByIdAndUpdate(id, updateFields, {
+			new: true,
+		}).lean()
+
+		if (!updatedOrder || Array.isArray(updatedOrder)) {
+			throw new Error('Failed to update order: No document returned or multiple documents returned')
+		}
+
 		return { success: true, message: 'Замовлення оновлено успішно' }
 	} catch (error) {
 		if (error instanceof Error) {
@@ -203,44 +222,3 @@ export async function updateOrder(values: IOrder) {
 		redirect('/admin/orders')
 	}
 }
-
-// const newOrderData = {
-// 	orderNumber: values.orderNumber,
-// 	customer: values.customer,
-// 	orderedGoods: values.orderedGoods.map(item => ({
-// 		id: item.id,
-// 		title: item.title,
-// 		brand: item.brand,
-// 		model: item.model,
-// 		vendor: item.vendor,
-// 		quantity: item.quantity,
-// 		price: item.price,
-// 	})),
-// 	totalPrice: values.totalPrice,
-// 	status: values.status,
-// }
-
-// try {
-// 	await connectToDB()
-
-// const updatedOrder = await Order.findByIdAndUpdate(id, newOrderData, {
-// 	new: true,
-// }).lean()
-
-// 		if (!updatedOrder || Array.isArray(updatedOrder)) {
-// 			throw new Error('Failed to update order: No document returned or multiple documents returned')
-// 		}
-// 		return {
-// 			success: true,
-// 			data: updatedOrder,
-// 		}
-// 	} catch (error) {
-// 		console.error('Error updating customer:', error)
-// 		throw new Error(
-// 			'Failed to update customer: ' + (error instanceof Error ? error.message : 'Unknown error'),
-// 		)
-// 	} finally {
-// 		revalidatePath('/admin/orders')
-// 		redirect('/admin/orders')
-// 	}
-// }
