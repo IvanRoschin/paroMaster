@@ -278,6 +278,20 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 					return (
 						<>
 							{/* Form content */}
+							<label className='text-xl font-semibold'>Статус замовлення</label>
+							<FormField
+								item={{
+									id: 'status',
+									type: 'select',
+									required: true,
+									options: statusList.map(status => ({
+										value: status.title,
+										label: status.title,
+									})),
+								}}
+								errors={errors}
+								setFieldValue={setFieldValue}
+							/>
 							<h3 className='text-xl font-semibold'>Замовник</h3>
 							{customerInputs.map((item, i) => (
 								<FormField key={i} item={item} setFieldValue={setFieldValue} errors={errors} />
@@ -366,20 +380,6 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 										))}
 									</div>
 								)}
-							/>
-							<label className='text-xl font-semibold'>Статус замовлення</label>
-							<FormField
-								item={{
-									id: 'status',
-									type: 'select',
-									required: true,
-									options: statusList.map(status => ({
-										value: status.title,
-										label: status.title,
-									})),
-								}}
-								errors={errors}
-								setFieldValue={setFieldValue}
 							/>
 							<div className='flex justify-end'>
 								<CustomButton
