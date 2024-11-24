@@ -13,6 +13,7 @@
 		"@tanstack/react-query": "^5.52.1",
 		"@tanstack/react-query-devtools": "^5.53.1",
 		"@types/react-star-rating-component": "^1.4.4",
+		"@types/yup": "^0.32.0",
 		"axios": "^1.7.2",
 		"bcrypt": "^5.1.1",
 		"cloudinary-core": "^2.13.1",

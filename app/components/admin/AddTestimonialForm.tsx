@@ -6,7 +6,7 @@ import { useUpdateData } from '@/hooks/useUpdateData'
 import { ITestimonial } from '@/types/index'
 import { Form, Formik, FormikState } from 'formik'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { FaStar } from 'react-icons/fa'
 import { toast } from 'sonner'
@@ -48,13 +48,13 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
 			id: 'name',
 			label: 'Ваше Ім`я',
 			type: 'text',
-			required: true, // Ensure all fields have required
+			required: true,
 		},
 		{
 			id: 'text',
 			label: 'Відгук',
 			type: 'textarea',
-			required: true, // Ensure textarea has required
+			required: true,
 			style: textareaStyles,
 		},
 	]
@@ -64,7 +64,7 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
 			id: 'isActive',
 			label: 'Публікується?',
 			type: 'switcher',
-			required: true, // Include required
+			required: true,
 		})
 	}
 
@@ -80,14 +80,8 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
 		setIsLoading(true)
 
 		try {
-			let updateTestimonialData = {}
+			const updateTestimonialData = isUpdating ? { ...values, _id: testimonial?._id } : {}
 
-			if (isUpdating && testimonial) {
-				updateTestimonialData = {
-					...values,
-					_id: testimonial._id,
-				}
-			}
 			const result = isUpdating
 				? await updateTestimonialMutation.mutateAsync(updateTestimonialData)
 				: await addTestimonialMutation.mutateAsync(values)
@@ -126,7 +120,7 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
 										<Switcher
 											id={item.id}
 											label={item.label}
-											checked={values[item.id as keyof InitialStateType] as boolean} // Fix type issue
+											checked={values[item.id as keyof InitialStateType] as boolean}
 											onChange={checked =>
 												setFieldValue(item.id as keyof InitialStateType, checked)
 											}
