@@ -36,21 +36,32 @@ const orderFormSchema = Yup.object().shape({
 	}),
 	orderedGoods: Yup.array().of(
 		Yup.object().shape({
-			id: Yup.string().required(`Обов'язкове поле`),
-			title: Yup.string().required(`Обов'язкове поле`),
+			_id: Yup.string().required(`Обов'язкове поле`),
+			category: Yup.string().required(`Обов'язкове поле`),
+			src: Yup.array()
+				.of(Yup.string().url('Некоректне посилання'))
+				.required(`Обов'язкове поле`),
 			brand: Yup.string().required(`Обов'язкове поле`),
 			model: Yup.string().required(`Обов'язкове поле`),
 			vendor: Yup.string().required(`Обов'язкове поле`),
-			quantity: Yup.number()
-				.positive()
-				.integer(),
+			title: Yup.string().required(`Обов'язкове поле`),
+			description: Yup.string().required(`Обов'язкове поле`),
 			price: Yup.number()
 				.positive()
+				.required(`Обов'язкове поле`),
+			isAvailable: Yup.boolean().required(`Обов'язкове поле`),
+			isCompatible: Yup.boolean().required(`Обов'язкове поле`),
+			compatibility: Yup.string().notRequired(),
+			quantity: Yup.number()
+				.positive('Кількість повинна бути більше 0')
+				.integer('Кількість повинна бути цілим числом')
 				.required(`Обов'язкове поле`),
 		}),
 	),
 	totalPrice: Yup.number().positive(),
-	status: Yup.string().required(`Обов'язкове поле`),
+	status: Yup.string()
+		.oneOf(['Новий', 'Опрацьовується', 'Оплачений', 'На відправку', 'Закритий'])
+		.required(`Обов'язкове поле`),
 })
 
 export default orderFormSchema
