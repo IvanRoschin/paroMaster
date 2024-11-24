@@ -3,6 +3,30 @@ import * as Yup from 'yup'
 const phoneRegex = /^\+380\d{9}$/
 const nameRegex = /^[а-яА-ЯіІїЇєЄґҐ']+$/
 
+const baseSchema = Yup.object().shape({
+	number: Yup.string().required(`Обов'язкове поле`),
+	customer: Yup.object().shape({
+		name: Yup.string().required(`Обов'язкове поле`),
+		surname: Yup.string().required(`Обов'язкове поле`),
+		email: Yup.string().required(`Обов'язкове поле`),
+	}),
+})
+
+// const fullSchema = baseSchema.shape({
+// 	orderedGoods: Yup.array().of(
+// 		Yup.object().shape({
+// 			_id: Yup.string().required(`Обов'язкове поле`),
+// 			price: Yup.number()
+// 				.positive()
+// 				.required(`Обов'язкове поле`),
+// 			// другие поля...
+// 		}),
+// 	),
+// 	totalPrice: Yup.number()
+// 		.positive()
+// 		.required(`Обов'язкове поле`),
+// })
+
 const orderFormSchema = Yup.object().shape({
 	number: Yup.string().required(`Обов'язкове поле`),
 	customer: Yup.object().shape({
@@ -34,30 +58,7 @@ const orderFormSchema = Yup.object().shape({
 			.oneOf(Object.values(PaymentMethod))
 			.required(`Обов'язкове поле`),
 	}),
-	orderedGoods: Yup.array().of(
-		Yup.object().shape({
-			_id: Yup.string().required(`Обов'язкове поле`),
-			category: Yup.string().required(`Обов'язкове поле`),
-			src: Yup.array()
-				.of(Yup.string().url('Некоректне посилання'))
-				.required(`Обов'язкове поле`),
-			brand: Yup.string().required(`Обов'язкове поле`),
-			model: Yup.string().required(`Обов'язкове поле`),
-			vendor: Yup.string().required(`Обов'язкове поле`),
-			title: Yup.string().required(`Обов'язкове поле`),
-			description: Yup.string().required(`Обов'язкове поле`),
-			price: Yup.number()
-				.positive()
-				.required(`Обов'язкове поле`),
-			isAvailable: Yup.boolean().required(`Обов'язкове поле`),
-			isCompatible: Yup.boolean().required(`Обов'язкове поле`),
-			compatibility: Yup.string().notRequired(),
-			quantity: Yup.number()
-				.positive('Кількість повинна бути більше 0')
-				.integer('Кількість повинна бути цілим числом')
-				.required(`Обов'язкове поле`),
-		}),
-	),
+
 	totalPrice: Yup.number().positive(),
 	status: Yup.string()
 		.oneOf(['Новий', 'Опрацьовується', 'Оплачений', 'На відправку', 'Закритий'])

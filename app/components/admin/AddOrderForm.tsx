@@ -167,13 +167,9 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 		values: InitialStateType,
 		setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void,
 	) => {
-		// Calculate the new quantity, ensuring it is at least 1
 		const newQuantity = Math.max((values.orderedGoods[index].quantity || 0) + change, 1)
-
-		// Update the specific quantity in the Formik state
 		setFieldValue(`orderedGoods.${index}.quantity`, newQuantity)
 
-		// Update the total price
 		const updatedGoods = [...values.orderedGoods]
 		updatedGoods[index].quantity = newQuantity
 		setTotalPrice(calculateTotalPrice(updatedGoods))
