@@ -70,15 +70,8 @@ const AddCustomerForm: React.FC<CustomerFormProps> = ({
 					...values,
 					name: fullName,
 				}
-				let updateCustomerData = {}
 
-				if (isUpdating && customer) {
-					updateCustomerData = {
-						...values,
-						name: fullName,
-						_id: customer._id,
-					}
-				}
+				const updateCustomerData = isUpdating ? { ...newCustomerData, _id: customer?._id } : {}
 
 				// const formData = new FormData()
 				// const fullName = `${values.name} ${values.surname}`.trim()
