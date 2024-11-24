@@ -1,6 +1,7 @@
 'use client'
 
 import { getData } from '@/actions/nova'
+import { orderFormSchema } from '@/helpers/index'
 import { useAddData } from '@/hooks/useAddData'
 import { useUpdateData } from '@/hooks/useUpdateData'
 import { IGood, IOrder } from '@/types/index'
@@ -28,9 +29,9 @@ interface OrderFormProps {
 }
 
 const statusList = [
-	{ id: 1, title: 'Новый' },
+	{ id: 1, title: 'Новий' },
 	{ id: 2, title: 'Опрацьовується' },
-	{ id: 3, title: 'Оплачено' },
+	{ id: 3, title: 'Оплачений' },
 	{ id: 4, title: 'На відправку' },
 	{ id: 5, title: 'Закритий' },
 ]
@@ -43,7 +44,8 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 			Description: string
 		}[]
 	>([])
-	const [warehouse, setWarehouse] = useState(order?.customer.warehouse)
+	const [city, setCity] = useState(order?.customer.city || 'Київ')
+
 	const [totalPrice, setTotalPrice] = useState(0)
 
 	const { push } = useRouter()
@@ -84,7 +86,6 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 		totalPrice: order?.totalPrice || 0,
 		status: order?.status || 'Новий',
 	}
-	const [city, setCity] = useState(order?.customer.city || initialValues.customer.city || '')
 
 	const customerInputs = [
 		{
@@ -92,28 +93,24 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 			type: 'text',
 			id: 'customer.name',
 			label: `І'мя`,
-			required: true,
 		},
 		{
 			name: 'customer.surname',
 			type: 'text',
 			id: 'customer.surname',
 			label: `Прізвище`,
-			required: true,
 		},
 		{
 			name: 'customer.email',
 			type: 'email',
 			id: 'customer.email',
 			label: `Email`,
-			required: true,
 		},
 		{
 			name: 'customer.phone',
 			type: 'tel',
 			id: 'customer.phone',
 			label: `Телефон`,
-			required: true,
 		},
 
 		{
@@ -143,22 +140,18 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 	}
 
 	const calculateTotalPrice = useCallback((orderedGoods: IGood[]): number => {
-		return orderedGoods.reduce((total: number, item: IGood) => {
-			const quantity = item.quantity ?? 1
-			return total + item.price * quantity
-		}, 0)
+		return orderedGoods.reduce((total, item) => total + item.price * (item.quantity || 1), 0)
 	}, [])
 
 	useEffect(() => {
-		const updatedTotalPrice = calculateTotalPrice(initialValues.orderedGoods)
-		setTotalPrice(updatedTotalPrice)
+		setTotalPrice(calculateTotalPrice(initialValues.orderedGoods))
 	}, [initialValues.orderedGoods, calculateTotalPrice])
 
 	useEffect(() => {
-		if (initialValues.customer.city) {
+		if (city) {
 			const fetchAndSetWarehouses = async () => {
 				try {
-					const fetchedWarehouses = await fetchWarehouses(initialValues.customer.city)
+					const fetchedWarehouses = await fetchWarehouses(city)
 					setWarehouses(fetchedWarehouses)
 				} catch (error) {
 					console.error('Error fetching warehouses:', error)
@@ -166,35 +159,24 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 			}
 			fetchAndSetWarehouses()
 		}
-	}, [initialValues.customer.city])
-
-	useEffect(() => {
-		const fetchAndSetWarehouses = async () => {
-			try {
-				if (city) {
-					console.log('city in UseEffect', city)
-					const fetchedWarehouses = await fetchWarehouses(city)
-					console.log('fetchedWarehouses in UseEffect', fetchedWarehouses)
-
-					setWarehouses(fetchedWarehouses)
-				}
-			} catch (error) {
-				console.error('Error fetching warehouses:', error)
-			}
-		}
-
-		fetchAndSetWarehouses()
 	}, [city])
 
 	const handleQuantityChange = (
 		index: number,
 		change: number,
 		values: InitialStateType,
-		setFieldValue: any,
+		setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void,
 	) => {
+		// Calculate the new quantity, ensuring it is at least 1
 		const newQuantity = Math.max((values.orderedGoods[index].quantity || 0) + change, 1)
+
+		// Update the specific quantity in the Formik state
 		setFieldValue(`orderedGoods.${index}.quantity`, newQuantity)
-		setTotalPrice(calculateTotalPrice(values.orderedGoods))
+
+		// Update the total price
+		const updatedGoods = [...values.orderedGoods]
+		updatedGoods[index].quantity = newQuantity
+		setTotalPrice(calculateTotalPrice(updatedGoods))
 	}
 
 	const handleSubmit = async (values: IOrder, { resetForm }: ResetFormProps) => {
@@ -207,34 +189,19 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 				customer: {
 					...values.customer,
 					name: `${values.customer.name} ${values.customer.surname}`,
-					warehouse,
 				},
 			}
 
-			let updateOrderData = {}
-
-			if (isUpdating && order) {
-				updateOrderData = {
-					...values,
-					totalPrice,
-					_id: order._id,
-					customer: {
-						...values.customer,
-						name: `${values.customer.name} ${values.customer.surname}`,
-						warehouse,
-					},
-				}
-			}
-			console.log('updateOrderData', updateOrderData)
+			const updateOrderData = isUpdating ? { ...newOrderData, _id: order?._id } : {}
 
 			const result = isUpdating
 				? await updateOrderMutation.mutateAsync(updateOrderData)
 				: await addOrderMutation.mutateAsync(newOrderData)
 
-			if (result?.success === false) {
-				toast.error('Something went wrong')
-				return
-			}
+			// if (!result?.success) {
+			// 	toast.error('Something went wrong')
+			// 	return
+			// }
 
 			resetForm()
 			toast.success(isUpdating ? 'Замовлення оновлено!' : 'Нове замовлення додано!')
@@ -251,12 +218,16 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 	return (
 		<div className='flex flex-col justify-center items-center p-4 bg-white rounded-lg shadow-md'>
 			<h2 className='text-3xl mb-4 font-bold'>{title || 'Order Form'}</h2>
-			<Formik initialValues={initialValues} onSubmit={handleSubmit}>
+			<Formik
+				initialValues={initialValues}
+				onSubmit={handleSubmit}
+				validationSchema={orderFormSchema}
+			>
 				{({ values, setFieldValue, errors, touched }) => {
 					return (
 						<>
 							{/* Form content */}
-							<label className='text-xl font-semibold'>Статус замовлення</label>
+							<h3 className='text-xl font-semibold'>Статус замовлення</h3>
 							<FormField
 								item={{
 									id: 'status',
@@ -270,6 +241,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 								}}
 								setFieldValue={setFieldValue}
 							/>
+
 							<h3 className='text-xl font-semibold'>Замовник</h3>
 							{customerInputs.map((item, i) => (
 								<FormField key={i} item={item} setFieldValue={setFieldValue} />
@@ -281,7 +253,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 										id='customer.city'
 										type='text'
 										value={values.customer.city}
-										onChange={e => {
+										onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
 											setFieldValue('customer.city', e.target.value)
 											setCity(e.target.value)
 										}}
@@ -312,7 +284,9 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 										id='customer.warehouse'
 										name='customer.warehouse'
 										value={values.customer.warehouse}
-										onChange={e => setFieldValue('customer.warehouse', e.target.value)}
+										onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+											setFieldValue('customer.warehouse', e.target.value)
+										}
 										className={`peer w-full p-4 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
         ${
 					errors.customer?.warehouse && touched.customer?.warehouse
@@ -387,7 +361,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 													<Button
 														type='button'
 														label='+'
-														onClick={() => handleQuantityChange(index, 1, values, setFieldValue)}
+														onClick={() => handleQuantityChange(index, +1, values, setFieldValue)}
 													/>
 												</div>
 
@@ -407,8 +381,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 														type='button'
 														onClick={() => {
 															remove(index)
-															const updatedTotal = calculateTotalPrice(values.orderedGoods)
-															setFieldValue('totalPrice', updatedTotal)
+															setFieldValue('totalPrice', calculateTotalPrice(values.orderedGoods))
 														}}
 														className='
 				flex items-center justify-center
