@@ -17,8 +17,10 @@ export default function Sidebar({ pricesData, categoriesData, brandsData }: Side
 	return (
 		<div>
 			<Category categories={categoriesData?.categories} />
-			<PriceFilter minPrice={pricesData?.minPrice} maxPrice={pricesData?.maxPrice} />
-			<Sort />
+			<div className='hidden md:block'>
+				<PriceFilter minPrice={pricesData?.minPrice} maxPrice={pricesData?.maxPrice} />
+				<Sort />
+			</div>
 			<BrandFilter brands={brandsData?.brands} />
 		</div>
 	)

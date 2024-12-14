@@ -1,14 +1,17 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
-// import { Icon } from './Icon'
-import Image from 'next/image'
+import { useScreenSize } from '../hooks'
 
 interface CategoryPage {
 	categories: { src: string; title: string }[]
 }
 
 const Category: React.FC<CategoryPage> = ({ categories }) => {
+	const { width } = useScreenSize()
+	const isMobile = width <= 767
+
 	const searchParams = useSearchParams()
 
 	const createQueryString = useCallback(
@@ -25,16 +28,21 @@ const Category: React.FC<CategoryPage> = ({ categories }) => {
 	)
 
 	return (
-		<div className='pt-0 mr-4 text-sm w-[250px] mb-4'>
-			<h2 className='text-2xl text-primaryAccentColor mb-4 font-bold'>Категорії товарів</h2>
-			<ul className='bg-secondaryBackground p-4 rounded-lg'>
+		<div className='pt-0 mr-4 text-sm w-full md:w-[250px] mb-4'>
+			<h2 className='subtitle-main'>Категорії товарів</h2>
+
+			{/* Conditional rendering based on isMobile */}
+			<ul
+				className={`bg-secondaryBackground p-4 rounded-lg ${
+					isMobile ? 'grid grid-cols-2 gap-3' : ''
+				}`}
+			>
 				{categories.map(({ src, title }, index) => (
 					<li key={index} className='mb-3 nav'>
 						<Link
 							href={`/category/?${createQueryString('category', title)}`}
 							className='flex justify-start items-start group'
 						>
-							{/* <Icon name={src} className='w-5 h-5 mr-3' /> */}
 							<Image
 								alt={title}
 								src={src}

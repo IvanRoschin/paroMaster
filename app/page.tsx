@@ -41,28 +41,34 @@ export default async function Home({ searchParams }: { searchParams: ISearchPara
 	return (
 		<HydrationBoundary state={dehydrate(queryClient)}>
 			<div className='container'>
-				<Slider
-					slidesData={slidesData}
-					testimonialsData={testimonialsData}
-					DescriptionComponent={Description}
-				/>
-				<h2 className='m-4 ml-0 text-2xl text-primaryAccentColor mb-4 bold'>Пропозиції дня</h2>
-				<ItemsList goods={goods} />
-				<div className='flex flex-col'>
-					<h2 className='m-4 ml-0 text-2xl text-primaryAccentColor mb-4 bold'>Відгуки клієнтів</h2>
-					{testimonialsData && (
-						<TestimonialsList
-							testimonialsData={{
-								...testimonialsData,
-								testimonials: testimonialsData.testimonials.filter(
-									(testimonial: ITestimonial) => testimonial.isActive,
-								),
-							}}
-						/>
-					)}
-					<h2 className='m-4 ml-0 text-2xl text-primaryAccentColor mb-4 bold'>Переваги</h2>
-					<Advantages />
-				</div>
+				<section className='hidden lg:block'>
+					<Slider
+						slidesData={slidesData}
+						testimonialsData={testimonialsData}
+						DescriptionComponent={Description}
+					/>
+				</section>
+				<section>
+					<ItemsList goods={goods} title='Пропозиції дня' />
+				</section>
+				<section>
+					<div className='flex flex-col'>
+						{testimonialsData && (
+							<TestimonialsList
+								testimonialsData={{
+									...testimonialsData,
+									testimonials: testimonialsData.testimonials.filter(
+										(testimonial: ITestimonial) => testimonial.isActive,
+									),
+								}}
+								title='Відгуки клієнтів'
+							/>
+						)}
+					</div>
+				</section>
+				<section>
+					<Advantages title='Переваги' />
+				</section>
 			</div>
 		</HydrationBoundary>
 	)

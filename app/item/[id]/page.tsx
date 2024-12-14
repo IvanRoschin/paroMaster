@@ -25,8 +25,6 @@ export default function Item({ params }: { params: any }) {
 		removeFromCart,
 	} = useShoppingCart()
 
-	// const { data, error } = useSWR(`good-${params.id}`, () => getGoodById(params.id))
-
 	const { data, isLoading, isError, error } = useFetchDataById(params.id, getGoodById, 'good')
 
 	useEffect(() => {
@@ -51,7 +49,7 @@ export default function Item({ params }: { params: any }) {
 	const quantity = getItemQuantity(data._id)
 
 	return (
-		<div className='flex'>
+		<div className='flex flex-col lg:flex-row mb-4 lg:mb-0'>
 			<ImagesBlock item={data} />
 			<div className='pt-10 relative'>
 				{isAdmin && (

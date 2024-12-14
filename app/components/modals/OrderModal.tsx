@@ -17,15 +17,17 @@ import { toast } from 'sonner'
 import FormField from '../input/FormField'
 import Modal from './Modal'
 
-interface InitialStateType {
-	name: string
-	surname: string
-	email: string
-	phone: string
-	city: string
-	warehouse: string
-	payment: any
-}
+interface InitialStateType extends Omit<IOrder, '_id'> {}
+
+// interface InitialStateType {
+// 	name: string
+// 	surname: string
+// 	email: string
+// 	phone: string
+// 	city: string
+// 	warehouse: string
+// 	payment: any
+// }
 
 type CustomerErrors = {
 	name?: string
@@ -125,7 +127,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 		},
 	]
 
-	const initialValues = {
+	const initialValues: InitialStateType = {
 		number: '123',
 		customer: {
 			name: '',

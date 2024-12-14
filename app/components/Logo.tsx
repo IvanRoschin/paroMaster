@@ -6,7 +6,7 @@ interface LogoProps {
 
 const Logo: React.FC<LogoProps> = ({ color }) => {
 	return (
-		<Link href='/' rel='noopener noreferrer' target='_self'>
+		<Link href='/' rel='noopener noreferrer' target='_self' className='mb-4 md:mb-0'>
 			<div
 				className={`text-4xl font-bold transition-colors duration-500 
 				${

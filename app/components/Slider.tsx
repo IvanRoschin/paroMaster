@@ -90,7 +90,7 @@ const Slider: React.FC<SliderProps> = ({
 				))}
 			</div>
 
-			<div className='absolute md:bottom-1 bottom-10 right-10 md:right-0 w-full flex justify-center items-center'>
+			<div className='absolute bottom-2 lg:bottom-10 right-10 lg:right-0 w-full flex justify-center items-center'>
 				<div className='absolute z-50 bottom-2 right-10 cursor-pointer' onClick={clickPrev}>
 					<div className='swiper-button-prev '>
 						<IoIosArrowDropleft />

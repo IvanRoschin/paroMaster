@@ -158,4 +158,12 @@ container sizes: xsm: max-480px sm: 480px md: 768px lg: 1280px
 		text-align: left;
 		font-weight: 700;
 	}
+
+	.subtitle-main {
+		color: #ea580c;
+		font-size: 24px;
+		text-align: left;
+		font-weight: 700;
+		margin: 16px 0 16px 0;
+	}
 }

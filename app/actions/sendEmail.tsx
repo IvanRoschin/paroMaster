@@ -25,8 +25,6 @@ interface IGetSendData {
 const resend = new Resend(process.env.RESEND_API)
 
 export async function sendEmail(data: IGetSendData) {
-	console.log('mailData:', data)
-
 	const {
 		name,
 		surname,
@@ -73,8 +71,8 @@ export async function sendEmail(data: IGetSendData) {
 		} as NewOrderTemplateProps)
 
 		const { data: responseData, error } = await resend.emails.send({
-			from: 'onboarding@resend.dev',
-			to: [`${process.env.ADMIN_EMAIL}`],
+			from: `Адміністратор веб-сайту ${process.env.NEXT_PUBLIC_SITE_NAME}`,
+			to: [`${process.env.NEXT_PUBLIC_ADMIN_EMAIL}`],
 			subject: `Нове замовлення на сайті від ${name} ${surname}, контактний email: ${email}`,
 			text: phone,
 			html: emailContent,
@@ -180,8 +178,8 @@ export async function sendEmailToLid(data: FieldValues) {
 		} as NewLidTemplateProps)
 
 		const { data: responseData, error } = await resend.emails.send({
-			from: 'onboarding@resend.dev',
-			to: [`${process.env.ADMIN_EMAIL}`],
+			from: `${process.env.NEXT_PUBLIC_SITE_NAME}`,
+			to: [`${process.env.NEXT_PUBLIC_ADMIN_EMAIL}`],
 			subject: `Заповнена форма зв'язку  на сайті від ${name}, контактний email: ${email}`,
 			text: phone,
 			html: emailContent,

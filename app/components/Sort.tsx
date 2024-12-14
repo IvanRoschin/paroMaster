@@ -11,7 +11,7 @@ const Sort = () => {
 
 	return (
 		<div className='mb-4'>
-			<h2 className='subtitle mb-4'>Сортувати за ціною</h2>{' '}
+			<h2 className='subtitle-main'>Сортувати за ціною</h2>{' '}
 			<select
 				value={sort}
 				onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {

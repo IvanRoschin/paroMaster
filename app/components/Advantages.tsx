@@ -29,23 +29,26 @@ const iconComponents: { [key: string]: React.ElementType } = {
 	MdOutlineSupportAgent,
 }
 
-const Advantages: React.FC = () => {
+const Advantages = ({ title }: { title?: string }) => {
 	return (
-		<div className='flex flex-wrap justify-around'>
-			{advantages.map((item, index) => {
-				const IconComponent = iconComponents[item.icon]
-				return (
-					<div
-						key={index}
-						className='flex flex-col items-center m-4 p-4 bg-gray-100 rounded-lg shadow-md w-[270px] mb-20'
-					>
-						<IconComponent size={item.iconSize} className='mb-2 text-primaryAccentColor' />
-						<h3 className='text-lg font-semibold'>{item.title}</h3>
-						<p className='text-gray-600'>{item.subtitle}</p>
-					</div>
-				)
-			})}
-		</div>
+		<>
+			<h2 className='subtitle-main'>{title}</h2>
+			<div className='flex flex-wrap justify-around'>
+				{advantages.map((item, index) => {
+					const IconComponent = iconComponents[item.icon]
+					return (
+						<div
+							key={index}
+							className='flex flex-col items-center m-4 p-4 bg-gray-100 rounded-lg shadow-md w-[270px] mb-20'
+						>
+							<IconComponent size={item.iconSize} className='mb-2 text-primaryAccentColor' />
+							<h3 className='text-lg font-semibold'>{item.title}</h3>
+							<p className='text-gray-600'>{item.subtitle}</p>
+						</div>
+					)
+				})}
+			</div>
+		</>
 	)
 }
 

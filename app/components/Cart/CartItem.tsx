@@ -36,7 +36,7 @@ const CartItem: React.FC<CartItemProps> = ({ id, quantity }) => {
 	return (
 		<div>
 			<li className='relative flex flex-col justify-between border border-gray-300 rounded-md p-4 hover:shadow-md transition-all mb-4'>
-				<div className='flex items-center gap-10'>
+				<div className='flex items-center gap-4 md:gap-10'>
 					{/* Product Image */}
 					<div className='w-[150px]'>
 						<Image src={src[0]} alt='item_photo' width={150} height={150} className='self-center' />
