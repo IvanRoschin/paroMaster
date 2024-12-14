@@ -13,8 +13,20 @@ export interface IGetAllTestimonials {
 }
 
 export async function addTestimonial(values: ITestimonial) {
+	console.log('values', values)
+	if (!values.name || !values.text || !values.rating || !values.isActive) {
+		throw new Error('All fields are required')
+	}
 	try {
 		await connectToDB()
+		const existingTestimonial = await Testimonials.findOne({
+			name: values.name,
+			text: values.text,
+		})
+
+		if (existingTestimonial) {
+			throw new Error('This testimonial already exists')
+		}
 
 		await Testimonials.create({
 			name: values.name,
