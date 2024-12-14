@@ -4,7 +4,7 @@ import { useAddData } from '@/hooks/useAddData'
 import { useUpdateData } from '@/hooks/useUpdateData'
 import { ICategory } from '@/types/category/ICategory'
 import { Field, Form, Formik, FormikState } from 'formik'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import { toast } from 'sonner'
 import ImageUploadCloudinary from '../ImageUploadCloudinary'
@@ -34,7 +34,7 @@ const AddCategoryForm: React.FC<CategoryFormProps> = ({ category, title, action 
 		title: category?.title || '',
 	}
 	const [isLoading, setIsLoading] = useState(false)
-	const router = useRouter()
+	const { push } = useRouter()
 
 	const isUpdating = Boolean(category?._id)
 
@@ -75,7 +75,7 @@ const AddCategoryForm: React.FC<CategoryFormProps> = ({ category, title, action 
 			}
 		} finally {
 			setIsLoading(false)
-			router.push('/admin/categories')
+			push('/admin/categories')
 		}
 	}
 

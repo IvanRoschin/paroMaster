@@ -9,6 +9,7 @@ export interface IOrder {
 		city: string
 		warehouse: string
 		payment: string
+		[key: string]: any
 	}
 	warehouse?: string
 	orderedGoods: {
