@@ -15,7 +15,7 @@ interface HeaderProps {
 
 const Header = ({ session }: HeaderProps) => {
 	const { width } = useScreenSize()
-	const isMobile = width <= 768
+	const isMobile = width <= 767
 
 	return (
 		<div className=''>
@@ -29,12 +29,11 @@ const Header = ({ session }: HeaderProps) => {
 			)}
 			{session && <SingOutButton />}
 			<div
-				className={`flex ${
-					isMobile ? 'flex-col' : 'flex-row'
-				} justify-between items-center border border-b p-4 px-8`}
+				className='flex
+				 justify-between items-center border border-b p-4 px-8'
 			>
 				<Logo />
-				<Search placeholder='Пошук товарів' />
+				{!isMobile && <Search placeholder='Пошук товарів' />}
 				<Cart />
 			</div>
 		</div>

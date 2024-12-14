@@ -25,7 +25,7 @@ const FormField: React.FC<FormFieldProps> = ({ item, errors, setFieldValue }) =>
 	const [, meta] = useField(item.id)
 
 	return (
-		<div className='w-full relative mb-4'>
+		<div className='relative mb-4'>
 			{item.options ? (
 				<>
 					<Field

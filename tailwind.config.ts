@@ -7,12 +7,10 @@ const config: Config = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./models/**/*.{js,ts,jsx,tsx,mdx}",
     "./config/**/*.{js,ts,jsx,tsx,mdx}",
-
-
   ],
   theme: {
     screens: {
-      mo: { max: "479.98px" },
+      xm: { max: "479.98px" },
       sm: "480px",
       md: "768px",
       lg: "1024px",

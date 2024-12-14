@@ -41,7 +41,7 @@ const PriceFilter = ({ minPrice, maxPrice }: { minPrice: number; maxPrice: numbe
 
 	return (
 		<div className='double-slider-box'>
-			<h2 className='text-2xl text-primaryAccentColor mb-6 bold'>Ціна</h2>{' '}
+			<h2 className='subtitle-main'>Фільтр за ціною</h2>{' '}
 			<div className='range-slider'>
 				<span className='slider-track'></span>
 				<input

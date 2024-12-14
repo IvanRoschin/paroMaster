@@ -42,7 +42,7 @@ const links = [
 
 const Footer = ({ categories }: { categories: ICategory[] }) => {
 	const { width } = useScreenSize()
-	const isMobile = width <= 768
+	const isMobile = width <= 767
 
 	const searchParams = useSearchParams()
 
@@ -73,7 +73,7 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
 			<div className='flex flex-col lg:flex-row  justify-between gap-10'>
 				<div className='mb-10'>
 					<div className='flex flex-col md:flex-row gap-8 mb-20'>
-						<div className='w-[50%] text-2xl flex flex-col gap-8'>
+						<div className='w-full md:w-[50%]  text-2xl flex flex-col gap-8'>
 							Доставка
 							<div className='border-b border-primaryAccentColor' />
 							<div className='flex justify-between'>
@@ -93,7 +93,7 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
 								/>
 							</div>
 						</div>
-						<div className='w-[50%] text-2xl flex flex-col gap-8'>
+						<div className='w-full md:w-[50%] text-2xl flex flex-col gap-8'>
 							Оплата
 							<div className='border-b border-primaryAccentColor' />
 							<div className='flex justify-between'>

@@ -54,7 +54,7 @@ const Testimonial: React.FC<TestimonialProps> = ({ id, name, text, stars }) => {
 					</span>
 				</Link>
 			)}
-			<div className='rounded-lg p-10 pr-10 m-4 w-full h-[150px] mx-2 grid place-items-center md:grid-cols-2 grid-cols-1'>
+			<div className='rounded-lg p-1 lg:p-10 pr-4 lg:pr-10 m-2 lg:m-4 w-full h-[150px] mx-2 grid place-items-center md:grid-cols-2 grid-cols-1'>
 				<div>
 					<div className='text-xl font-semibold'>{name}</div>
 					<div className='flex items-center'>{renderStars(stars)}</div>
