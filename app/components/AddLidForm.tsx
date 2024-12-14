@@ -94,7 +94,7 @@ const NewLidForm: React.FC<NewLidFormProps> = ({ lid, title, action, subtitle, i
 				enableReinitialize
 			>
 				{({ errors, setFieldValue }) => (
-					<Form className='flex flex-col w-[600px]'>
+					<Form className='flex flex-col w-full md:min-w-[400px] xl:min-w-[600px]'>
 						<div>
 							{inputs.map((item, i) => (
 								<FormField item={item} key={i} errors={errors} setFieldValue={setFieldValue} />

@@ -65,7 +65,7 @@ export default async function RootLayout({
       <body className={`${inter.className} primaryTextColor`}>
         <Providers>
           <Header session={session} />
-          <div className='px-8 flex items-start'>
+          <div className='px-8 flex items-start flex-col md:flex-row'>
             {session?.user ? (
               <>
                 <AdminSidebar user={user} />
@@ -82,7 +82,7 @@ export default async function RootLayout({
               )
             )}
           </div>
-          <section id="footer" className="mb-20 snap-start px-4">
+          <section className="snap-start px-4">
             <Footer categories={categoriesData.categories} />
           </section>
         </Providers>

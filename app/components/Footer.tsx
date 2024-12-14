@@ -6,6 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
+import { useScreenSize } from '../hooks'
 import AddLidForm from './AddLidForm'
 import EmptyState from './EmptyState'
 import Logo from './Logo'
@@ -40,6 +41,9 @@ const links = [
 ]
 
 const Footer = ({ categories }: { categories: ICategory[] }) => {
+	const { width } = useScreenSize()
+	const isMobile = width <= 768
+
 	const searchParams = useSearchParams()
 
 	const createQueryString = useCallback(
@@ -62,13 +66,13 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
 
 	return (
 		<div className='bg-slate-800 p-8 text-white'>
-			<div className='flex justify-between mb-10'>
+			<div className='flex flex-col gap-y-4 md:flex-row justify-between mb-10 '>
 				<Logo color='white' />
 				<Socials color='white' />
 			</div>
-			<div className='flex justify-between gap-10'>
+			<div className='flex flex-col lg:flex-row  justify-between gap-10'>
 				<div className='mb-10'>
-					<div className='flex gap-8 mb-20'>
+					<div className='flex flex-col md:flex-row gap-8 mb-20'>
 						<div className='w-[50%] text-2xl flex flex-col gap-8'>
 							Доставка
 							<div className='border-b border-primaryAccentColor' />
@@ -110,7 +114,7 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
 							</div>
 						</div>
 					</div>
-					<div className='flex gap-8 mb-4'>
+					<div className='flex gap-4 md:gap-8 mb-4'>
 						<div className='w-[33%] text-2xl flex flex-col gap-8'>
 							Інформація
 							<div className='border-b border-primaryAccentColor' />
@@ -166,11 +170,11 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
 						</div>
 					</div>
 				</div>
-				<div>
+				<div className={`${isMobile ? 'mb-4' : 'mb-0'}`}>
 					<AddLidForm action={addNewLid} title='Замовити зворотній дзвінок' />
 				</div>
 			</div>
-			<div className='border-b border-primaryAccentColor mb-5' />
+			{!isMobile && <div className='border-b border-primaryAccentColor mb-5' />}
 			<div className='mb-5'>
 				<p className='text-center'>
 					&copy; 2024 Paro<span className='text-primaryAccentColor'>Master</span>. Усі права
