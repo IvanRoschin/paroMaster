@@ -86,8 +86,7 @@ const AddCustomerForm: React.FC<CustomerFormProps> = ({
 				// formData.append('payment', values.payment as string)
 
 				if (isUpdating) {
-					const result = await updateCustomerMutation.mutateAsync(updateCustomerData)
-					console.log('result', result)
+					await updateCustomerMutation.mutateAsync(updateCustomerData)
 				} else {
 					await addCustomerMutation.mutateAsync(newCustomerData)
 				}
