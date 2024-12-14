@@ -6,9 +6,10 @@ import { useUpdateData } from '@/hooks/useUpdateData'
 import { ITestimonial } from '@/types/index'
 import { Form, Formik, FormikState } from 'formik'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/router'
-import { useState } from 'react'
-import { FaStar } from 'react-icons/fa'
+import { useRouter } from 'next/navigation'
+import React, { useState } from 'react'
+import Rating from 'react-rating'
+import ReactStars from 'react-stars'
 import { toast } from 'sonner'
 import FormField from '../input/FormField'
 import Switcher from '../Switcher'
@@ -21,19 +22,19 @@ interface ResetFormProps {
 }
 
 interface TestimonialFormProps {
-	testimonial?: Partial<ITestimonial>
+	testimonial?: ITestimonial
 	title?: string
 	action: (values: ITestimonial) => Promise<{ success: boolean; message: string }>
 }
 
 const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, action }) => {
-	const Rating: any = require('react-rating')
+	const ReactRating = (Rating as unknown) as React.FC<any>
 	const [isLoading, setIsLoading] = useState(false)
 	const { push } = useRouter()
 	const { data: session } = useSession()
 	const addTestimonialMutation = useAddData(action, 'testimonials')
 	const updateTestimonialMutation = useUpdateData(action, 'testimonials')
-
+	const [name, surname] = testimonial?.name?.split(' ') || ['', '']
 	const isUpdating = Boolean(testimonial?._id)
 
 	const textareaStyles: React.CSSProperties = {
@@ -48,13 +49,19 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
 			id: 'name',
 			label: 'Ваше Ім`я',
 			type: 'text',
-			required: true, // Ensure all fields have required
+			required: true,
+		},
+		{
+			id: 'surname',
+			label: 'Ваше Прізвище',
+			type: 'text',
+			required: true,
 		},
 		{
 			id: 'text',
 			label: 'Відгук',
 			type: 'textarea',
-			required: true, // Ensure textarea has required
+			required: true,
 			style: textareaStyles,
 		},
 	]
@@ -64,12 +71,13 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
 			id: 'isActive',
 			label: 'Публікується?',
 			type: 'switcher',
-			required: true, // Include required
+			required: true,
 		})
 	}
 
 	const initialValues: InitialStateType = {
-		name: testimonial?.name || '',
+		name: name || '',
+		surname: surname || '',
 		text: testimonial?.text || '',
 		rating: testimonial?.rating || 0,
 		createdAt: testimonial?.createdAt || '',
@@ -77,17 +85,23 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
 	}
 
 	const handleSubmit = async (values: ITestimonial, { resetForm }: ResetFormProps) => {
-		setIsLoading(true)
+		console.log('Submit triggered')
 
 		try {
-			let updateTestimonialData = {}
+			if (isLoading) return
+			setIsLoading(true)
 
-			if (isUpdating && testimonial) {
-				updateTestimonialData = {
-					...values,
-					_id: testimonial._id,
-				}
+			const fullName = `${values.name} ${values.surname}`.trim()
+			const newestimonialData = {
+				...values,
+				name: fullName,
 			}
+			console.log('newestimonialData', newestimonialData)
+
+			const updateTestimonialData = isUpdating
+				? { ...newestimonialData, _id: testimonial?._id }
+				: {}
+
 			const result = isUpdating
 				? await updateTestimonialMutation.mutateAsync(updateTestimonialData)
 				: await addTestimonialMutation.mutateAsync(values)
@@ -96,13 +110,18 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
 				toast.error('Something went wrong')
 				return
 			}
+
 			resetForm()
 			toast.success(isUpdating ? 'Відгук оновлено!' : 'Новий відгук додано!')
-			push('/admin/orders')
+			push('/admin/testimonials')
 		} catch (error) {
-			const errorMsg = error instanceof Error ? error.message : 'An unknown error occurred'
-			toast.error(errorMsg)
-			console.error(error)
+			if (error instanceof Error) {
+				toast.error(error.message)
+				console.error(error.message)
+			} else {
+				toast.error('An unknown error occurred')
+				console.error(error)
+			}
 		} finally {
 			setIsLoading(false)
 		}
@@ -126,7 +145,7 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
 										<Switcher
 											id={item.id}
 											label={item.label}
-											checked={values[item.id as keyof InitialStateType] as boolean} // Fix type issue
+											checked={values[item.id as keyof InitialStateType] as boolean}
 											onChange={checked =>
 												setFieldValue(item.id as keyof InitialStateType, checked)
 											}
@@ -137,16 +156,25 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
 								</div>
 							))}
 							<div className='mb-4'>
-								<label className='block mb-2'>Ваша оцінка</label>
-								<Rating
+								<label htmlFor='rating' className='block mb-2'>
+									Ваша оцінка
+								</label>
+								<ReactStars
+									count={5}
+									value={values.rating}
+									onChange={(value: number) => setFieldValue('rating', value)}
+									size={24}
+									color2={'#ffd700'}
+								/>
+								{/* <ReactRating
 									emptySymbol={<FaStar size={24} color='#ccc' />}
 									fullSymbol={<FaStar size={24} color='#ffd700' />}
 									initialRating={values.rating}
 									onChange={(value: number) => setFieldValue('rating', value)}
-								/>
+								/> */}
 							</div>
 						</div>
-						<CustomButton label={'Зберегти'} />
+						<CustomButton label={'Зберегти'} disabled={isLoading} />
 					</Form>
 				)}
 			</Formik>

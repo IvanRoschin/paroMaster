@@ -64,23 +64,31 @@ const AddCustomerForm: React.FC<CustomerFormProps> = ({
 		validationSchema: customerFormSchema,
 		onSubmit: async (values, { resetForm }) => {
 			setIsLoading(true)
+			const fullName = `${values.name} ${values.surname}`.trim()
 			try {
-				const formData = new FormData()
-				const fullName = `${values.name} ${values.surname}`.trim()
-				if (isUpdating && customer) {
-					formData.append('id', customer._id as string)
+				const newCustomerData = {
+					...values,
+					name: fullName,
 				}
-				formData.append('name', fullName)
-				formData.append('email', values.email)
-				formData.append('phone', values.phone)
-				formData.append('city', values.city)
-				formData.append('warehouse', values.warehouse)
-				formData.append('payment', values.payment as string)
+
+				const updateCustomerData = isUpdating ? { ...newCustomerData, _id: customer?._id } : {}
+
+				// const formData = new FormData()
+				// const fullName = `${values.name} ${values.surname}`.trim()
+				// if (isUpdating && customer) {
+				// 	formData.append('id', customer._id as string)
+				// }
+				// formData.append('name', fullName)
+				// formData.append('email', values.email)
+				// formData.append('phone', values.phone)
+				// formData.append('city', values.city)
+				// formData.append('warehouse', values.warehouse)
+				// formData.append('payment', values.payment as string)
 
 				if (isUpdating) {
-					await updateCustomerMutation.mutateAsync(formData)
+					await updateCustomerMutation.mutateAsync(updateCustomerData)
 				} else {
-					await addCustomerMutation.mutateAsync(formData)
+					await addCustomerMutation.mutateAsync(newCustomerData)
 				}
 				resetForm()
 				toast.success(isUpdating ? 'Клієнта оновлено!' : 'Нового клієнта додано!')

@@ -113,7 +113,6 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 		try {
 			setIsLoading(true)
 
-			// Create FormData
 			const formData = new FormData()
 			Object.keys(values).forEach(key => {
 				const value = (values as Record<string, any>)[key]
@@ -138,7 +137,6 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 				return
 			}
 
-			// If success, reset the form and navigate away
 			resetForm()
 			toast.success(isUpdating ? 'Товар оновлено!' : 'Новий товар додано!')
 			push('/admin/goods')

@@ -1,13 +1,20 @@
 import * as Yup from 'yup'
 
-const nameRegex = /^(?:[а-яА-Я]+(?:\s[а-яА-Я]+)?|[а-яА-Я]+)$/
+const nameRegex = /^[А-Яа-яЇїІіЄєҐґ']+(?:\s[А-Яа-яЇїІіЄєҐґ']+)?$/
 
 const testimonialFormSchema = Yup.object().shape({
 	name: Yup.string()
 		.min(2, 'Мінімум 2 символи')
-		.max(10, 'Максимум 10 символів')
+		.max(20, 'Максимум 20 символів')
 		.matches(nameRegex, {
-			message: 'Тільки кирилиця',
+			message: 'Тільки українські букви',
+		})
+		.required(`Обов'язкове поле`),
+	surname: Yup.string()
+		.min(2, 'Мінімум 2 символи')
+		.max(20, 'Максимум 20 символів')
+		.matches(nameRegex, {
+			message: 'Тільки українські букви',
 		})
 		.required(`Обов'язкове поле`),
 	text: Yup.string()

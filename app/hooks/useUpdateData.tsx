@@ -7,6 +7,7 @@ type UpdateAction = (
 
 export const useUpdateData = (action: UpdateAction, key: string) => {
 	const queryClient = useQueryClient()
+	console.log('Mutation triggered')
 
 	return useMutation({
 		mutationFn: (updatedDataItem: any) => action(updatedDataItem),
