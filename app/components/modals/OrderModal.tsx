@@ -27,6 +27,23 @@ interface InitialStateType {
 	payment: any
 }
 
+type CustomerErrors = {
+	name?: string
+	surname?: string
+	email?: string
+	phone?: string
+	city?: string
+	warehouse?: string
+	payment?: string
+}
+
+type OrderFormErrors = {
+	number?: string
+	customer?: CustomerErrors
+	totalPrice?: string
+	status?: string
+}
+
 interface ResetFormProps {
 	resetForm: (nextState?: Partial<FormikState<InitialStateType>>) => void
 }

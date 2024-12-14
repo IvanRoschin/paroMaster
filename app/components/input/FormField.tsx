@@ -1,4 +1,4 @@
-import { ErrorMessage, Field, useField } from 'formik'
+import { ErrorMessage, Field, FormikErrors, useField } from 'formik'
 
 interface Option {
 	value: string
@@ -17,7 +17,7 @@ interface FormFieldProps {
 		options?: Option[]
 		style?: React.CSSProperties
 	}
-	errors?: { [key: string]: string | string[] }
+	errors?: FormikErrors<any>
 	setFieldValue?: (field: string, value: any, shouldValidate?: boolean) => void
 }
 
