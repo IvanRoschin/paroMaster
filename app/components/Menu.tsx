@@ -1,13 +1,7 @@
 // import { signOut } from 'auth'
 import Link from 'next/link'
+import { menu } from '../config/constants'
 import { Icon } from './Icon'
-
-const menu = [
-	{ menuItemName: 'Послуги', menuItemLink: '/services ' },
-	{ menuItemName: 'Доставка', menuItemLink: '/delivery ' },
-	{ menuItemName: 'Гарантія', menuItemLink: '/guarantee ' },
-	{ menuItemName: 'Контакти', menuItemLink: '/contact' },
-]
 
 type Props = {}
 
