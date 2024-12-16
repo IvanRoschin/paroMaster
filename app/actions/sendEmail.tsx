@@ -179,7 +179,7 @@ export async function sendEmailToLid(data: FieldValues) {
 
 		const { data: responseData, error } = await resend.emails.send({
 			from: `${process.env.NEXT_PUBLIC_SITE_NAME}`,
-			to: [`${process.env.NEXT_PUBLIC_ADMIN_EMAIL}`],
+			to: [`${process.env.NEXT_PUBLIC_}`],
 			subject: `Заповнена форма зв'язку  на сайті від ${name}, контактний email: ${email}`,
 			text: phone,
 			html: emailContent,

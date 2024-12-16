@@ -114,63 +114,123 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
 							</div>
 						</div>
 					</div>
-					<div className='flex gap-4 md:gap-8 mb-4'>
-						<div className='w-[33%] text-2xl flex flex-col gap-8'>
-							Інформація
-							<div className='border-b border-primaryAccentColor' />
-							<ul className='text-sm'>
-								{links.map((item, index) => (
-									<li
-										key={index}
-										className='nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200'
-									>
-										<Link href={`/${item.link.toLowerCase().replace(/ /g, '-')}`}>
-											{item.title}
-										</Link>
-									</li>
-								))}
-							</ul>
+					{isMobile ? (
+						<div className='flex justify-between'>
+							<div className='w-[45%] text-2xl flex flex-col gap-8'>
+								<div>
+									Інформація
+									<div className='border-b border-primaryAccentColor' />
+									<ul className='text-sm'>
+										{links.map((item, index) => (
+											<li
+												key={index}
+												className='nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200'
+											>
+												<Link href={`/${item.link.toLowerCase().replace(/ /g, '-')}`}>
+													{item.title}
+												</Link>
+											</li>
+										))}
+									</ul>
+								</div>
+								<div>
+									Товари
+									<div className='border-b border-primaryAccentColor' />
+									<ul className='text-sm'>
+										{['Популярні', 'Акції та знижки'].map((text, index) => (
+											<li
+												key={index}
+												className='nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200'
+											>
+												<Link href={`/${text.toLowerCase().replace(/ /g, '-')}`}>{text}</Link>
+											</li>
+										))}
+									</ul>
+								</div>
+							</div>
+							<div className='w-[45%] text-2xl flex flex-col'>
+								Категорії
+								<div className='border-b border-primaryAccentColor' />
+								<ul className='text-sm'>
+									{categories?.map(({ src, title }, index) => (
+										<li key={index} className='mb-3 nav'>
+											<Link
+												href={`/category/?${createQueryString('category', title)}`}
+												className='flex justify-start items-start group'
+											>
+												<Image
+													alt={title}
+													src={src}
+													width={20}
+													height={20}
+													className='w-5 h-5 mr-3 transition-filter duration-300 ease-in-out group-hover:filter-primary filter-white'
+												/>
+												{title}
+											</Link>
+										</li>
+									))}
+								</ul>
+							</div>
 						</div>
-						<div className='w-[33%] text-2xl flex flex-col gap-8'>
-							Товари
-							<div className='border-b border-primaryAccentColor' />
-							<ul className='text-sm'>
-								{['Популярні', 'Акції та знижки'].map((text, index) => (
-									<li
-										key={index}
-										className='nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200'
-									>
-										<Link href={`/${text.toLowerCase().replace(/ /g, '-')}`}>{text}</Link>
-									</li>
-								))}
-							</ul>
-						</div>
-						<div className='w-[33%] text-2xl flex flex-col gap-8'>
-							Категорії
-							<div className='border-b border-primaryAccentColor' />
-							<ul className='text-sm'>
-								{categories?.map(({ src, title }, index) => (
-									<li key={index} className='mb-3 nav'>
-										<Link
-											href={`/category/?${createQueryString('category', title)}`}
-											className='flex justify-start items-start group'
+					) : (
+						<div className='flex gap-3 md:gap-8 mb-4'>
+							<div className='w-[33%] text-2xl flex flex-col gap-8'>
+								Інформація
+								<div className='border-b border-primaryAccentColor' />
+								<ul className='text-sm'>
+									{links.map((item, index) => (
+										<li
+											key={index}
+											className='nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200'
 										>
-											<Image
-												alt={title}
-												src={src}
-												width={20}
-												height={20}
-												className='w-5 h-5 mr-3 transition-filter duration-300 ease-in-out group-hover:filter-primary filter-white'
-											/>
-											{title}
-										</Link>
-									</li>
-								))}
-							</ul>
+											<Link href={`/${item.link.toLowerCase().replace(/ /g, '-')}`}>
+												{item.title}
+											</Link>
+										</li>
+									))}
+								</ul>
+							</div>
+							<div className='w-[33%] text-2xl flex flex-col gap-8'>
+								Товари
+								<div className='border-b border-primaryAccentColor' />
+								<ul className='text-sm'>
+									{['Популярні', 'Акції та знижки'].map((text, index) => (
+										<li
+											key={index}
+											className='nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200'
+										>
+											<Link href={`/${text.toLowerCase().replace(/ /g, '-')}`}>{text}</Link>
+										</li>
+									))}
+								</ul>
+							</div>
+							<div className='w-[33%] text-2xl flex flex-col gap-8'>
+								Категорії
+								<div className='border-b border-primaryAccentColor' />
+								<ul className='text-sm'>
+									{categories?.map(({ src, title }, index) => (
+										<li key={index} className='mb-3 nav'>
+											<Link
+												href={`/category/?${createQueryString('category', title)}`}
+												className='flex justify-start items-start group'
+											>
+												<Image
+													alt={title}
+													src={src}
+													width={20}
+													height={20}
+													className='w-5 h-5 mr-3 transition-filter duration-300 ease-in-out group-hover:filter-primary filter-white'
+												/>
+												{title}
+											</Link>
+										</li>
+									))}
+								</ul>
+							</div>
 						</div>
-					</div>
+					)}
 				</div>
-				<div className={`${isMobile ? 'mb-4' : 'mb-0'}`}>
+				<div id='contactForm' className={`${isMobile ? 'mb-4' : 'mb-0'}`}>
 					<AddLidForm action={addNewLid} title='Замовити зворотній дзвінок' />
 				</div>
 			</div>

@@ -39,6 +39,9 @@ container sizes: xsm: max-480px sm: 480px md: 768px lg: 1280px
 		--font-mono: ui-monospace, Melno, Monaco, Consolas, 'Coscadia Mono', 'Roboto Mono',
 			'Oxygen Mono', 'Ubuntu Monosapce', 'Fira Mono', 'Droid Sans Mono', 'Courier Nem' monospace;
 	}
+		html {
+		scroll-behavior: smooth;
+	}
 }
 
 @layer components {

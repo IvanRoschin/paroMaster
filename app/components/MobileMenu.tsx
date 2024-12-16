@@ -4,15 +4,9 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { MdMenu, MdMenuOpen } from 'react-icons/md'
 
+import { menu } from '../config/constants'
 import { Icon } from './Icon'
 import Socials from './Socials'
-
-const menu = [
-	{ menuItemName: 'Послуги', menuItemLink: '/services' },
-	{ menuItemName: 'Доставка та оплата', menuItemLink: '/delivery' },
-	{ menuItemName: 'Гарантія', menuItemLink: '/guarantee' },
-	{ menuItemName: 'Контакти', menuItemLink: '/contact' },
-]
 
 const MobileMenu = () => {
 	const [isMenuOpen, setIsMenuOpen] = useState(false)
