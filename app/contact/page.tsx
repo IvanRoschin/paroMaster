@@ -2,6 +2,7 @@
 
 import { addNewLid } from '@/actions/lids'
 import AddLidForm from '@/components/AddLidForm'
+import Logo from '@/components/Logo'
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api'
 import { FaCalendarAlt, FaMapMarkerAlt } from 'react-icons/fa'
 
@@ -24,17 +25,22 @@ const ContactPage = () => {
 
 			{/* Google Maps */}
 			<section className='mb-8'>
-				<h3 className='subtitle mb-4 flex justify-center items-center'>
-					<FaMapMarkerAlt className='inline-block mr-1' />
-					<span className='text-primaryTextColor'>paro</span>Master на Google карті
-				</h3>
+				<div className='flex flex-col items-center'>
+					<div className='flex flex-row justify-center items-baseline'>
+						<FaMapMarkerAlt className='inline-block mr-1 subtitle' />
+						<Logo />
+					</div>
+					<p>
+						<h3 className='subtitle mb-4 flex justify-center items-center'>на Google карті</h3>
+					</p>
+				</div>
 				<LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
 					<GoogleMap mapContainerStyle={containerStyle} center={center} zoom={15}>
 						<Marker position={center} />
 					</GoogleMap>
 				</LoadScript>
 			</section>
-			<div className='flex justify-between items-start'>
+			<div className='flex flex-col lg:flex-row justify-between items-start'>
 				{' '}
 				{/* Working Hours */}
 				<section className='mb-8'>
@@ -53,12 +59,7 @@ const ContactPage = () => {
 				</section>
 				{/* Contact Form */}
 				<section>
-					<AddLidForm
-						action={addNewLid}
-						title='Замовити зворотній дзвінок'
-						subtitle
-						icon={<FaMapMarkerAlt className='inline-block mr-1' />}
-					/>
+					<AddLidForm action={addNewLid} title='Замовити зворотній дзвінок' subtitle />
 				</section>
 			</div>
 		</div>
