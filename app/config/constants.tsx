@@ -1,20 +1,13 @@
-///Categories///
-// 'use client'
+///Menu///
 
-// import { getAllCategories } from '@/actions/categories'
-// import { ICategory } from '@/types/index'
-// import useSWR from 'swr'
+export const menu = [
+	{ menuItemName: 'Послуги', menuItemLink: '/services' },
+	{ menuItemName: 'Доставка', menuItemLink: '/delivery' },
+	{ menuItemName: 'Гарантія', menuItemLink: '/guarantee' },
+	{ menuItemName: 'Контакти', menuItemLink: '/contact' },
+]
 
-// interface CategoriesResponse {
-// 	success: boolean
-// 	categories: ICategory[]
-// 	count: number
-// }
-
-// const fetcher = async (): Promise<CategoriesResponse> => {
-// 	return getAllCategories()
-// }
-// const { data, error } = useSWR(['categories'], () => fetcher())
+///categoryList///
 
 export const categoryList = [
 	{

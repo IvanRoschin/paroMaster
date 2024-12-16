@@ -54,19 +54,19 @@ const GuaranteePage = (props: Props) => {
 				<p className='text-lg text-gray-700 mb-2'>
 					<strong>Телефон:</strong>{' '}
 					<Link
-						href={`tel:${process.env.ADMIN_PHONE}`}
+						href={`tel:${process.env.NEXT_PUBLIC_ADMIN_PHONE}`}
 						className='text-primaryAccentColor underline'
 					>
-						{process.env.ADMIN_PHONE}
+						{process.env.NEXT_PUBLIC_ADMIN_PHONE}
 					</Link>
 				</p>
 				<p className='text-lg text-gray-700'>
 					<strong>Електронна пошта:</strong>{' '}
 					<Link
-						href={`mailto:${process.env.ADMIN_EMAIL}`}
+						href={`mailto:${process.env.NEXT_PUBLIC_ADMIN_EMAIL}`}
 						className='text-primaryAccentColor underline'
 					>
-						{process.env.ADMIN_EMAIL}
+						{process.env.NEXT_PUBLIC_ADMIN_EMAIL}
 					</Link>
 				</p>
 			</section>
