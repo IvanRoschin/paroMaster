@@ -1,17 +1,17 @@
-import { getCategoryById, updateCategory } from '@/actions/categories'
-import { AddCategoryForm } from '@/components/index'
+import { getCategoryById, updateCategory } from "@/actions/categories"
+import { AddCategoryForm } from "@/components/index"
 
 interface Params {
-	id: string
+  id: string
 }
 const SingleCategoryPage = async ({ params }: { params: Params }) => {
-	const { id } = params
-	const category = await getCategoryById(id)
-	return (
-		<div className='mb-20'>
-			<AddCategoryForm title={'Редагувати категорію'} category={category} action={updateCategory} />
-		</div>
-	)
+  const { id } = params
+  const category = await getCategoryById(id)
+  return (
+    <div className="mb-20">
+      <AddCategoryForm title={"Редагувати категорію"} category={category} action={updateCategory} />
+    </div>
+  )
 }
 
 export default SingleCategoryPage

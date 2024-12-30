@@ -1,340 +1,307 @@
-'use client'
+"use client"
 
-import { addCustomer } from '@/actions/customers'
-import { getGoodById } from '@/actions/goods'
-import { getData } from '@/actions/nova'
-import { addOrder } from '@/actions/orders'
-import { sendCustomerEmail, sendEmail } from '@/actions/sendEmail'
-import { orderFormSchema } from '@/helpers/index'
-import { generateOrderNumber } from '@/helpers/orderNumber'
-import { ICustomer, IGood, IOrder } from '@/types/index'
-import { PaymentMethod } from '@/types/paymentMethod'
-import { useShoppingCart } from 'app/context/ShoppingCartContext'
-import { Form, Formik, FormikState } from 'formik'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
-import FormField from '../input/FormField'
-import Modal from './Modal'
+import debounce from "debounce"
+import { Field, Formik, FormikState } from "formik"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { toast } from "sonner"
 
-interface InitialStateType extends Omit<IOrder, '_id'> {}
+import { getGoodById } from "@/actions/goods"
+import { getData } from "@/actions/nova"
+import { generateOrderNumber } from "@/helpers/orderNumber"
+import { ICustomer, IGood } from "@/types/index"
+import { PaymentMethod } from "@/types/paymentMethod"
+import { useShoppingCart } from "app/context/ShoppingCartContext"
 
-// interface InitialStateType {
-// 	name: string
-// 	surname: string
-// 	email: string
-// 	phone: string
-// 	city: string
-// 	warehouse: string
-// 	payment: any
-// }
-
-type CustomerErrors = {
-	name?: string
-	surname?: string
-	email?: string
-	phone?: string
-	city?: string
-	warehouse?: string
-	payment?: string
-}
-
-type OrderFormErrors = {
-	number?: string
-	customer?: CustomerErrors
-	totalPrice?: string
-	status?: string
-}
-
-interface ResetFormProps {
-	resetForm: (nextState?: Partial<FormikState<InitialStateType>>) => void
-}
+import { addCustomer } from "@/actions/customers"
+import { addOrder } from "@/actions/orders"
+import { sendCustomerEmail } from "@/actions/sendEmail"
+import { sendAdminEmail } from "@/actions/sendGridEmail"
+import FormField from "../input/FormField"
+import Modal from "./Modal"
 
 interface OrderModalProps {
-	isOrderModalOpen: boolean
+  isOrderModalOpen: boolean
+}
+
+interface InitialStateType extends Omit<ICustomer, "_id"> {}
+
+interface ResetFormProps {
+  resetForm: (nextState?: Partial<FormikState<InitialStateType>>) => void
 }
 
 const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
-	const { cartItemsId, closeOrderModal, resetCart, getItemQuantity } = useShoppingCart()
-	const [warehouses, setWarehouses] = useState<
-		{
-			Ref: string
-			Description: string
-		}[]
-	>([])
-	const [isCheckboxChecked, setIsCheckboxChecked] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isCheckboxChecked, setIsCheckboxChecked] = useState(false)
+  const [warehouses, setWarehouses] = useState<{ Ref: string; Description: string }[]>([])
+  const [city, setCity] = useState("Київ")
+  const [orderedGoods, setOrderedGoods] = useState<IGood[]>([])
+  const [orderNumber, setOrderNumber] = useState<string>("")
+  const [totalPrice, setTotalPrice] = useState(0)
 
-	const [orderNumber, setOrderNumber] = useState<string>('')
-	const [orderedGoods, setOrderedGoods] = useState<IGood[]>([])
-	const [totalPrice, setTotalPrice] = useState<number>(0)
-	const [customer, setCustomer] = useState<ICustomer>()
+  const { cartItemsId, closeOrderModal, resetCart, getItemQuantity } = useShoppingCart()
+  const { push } = useRouter()
 
-	const { push } = useRouter()
+  const initialValues: InitialStateType = {
+    name: "",
+    surname: "",
+    email: "",
+    phone: "+380",
+    city: "",
+    warehouse: "Київ",
+    payment: PaymentMethod.CashOnDelivery
+  }
+  const [values, setValues] = useState(initialValues)
 
-	const customerInputs = [
-		{
-			name: 'customer.name',
-			type: 'text',
-			id: 'customer.name',
-			label: `І'мя`,
-			required: true,
-		},
-		{
-			name: 'customer.surname',
-			type: 'text',
-			id: 'customer.surname',
-			label: `Прізвище`,
-			required: true,
-		},
-		{
-			name: 'customer.email',
-			type: 'email',
-			id: 'customer.email',
-			label: `Email`,
-			required: true,
-		},
-		{
-			name: 'customer.phone',
-			type: 'tel',
-			id: 'customer.phone',
-			label: `Телефон`,
-			required: true,
-		},
-		{
-			name: 'customer.city',
-			type: 'text',
-			id: 'customer.city',
-			label: `Місто`,
-			required: true,
-		},
-		{
-			id: 'customer.warehouse',
-			label: 'Оберіть відділення',
-			options: warehouses.map(warehouse => ({
-				value: warehouse.Description,
-				label: warehouse.Description,
-			})),
-			type: 'select',
-		},
-		{
-			id: 'customer.payment',
-			label: 'Оберіть спосіб оплати',
-			options: Object.values(PaymentMethod).map(method => ({
-				value: method,
-				label: method,
-			})),
-			type: 'select',
-		},
-	]
+  const customerInputs = [
+    {
+      name: "name",
+      type: "text",
+      id: "name",
+      label: `І'мя`
+    },
+    {
+      name: "surname",
+      type: "text",
+      id: "surname",
+      label: `Прізвище`
+    },
+    {
+      name: "email",
+      type: "email",
+      id: "email",
+      label: `Email`
+    },
+    {
+      name: "phone",
+      type: "tel",
+      id: "phone",
+      label: `Телефон`
+    },
 
-	const initialValues: InitialStateType = {
-		number: '123',
-		customer: {
-			name: '',
-			surname: '',
-			email: '',
-			phone: '+380',
-			city: 'Київ',
-			warehouse: '',
-			payment: PaymentMethod.CashOnDelivery,
-		},
-		orderedGoods,
-		totalPrice,
-		status: 'Новий',
-	}
+    {
+      id: "payment",
+      label: "Оберіть спосіб оплати",
+      options: Object.values(PaymentMethod).map(method => ({
+        value: method,
+        label: method
+      })),
+      type: "select"
+    }
+  ]
+  // Debounced function to fetch warehouses by city
+  const fetchWarehouses = debounce(async (city: string) => {
+    try {
+      const response = await getData({
+        apiKey: process.env.NOVA_API,
+        modelName: "Address",
+        calledMethod: "getWarehouses",
+        methodProperties: { CityName: city, Limit: "50", Language: "UA" }
+      })
+      setWarehouses(response?.data?.data || [])
+    } catch (error) {
+      console.error("Error fetching warehouses:", error)
+    }
+  }, 500)
 
-	// Fetch goods and update form values
-	useEffect(() => {
-		const fetchGoods = async () => {
-			const retrievedGoods = await Promise.all(
-				cartItemsId.map(async item => {
-					const fetchedItem = await getGoodById(item.id)
-					const quantity = getItemQuantity(item.id)
-					const itemObject = {
-						...fetchedItem,
-						quantity,
-					}
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch ordered goods and calculate total price
+        const goodsPromises = cartItemsId.map(async item => {
+          const good = await getGoodById(item.id)
+          const quantity = getItemQuantity(item.id)
+          return good ? { ...good, quantity } : null
+        })
 
-					if (itemObject) {
-						return itemObject
-					} else {
-						return null
-					}
-				}),
-			)
+        const retrievedGoods = await Promise.all(goodsPromises)
+        const validGoods = retrievedGoods.filter(item => item !== null) as IGood[]
+        setOrderedGoods(validGoods)
 
-			const retrievedAmounts = cartItemsId.map(item => {
-				const storedAmount = localStorage.getItem(`amount-${item.id}`)
-				return storedAmount ? JSON.parse(storedAmount) : 0
-			})
-			const totalAmount = retrievedAmounts.reduce((total, amount) => total + amount, 0)
+        const totalAmount = validGoods.reduce(
+          (total, item) => total + (item.quantity || 0) * (item.price || 0),
+          0
+        )
+        setTotalPrice(totalAmount)
 
-			setOrderedGoods(retrievedGoods.filter(item => item !== null) as IGood[])
-			setTotalPrice(totalAmount)
-		}
-		const fetchOrderNumber = () => {
-			const getOrderNumber = generateOrderNumber()
-			setOrderNumber(getOrderNumber)
-		}
-		fetchGoods()
-		fetchOrderNumber()
-	}, [cartItemsId, getItemQuantity])
+        // Generate order number
+        setOrderNumber(generateOrderNumber())
+      } catch (error) {
+        console.error("Error fetching data:", error)
+      }
+    }
 
-	const handleCityChange = async (city: string) => {
-		try {
-			const warehouses = await fetchWarehouses(city)
-			setWarehouses(warehouses)
-		} catch (error) {
-			console.error('Error fetching warehouses:', error)
-		}
-	}
-	const handleCustomerChange = async (values: ICustomer) => {
-		setCustomer(values)
-	}
+    if (city) {
+      fetchWarehouses(city)
+      fetchData()
+    }
+  }, [city, cartItemsId, getItemQuantity])
 
-	const fetchWarehouses = async (city: string): Promise<{ Ref: string; Description: string }[]> => {
-		try {
-			const response = await getData({
-				apiKey: process.env.NOVA_API,
-				modelName: 'Address',
-				calledMethod: 'getWarehouses',
-				methodProperties: { CityName: city, Limit: '50', Language: 'UA' },
-			})
-			return response.data.data || []
-		} catch (error) {
-			console.error('Error fetching warehouses:', error)
-			return []
-		}
-	}
+  const handleSubmit = async (values: ICustomer) => {
+    if (!values) {
+      toast.error("values details are missing")
+      return
+    }
 
-	const handleSubmit = async () => {
-		try {
-			if (customer) {
-				const orderData: IOrder = {
-					number: orderNumber,
-					customer: {
-						name: `${customer?.name} ${customer?.surname}`,
-						email: customer?.email,
-						phone: customer?.phone,
-						city: customer?.city,
-						warehouse: customer?.warehouse,
-						payment: customer?.payment,
-					},
-					orderedGoods,
-					totalPrice,
-					status: 'Новий',
-				}
-				const mailData = {
-					...customer,
-					orderNumber,
-					orderedGoods,
-					totalPrice,
-				}
-				const emailResult = await sendEmail(mailData)
-				const customerEmailRusult = await sendCustomerEmail(mailData)
-				const orderResult = await addOrder(orderData)
-				const customerResult = await addCustomer(customer)
+    const orderData = {
+      number: orderNumber,
+      orderedGoods,
+      totalPrice,
+      customer: values,
+      status: "Новий"
+    }
 
-				if (
-					emailResult?.success &&
-					customerEmailRusult?.success &&
-					orderResult?.success &&
-					customerResult?.success
-				) {
-					push('/')
-					closeOrderModal()
-					resetCart()
-					toast.success('Замовлення відправлене', {
-						duration: 3000,
-					})
-				} else {
-					toast.error('Щось зломалось')
-				}
+    console.log("orderData:", orderData)
 
-				closeOrderModal()
-				resetCart()
-				toast.success('Замовлення відправлене')
-			}
+    const mailData = {
+      ...values,
+      orderNumber,
+      orderedGoods,
+      totalPrice
+    }
+    console.log("mailData:", mailData)
 
-			// Process order submission
-		} catch (error) {
-			console.error('Error submitting order:', error)
-			toast.error('Помилка створення замовлення')
-		} finally {
-		}
-	}
+    try {
+      setIsLoading(true)
+      const [adminEmail, customerEmail, orderResult, customerResult] = await Promise.all([
+        sendAdminEmail(mailData),
+        sendCustomerEmail(mailData),
+        addOrder(orderData),
+        addCustomer(mailData)
+      ])
 
-	const bodyContent = (
-		<div className='flex flex-col justify-center items-center p-4 bg-white rounded-lg shadow-md'>
-			<Formik
-				initialValues={initialValues}
-				validationSchema={orderFormSchema}
-				onSubmit={handleSubmit}
-				enableReinitialize
-			>
-				{({ values, errors, setFieldValue }) => {
-					handleCityChange(values.customer.city)
-					// useEffect(() => {
-					// 	if (values.customer.city) {
-					// 		fetchWarehouses(values.customer.city)
-					// 	}
-					// }, [values.customer.city])
-					handleCustomerChange(values.customer)
-					// useEffect(() => {
-					// 	setCustomer(values.customer)
-					// }, [values.customer])
+      if (
+        adminEmail.success &&
+        customerEmail.success &&
+        orderResult.success &&
+        customerResult.success
+      ) {
+        toast.success("Замовлення відправлене", { duration: 3000 })
+        closeOrderModal()
+        resetCart()
+      } else {
+        throw new Error("Failed to process one or more operations.")
+      }
+    } catch (error) {
+      console.error("Error during order processing:", error)
+      toast.error(error instanceof Error ? error.message : "An unknown error occurred")
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
-					return (
-						<Form className='flex flex-col space-y-8'>
-							{/* <Field
-								name='customer.name'
-								onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-									handleFieldChange('customer.name', e.target.value)
-								}
-								className={`text-primaryTextColor peer w-full p-4 pt-6 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed 
-					${errors.customer?.name && errors.customer?.name ? 'border-rose-500' : 'border-neutral-300'} 
-					${
-						errors.customer?.name && touched.customer?.name
-							? 'focus:border-rose-500'
-							: 'focus:border-green-500'
-					}
-					`}
-							/>
-							<ErrorMessage name='customer.name' render={msg => <div>{msg}</div>} /> */}
-							{customerInputs.map((item, i) => (
-								<FormField key={i} item={item} setFieldValue={setFieldValue} errors={errors} />
-							))}
+  if (!initialValues) {
+    return null
+  }
 
-							<div className='flex items-center'>
-								<input
-									id='termsCheckbox'
-									type='checkbox'
-									checked={isCheckboxChecked}
-									onChange={e => setIsCheckboxChecked(e.target.checked)}
-									className='mr-2'
-								/>
-								<label htmlFor='termsCheckbox'>Я погоджуюсь з умовами та правилами</label>
-							</div>
-						</Form>
-					)
-				}}
-			</Formik>
-		</div>
-	)
+  const bodyContent = (
+    <div className="flex flex-col p-4 bg-white rounded-lg shadow-md">
+      <Formik initialValues={initialValues} onSubmit={handleSubmit}>
+        {({ values, errors, setFieldValue, touched }) => {
+          console.log("values in Formik", values)
 
-	return (
-		<Modal
-			title='Форма замовлення'
-			actionLabel='Замовити'
-			secondaryAction={closeOrderModal}
-			secondaryActionLabel='Закрити'
-			body={bodyContent}
-			isOpen={isOrderModalOpen}
-			onClose={closeOrderModal}
-			onSubmit={handleSubmit}
-			disabled={!isCheckboxChecked}
-		/>
-	)
+          setValues(values)
+
+          return (
+            <div className="flex flex-col space-y-4">
+              {customerInputs.map((field, index) => (
+                <FormField key={index} item={field} setFieldValue={setFieldValue} errors={errors} />
+              ))}
+              {/* City Input */}
+              <div className="relative">
+                <Field
+                  id="city"
+                  type="text"
+                  value={values.city}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    setFieldValue("city", e.target.value)
+                    setCity(e.target.value)
+                  }}
+                  className={`peer w-full p-4 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
+        ${errors?.city && touched?.city ? "border-rose-500" : "border-neutral-300"}
+        ${errors?.city && touched?.city ? "focus:border-rose-500" : "focus:border-green-500"}
+      `}
+                />
+                <label
+                  htmlFor="city"
+                  className="text-primaryTextColor absolute text-md duration-150 left-3 top-3 z-10 origin-[0] transform -translate-y-3
+            peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
+                >
+                  Введіть назву міста
+                </label>
+              </div>
+              {/* Warehouse Select */}
+              <div className="relative mt-4">
+                <Field
+                  as="select"
+                  id="warehouse"
+                  name="warehouse"
+                  value={values.warehouse}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setFieldValue("warehouse", e.target.value)
+                  }
+                  className={`peer w-full p-4 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
+        ${errors?.warehouse && touched?.warehouse ? "border-rose-500" : "border-neutral-300"}
+        ${
+          errors?.warehouse && touched?.warehouse
+            ? "focus:border-rose-500"
+            : "focus:border-green-500"
+        }
+      `}
+                >
+                  {warehouses.map((wh, index) => (
+                    <option key={index} value={wh.Description}>
+                      {wh.Description}
+                    </option>
+                  ))}
+                </Field>
+                <label
+                  htmlFor="warehouse"
+                  className="text-primaryTextColor absolute text-md duration-150 left-3 top-3 z-10 origin-[0] transform -translate-y-3
+            peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
+                >
+                  Оберіть відділення
+                </label>
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  id="termsCheckbox"
+                  type="checkbox"
+                  checked={isCheckboxChecked}
+                  onChange={e => setIsCheckboxChecked(e.target.checked)}
+                  className="mr-2"
+                />
+                <label htmlFor="termsCheckbox">Я погоджуюсь з умовами та правилами</label>
+              </div>
+              {/* <div className="flex justify-end">
+                <CustomButton
+                  type="submit"
+                  label={"Створити замовлення"}
+                  disabled={!isCheckboxChecked || isLoading}
+                />
+              </div> */}
+            </div>
+          )
+        }}
+      </Formik>
+    </div>
+  )
+  console.log("values in State", values)
+
+  return (
+    <Modal
+      title="Форма замовлення"
+      actionLabel="Замовити"
+      secondaryAction={closeOrderModal}
+      secondaryActionLabel="Закрити"
+      body={bodyContent}
+      isOpen={isOrderModalOpen}
+      onClose={closeOrderModal}
+      disabled={!isCheckboxChecked || isLoading}
+      onSubmit={() => handleSubmit(values)}
+    />
+  )
 }
 
 export default OrderModal

@@ -1,11 +1,11 @@
 export interface NewLidTemplateProps {
-	name: string
-	email: string
-	phone: string
+  name: string
+  email: string
+  phone: string
 }
 
 export function generateLidEmailContent({ name, email, phone }: NewLidTemplateProps): string {
-	return `
+  return `
     <div>
       <h1>З форми Зворотнього зв'язку сайту ParoMaster надійшов запит 
 			</h1>

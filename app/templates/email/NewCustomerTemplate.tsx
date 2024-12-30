@@ -1,38 +1,38 @@
-import { IGood } from '@/types/good/IGood'
+import { IGood } from "@/types/good/IGood"
 
 enum PaymentMethod {
-	CashOnDelivery = 'Оплата після отримання',
-	CreditCard = 'Оплата на карту',
-	InvoiceForSPD = 'Рахунок для СПД',
+  CashOnDelivery = "Оплата після отримання",
+  CreditCard = "Оплата на карту",
+  InvoiceForSPD = "Рахунок для СПД"
 }
 
 export interface NewCustomerTemplateProps {
-	name: string
-	surname: string
-	email: string
-	phone: string
-	payment: PaymentMethod
-	city: string
-	warehouse: string
-	orderedGoods: IGood[]
-	totalPrice: number
-	orderNumber: string
+  name: string
+  surname: string
+  email: string
+  phone: string
+  payment: PaymentMethod
+  city: string
+  warehouse: string
+  orderedGoods: IGood[]
+  totalPrice: number
+  orderNumber: string
 }
 
 export function generateCustomerEmailContent({
-	name,
-	surname,
-	phone,
-	payment,
-	city,
-	warehouse,
-	orderedGoods,
-	totalPrice,
-	orderNumber,
+  name,
+  surname,
+  phone,
+  payment,
+  city,
+  warehouse,
+  orderedGoods,
+  totalPrice,
+  orderNumber
 }: NewCustomerTemplateProps): string {
-	const itemsContent = orderedGoods
-		.map(
-			(item, index) => `
+  const itemsContent = orderedGoods
+    .map(
+      (item, index) => `
         <tr key="${item._id}">
           <td>${index + 1}.</td>
           <td>${item.title}</td>
@@ -42,11 +42,11 @@ export function generateCustomerEmailContent({
           <td style="text-align: center">${item.quantity}</td>
           <td style="text-align: center">${item.price}</td>
         </tr>
-      `,
-		)
-		.join('')
+      `
+    )
+    .join("")
 
-	return `
+  return `
     <div>
       <h1> Шановний ${name} ${surname} !
       <br />
@@ -91,7 +91,7 @@ export function generateCustomerEmailContent({
 
       <h3>Щиро вдячний за довіру!
       <p>З повагою, власник сайту ParoMaster.</p>
-      <p>${process.env.ADMIN_NAME}</p>
+      <p>${process.env.NEXT_PUBLIC_ADMIN_NAME}</p>
       <p>тел.: ${process.env.NEXT_PUBLIC_ADMIN_PHONE}</p>
       <p>email: ${process.env.NEXT_PUBLIC_ADMIN_EMAIL}</p>
       </h3>
