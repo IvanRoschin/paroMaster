@@ -1,13 +1,13 @@
-import { IOrder } from '../order/IOrder'
+import { IOrder } from "../order/IOrder"
 
 export interface ICustomer {
-	_id?: string
-	name: string
-	surname?: string
-	phone: string
-	email: string
-	city: string
-	warehouse: string
-	payment: string
-	orders?: IOrder
+  _id?: string
+  name: string
+  surname?: string
+  phone: string
+  email: string
+  city: string
+  warehouse: string
+  payment: string
+  orders?: IOrder
 }
