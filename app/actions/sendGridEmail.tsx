@@ -4,12 +4,11 @@ import { IGood } from "@/types/index"
 import sendgrid from "@sendgrid/mail"
 import { generateEmailContent, NewOrderTemplateProps } from "app/templates/email/NewOrderTemplate"
 
-if (!process.env.NEXT_PUBLIC_SENDGRID_API_KEY) {
-  throw new Error("SENDGRID_API_KEY is not defined in the environment variables")
+if (!process.env.NEXT_PUBLIC_SENDGRID_API_KEY || !process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
+  throw new Error("SENDGRID_API_KEY or ADMIN_EMAIL is not defined in the environment variables")
 }
-const key = process.env.NEXT_PUBLIC_SENDGRID_API_KEY
 
-sendgrid.setApiKey(key)
+sendgrid.setApiKey(process.env.NEXT_PUBLIC_SENDGRID_API_KEY)
 
 interface IGetSendData {
   name: string
@@ -25,6 +24,7 @@ interface IGetSendData {
 }
 
 export async function sendAdminEmail(data: IGetSendData) {
+  console.log("this is sendgrid admin email")
   const {
     name,
     surname,
@@ -54,7 +54,7 @@ export async function sendAdminEmail(data: IGetSendData) {
     orderedGoods.length === 0 ||
     totalPrice <= 0
   ) {
-    throw new Error("Error: Not all data passed.")
+    return { success: false, error: "Validation Error: Missing or invalid data." }
   }
 
   try {
@@ -71,29 +71,26 @@ export async function sendAdminEmail(data: IGetSendData) {
       totalPrice
     } as NewOrderTemplateProps)
 
-    // Ensure the "from" email is valid
     const fromEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
-    if (!fromEmail || !fromEmail.includes("@")) {
-      throw new Error("Invalid 'from' email address configured in environment variables.")
-    }
-    console.log("fromEmail", fromEmail)
+
+    console.log("Using fromEmail:", fromEmail)
+
+    if (!fromEmail) return
 
     // Send email
     await sendgrid.send({
-      from: `${fromEmail}`,
-      to: fromEmail,
-      subject: `Нове замовлення на сайті від ${name} ${surname}, контактний email: ${fromEmail}`,
+      from: fromEmail,
+      to: "ivan.roschin86@gmail.com", // Admin email receiving the order
+      subject: `Нове замовлення на сайті від ${name} ${surname}, контактний email: ${email}`,
       text: `Замовлення від: ${name} ${surname}, Телефон: ${phone}`,
       html: emailContent
     })
-    console.log("AdminEmail successfyly sended")
+
+    console.log("Admin email successfully sent.")
     return { success: true }
   } catch (error: any) {
-    if (error.response) {
-      console.error("SendGrid response error:", error.response.body.errors)
-    } else {
-      console.error("Error sending email:", error)
-    }
-    return { success: false, error: error.message || "Error sending email" }
+    const errorMessage = error.response?.body?.errors || error.message || "Unknown error occurred."
+    console.error("Error sending email:", errorMessage)
+    return { success: false, error: errorMessage }
   }
 }

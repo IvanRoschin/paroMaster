@@ -83,9 +83,8 @@ export function generateEmailContent({
           ${itemsContent}
         </tbody>
       </table>
-      <h2 style="text-align: center; color: #333;">Всього за замовленням: ${totalPrice} грн.</br> + доставка за тарифами перевізника
+      <h2 style="text-align: center; color: #333;">Всього за замовленням: ${totalPrice} грн.</br>
       </h2>
-
     </div>
   `
 }

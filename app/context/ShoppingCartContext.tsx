@@ -133,7 +133,6 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
         })
       }
     })
-    toast.success("Товар доданий до корзини")
   }
 
   function decreaseCartQuantity(id: string) {
@@ -153,7 +152,6 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
         })
       }
     })
-    toast.success("Товар видалено з коризни")
   }
 
   function removeFromCart(id: string) {
