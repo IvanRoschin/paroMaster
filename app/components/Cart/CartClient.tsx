@@ -28,8 +28,13 @@ export const CartClient = (props: Props) => {
       ))}
       <p className="text-end pt-10">
         Всього за замовленням: <span className="font-bold">{totalAmount} грн.</span>
-        <br />+ вартість доставки: <span className="font-bold"> за тарифами перевізника</span>
       </p>
+      <p className="text-end pt-10">
+        {totalAmount >= 1000
+          ? `доставка безкоштовна`
+          : `вартість доставки: за тарифами перевізника`}
+      </p>
+      {/* <br />+ вартість доставки: <span className="font-bold"> за тарифами перевізника</span> */}
     </div>
   )
 }

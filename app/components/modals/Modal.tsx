@@ -13,7 +13,7 @@ interface ModalProps {
   footer?: JSX.Element
   isOpen?: boolean
   onClose: () => void
-  onSubmit: () => Promise<void>
+  onSubmit: () => Promise<void> | void
   disabled?: boolean
 }
 

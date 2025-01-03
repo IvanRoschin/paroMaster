@@ -13,9 +13,6 @@ import { ICustomer, IGood } from "@/types/index"
 import { PaymentMethod } from "@/types/paymentMethod"
 import { useShoppingCart } from "app/context/ShoppingCartContext"
 
-import { addCustomer } from "@/actions/customers"
-import { addOrder } from "@/actions/orders"
-import { sendCustomerEmail } from "@/actions/sendEmail"
 import { sendAdminEmail } from "@/actions/sendGridEmail"
 import FormField from "../input/FormField"
 import Modal from "./Modal"
@@ -143,15 +140,15 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
       return
     }
 
-    const orderData = {
-      number: orderNumber,
-      orderedGoods,
-      totalPrice,
-      customer: values,
-      status: "Новий"
-    }
+    // const orderData = {
+    //   number: orderNumber,
+    //   orderedGoods,
+    //   totalPrice,
+    //   customer: values,
+    //   status: "Новий"
+    // }
 
-    console.log("orderData:", orderData)
+    // console.log("orderData:", orderData)
 
     const mailData = {
       ...values,
@@ -163,24 +160,26 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
 
     try {
       setIsLoading(true)
-      const [adminEmail, customerEmail, orderResult, customerResult] = await Promise.all([
-        sendAdminEmail(mailData),
-        sendCustomerEmail(mailData),
-        addOrder(orderData),
-        addCustomer(mailData)
+
+      const [adminEmail] = await Promise.all([
+        sendAdminEmail(mailData)
+        // sendCustomerEmail(mailData),
+        // addOrder(orderData),
+        // addCustomer(mailData)
       ])
 
       if (
-        adminEmail.success &&
-        customerEmail.success &&
-        orderResult.success &&
-        customerResult.success
+        adminEmail?.success
+        //   // &&
+        //   // customerEmail.success &&
+        //   // orderResult.success &&
+        //   // customerResult.success
       ) {
         toast.success("Замовлення відправлене", { duration: 3000 })
         closeOrderModal()
         resetCart()
       } else {
-        throw new Error("Failed to process one or more operations.")
+        throw new Error("Failed send Admin email")
       }
     } catch (error) {
       console.error("Error during order processing:", error)
@@ -198,10 +197,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
     <div className="flex flex-col p-4 bg-white rounded-lg shadow-md">
       <Formik initialValues={initialValues} onSubmit={handleSubmit}>
         {({ values, errors, setFieldValue, touched }) => {
-          console.log("values in Formik", values)
-
           setValues(values)
-
           return (
             <div className="flex flex-col space-y-4">
               {customerInputs.map((field, index) => (
@@ -274,21 +270,12 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
                 />
                 <label htmlFor="termsCheckbox">Я погоджуюсь з умовами та правилами</label>
               </div>
-              {/* <div className="flex justify-end">
-                <CustomButton
-                  type="submit"
-                  label={"Створити замовлення"}
-                  disabled={!isCheckboxChecked || isLoading}
-                />
-              </div> */}
             </div>
           )
         }}
       </Formik>
     </div>
   )
-  console.log("values in State", values)
-
   return (
     <Modal
       title="Форма замовлення"

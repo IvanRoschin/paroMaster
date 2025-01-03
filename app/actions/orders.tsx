@@ -43,7 +43,7 @@ export async function getAllOrders(
 }
 
 export async function addOrder(values: IOrder) {
-  console.log("valuesBackend:", values)
+  // console.log("valuesBackend:", values)
   try {
     await connectToDB()
 
