@@ -12,9 +12,9 @@
 
 // Function to generate an order number
 export function generateOrderNumber(): string {
-	const prefix = 'ORD' // Example prefix for order number
-	const timestamp = Date.now().toString() // Get current timestamp
-	// const randomPart = generateRandomString(4) // Generate a random string part
-	const orderNumber = `${prefix}-${timestamp}` // Example format: ORD-1624201696065-ABCD
-	return orderNumber
+  const prefix = "ORD" // Example prefix for order number
+  const timestamp = Date.now().toString() // Get current timestamp
+  // const randomPart = generateRandomString(4) // Generate a random string part
+  const orderNumber = `${prefix}-${timestamp}` // Example format: ORD-1624201696065-ABCD
+  return orderNumber
 }

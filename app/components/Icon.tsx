@@ -18,25 +18,20 @@ export function Icon({
   children,
   ...props
 }: SVGProps<SVGSVGElement> & {
-  name: string ;
-  childClassName?: string;
+  name: string
+  childClassName?: string
 }) {
   if (children) {
     return (
-      <span
-        className={childClassName}
-      >
+      <span className={childClassName}>
         <Icon name={name} className={className} {...props} />
         {children}
       </span>
-    );
+    )
   }
   return (
-    <svg
-      {...props}
-      className={className}
-    >
-    <use href={`${process.env.PUBLIC_URL}/icons/sprite.svg#${name}`} />
+    <svg {...props} className={className}>
+      <use href={`${process.env.PUBLIC_URL}/icons/sprite.svg#${name}`} />
     </svg>
-  );
+  )
 }

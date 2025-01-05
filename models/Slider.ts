@@ -1,26 +1,26 @@
-import mongoose from 'mongoose'
+import mongoose from "mongoose"
 
 const { Schema } = mongoose
 
 const sliderSchema = new Schema(
-	{
-		title: {
-			type: String,
-			required: true,
-		},
-		desc: {
-			type: String,
-			required: true,
-		},
-		src: {
-			type: String,
-			required: true,
-		},
-	},
+  {
+    title: {
+      type: String,
+      required: true
+    },
+    desc: {
+      type: String,
+      required: true
+    },
+    src: {
+      type: String,
+      required: true
+    }
+  },
 
-	{ versionKey: false, timestamps: true },
+  { versionKey: false, timestamps: true }
 )
 
-sliderSchema.index({ '$**': 'text' })
+sliderSchema.index({ "$**": "text" })
 
-export default mongoose.models.Slider || mongoose.model('Slider', sliderSchema)
+export default mongoose.models.Slider || mongoose.model("Slider", sliderSchema)
