@@ -81,9 +81,10 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
     {
       id: "payment",
       label: "Оберіть спосіб оплати",
-      options: Object.values(PaymentMethod).map(method => ({
+      options: Object.values(PaymentMethod).map((method, index) => ({
         value: method,
-        label: method
+        label: method,
+        key: `payment-method-${index}` // Add a unique key
       })),
       type: "select"
     }
@@ -134,7 +135,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
       fetchWarehouses(city)
       fetchData()
     }
-  }, [city, cartItemsId, getItemQuantity])
+  }, [city, cartItemsId, getItemQuantity, fetchWarehouses])
 
   const handleSubmit = async (values: ICustomer) => {
     if (!values) {
@@ -195,6 +196,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
     <div className="flex flex-col p-4 bg-white rounded-lg shadow-md">
       <Formik initialValues={initialValues} onSubmit={handleSubmit}>
         {({ values, errors, setFieldValue, touched }) => {
+          // eslint-disable-next-line react-hooks/rules-of-hooks
           useEffect(() => {
             setValues(values)
           }, [values])

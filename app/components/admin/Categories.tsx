@@ -126,7 +126,7 @@ export default function Categories({
                   small
                   outline
                   color="border-red-400"
-                  onClick={() => category._id && handleDelete(category._id.toString())}
+                  onClick={() => category?._id && handleDelete(category?._id.toString())}
                 />
               </td>
             </tr>

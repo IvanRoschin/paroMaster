@@ -143,9 +143,7 @@ const OrderForm = ({ title, customer, handleSubmit }: Props) => {
         <div>
           <h3 className="text-xl font-semibold">{title}</h3>
           {customerInputs.map((item, i) => (
-            <div className="w-full mb-4">
-              <FormField key={i} item={item} setFieldValue={setFieldValue} />
-            </div>
+            <FormField key={i} item={item} setFieldValue={setFieldValue} />
           ))}
 
           <div className="w-full mb-4">
