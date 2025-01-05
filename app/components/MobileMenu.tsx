@@ -6,9 +6,13 @@ import { MdMenu, MdMenuOpen } from "react-icons/md"
 
 import { menu } from "../config/constants"
 import { Icon } from "./Icon"
+import SingOutButton from "./SingOutButton"
 import Socials from "./Socials"
 
-const MobileMenu = () => {
+interface MenuProps {
+  session?: any
+}
+const MobileMenu = ({ session }: MenuProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const toggleNavbar = () => {
@@ -50,6 +54,7 @@ const MobileMenu = () => {
                 </li>
               ))}
             </ul>
+            {session && <SingOutButton />}
           </div>
         )}
       </nav>

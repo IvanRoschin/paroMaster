@@ -6,7 +6,6 @@ import Logo from "./Logo"
 import Menu from "./Menu"
 import MobileMenu from "./MobileMenu"
 import Search from "./Search"
-import SingOutButton from "./SingOutButton"
 import Socials from "./Socials"
 
 interface HeaderProps {
@@ -21,13 +20,12 @@ const Header = ({ session }: HeaderProps) => {
     <div className="">
       {/* Mobile and desktop styles */}
       {isMobile ? (
-        <MobileMenu />
+        <MobileMenu session={session} />
       ) : (
         <div className="bg-gray-300 flex p-4 px-8 items-center justify-between">
-          <Socials /> <Menu />
+          <Socials /> <Menu session={session} />
         </div>
       )}
-      {session && <SingOutButton />}
       <div
         className="flex
 				 justify-between items-center border border-b p-4 px-8"

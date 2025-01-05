@@ -3,7 +3,7 @@
 import Category from "@/models/Category"
 import { ICategory } from "@/types/category/ICategory"
 import { ISearchParams } from "@/types/index"
-import { connectToDB } from "@/utils/dbConnect"
+import { startServer } from "@/utils/startServer"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
@@ -14,6 +14,7 @@ export interface IGetAllCategories {
 }
 
 export async function addCategory(formData: FormData) {
+  await startServer()
   const values: Record<string, any> = {}
 
   formData.forEach((value, key) => {
@@ -29,7 +30,6 @@ export async function addCategory(formData: FormData) {
     }
   })
   try {
-    await connectToDB()
     const title = values.title
     const existingCategory = await Category.findOne({ title })
     if (existingCategory) {
@@ -56,11 +56,11 @@ export async function getAllCategories(
   searchParams?: ISearchParams,
   limit: number = 10
 ): Promise<IGetAllCategories> {
+  await startServer()
+
   const page = searchParams?.page || 1
 
   try {
-    await connectToDB()
-
     const count = await Category.countDocuments()
 
     const categories: ICategory[] = await Category.find()
@@ -81,8 +81,8 @@ export async function getAllCategories(
 }
 
 export async function getCategoryById(id: string) {
+  await startServer()
   try {
-    await connectToDB()
     const category = await Category.findById({ _id: id })
     return JSON.parse(JSON.stringify(category))
   } catch (error) {
@@ -97,12 +97,12 @@ export async function getCategoryById(id: string) {
 }
 
 export async function deleteCategory(id: string) {
+  await startServer()
   if (!id) {
     console.error("No ID provided")
     return
   }
   try {
-    await connectToDB()
     await Category.findByIdAndDelete(id)
   } catch (error) {
     if (error instanceof Error) {
@@ -118,6 +118,8 @@ export async function deleteCategory(id: string) {
 }
 
 export async function updateCategory(formData: FormData) {
+  await startServer()
+
   const entries = Object.fromEntries(formData.entries())
   const { id, title, src } = entries as {
     id: string
@@ -125,7 +127,6 @@ export async function updateCategory(formData: FormData) {
     src?: string
   }
   try {
-    await connectToDB()
     const updateFields: Partial<ICategory> = {
       title,
       src

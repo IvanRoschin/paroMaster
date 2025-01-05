@@ -140,10 +140,12 @@ const OrderForm = ({ title, customer, handleSubmit }: Props) => {
       validationSchema={orderFormSchema}
     >
       {({ values, setFieldValue, errors, touched }) => (
-        <>
+        <div>
           <h3 className="text-xl font-semibold">{title}</h3>
           {customerInputs.map((item, i) => (
-            <FormField key={i} item={item} setFieldValue={setFieldValue} />
+            <div className="w-full mb-4">
+              <FormField key={i} item={item} setFieldValue={setFieldValue} />
+            </div>
           ))}
 
           <div className="w-full mb-4">
@@ -170,7 +172,7 @@ const OrderForm = ({ title, customer, handleSubmit }: Props) => {
           <div className="flex justify-end">
             <CustomButton type="submit" label="Створити замовлення" disabled={isLoading} />
           </div>
-        </>
+        </div>
       )}
     </Formik>
   )

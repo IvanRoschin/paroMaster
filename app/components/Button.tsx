@@ -4,7 +4,7 @@ import { IconType } from "react-icons"
 
 interface ButtonProps {
   label?: string
-  onClick?: () => void
+  onClick?: () => void | Promise<void>
   disabled?: boolean
   outline?: boolean
   small?: boolean
@@ -12,6 +12,7 @@ interface ButtonProps {
   color?: string
   width?: string
   type?: "submit" | "reset" | "button"
+  children?: React.ReactNode
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -23,7 +24,8 @@ const Button: React.FC<ButtonProps> = ({
   color,
   width,
   type,
-  icon: Icon
+  icon: Icon,
+  children
 }) => {
   return (
     <button
@@ -46,7 +48,7 @@ const Button: React.FC<ButtonProps> = ({
       `}
     >
       {Icon && <Icon size={12} className=" " />}
-      {label}
+      {label || children}
     </button>
   )
 }

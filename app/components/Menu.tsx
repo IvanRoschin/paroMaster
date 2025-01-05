@@ -1,11 +1,16 @@
 // import { signOut } from 'auth'
+import { signOut } from "next-auth/react"
 import Link from "next/link"
+import { MdLogout } from "react-icons/md"
 import { menu } from "../config/constants"
+import Button from "./Button"
 import { Icon } from "./Icon"
 
-type Props = {}
+interface MenuProps {
+  session?: any
+}
 
-const Menu = (props: Props) => {
+const Menu = ({ session }: MenuProps) => {
   return (
     <nav className="flex items-center justify-center font-semibold">
       <Link href="/catalog" className="flex justify-end items-center nav mr-2 lg:mr-4">
@@ -23,6 +28,12 @@ const Menu = (props: Props) => {
           )
         })}
       </ul>
+      {session && (
+        <Button small onClick={() => signOut({ callbackUrl: "/" })}>
+          <MdLogout />
+          Вихід
+        </Button>
+      )}
     </nav>
   )
 }

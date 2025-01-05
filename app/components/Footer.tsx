@@ -83,6 +83,7 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
                   width={120}
                   height={30}
                   className="h-[30px] object-fit"
+                  priority={true}
                 />
                 <Image
                   src={`${process.env.PUBLIC_URL}/delivery/ukr_poshta_white.svg`}
@@ -90,6 +91,7 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
                   width={120}
                   height={30}
                   className="h-[30px] object-fit"
+                  priority={true}
                 />
               </div>
             </div>
@@ -103,6 +105,7 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
                   width={120}
                   height={30}
                   className="h-[30px] object-fit"
+                  priority={true}
                 />
                 <Image
                   src={`${process.env.PUBLIC_URL}/payment/visa_white.svg`}
@@ -110,6 +113,7 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
                   width={120}
                   height={30}
                   className="h-[30px] object-fit"
+                  priority={true}
                 />
               </div>
             </div>
@@ -164,6 +168,7 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
                           width={20}
                           height={20}
                           className="w-5 h-5 mr-3 transition-filter duration-300 ease-in-out group-hover:filter-primary filter-white"
+                          priority={true}
                         />
                         {title}
                       </Link>

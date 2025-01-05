@@ -84,6 +84,7 @@ const Slider: React.FC<SliderProps> = ({
                 width={400}
                 height={400}
                 className="w-full h-[80vh] object-cover md:rounded-tl-3xl md:rounded-bl-3xl"
+                priority={true}
               />
             )}
           </div>

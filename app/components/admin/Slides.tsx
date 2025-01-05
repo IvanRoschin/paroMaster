@@ -80,7 +80,13 @@ export default function Slides({
               <td className="p-2 border-r-2 text-start">{slide.desc}</td>
               <td className="p-2 border-r-2 text-start">
                 <div className="flex justify-center">
-                  <Image src={slide.src} alt={slide.title} width={100} height={100} />
+                  <Image
+                    src={slide.src}
+                    alt={slide.title}
+                    width={100}
+                    height={100}
+                    priority={true}
+                  />
                 </div>
               </td>
               <td className="p-2 border-r-2 text-center">

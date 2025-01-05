@@ -1,6 +1,6 @@
 "use client"
 
-import { sendEmailToLid } from "@/actions/sendEmail"
+import { sendEmailToLid } from "@/actions/sendGridEmail"
 import CustomButton from "@/components/admin/CustomFormikButton"
 import FormField from "@/components/input/FormField"
 import { contactFormSchema } from "@/helpers/index"
@@ -65,7 +65,7 @@ const NewLidForm: React.FC<NewLidFormProps> = ({ lid, title, action, subtitle, i
         formData.append(key, (values as any)[key])
       })
       const emailResult = await sendEmailToLid(values)
-      if (emailResult.success) {
+      if (emailResult?.success) {
         await action(formData)
         resetForm()
         toast.success(lid?._id ? "Користувача оновлено!" : "Ваше повідомлення направлено!")
