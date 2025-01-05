@@ -102,7 +102,13 @@ export default function Categories({
               <td className="p-2 border-r-2 text-start">{category.title}</td>
               <td className="p-2 border-r-2 text-start">
                 <div className="flex justify-center">
-                  <Image src={category.src} alt={category.title} width={24} height={24} />
+                  <Image
+                    src={category.src}
+                    alt={category.title}
+                    width={24}
+                    height={24}
+                    priority={true}
+                  />
                 </div>
               </td>
               <td className="p-2 border-r-2 text-center">

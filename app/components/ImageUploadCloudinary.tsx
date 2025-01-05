@@ -71,6 +71,7 @@ const ImageUploadCloudinary: React.FC<ImageUploadProps> = ({
                     style={{ objectFit: "cover" }}
                     src={src}
                     className="border border-gray-400 block cursor-pointer hover:shadow-[10px_10px_15px_-3px_rgba(0,0,0,0.3)] hover:scale-105 transition-all"
+                    priority={true}
                   />
                 </div>
               ))}

@@ -13,7 +13,9 @@ import { ICustomer, IGood } from "@/types/index"
 import { PaymentMethod } from "@/types/paymentMethod"
 import { useShoppingCart } from "app/context/ShoppingCartContext"
 
-import { sendAdminEmail } from "@/actions/sendGridEmail"
+import { addCustomer } from "@/actions/customers"
+import { addOrder } from "@/actions/orders"
+import { sendAdminEmail, sendCustomerEmail } from "@/actions/sendGridEmail"
 import FormField from "../input/FormField"
 import Modal from "./Modal"
 
@@ -140,15 +142,13 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
       return
     }
 
-    // const orderData = {
-    //   number: orderNumber,
-    //   orderedGoods,
-    //   totalPrice,
-    //   customer: values,
-    //   status: "Новий"
-    // }
-
-    // console.log("orderData:", orderData)
+    const orderData = {
+      number: orderNumber,
+      orderedGoods,
+      totalPrice,
+      customer: values,
+      status: "Новий"
+    }
 
     const mailData = {
       ...values,
@@ -156,30 +156,28 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
       orderedGoods,
       totalPrice
     }
-    console.log("mailData:", mailData)
 
     try {
       setIsLoading(true)
 
-      const [adminEmail] = await Promise.all([
-        sendAdminEmail(mailData)
-        // sendCustomerEmail(mailData),
-        // addOrder(orderData),
-        // addCustomer(mailData)
+      const [adminEmail, customerEmail, orderResult, customerResult] = await Promise.all([
+        sendAdminEmail(mailData),
+        sendCustomerEmail(mailData),
+        addOrder(orderData),
+        addCustomer(values)
       ])
 
       if (
-        adminEmail?.success
-        //   // &&
-        //   // customerEmail.success &&
-        //   // orderResult.success &&
-        //   // customerResult.success
+        adminEmail?.success &&
+        customerEmail?.success &&
+        orderResult?.success &&
+        customerResult?.success
       ) {
         toast.success("Замовлення відправлене", { duration: 3000 })
         closeOrderModal()
         resetCart()
       } else {
-        throw new Error("Failed send Admin email")
+        throw new Error("Помилка сворення замовлення")
       }
     } catch (error) {
       console.error("Error during order processing:", error)
@@ -197,12 +195,16 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
     <div className="flex flex-col p-4 bg-white rounded-lg shadow-md">
       <Formik initialValues={initialValues} onSubmit={handleSubmit}>
         {({ values, errors, setFieldValue, touched }) => {
-          setValues(values)
+          useEffect(() => {
+            setValues(values)
+          }, [values])
+
           return (
             <div className="flex flex-col space-y-4">
               {customerInputs.map((field, index) => (
                 <FormField key={index} item={field} setFieldValue={setFieldValue} errors={errors} />
               ))}
+
               {/* City Input */}
               <div className="relative">
                 <Field
@@ -214,18 +216,19 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
                     setCity(e.target.value)
                   }}
                   className={`peer w-full p-4 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
-        ${errors?.city && touched?.city ? "border-rose-500" : "border-neutral-300"}
-        ${errors?.city && touched?.city ? "focus:border-rose-500" : "focus:border-green-500"}
-      `}
+              ${errors?.city && touched?.city ? "border-rose-500" : "border-neutral-300"}
+              ${errors?.city && touched?.city ? "focus:border-rose-500" : "focus:border-green-500"}
+            `}
                 />
                 <label
                   htmlFor="city"
                   className="text-primaryTextColor absolute text-md duration-150 left-3 top-3 z-10 origin-[0] transform -translate-y-3
-            peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
+              peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
                 >
                   Введіть назву міста
                 </label>
               </div>
+
               {/* Warehouse Select */}
               <div className="relative mt-4">
                 <Field
@@ -237,13 +240,13 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
                     setFieldValue("warehouse", e.target.value)
                   }
                   className={`peer w-full p-4 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
-        ${errors?.warehouse && touched?.warehouse ? "border-rose-500" : "border-neutral-300"}
-        ${
-          errors?.warehouse && touched?.warehouse
-            ? "focus:border-rose-500"
-            : "focus:border-green-500"
-        }
-      `}
+              ${errors?.warehouse && touched?.warehouse ? "border-rose-500" : "border-neutral-300"}
+              ${
+                errors?.warehouse && touched?.warehouse
+                  ? "focus:border-rose-500"
+                  : "focus:border-green-500"
+              }
+            `}
                 >
                   {warehouses.map((wh, index) => (
                     <option key={index} value={wh.Description}>
@@ -254,12 +257,13 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOrderModalOpen }) => {
                 <label
                   htmlFor="warehouse"
                   className="text-primaryTextColor absolute text-md duration-150 left-3 top-3 z-10 origin-[0] transform -translate-y-3
-            peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
+              peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
                 >
                   Оберіть відділення
                 </label>
               </div>
 
+              {/* Terms Checkbox */}
               <div className="flex items-center">
                 <input
                   id="termsCheckbox"

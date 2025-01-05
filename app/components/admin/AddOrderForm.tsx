@@ -329,6 +329,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
                             width={150}
                             height={150}
                             className="object-cover"
+                            priority={true}
                           />
                         </div>
 

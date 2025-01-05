@@ -23,6 +23,7 @@ const ImagesBlock: React.FC<ImagesBlockProps> = ({ item, values }) => {
               width={400}
               height={400}
               className="self-center mb-[30px]"
+              priority={true}
             />
           </div>
           <ul className="grid grid-cols-3 gap-3">
@@ -35,6 +36,7 @@ const ImagesBlock: React.FC<ImagesBlockProps> = ({ item, values }) => {
                   height={120}
                   className="border border-gray-400 block cursor-pointer hover:shadow-[10px_10px_15px_-3px_rgba(0,0,0,0.3)] hover:scale-105 transition-all"
                   onClick={() => setIndex(imgIndex)}
+                  priority={true}
                 />
               </li>
             ))}
@@ -51,6 +53,7 @@ const ImagesBlock: React.FC<ImagesBlockProps> = ({ item, values }) => {
                 width={400}
                 height={400}
                 className="self-center mb-[30px]"
+                priority={true}
               />
             </div>
             <ul className="grid grid-cols-3 gap-3">
@@ -63,6 +66,7 @@ const ImagesBlock: React.FC<ImagesBlockProps> = ({ item, values }) => {
                     height={120}
                     className="border border-gray-400 block cursor-pointer hover:shadow-[10px_10px_15px_-3px_rgba(0,0,0,0.3)] hover:scale-105 transition-all"
                     onClick={() => setIndex(imgIndex)}
+                    priority={true}
                   />
                 </li>
               ))}

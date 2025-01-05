@@ -49,6 +49,7 @@ const Category: React.FC<CategoryPage> = ({ categories }) => {
                 width={20}
                 height={20}
                 className="w-5 h-5 mr-3 transition-filter duration-300 ease-in-out group-hover:filter-primary"
+                priority={true}
               />
               {title}
             </Link>

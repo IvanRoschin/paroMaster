@@ -1,6 +1,5 @@
 "use client"
 
-import { signOut } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
 import {
@@ -77,6 +76,7 @@ const AdminSidebar = ({ user }: AdminSidebarProps) => {
             width={50}
             height={50}
             className="border-[50%] rounded-[50%]"
+            priority={true}
           />
         ) : (
           <Image
@@ -85,6 +85,7 @@ const AdminSidebar = ({ user }: AdminSidebarProps) => {
             width={50}
             height={50}
             className="border-[50%] rounded-[50%] m-2"
+            priority={true}
           />
         )}
         <div className="flex flex-col">
@@ -103,16 +104,6 @@ const AdminSidebar = ({ user }: AdminSidebarProps) => {
           )
         })}
       </ul>
-      <button
-        onClick={() => signOut({ callbackUrl: "/" })}
-        className="text-white end-2.5 bottom-2.5 bg-primaryAccentColor hover:opacity-80 
-					focus:opacity-80 
-					focus:outline-none 
-					focus:ring-secondaryBackground rounded-b-lg text-md px-4 py-3 w-full placeholder:bg-transparent flex justify-center items-center text-center gap-2"
-      >
-        <MdLogout />
-        Вихід
-      </button>
     </div>
   )
 }

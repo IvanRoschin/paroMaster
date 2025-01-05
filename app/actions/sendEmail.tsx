@@ -94,7 +94,6 @@ export async function sendEmail(data: IGetSendData) {
     }
   }
 }
-;``
 
 export async function sendCustomerEmail(data: IGetSendData) {
   const {
