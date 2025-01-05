@@ -1,9 +1,9 @@
-import LoginForm from '../components/LoginForm'
+import LoginForm from "../components/LoginForm"
 
 type Props = {}
 
 const page = (props: Props) => {
-	return <LoginForm />
+  return <LoginForm />
 }
 
 export default page

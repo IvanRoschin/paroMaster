@@ -1,13 +1,21 @@
 "use server"
+
 import { IGood } from "@/types/index"
+import sendgrid from "@sendgrid/mail"
 import {
   generateCustomerEmailContent,
   NewCustomerTemplateProps
 } from "app/templates/email/NewCustomerTemplate"
+import { generateLidEmailContent, NewLidTemplateProps } from "app/templates/email/NewLidTemplate"
+import { generateEmailContent, NewOrderTemplateProps } from "app/templates/email/NewOrderTemplate"
 import { FieldValues } from "react-hook-form"
-import { Resend } from "resend"
-import { generateLidEmailContent, NewLidTemplateProps } from "../templates/email/NewLidTemplate"
-import { generateEmailContent, NewOrderTemplateProps } from "../templates/email/NewOrderTemplate"
+
+if (!process.env.NEXT_PUBLIC_SENDGRID_API_KEY || !process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
+  throw new Error("SENDGRID_API_KEY or ADMIN_EMAIL is not defined in the environment variables")
+}
+
+sendgrid.setApiKey(process.env.NEXT_PUBLIC_SENDGRID_API_KEY)
+const fromEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
 
 interface IGetSendData {
   name: string
@@ -22,9 +30,7 @@ interface IGetSendData {
   totalPrice: number
 }
 
-const resend = new Resend(process.env.RESEND_API)
-
-export async function sendEmail(data: IGetSendData) {
+export async function sendAdminEmail(data: IGetSendData) {
   const {
     name,
     surname,
@@ -38,6 +44,7 @@ export async function sendEmail(data: IGetSendData) {
     totalPrice
   } = data
 
+  // Validate input data
   if (
     !name ||
     !surname ||
@@ -53,7 +60,7 @@ export async function sendEmail(data: IGetSendData) {
     orderedGoods.length === 0 ||
     totalPrice <= 0
   ) {
-    throw new Error("Error not all data passed")
+    return { success: false, error: "Validation Error: Missing or invalid data." }
   }
 
   try {
@@ -70,28 +77,23 @@ export async function sendEmail(data: IGetSendData) {
       totalPrice
     } as NewOrderTemplateProps)
 
-    const { data: responseData, error } = await resend.emails.send({
-      from: `${process.env.NEXT_PUBLIC_ADMIN_EMAIL}`,
-      to: [`${process.env.NEXT_PUBLIC_ADMIN_EMAIL}`],
+    if (!fromEmail) return
+
+    // Send email
+    await sendgrid.send({
+      from: fromEmail,
+      to: fromEmail,
       subject: `Нове замовлення на сайті від ${name} ${surname}, контактний email: ${email}`,
-      text: phone,
+      text: `Замовлення від: ${name} ${surname}, Телефон: ${phone}`,
       html: emailContent
     })
 
-    if (error) {
-      console.error("Error sending email:", error)
-      return { success: false, error }
-    }
-    console.log("Email sent successfully:", responseData)
-    return { success: true, data: responseData }
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error in sendEmail function:", error)
-      throw new Error("Error in sendEmail function: " + error.message)
-    } else {
-      console.error("Unknown error:", error)
-      throw new Error("Error in sendEmail function: Unknown error")
-    }
+    console.log("Admin email successfully sent.")
+    return { success: true }
+  } catch (error: any) {
+    const errorMessage = error.response?.body?.errors || error.message || "Unknown error occurred."
+    console.error("Error sending email:", errorMessage)
+    return { success: false, error: errorMessage }
   }
 }
 
@@ -138,19 +140,24 @@ export async function sendCustomerEmail(data: IGetSendData) {
       totalPrice
     } as NewCustomerTemplateProps)
 
-    const { data: responseData, error } = await resend.emails.send({
-      from: `Acme <onboarding@resend.dev>`,
+    if (!fromEmail || !email) return
+
+    await sendgrid.send({
+      from: fromEmail,
       to: [`${email}`],
       subject: `Ваше замовлення на сайті ParoMaster`,
       html: emailContent
     })
 
-    if (error) {
-      console.error("Error sending email:", error)
-      return { success: false, error }
-    }
-    console.log("Email sent successfully:", responseData)
-    return { success: true, data: responseData }
+    // const { data: responseData, error } = await resend.emails.send({
+    //   from: `Acme <onboarding@resend.dev>`,
+    //   to: [`${email}`],
+    //   subject: `Ваше замовлення на сайті ParoMaster`,
+    //   html: emailContent
+    // })
+
+    console.log("Customer Email sent successfully")
+    return { success: true }
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error in sendEmail function:", error)
@@ -175,20 +182,17 @@ export async function sendEmailToLid(data: FieldValues) {
       phone
     } as NewLidTemplateProps)
 
-    const { data: responseData, error } = await resend.emails.send({
-      from: `Acme <onboarding@resend.dev>`,
-      to: [`${process.env.NEXT_PUBLIC_}`],
+    if (!phone || !email) return
+
+    await sendgrid.send({
+      from: fromEmail,
+      to: fromEmail,
       subject: `Заповнена форма зв'язку  на сайті від ${name}, контактний email: ${email}`,
-      text: phone,
       html: emailContent
     })
 
-    if (error) {
-      console.error("Error sending email:", error)
-      return { success: false, error }
-    }
-    console.log("Email sent successfully:", responseData)
-    return { success: true, data: responseData }
+    console.log("Email sent successfully")
+    return { success: true }
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error in sendEmail function:", error)

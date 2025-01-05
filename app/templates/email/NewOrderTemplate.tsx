@@ -1,39 +1,39 @@
-import { IGood } from '@/types/good/IGood'
+import { IGood } from "@/types/good/IGood"
 
 enum PaymentMethod {
-	CashOnDelivery = 'Оплата після отримання',
-	CreditCard = 'Оплата на карту',
-	InvoiceForSPD = 'Рахунок для СПД',
+  CashOnDelivery = "Оплата після отримання",
+  CreditCard = "Оплата на карту",
+  InvoiceForSPD = "Рахунок для СПД"
 }
 
 export interface NewOrderTemplateProps {
-	name: string
-	surname: string
-	email: string
-	phone: string
-	payment: PaymentMethod
-	city: string
-	warehouse: string
-	orderedGoods: IGood[]
-	orderNumber: string
-	totalPrice: number
+  name: string
+  surname: string
+  email: string
+  phone: string
+  payment: PaymentMethod
+  city: string
+  warehouse: string
+  orderedGoods: IGood[]
+  orderNumber: string
+  totalPrice: number
 }
 
 export function generateEmailContent({
-	name,
-	surname,
-	email,
-	phone,
-	payment,
-	city,
-	warehouse,
-	orderedGoods,
-	orderNumber,
-	totalPrice,
+  name,
+  surname,
+  email,
+  phone,
+  payment,
+  city,
+  warehouse,
+  orderedGoods,
+  orderNumber,
+  totalPrice
 }: NewOrderTemplateProps): string {
-	const itemsContent = orderedGoods
-		.map(
-			(item, index) => `
+  const itemsContent = orderedGoods
+    .map(
+      (item, index) => `
         <tr key="${item._id}">
           <td>${index + 1}.</td>
           <td>${item.title}</td>
@@ -43,11 +43,11 @@ export function generateEmailContent({
           <td style="text-align: center">${item.quantity}</td>
           <td style="text-align: center">${item.price}</td>
         </tr>
-      `,
-		)
-		.join('')
+      `
+    )
+    .join("")
 
-	return `
+  return `
     <div>
       <h1>Замовлення # ${orderNumber}
 			з сайту ParoMaster</h1>
@@ -83,9 +83,8 @@ export function generateEmailContent({
           ${itemsContent}
         </tbody>
       </table>
-      <h2 style="text-align: center; color: #333;">Всього за замовленням: ${totalPrice} грн.</br> + доставка за тарифами перевізника
+      <h2 style="text-align: center; color: #333;">Всього за замовленням: ${totalPrice} грн.</br>
       </h2>
-
     </div>
   `
 }
