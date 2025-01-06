@@ -8,10 +8,10 @@ export const useFetchData = <T,>(
   action: (params: any, limit: number) => Promise<T>,
   key: string
 ) => {
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isLoading, error, isError, refetch } = useQuery({
     queryKey: [key, params],
     queryFn: async () => action(params, limit)
   })
 
-  return { data, isError, isLoading, refetch }
+  return { data, error, isError, isLoading, refetch }
 }

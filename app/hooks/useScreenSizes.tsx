@@ -2,23 +2,30 @@ import { useEffect, useState } from "react"
 
 export const useScreenSize = () => {
   const [screenSize, setScreenSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight
+    width: 0,
+    height: 0
   })
 
   useEffect(() => {
-    const handleResize = () => {
-      setScreenSize({
-        width: window.innerWidth,
-        height: window.innerHeight
-      })
-    }
+    // Check if the code is running on the client side
+    if (typeof window !== "undefined") {
+      const handleResize = () => {
+        setScreenSize({
+          width: window.innerWidth,
+          height: window.innerHeight
+        })
+      }
 
-    window.addEventListener("resize", handleResize)
+      // Set initial screen size
+      handleResize()
 
-    // Cleanup event listener on unmount
-    return () => {
-      window.removeEventListener("resize", handleResize)
+      // Add event listener for window resize
+      window.addEventListener("resize", handleResize)
+
+      // Cleanup event listener on component unmount
+      return () => {
+        window.removeEventListener("resize", handleResize)
+      }
     }
   }, [])
 
