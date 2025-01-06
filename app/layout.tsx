@@ -1,5 +1,5 @@
 import { getAllCategories, IGetAllCategories } from "@/actions/categories"
-import { getMinMaxPrice, IGetAllBrands, uniqueBrands } from "@/actions/goods"
+import { getMinMaxPrice, IGetAllBrands, IGetPrices, uniqueBrands } from "@/actions/goods"
 import AdminSidebar from "@/components/admin/AdminSidebar"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 import type { Metadata } from "next"
@@ -50,7 +50,7 @@ export default async function RootLayout({
   }
 
   // Provide default values to avoid 'undefined' issues
-  // const pricesData = queryClient.getQueryData<IGetPrices>(["pricesData"])
+  const pricesData = queryClient.getQueryData<IGetPrices>(["pricesData"])
   const categoriesData = queryClient.getQueryData<IGetAllCategories>(["categories"]) || {
     success: false,
     count: 0,
@@ -64,9 +64,10 @@ export default async function RootLayout({
 
   // Check if data exists and has content
   const hasValidData =
-    // pricesData?.minPrice !== undefined &&
-    // pricesData.maxPrice !== undefined &&
-    categoriesData?.categories.length > 0 && brandsData.brands.length > 0
+    pricesData?.minPrice !== undefined &&
+    pricesData.maxPrice !== undefined &&
+    categoriesData?.categories.length > 0 &&
+    brandsData.brands.length > 0
 
   return (
     <html lang="uk">
@@ -82,7 +83,7 @@ export default async function RootLayout({
             ) : hasValidData ? (
               <HydrationBoundary state={dehydrate(queryClient)}>
                 <Sidebar
-                  // pricesData={pricesData}
+                  pricesData={pricesData}
                   categoriesData={categoriesData}
                   brandsData={brandsData}
                 />
