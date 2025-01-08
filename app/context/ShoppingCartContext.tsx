@@ -1,23 +1,26 @@
 "use client"
 
+import { getGoodById } from "@/actions/goods"
 import ShoppingCart from "@/components/Cart/ShoppingCart"
-import { createContext, useContext, useMemo, useState } from "react"
+import { storageKeys } from "@/helpers/storageKeys"
+import { IGood } from "@/types/index"
+import { createContext, useContext, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 
 type ShoppingCartProviderProps = {
   children: React.ReactNode
 }
 
-type CartItemId = {
-  id: string
+type CartItem = {
+  good: IGood
   quantity: number
 }
 
 type ShoppingCartContextProps = {
   openCart: () => void
   closeCart: () => void
-  openOrderModal: () => void
-  closeOrderModal: () => void
+  // openOrderModal: () => void
+  // closeOrderModal: () => void
   resetCart: () => void
   getItemQuantity: (id: string) => number
   increaseCartQuantity: (id: string) => void
@@ -25,7 +28,8 @@ type ShoppingCartContextProps = {
   removeFromCart: (id: string) => void
   setCartQuantity: (id: string, quantity: number) => void
   cartQuantity: number
-  cartItemsId: CartItemId[]
+  cart: CartItem[]
+  setCart: React.Dispatch<React.SetStateAction<CartItem[]>>
 }
 
 const ShoppingCartContext = createContext({} as ShoppingCartContextProps)
@@ -35,82 +39,80 @@ export function useShoppingCart() {
 }
 
 export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
-  const [cartItemsId, setCartItemsId] = useState<CartItemId[]>([])
+  const [cart, setCart] = useState<CartItem[]>([])
   const [isOpen, setIsOpen] = useState(false)
-  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false)
-  // const [isHydrated, setIsHydrated] = useState(false)
+  // const [isOrderModalOpen, setIsOrderModalOpen] = useState(false)
 
-  // useEffect(() => {
-  //   try {
-  //     const savedCartItems = localStorage.getItem("cartItems")
-  //     if (savedCartItems) {
-  //       setCartItemsId(JSON.parse(savedCartItems))
-  //     }
-  //   } catch (error) {
-  //     console.error("Failed to load cart items:", error)
-  //   }
-  //   setIsHydrated(true)
-  // }, [])
+  useEffect(() => {
+    const storedCartData = sessionStorage.getItem(storageKeys.cart)
+    if (storedCartData) {
+      try {
+        const cartData = JSON.parse(storedCartData)
+        setCart(cartData)
+      } catch (error) {
+        console.error("Error parsing JSON from sessionStorage:", error)
+      }
+    }
+  }, [])
 
-  // useEffect(() => {
-  //   if (isHydrated) {
-  //     localStorage.setItem("cartItems", JSON.stringify(cartItemsId))
-  //   }
-  // }, [cartItemsId, isHydrated])
-
-  const cartQuantity = cartItemsId.reduce((quantity, item) => item.quantity + quantity, 0)
+  const cartQuantity = cart.reduce((quantity, item) => item.quantity + quantity, 0)
 
   const openCart = () => setIsOpen(true)
   const closeCart = () => setIsOpen(false)
-  const openOrderModal = () => {
-    setIsOrderModalOpen(true)
-    setIsOpen(false)
-  }
-  const closeOrderModal = () => setIsOrderModalOpen(false)
+  // const openOrderModal = () => {
+  //   setIsOrderModalOpen(true)
+  //   setIsOpen(false)
+  // }
+  // const closeOrderModal = () => setIsOrderModalOpen(false)
 
   const resetCart = () => {
-    setCartItemsId([])
-    localStorage.removeItem("cartItems")
+    setCart([])
+    sessionStorage.removeItem(storageKeys.cart)
   }
 
   const setCartQuantity = (id: string, quantity: number) => {
-    setCartItemsId(currItems =>
-      currItems.map(item => (item.id === id ? { ...item, quantity } : item))
+    setCart(currItems =>
+      currItems.map(item => (item.good._id === id ? { ...item, quantity } : item))
     )
   }
 
-  function getItemQuantity(id: string) {
-    return cartItemsId.find(item => item.id === id)?.quantity || 0
+  const getItemQuantity = (id: string) => {
+    return cart.find(item => item.good._id === id)?.quantity || 0
   }
 
-  function increaseCartQuantity(id: string) {
-    setCartItemsId(currItems => {
-      if (currItems.find(item => item.id === id) == null) {
-        return [...currItems, { id, quantity: 1 }]
+  const increaseCartQuantity = (id: string) => {
+    getGoodById(id)
+      .then(newGood => {
+        setCart(currItems => {
+          if (currItems.find(item => item.good._id === id) == null) {
+            return [...currItems, { good: newGood, quantity: 1 }]
+          } else {
+            return currItems.map(item =>
+              item.good._id === id ? { ...item, quantity: item.quantity + 1 } : item
+            )
+          }
+        })
+      })
+      .catch(error => {
+        console.error("Error fetching good:", error)
+        toast.error("Не вдалося додати товар до корзини")
+      })
+  }
+
+  const decreaseCartQuantity = (id: string) => {
+    setCart(currItems => {
+      if (currItems.find(item => item.good._id === id)?.quantity === 1) {
+        return currItems.filter(item => item.good._id !== id)
       } else {
         return currItems.map(item =>
-          item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+          item.good._id === id ? { ...item, quantity: item.quantity - 1 } : item
         )
       }
     })
-    toast.success("Товар доданий до корзини")
   }
 
-  function decreaseCartQuantity(id: string) {
-    setCartItemsId(currItems => {
-      if (currItems.find(item => item.id === id)?.quantity === 1) {
-        return currItems.filter(item => item.id !== id)
-      } else {
-        return currItems.map(item =>
-          item.id === id ? { ...item, quantity: item.quantity - 1 } : item
-        )
-      }
-    })
-    toast.success("Товар видалено з коризни")
-  }
-
-  function removeFromCart(id: string) {
-    setCartItemsId(currItems => currItems.filter(item => item.id !== id))
+  const removeFromCart = (id: string) => {
+    setCart(currItems => currItems.filter(item => item.good._id !== id))
     toast.info("Товар видалено з корзини")
   }
 
@@ -122,24 +124,21 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
       removeFromCart,
       openCart,
       closeCart,
-      openOrderModal,
-      closeOrderModal,
+      // openOrderModal,
+      // closeOrderModal,
       resetCart,
       setCartQuantity,
-      cartItemsId,
+      cart,
+      setCart,
       cartQuantity
     }),
-    [cartItemsId, cartQuantity]
+    [cart, cartQuantity]
   )
-
-  // if (!isHydrated) {
-  //   return null
-  // }
 
   return (
     <ShoppingCartContext.Provider value={contextValue}>
       {children}
-      <ShoppingCart isOpen={isOpen} isOrderModalOpen={isOrderModalOpen} />
+      <ShoppingCart isOpen={isOpen} />
     </ShoppingCartContext.Provider>
   )
 }
