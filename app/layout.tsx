@@ -1,5 +1,5 @@
-import { getAllCategories, IGetAllCategories } from "@/actions/categories"
-import { getMinMaxPrice, IGetAllBrands, IGetPrices, uniqueBrands } from "@/actions/goods"
+import { IGetAllCategories } from "@/actions/categories"
+import { IGetAllBrands, IGetPrices } from "@/actions/goods"
 import AdminSidebar from "@/components/admin/AdminSidebar"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 import type { Metadata } from "next"
@@ -8,6 +8,9 @@ import { Inter } from "next/font/google"
 import { Footer, Header, Sidebar } from "./components"
 import { authOptions } from "./config/authOptions"
 import "./globals.css"
+import { brandsOptions } from "./prefetchOptions/brandsOptions"
+import { categoriesOptions } from "./prefetchOptions/categoriesOptions"
+import { pricesOptions } from "./prefetchOptions/pricesOptions"
 import { Providers } from "./providers/providers"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -33,24 +36,18 @@ export default async function RootLayout({
   const queryClient = new QueryClient()
 
   try {
-    await queryClient.prefetchQuery({
-      queryKey: ["pricesData"],
-      queryFn: getMinMaxPrice
-    })
-    await queryClient.prefetchQuery({
-      queryKey: ["categories"],
-      queryFn: getAllCategories
-    })
-    await queryClient.prefetchQuery({
-      queryKey: ["brands"],
-      queryFn: uniqueBrands
-    })
+    await queryClient.prefetchQuery(pricesOptions)
+    await queryClient.prefetchQuery(categoriesOptions)
+    await queryClient.prefetchQuery(brandsOptions)
   } catch (error) {
     console.error("Error prefetching data:", error)
   }
-
   // Provide default values to avoid 'undefined' issues
-  const pricesData = queryClient.getQueryData<IGetPrices>(["pricesData"])
+  const pricesData = queryClient.getQueryData<IGetPrices>(["prices"]) || {
+    success: false,
+    minPrice: 0,
+    maxPrice: 100
+  }
   const categoriesData = queryClient.getQueryData<IGetAllCategories>(["categories"]) || {
     success: false,
     count: 0,

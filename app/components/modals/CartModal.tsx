@@ -1,6 +1,7 @@
 "use client"
 
 import { useShoppingCart } from "app/context/ShoppingCartContext"
+import { useRouter } from "next/navigation"
 import CartClient from "../Cart/CartClient"
 import Modal from "./Modal"
 
@@ -9,7 +10,13 @@ interface CartModalProps {
 }
 
 const CartModal: React.FC<CartModalProps> = ({ isOpen }) => {
-  const { closeCart, openOrderModal } = useShoppingCart()
+  const { closeCart } = useShoppingCart()
+  const { push } = useRouter()
+
+  const handleOrderSubmit = () => {
+    closeCart()
+    push("/order")
+  }
 
   const bodyContent = (
     <div className="flex flex-col gap-4">
@@ -33,7 +40,7 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen }) => {
       footer={footerContent}
       isOpen={isOpen}
       onClose={closeCart}
-      onSubmit={openOrderModal}
+      onSubmit={handleOrderSubmit}
     />
   )
 }
