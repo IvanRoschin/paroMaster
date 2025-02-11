@@ -1,5 +1,6 @@
 "use server"
 
+import { CartItem } from "@/types/cart/ICartItem"
 import { IGood } from "@/types/index"
 import sendgrid from "@sendgrid/mail"
 import {
@@ -26,7 +27,7 @@ interface IGetSendData {
   warehouse: string
   payment: string
   orderNumber: string
-  orderedGoods: IGood[]
+  orderedGoods: CartItem[]
   totalPrice: number
 }
 
