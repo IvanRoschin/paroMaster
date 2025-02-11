@@ -1,3 +1,5 @@
+import { CartItem } from "../cart/ICartItem"
+
 export interface IOrder {
   _id?: string
   number: string
@@ -12,21 +14,7 @@ export interface IOrder {
     [key: string]: any
   }
   warehouse?: string
-  orderedGoods: {
-    _id?: string
-    category: string
-    src: string[]
-    brand: string
-    model: string
-    vendor: string
-    title: string
-    description: string
-    price: number
-    isAvailable: boolean
-    isCompatible: boolean
-    compatibility: string
-    quantity?: number
-  }[]
+  orderedGoods: CartItem[]
   totalPrice: number
   status: string
 }

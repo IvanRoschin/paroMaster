@@ -3,7 +3,7 @@
 import { getGoodById } from "@/actions/goods"
 import ShoppingCart from "@/components/Cart/ShoppingCart"
 import { storageKeys } from "@/helpers/storageKeys"
-import { IGood } from "@/types/index"
+import { CartItem } from "@/types/cart/ICartItem"
 import { createContext, useContext, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 
@@ -11,16 +11,9 @@ type ShoppingCartProviderProps = {
   children: React.ReactNode
 }
 
-type CartItem = {
-  good: IGood
-  quantity: number
-}
-
 type ShoppingCartContextProps = {
   openCart: () => void
   closeCart: () => void
-  // openOrderModal: () => void
-  // closeOrderModal: () => void
   resetCart: () => void
   getItemQuantity: (id: string) => number
   increaseCartQuantity: (id: string) => void
@@ -41,7 +34,6 @@ export function useShoppingCart() {
 export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
   const [cart, setCart] = useState<CartItem[]>([])
   const [isOpen, setIsOpen] = useState(false)
-  // const [isOrderModalOpen, setIsOrderModalOpen] = useState(false)
 
   useEffect(() => {
     const storedCartData = sessionStorage.getItem(storageKeys.cart)
@@ -59,11 +51,6 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
 
   const openCart = () => setIsOpen(true)
   const closeCart = () => setIsOpen(false)
-  // const openOrderModal = () => {
-  //   setIsOrderModalOpen(true)
-  //   setIsOpen(false)
-  // }
-  // const closeOrderModal = () => setIsOrderModalOpen(false)
 
   const resetCart = () => {
     setCart([])
@@ -124,8 +111,6 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
       removeFromCart,
       openCart,
       closeCart,
-      // openOrderModal,
-      // closeOrderModal,
       resetCart,
       setCartQuantity,
       cart,
