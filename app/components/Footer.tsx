@@ -12,11 +12,6 @@ import EmptyState from "./EmptyState"
 import Logo from "./Logo"
 import Socials from "./Socials"
 
-const limit = 10
-
-const env = process.env
-env.PUBLIC_URL = env.PUBLIC_URL || ""
-
 const links = [
   {
     title: "Оплата та доставка",
@@ -43,6 +38,8 @@ const links = [
 const Footer = ({ categories }: { categories: ICategory[] }) => {
   const { width } = useScreenSize()
   const isMobile = width <= 767
+
+  const baseUrl = process.env.BASE_URL || ""
 
   const searchParams = useSearchParams()
 
@@ -78,7 +75,7 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
               <div className="border-b border-primaryAccentColor" />
               <div className="flex justify-between">
                 <Image
-                  src={`${process.env.PUBLIC_URL}/delivery/nova_poshta_white.svg`}
+                  src={`${baseUrl}/delivery/nova_poshta_white.svg`}
                   alt="Нова пошта"
                   width={120}
                   height={30}
@@ -86,7 +83,7 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
                   priority={true}
                 />
                 <Image
-                  src={`${process.env.PUBLIC_URL}/delivery/ukr_poshta_white.svg`}
+                  src={`${baseUrl}/delivery/ukr_poshta_white.svg`}
                   alt="Ukrposhta"
                   width={120}
                   height={30}
@@ -100,7 +97,7 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
               <div className="border-b border-primaryAccentColor" />
               <div className="flex justify-between">
                 <Image
-                  src={`${process.env.PUBLIC_URL}/payment/mastercard_white.svg`}
+                  src={`${baseUrl}/payment/mastercard_white.svg`}
                   alt="MasterCard"
                   width={120}
                   height={30}
@@ -108,7 +105,7 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
                   priority={true}
                 />
                 <Image
-                  src={`${process.env.PUBLIC_URL}/payment/visa_white.svg`}
+                  src={`${baseUrl}/payment/visa_white.svg`}
                   alt="Visa"
                   width={120}
                   height={30}

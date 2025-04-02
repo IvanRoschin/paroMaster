@@ -114,17 +114,19 @@
 
 "use client"
 
-import { useShoppingCart } from "app/context/ShoppingCartContext"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 import "./PriceFilter.css"
 
-const PriceFilter: React.FC<{ currencySymbol?: string }> = ({ currencySymbol = "₴" }) => {
-  const { minPrice, maxPrice } = useShoppingCart()
-
+interface PriceFilterProps {
+  currencySymbol?: string
+  minPrice: number
+  maxPrice: number
+}
+const PriceFilter: React.FC<PriceFilterProps> = ({ currencySymbol = "₴", minPrice, maxPrice }) => {
   const [values, setValues] = useState<string[]>([
-    minPrice?.toString() || "0",
-    maxPrice?.toString() || "100"
+    minPrice.toString() || "0",
+    maxPrice.toString() || "100"
   ])
 
   const searchParams = useSearchParams()

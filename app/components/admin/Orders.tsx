@@ -112,7 +112,7 @@ export default function Orders({
                 </td>
                 <td className="p-2 border-r-2 text-start">
                   <ul className="list-disc pl-4">
-                    {order.orderedGoods.map(good => (
+                    {order.orderedGoods.map(({ good }) => (
                       <li key={good._id}>
                         <strong>{good.title}</strong> - {good.brand}, {good.model}, {good.vendor}
                         (Кількість: {good.quantity}, Ціна: {good.price})

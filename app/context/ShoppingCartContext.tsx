@@ -1,35 +1,28 @@
 "use client"
 
-import { getMinMaxPrice } from "@/actions/goods"
+import { getGoodById } from "@/actions/goods"
 import ShoppingCart from "@/components/Cart/ShoppingCart"
-import { createContext, useContext, useEffect, useState } from "react"
+import { storageKeys } from "@/helpers/storageKeys"
+import { CartItem } from "@/types/cart/ICartItem"
+import { createContext, useContext, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 
 type ShoppingCartProviderProps = {
   children: React.ReactNode
 }
 
-type CartItemId = {
-  id: string
-  quantity: number
-}
-
 type ShoppingCartContextProps = {
   openCart: () => void
   closeCart: () => void
-  openOrderModal: () => void
-  closeOrderModal: () => void
   resetCart: () => void
   getItemQuantity: (id: string) => number
   increaseCartQuantity: (id: string) => void
   decreaseCartQuantity: (id: string) => void
   removeFromCart: (id: string) => void
-  setCartQuantity: (quantity: number) => void
+  setCartQuantity: (id: string, quantity: number) => void
   cartQuantity: number
-  cartItemsId: CartItemId[]
-  minPrice: number | null
-  maxPrice: number | null
-  getPricesValues: () => { minPrice: number | null; maxPrice: number | null }
+  cart: CartItem[]
+  setCart: React.Dispatch<React.SetStateAction<CartItem[]>>
 }
 
 const ShoppingCartContext = createContext({} as ShoppingCartContextProps)
@@ -39,155 +32,98 @@ export function useShoppingCart() {
 }
 
 export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
-  const [cartItemsId, setCartItemsId] = useState<CartItemId[]>([])
+  const [cart, setCart] = useState<CartItem[]>([])
   const [isOpen, setIsOpen] = useState(false)
-  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false)
-  const [isHydrated, setIsHydrated] = useState(false)
-  const [minPrice, setMinPrice] = useState<number | null>(null)
-  const [maxPrice, setMaxPrice] = useState<number | null>(null)
 
   useEffect(() => {
-    // Run only on client
-    const savedCartItems = localStorage.getItem("cartItems")
-    if (savedCartItems) {
-      setCartItemsId(JSON.parse(savedCartItems))
-    }
-    setIsHydrated(true)
-    async function fetchPrices() {
-      const result = await getMinMaxPrice()
-      if (result.success) {
-        setMinPrice(result.minPrice)
-        setMaxPrice(result.maxPrice)
-      } else {
-        return result.message || "Failed to fetch prices"
+    const storedCartData = sessionStorage.getItem(storageKeys.cart)
+    if (storedCartData) {
+      try {
+        const cartData = JSON.parse(storedCartData)
+        setCart(cartData)
+      } catch (error) {
+        console.error("Error parsing JSON from sessionStorage:", error)
       }
     }
-    fetchPrices()
   }, [])
 
-  useEffect(() => {
-    if (isHydrated) {
-      localStorage.setItem("cartItems", JSON.stringify(cartItemsId))
-    }
-  }, [cartItemsId, isHydrated])
-
-  const cartQuantity = cartItemsId.reduce((quantity, item) => item.quantity + quantity, 0)
+  const cartQuantity = cart.reduce((quantity, item) => item.quantity + quantity, 0)
 
   const openCart = () => setIsOpen(true)
   const closeCart = () => setIsOpen(false)
-  const openOrderModal = () => {
-    setIsOrderModalOpen(true)
-    setIsOpen(false)
-  }
-  const closeOrderModal = () => setIsOrderModalOpen(false)
 
   const resetCart = () => {
-    setCartItemsId([])
-    localStorage.removeItem("cartItems")
+    setCart([])
+    sessionStorage.removeItem(storageKeys.cart)
   }
 
-  const setCartQuantity = (quantity: number) => {
-    const updatedItems = cartItemsId.map(item => ({ ...item, quantity }))
-    setCartItemsId(updatedItems)
+  const setCartQuantity = (id: string, quantity: number) => {
+    setCart(currItems =>
+      currItems.map(item => (item.good._id === id ? { ...item, quantity } : item))
+    )
   }
 
-  function getItemQuantity(id: string) {
-    return cartItemsId.find(item => item.id === id)?.quantity || 0
+  const getItemQuantity = (id: string) => {
+    return cart.find(item => item.good._id === id)?.quantity || 0
   }
 
-  function getPricesValues() {
-    const pricesData = getMinMaxPrice()
-    console.log("pricesData", pricesData)
-    if (!pricesData) {
-      return { minPrice: null, maxPrice: null }
-    } else {
-      setMinPrice(minPrice)
-      setMaxPrice(maxPrice)
-      return {
-        minPrice,
-        maxPrice
-      }
-    }
-  }
-
-  function increaseCartQuantity(id: string) {
-    setCartItemsId(currItems => {
-      if (currItems.find(item => item.id === id) == null) {
-        return [
-          ...currItems,
-          {
-            id,
-            quantity: 1
-          }
-        ]
-      } else {
-        return currItems.map(item => {
-          if (item.id === id) {
-            return {
-              ...item,
-              quantity: item.quantity + 1
-            }
+  const increaseCartQuantity = (id: string) => {
+    getGoodById(id)
+      .then(newGood => {
+        setCart(currItems => {
+          if (currItems.find(item => item.good._id === id) == null) {
+            return [...currItems, { good: newGood, quantity: 1 }]
           } else {
-            return item
+            return currItems.map(item =>
+              item.good._id === id ? { ...item, quantity: item.quantity + 1 } : item
+            )
           }
         })
-      }
-    })
+      })
+      .catch(error => {
+        console.error("Error fetching good:", error)
+        toast.error("Не вдалося додати товар до корзини")
+      })
   }
 
-  function decreaseCartQuantity(id: string) {
-    setCartItemsId(currItems => {
-      if (currItems.find(item => item.id === id)?.quantity === 1) {
-        return currItems.filter(item => item.id !== id)
+  const decreaseCartQuantity = (id: string) => {
+    setCart(currItems => {
+      if (currItems.find(item => item.good._id === id)?.quantity === 1) {
+        return currItems.filter(item => item.good._id !== id)
       } else {
-        return currItems.map(item => {
-          if (item.id === id) {
-            return {
-              ...item,
-              quantity: item.quantity - 1
-            }
-          } else {
-            return item
-          }
-        })
+        return currItems.map(item =>
+          item.good._id === id ? { ...item, quantity: item.quantity - 1 } : item
+        )
       }
     })
   }
 
-  function removeFromCart(id: string) {
-    setCartItemsId(currItems => {
-      return currItems.filter(item => item.id !== id)
-    })
+  const removeFromCart = (id: string) => {
+    setCart(currItems => currItems.filter(item => item.good._id !== id))
     toast.info("Товар видалено з корзини")
   }
 
-  if (!isHydrated) {
-    // Render a loading state or nothing until the component is hydrated
-    return null
-  }
+  const contextValue = useMemo(
+    () => ({
+      getItemQuantity,
+      increaseCartQuantity,
+      decreaseCartQuantity,
+      removeFromCart,
+      openCart,
+      closeCart,
+      resetCart,
+      setCartQuantity,
+      cart,
+      setCart,
+      cartQuantity
+    }),
+    [cart, cartQuantity]
+  )
 
   return (
-    <ShoppingCartContext.Provider
-      value={{
-        getItemQuantity,
-        increaseCartQuantity,
-        decreaseCartQuantity,
-        removeFromCart,
-        openCart,
-        closeCart,
-        openOrderModal,
-        closeOrderModal,
-        resetCart,
-        setCartQuantity,
-        getPricesValues,
-        cartItemsId,
-        cartQuantity,
-        minPrice,
-        maxPrice
-      }}
-    >
+    <ShoppingCartContext.Provider value={contextValue}>
       {children}
-      <ShoppingCart isOpen={isOpen} isOrderModalOpen={isOrderModalOpen} />
+      <ShoppingCart isOpen={isOpen} />
     </ShoppingCartContext.Provider>
   )
 }

@@ -1,4 +1,4 @@
-import { IGood } from "@/types/good/IGood"
+import { CartItem } from "@/types/cart/ICartItem"
 
 enum PaymentMethod {
   CashOnDelivery = "Оплата після отримання",
@@ -14,7 +14,7 @@ export interface NewCustomerTemplateProps {
   payment: PaymentMethod
   city: string
   warehouse: string
-  orderedGoods: IGood[]
+  orderedGoods: CartItem[]
   totalPrice: number
   orderNumber: string
 }
@@ -32,15 +32,15 @@ export function generateCustomerEmailContent({
 }: NewCustomerTemplateProps): string {
   const itemsContent = orderedGoods
     .map(
-      (item, index) => `
-        <tr key="${item._id}">
+      ({ good, quantity }, index) => `
+        <tr key="${good._id}">
           <td>${index + 1}.</td>
-          <td>${item.title}</td>
-          <td style="text-align: center">${item.brand}</td>
-          <td style="text-align: center">${item.model}</td>
-					<td style="text-align: center">${item.vendor}</td>
-          <td style="text-align: center">${item.quantity}</td>
-          <td style="text-align: center">${item.price}</td>
+          <td>${good.title}</td>
+          <td style="text-align: center">${good.brand}</td>
+          <td style="text-align: center">${good.model}</td>
+					<td style="text-align: center">${good.vendor}</td>
+          <td style="text-align: center">${quantity}</td>
+          <td style="text-align: center">${good.price}</td>
         </tr>
       `
     )

@@ -1,31 +1,33 @@
 import mongoose from "mongoose"
 
-let isConnected = false // Track connection status
+let isConnected = false // track connection status
 
 export const connectToDB = async () => {
   mongoose.set("strictQuery", true)
 
-  const mongodbUri = process.env.MONGODB_URI
+  const mongodbUri: string | undefined = process.env.MONGODB_URI
+
+  const options = {
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 20000, // Increase server selection timeout to 20 seconds
+    connectTimeoutMS: 20000, // Increase connection timeout to 20 seconds
+    dbName: "paromaster" //
+  }
 
   if (!mongodbUri) {
-    throw new Error("MONGODB_URI is not defined in environment variables.")
+    throw new Error("MONGODB_URI is not defined")
   }
 
   if (isConnected) {
-    console.log("MongoDB is already connected.")
+    console.log("MongoDB is already connected")
     return
   }
 
   try {
-    await mongoose.connect(mongodbUri, {
-      dbName: "paromaster", // Database name
-      serverSelectionTimeoutMS: 20000, // Server selection timeout (20 seconds)
-      connectTimeoutMS: 20000 // Connection timeout (20 seconds)
-    })
+    await mongoose.connect(mongodbUri, options)
     isConnected = true
-    console.log("Successfully connected to MongoDB.")
-  } catch (error: any) {
-    console.error("Error connecting to MongoDB:", error.message)
-    throw new Error("Failed to connect to MongoDB.")
+    console.log("MongoDB connected")
+  } catch (error) {
+    console.log(error || "Can`t connect to MongoDB")
   }
 }

@@ -43,7 +43,6 @@ export async function getAllOrders(
 }
 
 export async function addOrder(values: IOrder) {
-  // console.log("valuesBackend:", values)
   try {
     await connectToDB()
 
@@ -51,13 +50,13 @@ export async function addOrder(values: IOrder) {
       number: values.number,
       customer: values.customer,
       orderedGoods: values.orderedGoods.map(item => ({
-        title: item.title,
-        brand: item.brand,
-        model: item.model,
-        vendor: item.vendor,
-        price: item.price,
+        title: item.good.title,
+        brand: item.good.brand,
+        model: item.good.model,
+        vendor: item.good.vendor,
+        price: item.good.price,
         quantity: item.quantity,
-        src: item.src
+        src: item.good.src
       })),
       totalPrice: values.totalPrice,
       status: values.status
