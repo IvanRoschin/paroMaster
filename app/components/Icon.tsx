@@ -29,9 +29,11 @@ export function Icon({
       </span>
     )
   }
+  const baseUrl = process.env.BASE_URL || ""
+
   return (
     <svg {...props} className={className}>
-      <use href={`${process.env.PUBLIC_URL}/icons/sprite.svg#${name}`} />
+      <use href={`${baseUrl}/icons/sprite.svg#${name}`} />
     </svg>
   )
 }

@@ -9,11 +9,14 @@ export const useDeleteData = (action: DeleteAction, key: string) => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (id: string) => action(id),
+    mutationFn: async (id: string) => {
+      console.log(`Deleting item with id: ${id}`)
+      return action(id)
+    },
     onSuccess: () => {
       toast.success("Дані видалено!")
-      // @ts-ignore
-      queryClient.refetchQueries([key])
+      console.log(`Refetching queries with key: ${key}`)
+      queryClient.invalidateQueries({ queryKey: [key] })
     },
     onError: () => {
       toast.error("Помилка при видаленні")
