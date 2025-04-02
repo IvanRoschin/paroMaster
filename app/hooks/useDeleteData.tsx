@@ -16,7 +16,7 @@ export const useDeleteData = (action: DeleteAction, key: string) => {
     onSuccess: () => {
       toast.success("Дані видалено!")
       console.log(`Refetching queries with key: ${key}`)
-      queryClient.refetchQueries([key], { exact: true })
+      queryClient.invalidateQueries({ queryKey: [key] })
     },
     onError: () => {
       toast.error("Помилка при видаленні")

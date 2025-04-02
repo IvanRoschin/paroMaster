@@ -4,7 +4,8 @@ import { getData } from "@/actions/nova"
 import { orderFormSchema } from "@/helpers/index"
 import { useAddData } from "@/hooks/useAddData"
 import { useUpdateData } from "@/hooks/useUpdateData"
-import { IGood, IOrder } from "@/types/index"
+import { CartItem } from "@/types/cart/ICartItem"
+import { IOrder } from "@/types/index"
 import { PaymentMethod } from "@/types/paymentMethod"
 import { Field, FieldArray, Formik, FormikState } from "formik"
 import Image from "next/image"
@@ -66,23 +67,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
       warehouse: order?.customer.warehouse || "Київ",
       payment: order?.customer.payment || PaymentMethod.CashOnDelivery
     },
-    orderedGoods: order?.orderedGoods || [
-      {
-        _id: "",
-        category: "",
-        src: [],
-        brand: "",
-        model: "",
-        vendor: "",
-        title: "",
-        description: "",
-        price: 0,
-        isAvailable: false,
-        isCompatible: false,
-        compatibility: "",
-        quantity: 0
-      }
-    ],
+    orderedGoods: order?.orderedGoods || [],
     totalPrice: order?.totalPrice || 0,
     status: order?.status || "Новий"
   }
@@ -139,8 +124,11 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
     }
   }
 
-  const calculateTotalPrice = useCallback((orderedGoods: IGood[]): number => {
-    return orderedGoods.reduce((total, item) => total + item.price * (item.quantity || 1), 0)
+  const calculateTotalPrice = useCallback((orderedGoods: CartItem[]): number => {
+    return orderedGoods.reduce(
+      (total, item) => total + item.good.price * (item.good.quantity || 1),
+      0
+    )
   }, [])
 
   useEffect(() => {
@@ -316,7 +304,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
                 name="orderedGoods"
                 render={({ remove }) => (
                   <div>
-                    {values?.orderedGoods.map((good, index) => (
+                    {values?.orderedGoods.map((item, index) => (
                       <div
                         key={index}
                         className="border p-4 mb-4 flex items-center gap-4 justify-between"
@@ -324,7 +312,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
                         {/* Image container */}
                         <div className="flex-shrink-0 w-[150px]">
                           <Image
-                            src={good.src[0] || "/placeholder.png"}
+                            src={item.good.src[0] || "/placeholder.png"}
                             alt="item_photo"
                             width={150}
                             height={150}
@@ -335,7 +323,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 
                         {/* Item title */}
                         <div className="flex-1 text-center">
-                          <span>{good?.title || "Unnamed Item"}</span>
+                          <span>{item.good.title || "Unnamed Item"}</span>
                         </div>
 
                         {/* Quantity decrement button */}
@@ -344,13 +332,13 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
                             type="button"
                             label="-"
                             onClick={() => handleQuantityChange(index, -1, values, setFieldValue)}
-                            disabled={good?.quantity !== undefined && good?.quantity <= 1}
+                            disabled={item.good?.quantity !== undefined && item.good?.quantity <= 1}
                           />
                         </div>
 
                         {/* Quantity display */}
                         <div className="w-[40px] text-center">
-                          <span>{good.quantity || 0}</span>
+                          <span>{item.good.quantity || 0}</span>
                         </div>
 
                         {/* Quantity increment button */}
@@ -364,12 +352,12 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 
                         {/* Price per unit */}
                         <div className="w-[100px] text-center">
-                          <span>Ціна за 1: {good.price}</span>
+                          <span>Ціна за 1: {item.good.price}</span>
                         </div>
 
                         {/* Total price for the item */}
                         <div className="w-[120px] text-center">
-                          <span>Ціна за Товар: {good.price * (good?.quantity || 1)}</span>
+                          <span>Ціна за Товар: {item.good.price * (item.good?.quantity || 1)}</span>
                         </div>
 
                         {/* Remove button */}
