@@ -6,6 +6,8 @@ import Credentials from "next-auth/providers/credentials"
 import Google from "next-auth/providers/google"
 import { toast } from "sonner"
 
+const allowedEmails = ["ivan.roschin86@gmail.com", "paromaster2@gmail.com"]
+
 export const authOptions: NextAuthOptions = {
   providers: [
     Google({
@@ -48,6 +50,21 @@ export const authOptions: NextAuthOptions = {
   ],
 
   pages: { signIn: "/login" },
+
+  callbacks: {
+    async signIn({ user, account }) {
+      if (account?.provider === "google") {
+        if (!allowedEmails.includes(user.email as string)) {
+          console.error("Google login denied for:", user.email)
+          return false
+        }
+      }
+      return true
+    },
+    async redirect({ url, baseUrl }) {
+      return `${baseUrl}/admin`
+    }
+  },
 
   debug: process.env.NODE_ENV === "development",
   session: {

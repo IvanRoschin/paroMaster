@@ -1,15 +1,14 @@
 "use server"
-
 import Order from "@/models/Order"
 import { ISearchParams } from "@/types/index"
-import { IOrder } from "@/types/order/IOrder"
+import { IAdminOrder, IOrder } from "@/types/order/IOrder"
 import { connectToDB } from "@/utils/dbConnect"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
 interface IGetAllOrdesResponse {
   success: boolean
-  orders: IOrder[]
+  orders: IOrder[] | IAdminOrder[]
   count: number
 }
 export async function getAllOrders(
@@ -141,18 +140,33 @@ export async function addOrderAction(values: IOrder) {
 }
 
 export async function deleteOrder(id: string) {
+  console.log(`🔹 Начало удаления заказа с ID: ${id}`)
+
   if (!id) {
-    console.error("No ID provided")
+    console.error("❌ Ошибка: Не передан ID для удаления")
     return
   }
+
   try {
+    console.log("🔹 Подключение к базе данных...")
     await connectToDB()
-    await Order.findByIdAndDelete(id)
+
+    console.log(`🔹 Попытка удаления заказа с ID: ${id}`)
+    const deletedOrder = await Order.findByIdAndDelete(id)
+
+    if (!deletedOrder) {
+      console.warn(`⚠️ Заказ с ID: ${id} не найден`)
+      return
+    }
+
+    console.log(`✅ Заказ с ID: ${id} успешно удален`)
   } catch (error) {
-    console.error("Failed to delete the order:", error)
+    console.error("❌ Ошибка при удалении заказа:", error)
   } finally {
-    revalidatePath("/admin/orders")
+    console.log("🔹 Перенаправление на `/admin/orders`")
     redirect("/admin/orders")
+
+    console.log("✅ Удаление заказа завершено")
   }
 }
 
