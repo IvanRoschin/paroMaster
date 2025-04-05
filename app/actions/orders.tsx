@@ -146,27 +146,16 @@ export async function deleteOrder(id: string) {
     console.error("❌ Ошибка: Не передан ID для удаления")
     return
   }
-
   try {
-    console.log("🔹 Подключение к базе данных...")
     await connectToDB()
-
-    console.log(`🔹 Попытка удаления заказа с ID: ${id}`)
     const deletedOrder = await Order.findByIdAndDelete(id)
-
     if (!deletedOrder) {
       console.warn(`⚠️ Заказ с ID: ${id} не найден`)
       return
     }
-
-    console.log(`✅ Заказ с ID: ${id} успешно удален`)
   } catch (error) {
-    console.error("❌ Ошибка при удалении заказа:", error)
   } finally {
-    console.log("🔹 Перенаправление на `/admin/orders`")
     redirect("/admin/orders")
-
-    console.log("✅ Удаление заказа завершено")
   }
 }
 

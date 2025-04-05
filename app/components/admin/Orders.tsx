@@ -82,7 +82,7 @@ export default function Orders({
             <option value="">Всі статуси</option>
             <option value="Новий">Новий</option>
             <option value="Опрацьовується">Опрацьовується</option>
-            <option value="Оплачено">Оплачено</option>
+            <option value="Оплачений">Оплачений</option>
             <option value="На відправку">На відправку</option>
             <option value="Закритий">Закритий</option>
           </select>
