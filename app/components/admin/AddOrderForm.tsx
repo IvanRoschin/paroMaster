@@ -46,10 +46,8 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title, goods }) =>
     }[]
   >([])
 
-  const [selectedGood, setSelectedGood] = useState<any | null>(null)
   const [showSelect, setShowSelect] = useState(false)
   const [city, setCity] = useState(order?.customer.city || "Київ")
-  // const [totalPrice, setTotalPrice] = useState(0)
 
   const { push } = useRouter()
   const isUpdating = Boolean(order?._id)
@@ -133,18 +131,17 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title, goods }) =>
       }
     }, [warehouses])
 
-    // Only update totalPrice if it has actually changed
     useEffect(() => {
       if (values.totalPrice !== totalPrice && totalPrice !== prevTotalPrice) {
-        setFieldValue("totalPrice", totalPrice, false) // Обновлюємо totalPrice тільки коли значення змінюється
-        setPrevTotalPrice(totalPrice) // Оновлюємо попереднє значення totalPrice
+        setFieldValue("totalPrice", totalPrice, false)
+        setPrevTotalPrice(totalPrice)
       }
     }, [totalPrice, values.totalPrice, setFieldValue, prevTotalPrice])
 
     return null
   }
 
-  const handleSubmit = async (values: IOrder, { resetForm }: ResetFormProps) => {
+  const handleSubmit = async (values: IOrder) => {
     try {
       setIsLoading(true)
 
@@ -162,8 +159,6 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title, goods }) =>
       const result = isUpdating
         ? await updateOrderMutation.mutateAsync(updateOrderData)
         : await addOrderMutation.mutateAsync(newOrderData)
-
-      console.log("Result of mutation:", result)
 
       toast.success(isUpdating ? "Замовлення оновлено!" : "Нове замовлення додано!")
       push("/admin/orders")
@@ -186,16 +181,6 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title, goods }) =>
         validationSchema={orderFormSchema}
       >
         {({ values, setFieldValue, errors, touched }) => {
-          // useEffect(() => {
-          //   setTotalPrice(calculateTotalPrice(values.orderedGoods))
-          // }, [values.orderedGoods])
-
-          // useEffect(() => {
-          //   if (city) {
-          //     fetchWarehouses(city).then(setWarehouses)
-          //   }
-          // }, [city])
-
           return (
             <>
               <FormEffects />
@@ -361,12 +346,13 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title, goods }) =>
                 )}
               />
               {/* Кнопка для додавання нового товару */}
-              <div className="flex justify-between mt-4">
+              <div className="flex justify-between mt-4 mb-4">
                 <Button type="button" label="Додати товар" onClick={() => setShowSelect(true)} />
               </div>
               {showSelect && (
                 <div>
                   <select
+                    className="w-full p-2 border border-gray-300 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     onChange={e => {
                       const good = goods?.find(g => g._id === e.target.value)
                       if (!good) return
@@ -384,29 +370,13 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title, goods }) =>
                   >
                     <option value="">Оберіть товар</option>
                     {goods?.map(good => (
-                      <option key={good._id} value={good._id}>
+                      <option className="py-2 text-sm" key={good._id} value={good._id}>
                         {good.title && good.brand && good.model
                           ? `${good.title} - ${good.brand} - ${good.model}`
                           : good.title || good.brand}
                       </option>
                     ))}
                   </select>
-                  {/* 
-                  <Button
-                    type="button"
-                    label="Додати до замовлення"
-                    onClick={() => {
-                      if (selectedGood) {
-                        const newItem = {
-                          ...selectedGood,
-                          quantity: 1
-                        }
-                        setFieldValue("orderedGoods", [...values.orderedGoods, newItem])
-                        setShowSelect(false)
-                      }
-                    }}
-                    disabled={!selectedGood}
-                  /> */}
                 </div>
               )}
               <div className="my-4 ">
