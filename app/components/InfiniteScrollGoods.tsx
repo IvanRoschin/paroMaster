@@ -10,12 +10,10 @@ import ItemsList from "./Item/ItemsList"
 
 const InfiniteScrollGoods = ({
   initialGoods,
-  searchParams,
-  limit
+  searchParams
 }: {
   initialGoods: IGood[]
   searchParams: ISearchParams
-  limit: number
 }) => {
   const [goods, setGoods] = useState<IGood[]>(initialGoods || [])
   const [pagesLoaded, setPagesLoaded] = useState(1)
@@ -37,7 +35,7 @@ const InfiniteScrollGoods = ({
     setIsFetchingMore(true)
 
     const nextPage = pagesLoaded + 1
-    const newGoods = (await getAllGoods(searchParams, limit, nextPage)) ?? []
+    const newGoods = (await getAllGoods(searchParams, nextPage)) ?? []
 
     if (newGoods?.goods?.length > 0) {
       setGoods(prevGoods => [...prevGoods, ...newGoods.goods])
@@ -47,7 +45,7 @@ const InfiniteScrollGoods = ({
     }
 
     setIsFetchingMore(false)
-  }, [isFetchingMore, allGoodsLoaded, pagesLoaded, searchParams, limit])
+  }, [isFetchingMore, allGoodsLoaded, pagesLoaded, searchParams])
 
   useEffect(() => {
     if (inView && !allGoodsLoaded && !isFetchingMore) {

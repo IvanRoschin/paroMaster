@@ -25,9 +25,9 @@ export interface IGetPrices {
 }
 export async function getAllGoods(
   searchParams: ISearchParams,
-  limit: number,
   nextPage?: number
 ): Promise<IGetAllGoods> {
+  const limit = searchParams?.limit || 10
   let skip: number
 
   if (nextPage) {

@@ -19,18 +19,17 @@ export default function Orders({
   limit: number
 }) {
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
-  const { data, isLoading, isError } = useFetchData(
+
+  // Вызов хуков на верхнем уровне
+  const { mutate: deleteOrderById } = useDeleteData(deleteOrder, "orders")
+
+  // Получаем данные с сервера
+  const { data, isLoading, isError, refetch } = useFetchData(
     { ...searchParams, status: statusFilter },
     limit,
     getAllOrders,
     "orders"
   )
-
-  const { mutate: deleteOrderById } = useDeleteData(deleteOrder, "orders")
-
-  const handleDelete = (id: string) => {
-    deleteOrderById(id)
-  }
 
   if (isLoading) {
     return <Loader />
@@ -40,14 +39,22 @@ export default function Orders({
     return <div>Error fetching data.</div>
   }
 
-  if (!data?.orders || data.orders.length === 0) {
-    return <EmptyState showReset />
+  if (!data?.orders || data?.orders.length === 0) {
+    return <EmptyState showReset title="Відсутні замовлення 🤷‍♂️" />
+  }
+
+  const handleDelete = (id: string) => {
+    // Удаляем заказ
+    deleteOrderById(id, {
+      onSuccess: () => {
+        // После удаления перезагружаем данные
+        refetch() // Это перезагружает запрос с сервера и обновляет данные
+      }
+    })
   }
 
   const ordersCount = data?.count || 0
-
   const page = searchParams.page ? Number(searchParams.page) : 1
-
   const totalPages = Math.ceil(ordersCount / limit)
   const pageNumbers = []
   const offsetNumber = 3
@@ -75,7 +82,7 @@ export default function Orders({
             <option value="">Всі статуси</option>
             <option value="Новий">Новий</option>
             <option value="Опрацьовується">Опрацьовується</option>
-            <option value="Оплачено">Оплачено</option>
+            <option value="Оплачений">Оплачений</option>
             <option value="На відправку">На відправку</option>
             <option value="Закритий">Закритий</option>
           </select>
@@ -112,7 +119,7 @@ export default function Orders({
                 </td>
                 <td className="p-2 border-r-2 text-start">
                   <ul className="list-disc pl-4">
-                    {order.orderedGoods.map(({ good }) => (
+                    {order.orderedGoods.map(good => (
                       <li key={good._id}>
                         <strong>{good.title}</strong> - {good.brand}, {good.model}, {good.vendor}
                         (Кількість: {good.quantity}, Ціна: {good.price})

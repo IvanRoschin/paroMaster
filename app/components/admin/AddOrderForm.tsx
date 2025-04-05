@@ -4,13 +4,12 @@ import { getData } from "@/actions/nova"
 import { orderFormSchema } from "@/helpers/index"
 import { useAddData } from "@/hooks/useAddData"
 import { useUpdateData } from "@/hooks/useUpdateData"
-import { CartItem } from "@/types/cart/ICartItem"
-import { IOrder } from "@/types/index"
+import { IGood, IOrder } from "@/types/index"
 import { PaymentMethod } from "@/types/paymentMethod"
-import { Field, FieldArray, Formik, FormikState } from "formik"
+import { Field, FieldArray, Formik, FormikState, useFormikContext } from "formik"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import React, { useCallback, useEffect, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import Button from "../Button"
 import { Icon } from "../Icon"
@@ -26,6 +25,7 @@ interface ResetFormProps {
 interface OrderFormProps {
   order?: IOrder
   title?: string
+  goods?: IGood[]
   action: (values: IOrder) => Promise<{ success: boolean; message: string }>
 }
 
@@ -37,7 +37,7 @@ const statusList = [
   { id: 5, title: "Закритий" }
 ]
 
-const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
+const OrderForm: React.FC<OrderFormProps> = ({ order, action, title, goods }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [warehouses, setWarehouses] = useState<
     {
@@ -45,9 +45,9 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
       Description: string
     }[]
   >([])
-  const [city, setCity] = useState(order?.customer.city || "Київ")
 
-  const [totalPrice, setTotalPrice] = useState(0)
+  const [showSelect, setShowSelect] = useState(false)
+  const [city, setCity] = useState(order?.customer.city || "Київ")
 
   const { push } = useRouter()
   const isUpdating = Boolean(order?._id)
@@ -73,38 +73,14 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
   }
 
   const customerInputs = [
-    {
-      name: "customer.name",
-      type: "text",
-      id: "customer.name",
-      label: `І'мя`
-    },
-    {
-      name: "customer.surname",
-      type: "text",
-      id: "customer.surname",
-      label: `Прізвище`
-    },
-    {
-      name: "customer.email",
-      type: "email",
-      id: "customer.email",
-      label: `Email`
-    },
-    {
-      name: "customer.phone",
-      type: "tel",
-      id: "customer.phone",
-      label: `Телефон`
-    },
-
+    { name: "customer.name", type: "text", id: "customer.name", label: `І'мя` },
+    { name: "customer.surname", type: "text", id: "customer.surname", label: `Прізвище` },
+    { name: "customer.email", type: "email", id: "customer.email", label: `Email` },
+    { name: "customer.phone", type: "tel", id: "customer.phone", label: `Телефон` },
     {
       id: "customer.payment",
       label: "Оберіть спосіб оплати",
-      options: Object.values(PaymentMethod).map(method => ({
-        value: method,
-        label: method
-      })),
+      options: Object.values(PaymentMethod).map(method => ({ value: method, label: method })),
       type: "select"
     }
   ]
@@ -124,56 +100,58 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
     }
   }
 
-  const calculateTotalPrice = useCallback((orderedGoods: CartItem[]): number => {
+  const calculateTotalPrice = (orderedGoods: IOrder["orderedGoods"]): number => {
     return orderedGoods.reduce(
-      (total, item) => total + item.good.price * (item.good.quantity || 1),
+      (total, item) => total + (item?.price ?? 0) * (item?.quantity ?? 1),
       0
     )
-  }, [])
-
-  useEffect(() => {
-    setTotalPrice(calculateTotalPrice(initialValues.orderedGoods))
-  }, [initialValues.orderedGoods, calculateTotalPrice])
-
-  useEffect(() => {
-    if (city) {
-      const fetchAndSetWarehouses = async () => {
-        try {
-          const fetchedWarehouses = await fetchWarehouses(city)
-          setWarehouses(fetchedWarehouses)
-        } catch (error) {
-          console.error("Error fetching warehouses:", error)
-        }
-      }
-      fetchAndSetWarehouses()
-    }
-  }, [city])
-
-  const handleQuantityChange = (
-    index: number,
-    change: number,
-    values: InitialStateType,
-    setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void
-  ) => {
-    const newQuantity = Math.max((values.orderedGoods[index].quantity || 0) + change, 1)
-    setFieldValue(`orderedGoods.${index}.quantity`, newQuantity)
-
-    const updatedGoods = [...values.orderedGoods]
-    updatedGoods[index].quantity = newQuantity
-    setTotalPrice(calculateTotalPrice(updatedGoods))
   }
 
-  const handleSubmit = async (values: IOrder, { resetForm }: ResetFormProps) => {
+  const FormEffects = () => {
+    const { values, setFieldValue } = useFormikContext<IOrder>()
+
+    const [prevTotalPrice, setPrevTotalPrice] = useState<number>(values.totalPrice)
+
+    const totalPrice = useMemo(
+      () => calculateTotalPrice(values.orderedGoods),
+      [values.orderedGoods]
+    )
+
+    useEffect(() => {
+      const delayDebounceFn = setTimeout(() => {
+        if (city && city !== order?.customer.city) fetchWarehouses(city).then(setWarehouses)
+      }, 500)
+
+      return () => clearTimeout(delayDebounceFn)
+    }, [city, order?.customer.city])
+
+    useEffect(() => {
+      if (warehouses.length > 0) {
+        setFieldValue("customer.warehouse", warehouses[0].Description)
+      }
+    }, [warehouses])
+
+    useEffect(() => {
+      if (values.totalPrice !== totalPrice && totalPrice !== prevTotalPrice) {
+        setFieldValue("totalPrice", totalPrice, false)
+        setPrevTotalPrice(totalPrice)
+      }
+    }, [totalPrice, values.totalPrice, setFieldValue, prevTotalPrice])
+
+    return null
+  }
+
+  const handleSubmit = async (values: IOrder) => {
     try {
       setIsLoading(true)
 
-      const newOrderData = {
+      let newOrderData = {
         ...values,
-        totalPrice,
         customer: {
           ...values.customer,
           name: `${values.customer.name} ${values.customer.surname}`
-        }
+        },
+        totalPrice: values.totalPrice
       }
 
       const updateOrderData = isUpdating ? { ...newOrderData, _id: order?._id } : {}
@@ -182,16 +160,10 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
         ? await updateOrderMutation.mutateAsync(updateOrderData)
         : await addOrderMutation.mutateAsync(newOrderData)
 
-      // if (!result?.success) {
-      // 	toast.error('Something went wrong')
-      // 	return
-      // }
-
-      resetForm()
       toast.success(isUpdating ? "Замовлення оновлено!" : "Нове замовлення додано!")
       push("/admin/orders")
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : "An unknown error occurred"
+      const errorMsg = error instanceof Error ? error.message : "Невідома помилка"
       toast.error(errorMsg)
       console.error(error)
     } finally {
@@ -203,6 +175,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
     <div className="flex flex-col justify-center items-center p-4 bg-white rounded-lg shadow-md">
       <h2 className="text-3xl mb-4 font-bold">{title || "Order Form"}</h2>
       <Formik
+        enableReinitialize
         initialValues={initialValues}
         onSubmit={handleSubmit}
         validationSchema={orderFormSchema}
@@ -210,7 +183,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
         {({ values, setFieldValue, errors, touched }) => {
           return (
             <>
-              {/* Form content */}
+              <FormEffects />
               <h3 className="text-xl font-semibold">Статус замовлення</h3>
               <FormField
                 item={{
@@ -218,10 +191,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
                   label: "Статус",
                   type: "select",
                   required: true,
-                  options: statusList.map(status => ({
-                    value: status.title,
-                    label: status.title
-                  }))
+                  options: statusList.map(status => ({ value: status.title, label: status.title }))
                 }}
                 setFieldValue={setFieldValue}
               />
@@ -230,62 +200,46 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
               {customerInputs.map((item, i) => (
                 <FormField key={i} item={item} setFieldValue={setFieldValue} />
               ))}
+
               <div className="w-full mb-4">
-                {/* City Input */}
                 <div className="relative">
                   <Field
                     id="customer.city"
                     type="text"
                     value={values.customer.city}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      setFieldValue("customer.city", e.target.value)
-                      setCity(e.target.value)
+                      const value = e.target.value
+                      setFieldValue("customer.city", value)
+                      setTimeout(() => setCity(value), 300)
                     }}
                     className={`peer w-full p-4 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
-        ${
-          errors.customer?.city && touched.customer?.city ? "border-rose-500" : "border-neutral-300"
-        }
-        ${
-          errors.customer?.city && touched.customer?.city
-            ? "focus:border-rose-500"
-            : "focus:border-green-500"
-        }
-      `}
+                      ${errors.customer?.city && touched.customer?.city ? "border-rose-500" : "border-neutral-300"}
+                      ${errors.customer?.city && touched.customer?.city ? "focus:border-rose-500" : "focus:border-green-500"}`}
                   />
                   <label
                     htmlFor="customer.city"
                     className="text-primaryTextColor absolute text-md duration-150 left-3 top-3 z-10 origin-[0] transform -translate-y-3
-            peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
+                      peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
                   >
                     Введіть назву міста
                   </label>
                 </div>
 
-                {/* Warehouse Select */}
                 <div className="relative mt-4">
                   <Field
                     as="select"
                     id="customer.warehouse"
                     name="customer.warehouse"
                     value={values.customer.warehouse}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       setFieldValue("customer.warehouse", e.target.value)
-                    }
+                    }}
                     className={`peer w-full p-4 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
-        ${
-          errors.customer?.warehouse && touched.customer?.warehouse
-            ? "border-rose-500"
-            : "border-neutral-300"
-        }
-        ${
-          errors.customer?.warehouse && touched.customer?.warehouse
-            ? "focus:border-rose-500"
-            : "focus:border-green-500"
-        }
-      `}
+                      ${errors.customer?.warehouse && touched.customer?.warehouse ? "border-rose-500" : "border-neutral-300"}
+                      ${errors.customer?.warehouse && touched.customer?.warehouse ? "focus:border-rose-500" : "focus:border-green-500"}`}
                   >
-                    {warehouses.map((wh, index) => (
-                      <option key={index} value={wh.Description}>
+                    {warehouses.map((wh, i) => (
+                      <option key={i} value={wh.Description}>
                         {wh.Description}
                       </option>
                     ))}
@@ -293,26 +247,27 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
                   <label
                     htmlFor="customer.warehouse"
                     className="text-primaryTextColor absolute text-md duration-150 left-3 top-3 z-10 origin-[0] transform -translate-y-3
-            peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
+                      peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
                   >
                     Оберіть відділення
                   </label>
                 </div>
               </div>
+
               <h3 className="text-xl font-semibold">Товари у замовленні</h3>
               <FieldArray
                 name="orderedGoods"
                 render={({ remove }) => (
                   <div>
-                    {values?.orderedGoods.map((item, index) => (
+                    {values?.orderedGoods.map((good, i) => (
                       <div
-                        key={index}
+                        key={good._id}
                         className="border p-4 mb-4 flex items-center gap-4 justify-between"
                       >
                         {/* Image container */}
                         <div className="flex-shrink-0 w-[150px]">
                           <Image
-                            src={item.good.src[0] || "/placeholder.png"}
+                            src={good?.src?.[0] || "/placeholder.png"}
                             alt="item_photo"
                             width={150}
                             height={150}
@@ -323,7 +278,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
 
                         {/* Item title */}
                         <div className="flex-1 text-center">
-                          <span>{item.good.title || "Unnamed Item"}</span>
+                          <span>{good.title || "Unnamed Item"}</span>
                         </div>
 
                         {/* Quantity decrement button */}
@@ -331,14 +286,17 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
                           <Button
                             type="button"
                             label="-"
-                            onClick={() => handleQuantityChange(index, -1, values, setFieldValue)}
-                            disabled={item.good?.quantity !== undefined && item.good?.quantity <= 1}
+                            onClick={() => {
+                              const quantity = Math.max((good.quantity || 1) - 1, 1)
+                              setFieldValue(`orderedGoods.${i}.quantity`, quantity)
+                            }}
+                            disabled={good?.quantity !== undefined && good?.quantity <= 1}
                           />
                         </div>
 
                         {/* Quantity display */}
                         <div className="w-[40px] text-center">
-                          <span>{item.good.quantity || 0}</span>
+                          <span>{good.quantity || 0}</span>
                         </div>
 
                         {/* Quantity increment button */}
@@ -346,18 +304,21 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
                           <Button
                             type="button"
                             label="+"
-                            onClick={() => handleQuantityChange(index, +1, values, setFieldValue)}
+                            onClick={() => {
+                              const quantity = (good.quantity || 0) + 1
+                              setFieldValue(`orderedGoods.${i}.quantity`, quantity)
+                            }}
                           />
                         </div>
 
                         {/* Price per unit */}
                         <div className="w-[100px] text-center">
-                          <span>Ціна за 1: {item.good.price}</span>
+                          <span>Ціна за 1: {good.price}</span>
                         </div>
 
                         {/* Total price for the item */}
                         <div className="w-[120px] text-center">
-                          <span>Ціна за Товар: {item.good.price * (item.good?.quantity || 1)}</span>
+                          <span>Ціна за Товар: {(good?.price ?? 0) * (good?.quantity ?? 1)}</span>
                         </div>
 
                         {/* Remove button */}
@@ -365,7 +326,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
                           <button
                             type="button"
                             onClick={() => {
-                              remove(index)
+                              remove(i)
                               setFieldValue("totalPrice", calculateTotalPrice(values.orderedGoods))
                             }}
                             className="
@@ -384,8 +345,42 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title }) => {
                   </div>
                 )}
               />
+              {/* Кнопка для додавання нового товару */}
+              <div className="flex justify-between mt-4 mb-4">
+                <Button type="button" label="Додати товар" onClick={() => setShowSelect(true)} />
+              </div>
+              {showSelect && (
+                <div>
+                  <select
+                    className="w-full p-2 border border-gray-300 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onChange={e => {
+                      const good = goods?.find(g => g._id === e.target.value)
+                      if (!good) return
+                      if (values.orderedGoods.some(item => item._id === good._id)) {
+                        toast.warning("Цей товар вже додано!")
+                        return
+                      }
+
+                      setFieldValue("orderedGoods", [
+                        ...values.orderedGoods,
+                        { ...good, quantity: 1 }
+                      ])
+                      setShowSelect(false)
+                    }}
+                  >
+                    <option value="">Оберіть товар</option>
+                    {goods?.map(good => (
+                      <option className="py-2 text-sm" key={good._id} value={good._id}>
+                        {good.title && good.brand && good.model
+                          ? `${good.title} - ${good.brand} - ${good.model}`
+                          : good.title || good.brand}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="my-4 ">
-                <h3 className="text-xl font-semibold">Загальна ціна: {totalPrice} грн</h3>
+                <h3 className="text-xl font-semibold">Загальна ціна: {values.totalPrice} грн</h3>
               </div>
               <div className="flex justify-end">
                 <CustomButton
