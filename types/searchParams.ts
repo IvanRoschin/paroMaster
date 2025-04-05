@@ -3,6 +3,7 @@ export interface ISearchParams {
   search?: string
   low?: number
   high?: number
+  limit?: number
   [key: string]: any
 }
 

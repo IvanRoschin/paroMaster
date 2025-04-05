@@ -4,7 +4,6 @@ type AddAction = (newData: any) => Promise<{ success: boolean; message: string }
 
 export const useAddData = (action: AddAction, key: string) => {
   const queryClient = useQueryClient()
-  console.log("Mutation triggered")
 
   return useMutation({
     mutationFn: async (newDataItem: any) => action(newDataItem),

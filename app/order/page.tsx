@@ -99,7 +99,7 @@ const OrderPage = () => {
 
   useEffect(() => {
     fetchWarehouses(city)
-  }, [city])
+  }, [city, fetchWarehouses])
 
   useEffect(() => {
     setOrderNumber(generateOrderNumber())
@@ -245,7 +245,12 @@ const OrderPage = () => {
                       />
                       <label htmlFor="termsCheckbox">Я погоджуюсь з умовами та правилами</label>
                     </div>
-                    <Button onClick={() => handleSubmit} label="Відправити" disabled={isLoading} />
+                    <Button
+                      type="submit"
+                      onClick={() => handleSubmit}
+                      label="Відправити"
+                      disabled={!isCheckboxChecked}
+                    />
                   </Form>
                 )
               }}

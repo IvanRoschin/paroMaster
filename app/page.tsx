@@ -1,9 +1,9 @@
+import { getAllGoods } from "@/actions/goods"
+import { getAllTestimonials, IGetAllTestimonials } from "@/actions/testimonials"
 import { Advantages, Description, ItemsList, Slider, TestimonialsList } from "@/components/index"
 import { IGood, ISearchParams, ITestimonial } from "@/types/index"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
-import { getAllGoods } from "./actions/goods"
 import { getAllSlides, IGetAllSlides } from "./actions/slider"
-import { getAllTestimonials, IGetAllTestimonials } from "./actions/testimonials"
 
 interface GoodsData {
   goods: IGood[]

@@ -1,15 +1,14 @@
 "use server"
-
 import Order from "@/models/Order"
 import { ISearchParams } from "@/types/index"
-import { IOrder } from "@/types/order/IOrder"
+import { IAdminOrder, IOrder } from "@/types/order/IOrder"
 import { connectToDB } from "@/utils/dbConnect"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
 interface IGetAllOrdesResponse {
   success: boolean
-  orders: IOrder[]
+  orders: IOrder[] | IAdminOrder[]
   count: number
 }
 export async function getAllOrders(
@@ -141,17 +140,21 @@ export async function addOrderAction(values: IOrder) {
 }
 
 export async function deleteOrder(id: string) {
+  console.log(`🔹 Начало удаления заказа с ID: ${id}`)
+
   if (!id) {
-    console.error("No ID provided")
+    console.error("❌ Ошибка: Не передан ID для удаления")
     return
   }
   try {
     await connectToDB()
-    await Order.findByIdAndDelete(id)
+    const deletedOrder = await Order.findByIdAndDelete(id)
+    if (!deletedOrder) {
+      console.warn(`⚠️ Заказ с ID: ${id} не найден`)
+      return
+    }
   } catch (error) {
-    console.error("Failed to delete the order:", error)
   } finally {
-    revalidatePath("/admin/orders")
     redirect("/admin/orders")
   }
 }
@@ -166,14 +169,72 @@ export async function getOrderById(id: string) {
   }
 }
 
+// export async function updateOrder(values: IOrder) {
+//   const id = values._id
+
+//   const { number, customer, orderedGoods, totalPrice, status } = values
+
+//   try {
+//     await connectToDB()
+
+//     const updateFields: Partial<IOrder> = {
+//       number,
+//       customer: customer
+//         ? {
+//             name: customer.name || "",
+//             surname: customer.surname || "",
+//             phone: customer.phone || "",
+//             email: customer.email || "",
+//             city: customer.city || "",
+//             warehouse: customer.warehouse || "",
+//             payment: customer.payment || ""
+//           }
+//         : undefined,
+//       orderedGoods,
+//       totalPrice,
+//       status
+//     }
+
+//     Object.keys(updateFields).forEach(
+//       key =>
+//         (updateFields[key as keyof IOrder] === "" ||
+//           updateFields[key as keyof IOrder] === undefined) &&
+//         delete updateFields[key as keyof IOrder]
+//     )
+
+//     const updatedOrder = await Order.findByIdAndUpdate(id, updateFields, {
+//       new: true
+//     }).lean()
+
+//     if (!updatedOrder || Array.isArray(updatedOrder)) {
+//       throw new Error("Failed to update order: No document returned or multiple documents returned")
+//     }
+
+//     return { success: true, message: "Замовлення оновлено успішно" }
+//   } catch (error) {
+//     if (error instanceof Error) {
+//       console.error("Error updating order:", error)
+//       throw new Error("Failed to update order: " + error.message)
+//     } else {
+//       console.error("Unknown error:", error)
+//       throw new Error("Failed to update order: Unknown error")
+//     }
+//   } finally {
+//     revalidatePath("/admin/orders")
+//     redirect("/admin/orders")
+//   }
+// }
+
 export async function updateOrder(values: IOrder) {
   const id = values._id
 
   const { number, customer, orderedGoods, totalPrice, status } = values
 
   try {
+    // Підключення до БД
     await connectToDB()
 
+    // Формуємо часткові дані для оновлення
     const updateFields: Partial<IOrder> = {
       number,
       customer: customer
@@ -192,6 +253,7 @@ export async function updateOrder(values: IOrder) {
       status
     }
 
+    // Видаляємо порожні або невизначені поля з updateFields
     Object.keys(updateFields).forEach(
       key =>
         (updateFields[key as keyof IOrder] === "" ||
@@ -199,6 +261,7 @@ export async function updateOrder(values: IOrder) {
         delete updateFields[key as keyof IOrder]
     )
 
+    // Оновлення в базі даних
     const updatedOrder = await Order.findByIdAndUpdate(id, updateFields, {
       new: true
     }).lean()
@@ -207,16 +270,19 @@ export async function updateOrder(values: IOrder) {
       throw new Error("Failed to update order: No document returned or multiple documents returned")
     }
 
+    // Успішне оновлення
     return { success: true, message: "Замовлення оновлено успішно" }
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error updating order:", error)
-      throw new Error("Failed to update order: " + error.message)
+      // Повертати вищий рівень помилки для подальшого оброблення
+      return { success: false, message: "Помилка при оновленні замовлення: " + error.message }
     } else {
       console.error("Unknown error:", error)
-      throw new Error("Failed to update order: Unknown error")
+      return { success: false, message: "Неизвесная помилка при оновленні замовлення" }
     }
   } finally {
+    // Перезавантаження шляхів після оновлення
     revalidatePath("/admin/orders")
     redirect("/admin/orders")
   }
