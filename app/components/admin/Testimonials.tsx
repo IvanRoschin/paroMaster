@@ -12,18 +12,11 @@ import { useState } from "react"
 import { FaPen, FaTrash } from "react-icons/fa"
 import { toast } from "sonner"
 
-export default function Testimonials({
-  searchParams,
-  limit
-}: {
-  searchParams: ISearchParams
-  limit: number
-}) {
+export default function Testimonials({ searchParams }: { searchParams: ISearchParams }) {
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
 
   const { data, isLoading, isError, refetch } = useFetchData(
     { ...searchParams, statusFilter },
-    limit,
     getAllTestimonials,
     "testimonials"
   )
@@ -56,6 +49,7 @@ export default function Testimonials({
   // Pagination setup
   const testimonialsCount = data?.count || 0
   const page = searchParams.page ? Number(searchParams.page) : 1
+  const limit = Number(searchParams.limit) || 10
   const totalPages = Math.ceil(testimonialsCount / limit)
   const pageNumbers = []
   const offsetNumber = 3

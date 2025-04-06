@@ -50,7 +50,8 @@ export async function addUser(formData: FormData): Promise<void> {
   }
 }
 
-export async function getAllUsers(searchParams: ISearchParams, limit: number) {
+export async function getAllUsers(searchParams: ISearchParams) {
+  const limit = searchParams.limit || 10
   const q = searchParams.q || ""
   const page = searchParams.page || 1
   const ITEM_PER_PAGE = limit

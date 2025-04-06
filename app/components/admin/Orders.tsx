@@ -11,13 +11,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { FaPen, FaTrash } from "react-icons/fa"
 
-export default function Orders({
-  searchParams,
-  limit
-}: {
-  searchParams: ISearchParams
-  limit: number
-}) {
+export default function Orders({ searchParams }: { searchParams: ISearchParams }) {
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
 
   // Вызов хуков на верхнем уровне
@@ -26,7 +20,6 @@ export default function Orders({
   // Получаем данные с сервера
   const { data, isLoading, isError, refetch } = useFetchData(
     { ...searchParams, status: statusFilter },
-    limit,
     getAllOrders,
     "orders"
   )
@@ -55,6 +48,7 @@ export default function Orders({
 
   const ordersCount = data?.count || 0
   const page = searchParams.page ? Number(searchParams.page) : 1
+  const limit = Number(searchParams.limit) || 10
   const totalPages = Math.ceil(ordersCount / limit)
   const pageNumbers = []
   const offsetNumber = 3

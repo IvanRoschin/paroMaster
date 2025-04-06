@@ -73,6 +73,11 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
       required: true
     },
     {
+      id: "isCondition",
+      label: "Новий?",
+      type: "switcher"
+    },
+    {
       id: "isAvailable",
       label: "В наявності?",
       type: "switcher"
@@ -104,6 +109,7 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
     title: good?.title || "",
     description: good?.description || "",
     price: good?.price || 0,
+    isCondition: good?.isCondition || false,
     isAvailable: good?.isAvailable || false,
     isCompatible: good?.isCompatible || false,
     compatibility: good?.compatibility || ""

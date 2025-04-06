@@ -11,21 +11,10 @@ import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
 import { FaPen, FaSortAlphaDown, FaSortAlphaUp, FaTrash } from "react-icons/fa"
-export default function Categories({
-  searchParams,
-  limit
-}: {
-  searchParams: ISearchParams
-  limit: number
-}) {
+export default function Categories({ searchParams }: { searchParams: ISearchParams }) {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
 
-  const { data, isLoading, isError } = useFetchData(
-    searchParams,
-    limit,
-    getAllCategories,
-    "categories"
-  )
+  const { data, isLoading, isError } = useFetchData(searchParams, getAllCategories, "categories")
 
   const { mutate: deleteCategoryById } = useDeleteData(deleteCategory, "categories")
 
@@ -52,6 +41,8 @@ export default function Categories({
   const categoriesCount = data?.count || 0
 
   const page = searchParams.page ? Number(searchParams.page) : 1
+
+  const limit = Number(searchParams.limit) || 10
 
   const totalPages = Math.ceil(categoriesCount / limit)
   const pageNumbers = []

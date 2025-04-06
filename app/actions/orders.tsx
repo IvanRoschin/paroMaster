@@ -11,10 +11,8 @@ interface IGetAllOrdesResponse {
   orders: IOrder[] | IAdminOrder[]
   count: number
 }
-export async function getAllOrders(
-  searchParams: ISearchParams,
-  limit: number
-): Promise<IGetAllOrdesResponse> {
+export async function getAllOrders(searchParams: ISearchParams): Promise<IGetAllOrdesResponse> {
+  const limit = searchParams.limit || 10
   const page = searchParams.page || 1
   const status = searchParams.status === null ? "all" : searchParams.status
 

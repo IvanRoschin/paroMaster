@@ -9,12 +9,12 @@ export default async function TestimonialsPage({ searchParams }: { searchParams:
   const queryClinet = new QueryClient()
   await queryClinet.prefetchQuery({
     queryKey: ["testimonials"],
-    queryFn: () => getAllTestimonials(searchParams, limit)
+    queryFn: () => getAllTestimonials(searchParams)
   })
 
   return (
     <HydrationBoundary state={dehydrate(queryClinet)}>
-      <Testimonials searchParams={searchParams} limit={limit} />
+      <Testimonials searchParams={searchParams} />
     </HydrationBoundary>
   )
 }

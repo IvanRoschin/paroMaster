@@ -15,7 +15,7 @@ export default async function CategoriesPage({ searchParams }: { searchParams: I
 
   return (
     <HydrationBoundary state={dehydrate(queryClinet)}>
-      <Categories searchParams={searchParams} limit={limit} />
+      <Categories searchParams={searchParams} />
     </HydrationBoundary>
   )
 }

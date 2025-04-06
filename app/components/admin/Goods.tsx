@@ -18,19 +18,14 @@ import {
   FaTrash
 } from "react-icons/fa"
 
-export default function Goods({
-  searchParams,
-  limit
-}: {
-  searchParams: ISearchParams
-  limit: number
-}) {
+export default function Goods({ searchParams }: { searchParams: ISearchParams }) {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
-  const [sortBy, setSortBy] = useState<"category" | "brand" | "price" | "availability">("category")
+  const [sortBy, setSortBy] = useState<
+    "category" | "brand" | "price" | "availability" | "condition"
+  >("category")
 
   const { data, isLoading, isError } = useFetchData(
     { ...searchParams, sortOrder, sortBy },
-    limit,
     getAllGoods,
     "goods"
   )
@@ -56,6 +51,8 @@ export default function Goods({
 
   const page = searchParams.page ? Number(searchParams.page) : 1
 
+  const limit = Number(searchParams.limit) || 10
+
   const totalPages = Math.ceil(goodsCount / limit)
   const pageNumbers = []
   const offsetNumber = 3
@@ -68,7 +65,7 @@ export default function Goods({
     }
   }
 
-  const handleSort = (sortKey: "category" | "brand" | "price" | "availability") => {
+  const handleSort = (sortKey: "category" | "brand" | "price" | "availability" | "condition") => {
     setSortBy(sortKey)
     setSortOrder(prevOrder => (prevOrder === "asc" ? "desc" : "asc"))
   }
@@ -84,6 +81,8 @@ export default function Goods({
       comparison = a.price - b.price
     } else if (sortBy === "availability") {
       comparison = a.isAvailable === b.isAvailable ? 0 : a.isAvailable ? -1 : 1
+    } else if (sortBy === "condition") {
+      comparison = a.isCondition === b.isCondition ? 0 : a.isCondition ? -1 : 1
     }
 
     return sortOrder === "asc" ? comparison : -comparison
