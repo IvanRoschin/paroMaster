@@ -9,12 +9,12 @@ export default async function CustomersPage({ searchParams }: { searchParams: IS
   const queryClinet = new QueryClient()
   await queryClinet.prefetchQuery({
     queryKey: ["customers"],
-    queryFn: () => getAllCustomers(searchParams, limit)
+    queryFn: () => getAllCustomers(searchParams)
   })
 
   return (
     <HydrationBoundary state={dehydrate(queryClinet)}>
-      <Customers searchParams={searchParams} limit={limit} />
+      <Customers searchParams={searchParams} />
     </HydrationBoundary>
   )
 }

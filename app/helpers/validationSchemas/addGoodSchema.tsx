@@ -43,6 +43,7 @@ const goodFormSchema = Yup.object().shape({
     .min(0, "Ціна товару повинан бути вище 0")
     .required(`Обов'язкове поле`)
     .nullable(),
+  isCondition: Yup.boolean().required(`Обов'язкове поле`),
   isAvailable: Yup.boolean().required(`Обов'язкове поле`),
   isCompatible: Yup.boolean().required(`Обов'язкове поле`),
   compatibility: Yup.string().notRequired()

@@ -11,14 +11,8 @@ import { ISearchParams, IUser } from "@/types/index"
 import Link from "next/link"
 import { FaPen, FaTrash } from "react-icons/fa"
 
-export default function Users({
-  searchParams,
-  limit
-}: {
-  searchParams: ISearchParams
-  limit: number
-}) {
-  const { data, isLoading, isError } = useFetchData(searchParams, limit, getAllUsers, "users")
+export default function Users({ searchParams }: { searchParams: ISearchParams }) {
+  const { data, isLoading, isError } = useFetchData(searchParams, getAllUsers, "users")
 
   const { mutate: deleteUserById } = useDeleteData(deleteUser, "users")
 
@@ -41,7 +35,7 @@ export default function Users({
   const usersCount = data?.count || 0
 
   const page = searchParams.page ? Number(searchParams.page) : 1
-
+  const limit = Number(searchParams.limit) || 10
   const totalPages = Math.ceil(usersCount / limit)
   const pageNumbers = []
   const offsetNumber = 3

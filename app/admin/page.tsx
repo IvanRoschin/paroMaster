@@ -30,30 +30,30 @@ export default async function Admin() {
 
   // Define wrapper functions for prefetching with default parameters
   const fetchUsers = async () => {
-    const response = await getAllUsers({} as ISearchParams, 10)
+    const response = await getAllUsers({} as ISearchParams)
     return { success: true, users: response.users, count: response.count }
   }
 
   const fetchCustomers = async () => {
-    const response = await getAllCustomers({} as ISearchParams, 10)
+    const response = await getAllCustomers({} as ISearchParams)
     return { success: true, users: response.customers, count: response.count }
   }
   const fetchOrders = async () => {
-    const response = await getAllOrders({} as ISearchParams, 10)
+    const response = await getAllOrders({} as ISearchParams)
     return { success: true, users: response.orders, count: response.count }
   }
   const fetchSlides = async () => {
-    const response = await getAllSlides({} as ISearchParams, 10)
+    const response = await getAllSlides({} as ISearchParams)
     return { success: true, users: response.slides, count: response.count }
   }
 
   const fetchTestimonials = async () => {
-    const response = await getAllTestimonials({} as ISearchParams, 10)
+    const response = await getAllTestimonials({} as ISearchParams)
     return { success: true, users: response.testimonials, count: response.count }
   }
 
   const fetchGoods = async () => {
-    const response = await getAllGoods({} as ISearchParams, 10)
+    const response = await getAllGoods({} as ISearchParams)
     return { success: true, users: response.goods, count: response.count }
   }
 

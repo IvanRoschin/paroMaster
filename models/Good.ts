@@ -47,6 +47,10 @@ const goodSchema = new Schema(
       type: Number,
       required: true
     },
+    isCondition: {
+      type: Boolean,
+      required: true
+    },
     isAvailable: {
       type: Boolean,
       required: true

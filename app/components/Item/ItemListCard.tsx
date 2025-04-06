@@ -36,6 +36,9 @@ const ItemListCard: React.FC<ItemListCardProps> = ({ item }) => {
       <div className="relative">
         <Link href={`/item/${item._id}`} className="flex flex-col h-full justify-between">
           <div className="w-[200px] h-[200px]">
+            <div className="absolute top-2 left-2 bg-primaryAccentColor text-white text-xs font-semibold px-2 py-1 rounded">
+              {item.isCondition ? "НОВИЙ" : "Б/У"}
+            </div>{" "}
             <Image
               src={item.src[0]}
               alt="item_photo"

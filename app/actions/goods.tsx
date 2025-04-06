@@ -184,6 +184,7 @@ export async function addGood(formData: FormData) {
       description: values.description,
       src: Array.isArray(values.src) ? values.src : [values.src],
       vendor: values.vendor,
+      isCondition: values.isAvailable === "true",
       isAvailable: values.isAvailable === "true",
       isCompatible: values.isCompatible === "true",
       compatibility: values.compatibility
@@ -242,6 +243,7 @@ export async function updateGood(formData: FormData) {
     title,
     description,
     price,
+    isCondition,
     isAvailable,
     isCompatible,
     compatibility
@@ -255,6 +257,7 @@ export async function updateGood(formData: FormData) {
     title?: string
     description?: string
     price?: number
+    isCondition?: string
     isAvailable?: string
     isCompatible?: string
     compatibility?: any
@@ -272,6 +275,7 @@ export async function updateGood(formData: FormData) {
       title,
       description,
       price: Number(price),
+      isCondition: isCondition === "true",
       isAvailable: isAvailable === "true",
       isCompatible: isCompatible === "true",
       compatibility

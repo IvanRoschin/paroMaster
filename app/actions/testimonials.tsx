@@ -52,9 +52,9 @@ export async function addTestimonial(values: ITestimonial) {
 }
 
 export async function getAllTestimonials(
-  searchParams: ISearchParams,
-  limit: number
+  searchParams: ISearchParams
 ): Promise<IGetAllTestimonials> {
+  const limit = searchParams.limit || 4
   const page = searchParams.page || 1
 
   try {

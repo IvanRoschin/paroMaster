@@ -9,23 +9,21 @@ interface GoodsData {
   goods: IGood[]
 }
 
-const limit = 4
-
 export default async function Home({ searchParams }: { searchParams: ISearchParams }) {
   const queryClient = new QueryClient()
 
   try {
     await queryClient.prefetchQuery({
       queryKey: ["slides"],
-      queryFn: () => getAllSlides(searchParams, limit)
+      queryFn: () => getAllSlides(searchParams)
     })
     await queryClient.prefetchQuery({
       queryKey: ["testimonials"],
-      queryFn: () => getAllTestimonials(searchParams, limit)
+      queryFn: () => getAllTestimonials(searchParams)
     })
     await queryClient.prefetchQuery({
       queryKey: ["goods"],
-      queryFn: () => getAllGoods(searchParams, limit)
+      queryFn: () => getAllGoods(searchParams)
     })
   } catch (error) {
     console.error("Error prefetching data:", error)

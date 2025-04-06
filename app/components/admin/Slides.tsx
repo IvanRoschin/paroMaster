@@ -12,14 +12,8 @@ import Image from "next/image"
 import Link from "next/link"
 import { FaPen, FaTrash } from "react-icons/fa"
 
-export default function Slides({
-  searchParams,
-  limit
-}: {
-  searchParams: ISearchParams
-  limit: number
-}) {
-  const { data, isLoading, isError } = useFetchData(searchParams, limit, getAllSlides, "slides")
+export default function Slides({ searchParams }: { searchParams: ISearchParams }) {
+  const { data, isLoading, isError } = useFetchData(searchParams, getAllSlides, "slides")
 
   const { mutate: deleteSliderById } = useDeleteData(deleteSlide, "slides")
 
@@ -42,7 +36,7 @@ export default function Slides({
   const slidesCount = data?.count || 0
 
   const page = searchParams.page ? Number(searchParams.page) : 1
-
+  const limit = Number(searchParams.limit) || 10
   const totalPages = Math.ceil(slidesCount / limit)
   const pageNumbers = []
   const offsetNumber = 3

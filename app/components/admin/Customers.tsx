@@ -10,19 +10,8 @@ import { ISearchParams } from "@/types/searchParams"
 import Link from "next/link"
 import { FaPen, FaTrash } from "react-icons/fa"
 
-export default function Customers({
-  searchParams,
-  limit
-}: {
-  searchParams: ISearchParams
-  limit: number
-}) {
-  const { data, isLoading, isError } = useFetchData(
-    searchParams,
-    limit,
-    getAllCustomers,
-    "customers"
-  )
+export default function Customers({ searchParams }: { searchParams: ISearchParams }) {
+  const { data, isLoading, isError } = useFetchData(searchParams, getAllCustomers, "customers")
   const { mutate: deleteCustomerById } = useDeleteData(deleteCustomer, "customers")
 
   const handleDelete = (id: string) => {
@@ -42,9 +31,8 @@ export default function Customers({
   }
 
   const customersCount = data?.count || 0
-
   const page = searchParams.page ? Number(searchParams.page) : 1
-
+  const limit = Number(searchParams.limit) || 10
   const totalPages = Math.ceil(customersCount / limit)
   const pageNumbers = []
   const offsetNumber = 3
