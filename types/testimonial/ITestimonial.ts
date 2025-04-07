@@ -6,4 +6,5 @@ export interface ITestimonial {
   text: string
   rating: number
   isActive: boolean
+  product: string
 }
