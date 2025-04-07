@@ -13,7 +13,6 @@ export interface IGetAllTestimonials {
 }
 
 export async function addTestimonial(values: ITestimonial) {
-  console.log("values", values)
   if (!values.name || !values.text || !values.rating || !values.isActive) {
     throw new Error("All fields are required")
   }
@@ -32,7 +31,8 @@ export async function addTestimonial(values: ITestimonial) {
       name: values.name,
       text: values.text,
       rating: Number(values.rating),
-      isActive: values.isActive
+      isActive: values.isActive,
+      product: values.product
     })
     return {
       success: true,
@@ -157,5 +157,21 @@ export async function updateTestimonial(values: any) {
   } finally {
     revalidatePath("/admin/testimonials")
     redirect("/admin/testimonials")
+  }
+}
+
+export async function getTestimonialByGood() {
+  try {
+    await connectToDB()
+    const testimonials = await Testimonials.find({ isActive: true }).populate("product")
+    console.log("testimonials:", testimonials)
+    return testimonials
+  } catch (error) {
+    console.error("Error updating testimonial:", error)
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Unknown error occurred"
+    }
+  } finally {
   }
 }

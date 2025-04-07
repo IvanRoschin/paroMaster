@@ -3,6 +3,11 @@ const { Schema } = mongoose
 
 const testimonialsSchema = new Schema(
   {
+    product: {
+      type: Schema.Types.ObjectId,
+      ref: "Good",
+      required: true
+    },
     name: {
       type: String,
       required: true

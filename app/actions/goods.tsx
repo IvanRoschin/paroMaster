@@ -1,6 +1,7 @@
 "use server"
 
 import Good from "@/models/Good"
+import Testimonials from "@/models/Testimonials"
 import { IGood } from "@/types/good/IGood"
 import { ISearchParams } from "@/types/index"
 import { connectToDB } from "@/utils/dbConnect"
@@ -29,8 +30,6 @@ export async function getAllGoods(
 ): Promise<IGetAllGoods> {
   const limit = searchParams?.limit || 10
   let skip: number
-
-  console.log("limit", limit)
 
   if (nextPage) {
     skip = (nextPage - 1) * limit
@@ -113,7 +112,11 @@ export async function getGoodById(id: string) {
   try {
     await connectToDB()
     const good = await Good.findById({ _id: id })
-    return JSON.parse(JSON.stringify(good))
+    const testimonials = await Testimonials.find({
+      product: id,
+      isActive: true
+    })
+    return JSON.parse(JSON.stringify({ ...good.toObject(), testimonials }))
   } catch (error) {
     console.log(error)
   }

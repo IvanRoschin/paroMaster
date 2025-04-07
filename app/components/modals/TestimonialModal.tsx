@@ -2,12 +2,12 @@ import { addTestimonial } from "@/actions/testimonials"
 import { testimonialFormSchema } from "@/helpers/index"
 import { useAddData } from "@/hooks/useAddData"
 import { ITestimonial } from "@/types/index"
+import { useQueryClient } from "@tanstack/react-query"
 import { Form, Formik, FormikState } from "formik"
 import { useSession } from "next-auth/react"
 import { useMemo, useState } from "react"
 import ReactStars from "react-stars"
 import { toast } from "sonner"
-import Heading from "../Heading"
 import Switcher from "../Switcher"
 import FormField from "../input/FormField"
 import Modal from "./Modal"
@@ -19,11 +19,12 @@ interface ResetFormProps {
 }
 
 interface TestimonialModalProps {
+  productId: string
   isOpen: boolean
   closeModal: () => void
 }
 
-const TestimonialModal = ({ isOpen, closeModal }: TestimonialModalProps) => {
+const TestimonialModal = ({ isOpen, closeModal, productId }: TestimonialModalProps) => {
   const initialValues = useMemo(
     () => ({
       name: "",
@@ -31,10 +32,13 @@ const TestimonialModal = ({ isOpen, closeModal }: TestimonialModalProps) => {
       text: "",
       rating: 0,
       createdAt: "",
-      isActive: false
+      isActive: false,
+      product: productId
     }),
-    []
+    [productId]
   )
+  const queryClient = useQueryClient()
+
   const { data: session } = useSession()
   const [isLoading, setIsLoading] = useState(false)
   const addTestimonialMutation = useAddData(addTestimonial, ["testimonials"])
@@ -50,20 +54,18 @@ const TestimonialModal = ({ isOpen, closeModal }: TestimonialModalProps) => {
     try {
       if (isLoading) return
       setIsLoading(true)
-
       const fullName = `${values.name} ${values.surname}`.trim()
       const newTestimonialData = {
         ...values,
         name: fullName
       }
       const result = await addTestimonialMutation.mutateAsync(newTestimonialData)
-
       if (result?.success === false) {
         toast.error("Щось пішло не так")
         return
       }
-
-      resetForm()
+      queryClient.invalidateQueries({ queryKey: ["testimonials", productId] })
+      closeModal()
       toast.success("Новий відгук додано!")
     } catch (error) {
       toast.error("Помилка при додаванні відгуку")
@@ -98,8 +100,7 @@ const TestimonialModal = ({ isOpen, closeModal }: TestimonialModalProps) => {
       {({ errors, setFieldValue, values, handleSubmit }) => {
         const bodyContent = (
           <div className="flex flex-col justify-center items-center">
-            <Heading title="Додати відгук" subtitle="про товар" />
-            <Form className="flex flex-col w-[600px]">
+            <Form className="flex flex-col w-full">
               {inputs.map((item, i) => (
                 <div key={i}>
                   {item.type === "switcher" ? (
