@@ -3,8 +3,9 @@
 import { CustomButton, FormField, ImageUploadCloudinary, Switcher } from "@/components/index"
 import { goodFormSchema } from "@/helpers/index"
 import { useAddData, useUpdateData } from "@/hooks/index"
+import { useCategoriesEnum } from "@/hooks/useCategoriesEnum"
 import { IGood } from "@/types/good/IGood"
-import { categoryList } from "app/config/constants"
+import { ICategory } from "@/types/index"
 import { Form, Formik, FormikState } from "formik"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -27,6 +28,8 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
   const { push } = useRouter()
   const isUpdating = Boolean(good?._id)
 
+  const { categories, allowedCategories } = useCategoriesEnum()
+
   const addGoodMutation = useAddData(action, ["goods"])
   const updateGoodMutation = useUpdateData(action, ["goods"])
 
@@ -38,8 +41,12 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
   const inputs = [
     {
       id: "category",
+      label: "Оберіть категорію",
       type: "select",
-      options: categoryList.map(category => ({ value: category.title, label: category.title })),
+      options: categories?.categories.map((category: ICategory) => ({
+        value: category.title,
+        label: category.title
+      })),
       required: true
     },
     {
@@ -101,7 +108,7 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
   ]
 
   const initialValues: InitialStateType = {
-    category: good?.category || categoryList[0].title,
+    category: good?.category || allowedCategories[0],
     src: good?.src || [],
     brand: good?.brand || "",
     model: good?.model || "",

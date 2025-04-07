@@ -52,10 +52,8 @@ export async function addCategory(formData: FormData) {
   }
 }
 
-export async function getAllCategories(
-  searchParams?: ISearchParams,
-  limit: number = 10
-): Promise<IGetAllCategories> {
+export async function getAllCategories(searchParams?: ISearchParams): Promise<IGetAllCategories> {
+  const limit = searchParams?.limit || 10
   const page = searchParams?.page || 1
 
   try {
