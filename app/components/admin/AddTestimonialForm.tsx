@@ -85,8 +85,6 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
   }
 
   const handleSubmit = async (values: ITestimonial, { resetForm }: ResetFormProps) => {
-    console.log("Submit triggered")
-
     try {
       if (isLoading) return
       setIsLoading(true)
@@ -96,7 +94,6 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
         ...values,
         name: fullName
       }
-      console.log("newestimonialData", newestimonialData)
 
       const updateTestimonialData = isUpdating
         ? { ...newestimonialData, _id: testimonial?._id }

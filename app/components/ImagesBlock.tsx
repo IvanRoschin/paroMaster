@@ -56,7 +56,7 @@ const ImagesBlock: React.FC<ImagesBlockProps> = ({ item, values }) => {
                 priority={true}
               />
             </div>
-            <ul className="grid grid-cols-3 gap-3">
+            <ul className="flex items-baseline">
               {values.map((img: string, imgIndex: number) => (
                 <li key={imgIndex}>
                   <Image
