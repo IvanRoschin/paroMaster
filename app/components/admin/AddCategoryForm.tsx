@@ -36,8 +36,8 @@ const AddCategoryForm: React.FC<CategoryFormProps> = ({ category, title, action 
 
   const isUpdating = Boolean(category?._id)
 
-  const addCategoryMutation = useAddData(action, "categories")
-  const updateCategoryMutation = useUpdateData(action, "categories")
+  const addCategoryMutation = useAddData(action, ["categories"])
+  const updateCategoryMutation = useUpdateData(action, ["categories"])
 
   const handleSubmit = async (values: InitialStateType, { resetForm }: ResetFormProps) => {
     try {

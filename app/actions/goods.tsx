@@ -30,6 +30,8 @@ export async function getAllGoods(
   const limit = searchParams?.limit || 10
   let skip: number
 
+  console.log("limit", limit)
+
   if (nextPage) {
     skip = (nextPage - 1) * limit
   } else {
