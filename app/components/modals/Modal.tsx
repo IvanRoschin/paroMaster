@@ -13,7 +13,13 @@ interface ModalProps {
   footer?: JSX.Element
   isOpen?: boolean
   onClose: () => void
-  onSubmit: () => Promise<void> | void
+  onSubmit: () =>
+    | Promise<void>
+    | void
+    | {
+        success: boolean
+        message: string
+      }
   disabled?: boolean
 }
 
@@ -103,8 +109,7 @@ const Modal: React.FC<ModalProps> = ({
           w-full 
           md:w-4/6 
           lg:w-3/6 
-          xl:w-3/5 
-					mr-0
+          xl:w-3/5
           mx-auto 
           lg:h-auto 
           md:h-auto

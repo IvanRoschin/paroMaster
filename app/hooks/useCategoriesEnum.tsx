@@ -7,7 +7,7 @@ export const useCategoriesEnum = () => {
     data: categories,
     isLoading,
     isError
-  } = useFetchData(null, params => getAllCategories({ limit: 10000, page: 1 }), "categories")
+  } = useFetchData(null, params => getAllCategories({ limit: 100, page: 1 }), "categories")
 
   const allowedCategories = categories?.categories.map((cat: ICategory) => cat.title) ?? []
 
