@@ -46,8 +46,8 @@ const AddCustomerForm: React.FC<CustomerFormProps> = ({
 
   const isUpdating = Boolean(customer?._id)
 
-  const addCustomerMutation = useAddData(action, "customers")
-  const updateCustomerMutation = useUpdateData(action, "customers")
+  const addCustomerMutation = useAddData(action, ["customers"])
+  const updateCustomerMutation = useUpdateData(action, ["customers"])
 
   const [name, surname] = customer?.name?.split(" ") || ["", ""]
 

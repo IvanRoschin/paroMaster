@@ -27,8 +27,8 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
   const { push } = useRouter()
   const isUpdating = Boolean(good?._id)
 
-  const addGoodMutation = useAddData(action, "goods")
-  const updateGoodMutation = useUpdateData(action, "goods")
+  const addGoodMutation = useAddData(action, ["goods"])
+  const updateGoodMutation = useUpdateData(action, ["goods"])
 
   const textareaStyles: React.CSSProperties = {
     height: "100px",
@@ -138,9 +138,9 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
         : await addGoodMutation.mutateAsync(formData)
 
       // Ensure result contains 'success'
-      if (result?.success === false) {
-        toast.error(result.message || "Something went wrong")
-        return
+      if (result.success) {
+        toast.success(isUpdating ? "Товар оновлено!" : "Новий товар додано!")
+        push("/admin/goods")
       }
 
       resetForm({

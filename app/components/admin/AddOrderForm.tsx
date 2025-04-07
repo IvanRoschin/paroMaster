@@ -53,8 +53,8 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title, goods }) =>
   const isUpdating = Boolean(order?._id)
   const [name = "", surname = ""] = (order?.customer.name || "").split(" ")
 
-  const addOrderMutation = useAddData(action, "orders")
-  const updateOrderMutation = useUpdateData(action, "orders")
+  const addOrderMutation = useAddData(action, ["goods"])
+  const updateOrderMutation = useUpdateData(action, ["goods"])
 
   const initialValues: InitialStateType = {
     number: order?.number || "",
@@ -160,8 +160,10 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title, goods }) =>
         ? await updateOrderMutation.mutateAsync(updateOrderData)
         : await addOrderMutation.mutateAsync(newOrderData)
 
-      toast.success(isUpdating ? "Замовлення оновлено!" : "Нове замовлення додано!")
-      push("/admin/orders")
+      if (result.success) {
+        toast.success(isUpdating ? "Замовлення оновлено!" : "Нове замовлення додано!")
+        push("/admin/orders")
+      }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : "Невідома помилка"
       toast.error(errorMsg)

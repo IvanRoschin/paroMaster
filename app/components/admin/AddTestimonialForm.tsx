@@ -32,8 +32,8 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
   const [isLoading, setIsLoading] = useState(false)
   const { push } = useRouter()
   const { data: session } = useSession()
-  const addTestimonialMutation = useAddData(action, "testimonials")
-  const updateTestimonialMutation = useUpdateData(action, "testimonials")
+  const addTestimonialMutation = useAddData(action, ["testimonials"])
+  const updateTestimonialMutation = useUpdateData(action, ["testimonials"])
   const [name, surname] = testimonial?.name?.split(" ") || ["", ""]
   const isUpdating = Boolean(testimonial?._id)
 
