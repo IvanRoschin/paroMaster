@@ -10,7 +10,7 @@ export default async function CategoriesPage({ searchParams }: { searchParams: I
   const queryClinet = new QueryClient()
   await queryClinet.prefetchQuery({
     queryKey: ["categories"],
-    queryFn: () => getAllCategories(searchParams, limit)
+    queryFn: () => getAllCategories(searchParams)
   })
 
   return (

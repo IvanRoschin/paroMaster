@@ -33,8 +33,6 @@ export default async function Home({ searchParams }: { searchParams: ISearchPara
 
   const goods = (queryState?.data as GoodsData)?.goods || []
 
-  console.log("goods.length", goods.length)
-
   const slidesData = queryClient.getQueryData<IGetAllSlides>(["slides"])
   const testimonialsData = queryClient.getQueryData<IGetAllTestimonials>(["testimonials"])
 
