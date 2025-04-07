@@ -143,7 +143,18 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
         return
       }
 
-      resetForm()
+      resetForm({
+        values: {
+          ...values,
+          title: "",
+          vendor: "",
+          model: "",
+          price: 0,
+          description: "",
+          src: [],
+          compatibility: ""
+        }
+      })
       toast.success(isUpdating ? "Товар оновлено!" : "Новий товар додано!")
       push("/admin/goods")
     } catch (error) {
@@ -178,17 +189,40 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
             {inputs.map((item, i) => (
               <div key={i}>
                 {item.type === "switcher" ? (
-                  <Switcher
-                    id={item.id}
-                    label={item.label}
-                    checked={!!(values as Record<string, any>)[item.id]}
-                    onChange={checked => setFieldValue(item.id, checked)}
-                  />
+                  <>
+                    {(item.id === "isCondition" ||
+                      item.id === "isAvailable" ||
+                      item.id === "isCompatible") && (
+                      <div className="mb-1 text-sm text-gray-600">
+                        {item.id === "isCondition" &&
+                          `Стан: ${values.isCondition ? "Б/У" : "Нова"}`}
+                        {item.id === "isAvailable" &&
+                          `Наявність: ${values.isAvailable ? "Є в наявності" : "Немає"}`}
+                        {item.id === "isCompatible" &&
+                          `Сумісність: ${values.isCompatible ? "Сумісний" : "Не сумісний"}`}
+                      </div>
+                    )}
+                    <Switcher
+                      id={item.id}
+                      label={
+                        item.id === "isCondition"
+                          ? "Б/У?"
+                          : item.id === "isAvailable"
+                            ? "Є в наявності?"
+                            : item.id === "isCompatible"
+                              ? "Сумісний?"
+                              : item.label
+                      }
+                      checked={!!(values as Record<string, any>)[item.id]}
+                      onChange={checked => setFieldValue(item.id, checked)}
+                    />
+                  </>
                 ) : (
                   <FormField item={item} setFieldValue={setFieldValue} errors={errors} />
                 )}
               </div>
             ))}
+
             <CustomButton label="Зберегти" disabled={isLoading} />
           </Form>
         )}
