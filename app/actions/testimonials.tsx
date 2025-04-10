@@ -42,35 +42,43 @@ export async function addTestimonial(values: ITestimonial) {
       throw new Error("This testimonial already exists")
     }
 
-    const testimonialData: Partial<ITestimonial> = {
-      name: values.name,
-      text: values.text,
-      isActive: values.isActive,
-      product: values.product
-    }
+    // const testimonialData: Partial<ITestimonial> = {
+    //   name: values.name,
+    //   text: values.text,
+    //   isActive: values.isActive,
+    //   product: values.product
+    // }
 
-    // Assign rating only if provided
-    if (typeof values.rating === "number" && values.rating >= 1 && values.rating <= 5) {
-      testimonialData.rating = Number(values.rating)
-    }
+    const newTestimonial = await Testimonial.create(values)
 
-    //udate product
+    // 2. Отримуємо всі активні відгуки по товару (включаючи щойно створений)
     const testimonials = await Testimonial.find({
       product: values.product,
       isActive: true,
       rating: { $gt: 0 }
     })
+
     const ratingSum = testimonials.reduce((acc, t) => acc + t.rating, 0)
-    const ratingAvg = testimonials.length ? ratingSum / testimonials.length : null
+    const ratingCount = testimonials.length
+    const averageRating = ratingCount ? ratingSum / ratingCount : null
 
-    await Testimonial.create(testimonialData)
+    // 3. Оновлюємо товар з новим рейтингом
+    const updatedGood = await Good.findByIdAndUpdate(
+      values.product,
+      {
+        averageRating,
+        ratingCount
+      },
+      { new: true } // <-- поверне оновлений документ
+    )
 
-    await Good.findByIdAndUpdate(values.product, {
-      averageRating: ratingAvg,
-      ratingCount: testimonials.length
-    })
+    if (!updatedGood) {
+      throw new Error("Product not found")
+    }
 
+    // 4. Повертаємо оновлений товар
     return {
+      updatedGood: JSON.parse(JSON.stringify(updatedGood)),
       success: true,
       message: "Testimonial added successfully"
     }
@@ -196,7 +204,7 @@ export async function updateTestimonial(values: any) {
   }
 }
 
-export async function getTestimonialByGood() {
+export async function getTestimonialsByGoods() {
   try {
     await connectToDB()
     const testimonials = await Testimonial.find({ isActive: true }).populate("product")

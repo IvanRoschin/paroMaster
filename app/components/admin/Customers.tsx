@@ -2,9 +2,9 @@
 
 import { deleteCustomer, getAllCustomers } from "@/actions/customers"
 import Pagination from "@/components/admin/Pagination"
-import Button from "@/components/Button"
 import EmptyState from "@/components/EmptyState"
 import { Loader, Search } from "@/components/index"
+import Button from "@/components/ui/Button"
 import { useDeleteData, useFetchData } from "@/hooks/index"
 import { ISearchParams } from "@/types/searchParams"
 import Link from "next/link"

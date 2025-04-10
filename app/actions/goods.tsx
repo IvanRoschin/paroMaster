@@ -1,7 +1,7 @@
 "use server"
 
 import Good from "@/models/Good"
-import Testimonials from "@/models/Testimonial"
+import Testimonial from "@/models/Testimonial"
 import { IGood } from "@/types/good/IGood"
 import { ISearchParams } from "@/types/index"
 import { connectToDB } from "@/utils/dbConnect"
@@ -112,7 +112,7 @@ export async function getGoodById(id: string) {
   try {
     await connectToDB()
     const good = await Good.findById({ _id: id })
-    const testimonials = await Testimonials.find({
+    const testimonials = await Testimonial.find({
       product: id,
       isActive: true
     }).sort({ createdAt: -1 })
@@ -217,6 +217,13 @@ export async function deleteGood(id: string) {
   }
   try {
     await connectToDB()
+    const deletedReviews = await Testimonial.deleteMany({ product: id })
+
+    if (deletedReviews.deletedCount > 0) {
+      console.log(`Видалено ${deletedReviews.deletedCount} відгуків для товару з ID: ${id}`)
+    } else {
+      console.log("Відгуків не було знайдено для видалення")
+    }
     await Good.findByIdAndDelete(id)
   } catch (error) {
     console.error("Failed to delete the good:", error)

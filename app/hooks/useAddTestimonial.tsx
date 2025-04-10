@@ -8,7 +8,6 @@ export const useAddTestimonial = (actionFn: AddAction, key: QueryKey, productId:
   return useMutation({
     mutationFn: async (newDataItem: any) => actionFn(newDataItem),
     onSuccess: async () => {
-      // @ts-ignore
       await queryClient.invalidateQueries({ queryKey: [key, productId] })
     },
     onError: () => {

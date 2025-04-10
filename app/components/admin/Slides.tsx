@@ -2,10 +2,10 @@
 
 import { deleteSlide, getAllSlides } from "@/actions/slider"
 import Pagination from "@/components/admin/Pagination"
-import Button from "@/components/Button"
 import EmptyState from "@/components/EmptyState"
 import Loader from "@/components/Loader"
 import Search from "@/components/Search"
+import Button from "@/components/ui/Button"
 import { useDeleteData, useFetchData } from "@/hooks/index"
 import { ISearchParams } from "@/types/searchParams"
 import Image from "next/image"

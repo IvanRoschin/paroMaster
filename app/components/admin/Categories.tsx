@@ -1,10 +1,10 @@
 "use client"
 import { deleteCategory, getAllCategories } from "@/actions/categories"
 import Pagination from "@/components/admin/Pagination"
-import Button from "@/components/Button"
 import EmptyState from "@/components/EmptyState"
 import Loader from "@/components/Loader"
 import Search from "@/components/Search"
+import Button from "@/components/ui/Button"
 import { useDeleteData, useFetchData } from "@/hooks/index"
 import { ISearchParams } from "@/types/index"
 import Image from "next/image"
@@ -16,13 +16,13 @@ export default function Categories({ searchParams }: { searchParams: ISearchPara
 
   const { data, isLoading, isError } = useFetchData(searchParams, getAllCategories, "categories")
 
-  const { mutate: deleteCategoryById } = useDeleteData(deleteCategory, "categories")
+  const { mutate: deleteCategoryById } = useDeleteData(deleteCategory, ["categories"])
 
   const handleDelete = (id: string) => {
     deleteCategoryById(id)
   }
 
-  if (isLoading) {
+  if (!data || isLoading) {
     return <Loader />
   }
 
@@ -31,7 +31,7 @@ export default function Categories({ searchParams }: { searchParams: ISearchPara
   }
 
   if (!data?.categories || data.categories.length === 0) {
-    return <EmptyState showReset />
+    return <EmptyState showReset title="Категорії відсутні" />
   }
 
   const handleSort = () => {

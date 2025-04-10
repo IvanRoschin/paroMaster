@@ -3,7 +3,8 @@
 import { getMostPopularGoods } from "@/actions/goods"
 import InfiniteScrollGoods from "@/components/InfiniteScrollGoods"
 import { IGood, ISearchParams } from "@/types/index"
-import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
+import { Loader } from "../components"
+import { useFetchData } from "../hooks"
 
 interface GoodsData {
   goods: IGood[]
@@ -13,23 +14,26 @@ export default async function MostPopularGoodsPage({
 }: {
   searchParams: ISearchParams
 }) {
-  const queryClient = new QueryClient()
-  await queryClient.prefetchQuery({
-    queryKey: ["populargoods"],
-    queryFn: () => getMostPopularGoods()
-  })
+  const { data, error, isError, isLoading, refetch } = useFetchData(
+    searchParams,
+    getMostPopularGoods,
+    "populargoods"
+  )
 
-  const queryState = queryClient.getQueryState(["populargoods"])
+  if (!data || isLoading) {
+    return <Loader />
+  }
 
-  const goods = (queryState?.data as GoodsData)?.goods || []
+  if (error) {
+    return <div>Ошибка загрузки</div>
+  }
+
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <div className="container">
-        <h2 className="title mb-1">Популярні товари</h2>
-        <div key={Math.random()}>
-          <InfiniteScrollGoods initialGoods={goods} searchParams={searchParams} />
-        </div>
+    <div className="container">
+      <h2 className="title mb-1">Популярні товари</h2>
+      <div key={Math.random()}>
+        <InfiniteScrollGoods initialGoods={data.goods} searchParams={searchParams} />
       </div>
-    </HydrationBoundary>
+    </div>
   )
 }

@@ -4,8 +4,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
 import { CiSearch } from "react-icons/ci"
 import { useDebouncedCallback } from "use-debounce"
-import Button from "../Button"
 import { Icon } from "../Icon"
+import Button from "../ui/Button"
 
 const Search = ({ placeholder }: { placeholder: string }) => {
   const searchParams = useSearchParams()

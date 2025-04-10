@@ -1,23 +1,23 @@
 "use client"
 
 import { getGoodById } from "@/actions/goods"
-import Button from "@/components/Button"
 import ImagesBlock from "@/components/ImagesBlock"
 import Loader from "@/components/Loader"
+import Button from "@/components/ui/Button"
 import { useFetchDataById } from "@/hooks/useFetchDataById"
 import { IGood, ITestimonial } from "@/types/index"
 import { useShoppingCart } from "app/context/ShoppingCartContext"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { FaPen, FaTrash } from "react-icons/fa"
+import { FaPen, FaRegStar, FaStar, FaStarHalfAlt, FaTrash } from "react-icons/fa"
 
 import { deleteTestimonial } from "@/actions/testimonials"
 import DeleteConfirmation from "@/components/DeleteConfirmation"
 import TestimonialForm from "@/components/forms/TestimonialForm"
 import Modal from "@/components/modals/Modal"
-import { useDeleteData } from "@/hooks/useDeleteData"
 import useDeleteModal from "@/hooks/useDeleteModal"
+import { useDeleteTestimonial } from "@/hooks/useDeleteTestimonial"
 import useTestimonialModal from "@/hooks/useTestimonialsModal"
 
 export default function Item({ params }: { params: any }) {
@@ -35,7 +35,7 @@ export default function Item({ params }: { params: any }) {
   const testimonialModal = useTestimonialModal()
   const deleteModal = useDeleteModal()
 
-  const { mutate: deleteTestimonialById } = useDeleteData(
+  const { mutate: deleteTestimonialById } = useDeleteTestimonial(
     deleteTestimonial,
     ["goodById"],
     params.id
@@ -193,7 +193,8 @@ export default function Item({ params }: { params: any }) {
                 >
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-lg font-medium">{review.name}</p>
-                    <span className="text-yellow-500 font-bold">{review.rating} ★</span>
+                    {review.rating && <StarDisplay rating={review.rating} />}
+                    {/* <span className="text-yellow-500 font-bold">{review.rating} ★</span> */}
                   </div>
                   <p className="text-gray-600 italic mb-2">&ldquo;{review.text}&rdquo;</p>
                   <p className="text-sm text-gray-400">
@@ -244,23 +245,40 @@ export default function Item({ params }: { params: any }) {
       />
     </div>
   )
-}
+  function ItemDetails({ item }: { item: IGood }) {
+    return (
+      <>
+        <p className="font-light text-gray-500">
+          Сумісність з брендами:{" "}
+          <span className="font-bold">{item.isCompatible ? "так" : "ні"}</span>
+        </p>
+        <p className="font-light text-gray-500">
+          Brand: <span className="font-bold"> {item.brand}</span>
+        </p>
+        <p className="font-light text-gray-500">
+          Model: <span className="font-bold">{item.model}</span>{" "}
+        </p>
+        <p className="font-light text-gray-500">
+          Сумісність з брендами: <span className="font-bold">{item.compatibility}</span>
+        </p>
+      </>
+    )
+  }
+  function StarDisplay({ rating, size = 18 }: { rating: number; size?: number }) {
+    const fullStars = Math.floor(rating)
+    const hasHalfStar = rating - fullStars >= 0.5
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0)
 
-function ItemDetails({ item }: { item: IGood }) {
-  return (
-    <>
-      <p className="font-light text-gray-500">
-        Сумісність з брендами: <span className="font-bold">{item.isCompatible ? "так" : "ні"}</span>
-      </p>
-      <p className="font-light text-gray-500">
-        Brand: <span className="font-bold"> {item.brand}</span>
-      </p>
-      <p className="font-light text-gray-500">
-        Model: <span className="font-bold">{item.model}</span>{" "}
-      </p>
-      <p className="font-light text-gray-500">
-        Сумісність з брендами: <span className="font-bold">{item.compatibility}</span>
-      </p>
-    </>
-  )
+    return (
+      <div className="flex items-center space-x-0.5">
+        {[...Array(fullStars)].map((_, i) => (
+          <FaStar key={`full-${i}`} className="text-yellow-500" size={size} />
+        ))}
+        {hasHalfStar && <FaStarHalfAlt key="half" className="text-yellow-500" size={size} />}
+        {[...Array(emptyStars)].map((_, i) => (
+          <FaRegStar key={`empty-${i}`} className="text-yellow-500" size={size} />
+        ))}
+      </div>
+    )
+  }
 }

@@ -38,7 +38,4 @@ const testimonialsSchema = new Schema(
 
 testimonialsSchema.index({ "$**": "text" })
 
-const Testimonials =
-  mongoose.models.Testimonial || mongoose.model("Testimonial", testimonialsSchema)
-
-export default Testimonials
+export default mongoose.models.Testimonial || mongoose.model("Testimonial", testimonialsSchema)
