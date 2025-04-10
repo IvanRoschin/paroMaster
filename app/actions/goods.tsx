@@ -115,7 +115,7 @@ export async function getGoodById(id: string) {
     const testimonials = await Testimonials.find({
       product: id,
       isActive: true
-    })
+    }).sort({ createdAt: -1 })
     return JSON.parse(JSON.stringify({ ...good.toObject(), testimonials }))
   } catch (error) {
     console.log(error)
@@ -328,24 +328,24 @@ export async function uniqueBrands(): Promise<IGetAllBrands> {
   }
 }
 
-// export async function getMostPopularGoods() {
-//   try {
-//     await connectToDB()
-//     const mostPopularGoods: IGood[] = await Good.find()
-//       .sort({ averageRating: -1, ratingCount: -1 })
-//       .limit(10)
+export async function getMostPopularGoods() {
+  try {
+    await connectToDB()
+    const mostPopularGoods: IGood[] = await Good.find()
+      .sort({ averageRating: -1, ratingCount: -1 })
+      .limit(10)
 
-//     return {
-//       success: true,
-//       goods: JSON.parse(JSON.stringify(mostPopularGoods))
-//     }
-//   } catch (error) {
-//     console.log("Error fetching most popular goods:", error)
-//     return { success: false, goods: [] }
-//   } finally {
-//     revalidatePath("/")
-//   }
-// }
+    return {
+      success: true,
+      goods: JSON.parse(JSON.stringify(mostPopularGoods))
+    }
+  } catch (error) {
+    console.log("Error fetching most popular goods:", error)
+    return { success: false, goods: [] }
+  } finally {
+    revalidatePath("/")
+  }
+}
 
 export async function getMinMaxPrice(): Promise<{
   success: boolean

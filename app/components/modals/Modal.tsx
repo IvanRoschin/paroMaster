@@ -10,7 +10,7 @@ interface ModalProps {
   disabled?: boolean
 }
 
-const NewModal = ({ isOpen, onClose, body, disabled }: ModalProps) => {
+const Modal = ({ isOpen, onClose, body, disabled }: ModalProps) => {
   const [showModal, setShowModal] = useState(isOpen)
   useEffect(() => {
     setShowModal(isOpen)
@@ -84,4 +84,4 @@ const NewModal = ({ isOpen, onClose, body, disabled }: ModalProps) => {
   )
 }
 
-export default NewModal
+export default Modal

@@ -3,7 +3,7 @@
 import { useShoppingCart } from "app/context/ShoppingCartContext"
 import { useRouter } from "next/navigation"
 import CartClient from "../Cart/CartClient"
-import Modal from "./Modal"
+import Modal from "./Old_Modal"
 
 interface CartModalProps {
   isOpen: boolean

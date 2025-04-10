@@ -12,9 +12,7 @@ export default function ItemClient({ id }: { id: string }) {
   const { getItemQuantity, increaseCartQuantity, decreaseCartQuantity, removeFromCart } =
     useShoppingCart()
 
-  const { data, isLoading, isError, error } = useFetchDataById(id, getGoodById, "good")
-
-  // const { data, error } = useSWR(id ? "data" : null, () => getGoodById(id))
+  const { data, isLoading, isError, error } = useFetchDataById(getGoodById, ["goodById"], id)
 
   if (isLoading || !data) return <Loader />
   if (isError) {
