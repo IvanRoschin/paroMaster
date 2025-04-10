@@ -22,9 +22,9 @@ const testimonialFormSchema = Yup.object().shape({
     .max(200, "Максимум 200 символів")
     .required(`Обов'язкове поле`),
   rating: Yup.number()
-    .min(0, "Ціна товару повинна бути вище 0")
-    .required(`Обов'язкове поле`)
-    .nullable(),
+    .min(1, "Оцінка має бути не менше 1")
+    .max(5, "Оцінка не може бути більшою за 5")
+    .notRequired(),
   isActive: Yup.boolean().required(`Обов'язкове поле`)
 })
 

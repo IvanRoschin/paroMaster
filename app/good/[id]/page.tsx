@@ -10,27 +10,55 @@ import { useShoppingCart } from "app/context/ShoppingCartContext"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { FaPen } from "react-icons/fa"
+import { FaPen, FaTrash } from "react-icons/fa"
 
-import TestimonialModal from "@/components/modals/TestimonialModal"
+import { deleteTestimonial } from "@/actions/testimonials"
+import DeleteConfirmation from "@/components/DeleteConfirmation"
+import TestimonialForm from "@/components/forms/TestimonialForm"
+import Modal from "@/components/modals/Modal"
+import { useDeleteData } from "@/hooks/useDeleteData"
+import useDeleteModal from "@/hooks/useDeleteModal"
+import useTestimonialModal from "@/hooks/useTestimonialsModal"
 
 export default function Item({ params }: { params: any }) {
   const { data: session } = useSession()
   const isAdmin = session?.user
   const [, setAmount] = useState(0)
-  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const [testimonialToDelete, setTestimonialToDelete] = useState<string>("")
+
   const { getItemQuantity, increaseCartQuantity, decreaseCartQuantity, removeFromCart } =
     useShoppingCart()
 
-  const { data, isLoading, isError, error } = useFetchDataById(params.id, getGoodById, "good")
+  const { data, isLoading, isError, error } = useFetchDataById(getGoodById, ["goodById"], params.id)
+
+  const testimonialModal = useTestimonialModal()
+  const deleteModal = useDeleteModal()
+
+  const { mutate: deleteTestimonialById } = useDeleteData(
+    deleteTestimonial,
+    ["goodById"],
+    params.id
+  )
 
   useEffect(() => {
-    if (data) {
-      const newAmount = data.price * getItemQuantity(data._id)
-      setAmount(newAmount)
-      localStorage.setItem(`amount-${data._id}`, JSON.stringify(newAmount))
+    if (!data) {
+      return
     }
+    const newAmount = data.price * getItemQuantity(data._id)
+    setAmount(newAmount)
+    localStorage.setItem(`amount-${data._id}`, JSON.stringify(newAmount))
   }, [data, getItemQuantity])
+
+  const handleDelete = (id: string) => {
+    setTestimonialToDelete(id)
+    deleteModal.onOpen()
+    // setIsDeleteModalOpen(true)
+  }
+
+  const handleDeleteTestimonial = (testimonialToDelete: string) => {
+    deleteTestimonialById(testimonialToDelete)
+  }
 
   if (isLoading || !data) return <Loader />
   if (isError) {
@@ -40,6 +68,8 @@ export default function Item({ params }: { params: any }) {
       </div>
     )
   }
+
+  console.log("data", data)
 
   const quantity = getItemQuantity(data._id)
 
@@ -114,48 +144,17 @@ export default function Item({ params }: { params: any }) {
 
           <ItemDetails item={data} />
 
-          {/* Button to open testimonial modal */}
           <div className="mt-6">
             <Button
               width="40"
               type="button"
               label="Додати відгук"
-              onClick={() => setIsModalOpen(true)} // Open the modal on button click
+              onClick={() => {
+                console.log("click")
+                testimonialModal.onOpen()
+              }}
             />
           </div>
-
-          {/* <div className="mt-10">
-            <h3 className="text-2xl font-semibold mb-4">Відгуки</h3>
-            {data.testimonials && data.testimonials.length > 0 ? (
-              <ul className="space-y-6">
-                {data.testimonials.map((review: ITestimonial) => (
-                  <li
-                    key={review._id}
-                    className="border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-lg font-medium">{review.name}</p>
-                      <span className="text-yellow-500 font-bold">{review.rating} ★</span>
-                    </div>
-                    <p className="text-gray-600 italic mb-2">"{review.text}"</p>
-                    <p className="text-sm text-gray-400">
-                      Додано:{" "}
-                      {new Date(review.createdAt).toLocaleDateString("uk-UA", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric"
-                      })}
-                    </p>
-                    {!review.isActive && (
-                      <p className="text-xs text-red-500 mt-2">* Відгук ще не опублікований</p>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-gray-500 italic">Цей товар ще не має відгуків. Будь першим!</p>
-            )}
-          </div> */}
         </div>
       </div>
 
@@ -165,38 +164,83 @@ export default function Item({ params }: { params: any }) {
         {data.testimonials && data.testimonials.length > 0 ? (
           <ul className="grid gap-4 md:gap-6">
             {data.testimonials.map((review: ITestimonial) => (
-              <li
-                key={review._id}
-                className="border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-lg font-medium">{review.name}</p>
-                  <span className="text-yellow-500 font-bold">{review.rating} ★</span>
-                </div>
-                <p className="text-gray-600 italic mb-2">&ldquo;{review.text}&rdquo;</p>
-                <p className="text-sm text-gray-400">
-                  Додано:{" "}
-                  {new Date(review.createdAt).toLocaleDateString("uk-UA", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric"
-                  })}
-                </p>
-                {!review.isActive && (
-                  <p className="text-xs text-red-500 mt-2">* Відгук ще не опублікований</p>
+              <div key={review._id} className="relative">
+                {isAdmin && (
+                  <div className="absolute top-0 right-0">
+                    <div className="grid grid-cols-2 gap-2">
+                      <Link
+                        href={`/admin/testimonials/${review._id}`}
+                        className="flex items-center justify-center"
+                      >
+                        <span className="cursor-pointer w-[30px] h-[30px] rounded-full bg-orange-600 flex justify-center items-center hover:opacity-80">
+                          <FaPen size={12} color="white" />
+                        </span>
+                      </Link>
+                      <Button
+                        type="button"
+                        icon={FaTrash}
+                        small
+                        outline
+                        bg="bg"
+                        onClick={() => review._id && handleDelete(review._id.toString())}
+                      />
+                    </div>
+                  </div>
                 )}
-              </li>
+                <li
+                  key={review._id}
+                  className="border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-lg font-medium">{review.name}</p>
+                    <span className="text-yellow-500 font-bold">{review.rating} ★</span>
+                  </div>
+                  <p className="text-gray-600 italic mb-2">&ldquo;{review.text}&rdquo;</p>
+                  <p className="text-sm text-gray-400">
+                    Додано:{" "}
+                    {new Date(review.createdAt).toLocaleDateString("uk-UA", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric"
+                    })}
+                  </p>
+                  {!review.isActive && (
+                    <p className="text-xs text-red-500 mt-2">* Відгук ще не опублікований</p>
+                  )}
+                </li>
+              </div>
             ))}
           </ul>
         ) : (
           <p className="text-gray-500 italic">Цей товар ще не має відгуків. Будь першим!</p>
         )}
       </div>
-      {/* Modal for adding testimonial */}
-      <TestimonialModal
-        isOpen={isModalOpen}
-        closeModal={() => setIsModalOpen(false)}
-        productId={params.id}
+
+      {/* Модалка для відгуку */}
+      <Modal
+        body={<TestimonialForm productId={data._id} />}
+        isOpen={testimonialModal.isOpen}
+        onClose={testimonialModal.onClose}
+        disabled={isLoading}
+      />
+
+      {/* Модалка для підтвердження видалення */}
+      <Modal
+        body={
+          <DeleteConfirmation
+            onConfirm={() => {
+              if (testimonialToDelete) {
+                handleDeleteTestimonial(testimonialToDelete)
+                deleteModal.onClose()
+              }
+            }}
+            onCancel={() => deleteModal.onClose()}
+            title="відгук"
+          />
+        }
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.onClose}
+        disabled={isLoading}
       />
     </div>
   )

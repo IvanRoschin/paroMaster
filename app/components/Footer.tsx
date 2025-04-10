@@ -35,6 +35,17 @@ const links = [
   }
 ]
 
+const goodsLinks = [
+  {
+    title: "Популярні товари",
+    link: "populargoods"
+  },
+  {
+    title: "Акції та знижки",
+    link: "/"
+  }
+]
+
 const Footer = ({ categories }: { categories: ICategory[] }) => {
   const { width } = useScreenSize()
   const isMobile = width <= 767
@@ -138,12 +149,14 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
                   Товари
                   <div className="border-b border-primaryAccentColor" />
                   <ul className="text-sm">
-                    {["Популярні", "Акції та знижки"].map((text, index) => (
+                    {goodsLinks.map((item, index) => (
                       <li
                         key={index}
                         className="nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200"
                       >
-                        <Link href={`/${text.toLowerCase().replace(/ /g, "-")}`}>{text}</Link>
+                        <Link href={`/${item.link.toLowerCase().replace(/ /g, "-")}`}>
+                          {item.title}
+                        </Link>
                       </li>
                     ))}
                   </ul>
@@ -196,12 +209,14 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
                 Товари
                 <div className="border-b border-primaryAccentColor" />
                 <ul className="text-sm">
-                  {["Популярні", "Акції та знижки"].map((text, index) => (
+                  {goodsLinks.map((item, index) => (
                     <li
                       key={index}
                       className="nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200"
                     >
-                      <Link href={`/${text.toLowerCase().replace(/ /g, "-")}`}>{text}</Link>
+                      <Link href={`/${item.link.toLowerCase().replace(/ /g, "-")}`}>
+                        {item.title}
+                      </Link>
                     </li>
                   ))}
                 </ul>

@@ -1,7 +1,7 @@
 "use server"
 
 import Good from "@/models/Good"
-import Testimonials from "@/models/Testimonials"
+import Testimonials from "@/models/Testimonial"
 import { IGood } from "@/types/good/IGood"
 import { ISearchParams } from "@/types/index"
 import { connectToDB } from "@/utils/dbConnect"
@@ -328,59 +328,22 @@ export async function uniqueBrands(): Promise<IGetAllBrands> {
   }
 }
 
-// export async function getMinMaxPrice() {
+// export async function getMostPopularGoods() {
 //   try {
-//     // Connect to the database
 //     await connectToDB()
-
-//     // Perform the aggregation
-//     const result = await Good.aggregate([
-//       {
-//         $project: {
-//           // Convert price to double, exclude documents where price is not a number
-//           price: {
-//             $cond: {
-//               if: { $isNumber: { $toDouble: "$price" } },
-//               then: { $toDouble: "$price" },
-//               else: null
-//             }
-//           }
-//         }
-//       },
-//       {
-//         $match: {
-//           // Filter out documents where price is null (i.e., was not a number)
-//           price: { $ne: null }
-//         }
-//       },
-//       {
-//         $group: {
-//           _id: null,
-//           minPrice: { $min: "$price" },
-//           maxPrice: { $max: "$price" }
-//         }
-//       },
-//       {
-//         $project: {
-//           _id: 0,
-//           minPrice: 1,
-//           maxPrice: 1
-//         }
-//       }
-//     ]).exec()
-
-//     // Handle the case where no goods are found
-//     if (result.length === 0) {
-//       throw new Error("No valid goods found")
-//     }
+//     const mostPopularGoods: IGood[] = await Good.find()
+//       .sort({ averageRating: -1, ratingCount: -1 })
+//       .limit(10)
 
 //     return {
 //       success: true,
-//       minPrice: result[0].minPrice,
-//       maxPrice: result[0].maxPrice
+//       goods: JSON.parse(JSON.stringify(mostPopularGoods))
 //     }
 //   } catch (error) {
-//     console.error("Error fetching min and max prices:", error)
+//     console.log("Error fetching most popular goods:", error)
+//     return { success: false, goods: [] }
+//   } finally {
+//     revalidatePath("/")
 //   }
 // }
 

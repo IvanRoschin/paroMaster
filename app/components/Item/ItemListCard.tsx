@@ -34,7 +34,7 @@ const ItemListCard: React.FC<ItemListCardProps> = ({ item }) => {
   return (
     <li className="flex flex-col justify-between border border-gray-300 rounded-md p-4 hover:shadow-[10px_10px_15px_-3px_rgba(0,0,0,0.3)] transition-all">
       <div className="relative">
-        <Link href={`/item/${item._id}`} className="flex flex-col h-full justify-between">
+        <Link href={`/good/${item._id}`} className="flex flex-col h-full justify-between">
           <div className="w-[200px] h-[200px]">
             <div className="absolute top-2 left-2 bg-primaryAccentColor text-white text-xs font-semibold px-2 py-1 rounded">
               {item.isCondition ? "НОВИЙ" : "Б/У"}

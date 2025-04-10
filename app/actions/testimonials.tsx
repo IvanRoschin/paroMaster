@@ -1,6 +1,8 @@
 "use server"
 
-import Testimonials from "@/models/Testimonials"
+import Good from "@/models/Good"
+import Testimonial from "@/models/Testimonial"
+
 import { ISearchParams, ITestimonial } from "@/types/index"
 import { connectToDB } from "@/utils/dbConnect"
 import { revalidatePath } from "next/cache"
@@ -13,12 +15,25 @@ export interface IGetAllTestimonials {
 }
 
 export async function addTestimonial(values: ITestimonial) {
-  if (!values.name || !values.text || !values.rating || !values.isActive) {
-    throw new Error("All fields are required")
+  console.log("values", values)
+
+  if (!values.name) {
+    throw new Error("Name is required.")
   }
+
+  if (!values.text && typeof values.text !== "string") {
+    throw new Error("Text is required and must be a string")
+  }
+
+  // Remove the check for rating and handle it being optional
+  if (values.isActive === undefined) {
+    throw new Error("isActive field is required.")
+  }
+
   try {
     await connectToDB()
-    const existingTestimonial = await Testimonials.findOne({
+
+    const existingTestimonial = await Testimonial.findOne({
       name: values.name,
       text: values.text
     })
@@ -27,13 +42,34 @@ export async function addTestimonial(values: ITestimonial) {
       throw new Error("This testimonial already exists")
     }
 
-    await Testimonials.create({
+    const testimonialData: Partial<ITestimonial> = {
       name: values.name,
       text: values.text,
-      rating: Number(values.rating),
       isActive: values.isActive,
       product: values.product
+    }
+
+    // Assign rating only if provided
+    if (typeof values.rating === "number" && values.rating >= 1 && values.rating <= 5) {
+      testimonialData.rating = Number(values.rating)
+    }
+
+    //udate product
+    const testimonials = await Testimonial.find({
+      product: values.product,
+      isActive: true,
+      rating: { $gt: 0 }
     })
+    const ratingSum = testimonials.reduce((acc, t) => acc + t.rating, 0)
+    const ratingAvg = testimonials.length ? ratingSum / testimonials.length : null
+
+    await Testimonial.create(testimonialData)
+
+    await Good.findByIdAndUpdate(values.product, {
+      averageRating: ratingAvg,
+      ratingCount: testimonials.length
+    })
+
     return {
       success: true,
       message: "Testimonial added successfully"
@@ -60,9 +96,9 @@ export async function getAllTestimonials(
   try {
     await connectToDB()
 
-    const count = await Testimonials.countDocuments()
+    const count = await Testimonial.countDocuments()
 
-    const testimonials: ITestimonial[] = await Testimonials.find()
+    const testimonials: ITestimonial[] = await Testimonial.find()
       .sort({ createdAt: -1 })
       .skip(limit * (page - 1))
       .limit(limit)
@@ -82,8 +118,8 @@ export async function getAllTestimonials(
 export async function getTestimonialById(id: string) {
   try {
     await connectToDB()
-    const category = await Testimonials.findById({ _id: id })
-    return JSON.parse(JSON.stringify(category))
+    const testimonial = await Testimonial.findById({ _id: id })
+    return JSON.parse(JSON.stringify(testimonial))
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error getting testimonials:", error)
@@ -102,7 +138,7 @@ export async function deleteTestimonial(id: string) {
   }
   try {
     await connectToDB()
-    await Testimonials.findByIdAndDelete(id)
+    await Testimonial.findByIdAndDelete(id)
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error delete category:", error)
@@ -131,7 +167,7 @@ export async function updateTestimonial(values: any) {
       }
     }
 
-    const updatedTestimonial = await Testimonials.findByIdAndUpdate(
+    const updatedTestimonial = await Testimonial.findByIdAndUpdate(
       values._id,
       { $set: updateFields },
       { new: true }
@@ -163,7 +199,7 @@ export async function updateTestimonial(values: any) {
 export async function getTestimonialByGood() {
   try {
     await connectToDB()
-    const testimonials = await Testimonials.find({ isActive: true }).populate("product")
+    const testimonials = await Testimonial.find({ isActive: true }).populate("product")
     console.log("testimonials:", testimonials)
     return testimonials
   } catch (error) {

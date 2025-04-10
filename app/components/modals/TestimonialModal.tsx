@@ -1,16 +1,19 @@
+"use client"
+
 import { addTestimonial } from "@/actions/testimonials"
 import { testimonialFormSchema } from "@/helpers/index"
-import { useAddData } from "@/hooks/useAddData"
+import { useAddTestimonial } from "@/hooks/useAddTestimonial"
 import { ITestimonial } from "@/types/index"
-import { useQueryClient } from "@tanstack/react-query"
 import { Form, Formik, FormikState } from "formik"
 import { useSession } from "next-auth/react"
-import { useMemo, useState } from "react"
-import ReactStars from "react-stars"
+import { useCallback, useEffect, useState } from "react"
+import { IoMdClose } from "react-icons/io"
+// import ReactStars from "react-stars"
 import { toast } from "sonner"
-import Switcher from "../Switcher"
+import Button from "../Button"
 import FormField from "../input/FormField"
-import Modal from "./Modal"
+import Rating from "../Rating/Rating"
+import Switcher from "../Switcher"
 
 interface InitialStateType extends Omit<ITestimonial, "_id"> {}
 
@@ -25,30 +28,33 @@ interface TestimonialModalProps {
 }
 
 const TestimonialModal = ({ isOpen, closeModal, productId }: TestimonialModalProps) => {
-  const initialValues = useMemo(
-    () => ({
-      name: "",
-      surname: "",
-      text: "",
-      rating: 0,
-      createdAt: "",
-      isActive: false,
-      product: productId
-    }),
-    [productId]
-  )
-  const queryClient = useQueryClient()
-
   const { data: session } = useSession()
   const [isLoading, setIsLoading] = useState(false)
-  const addTestimonialMutation = useAddData(addTestimonial, ["testimonials"])
-
-  const textareaStyles: React.CSSProperties = {
-    height: "100px",
-    overflowY: "auto"
-  }
+  const addTestimonialMutation = useAddTestimonial(addTestimonial, ["testimonials"], productId)
 
   const isAdmin = !!session?.user
+
+  const handleClose = useCallback(() => {
+    setTimeout(() => {
+      closeModal()
+    }, 300)
+  }, [closeModal])
+
+  useEffect(() => {
+    const onEscClick = (e: KeyboardEvent) => {
+      if (e.code === "Escape") handleClose()
+    }
+
+    window.addEventListener("keydown", onEscClick)
+
+    return () => {
+      window.removeEventListener("keydown", onEscClick)
+    }
+  }, [handleClose])
+
+  const handleBackdropClick = (e: React.MouseEvent<HTMLElement>) => {
+    if (e.currentTarget === e.target) handleClose()
+  }
 
   const handleSubmit = async (values: ITestimonial, { resetForm }: ResetFormProps) => {
     try {
@@ -59,12 +65,14 @@ const TestimonialModal = ({ isOpen, closeModal, productId }: TestimonialModalPro
         ...values,
         name: fullName
       }
+      if (!values.rating) {
+        delete newTestimonialData.rating
+      }
       const result = await addTestimonialMutation.mutateAsync(newTestimonialData)
       if (result?.success === false) {
         toast.error("Щось пішло не так")
         return
       }
-      queryClient.invalidateQueries({ queryKey: ["testimonials", productId] })
       closeModal()
       toast.success("Новий відгук додано!")
     } catch (error) {
@@ -78,7 +86,7 @@ const TestimonialModal = ({ isOpen, closeModal, productId }: TestimonialModalPro
   const inputs = [
     { id: "name", label: "Ваше Ім`я", type: "text", required: true },
     { id: "surname", label: "Ваше Прізвище", type: "text", required: true },
-    { id: "text", label: "Відгук", type: "textarea", required: true, style: textareaStyles }
+    { id: "text", label: "Відгук", type: "textarea", required: true }
   ]
 
   if (isAdmin) {
@@ -90,62 +98,81 @@ const TestimonialModal = ({ isOpen, closeModal, productId }: TestimonialModalPro
     })
   }
 
+  const initialValues = {
+    name: "",
+    surname: "",
+    text: "",
+    rating: null,
+    isActive: false,
+    product: productId,
+    createdAt: ""
+  }
+
+  if (!isOpen) {
+    return null
+  }
+
   return (
-    <Formik
-      initialValues={initialValues}
-      onSubmit={handleSubmit}
-      validationSchema={testimonialFormSchema}
-      enableReinitialize
+    <div
+      onClick={handleBackdropClick}
+      className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none bg-neutral-800/70"
     >
-      {({ errors, setFieldValue, values, handleSubmit }) => {
-        const bodyContent = (
-          <div className="flex flex-col justify-center items-center">
-            <Form className="flex flex-col w-full">
-              {inputs.map((item, i) => (
-                <div key={i}>
-                  {item.type === "switcher" ? (
-                    <Switcher
-                      id={item.id}
-                      label={item.label}
-                      checked={values[item.id as keyof InitialStateType] as boolean}
-                      onChange={checked =>
-                        setFieldValue(item.id as keyof InitialStateType, checked)
-                      }
-                    />
-                  ) : (
-                    <FormField item={item} errors={errors} setFieldValue={setFieldValue} />
+      <div className="bg-white p-6 rounded-lg w-full md:w-4/6 lg:w-3/6 xl:w-3/5 mx-auto lg:h-auto md:h-auto relative">
+        <button
+          onClick={handleClose}
+          className="p-1 border-[1px] rounded-full border-neutral-600 hover:opacity-70 transition absolute right-9 hover:border-primaryAccentColor"
+        >
+          <IoMdClose size={18} />
+        </button>
+        {/* Using key here to prevent reinitialization when modal closes */}
+        <Formik
+          key={isOpen ? "open" : "closed"} // This prevents unnecessary form reinitialization.
+          initialValues={initialValues}
+          onSubmit={handleSubmit}
+          validationSchema={testimonialFormSchema}
+        >
+          {({ errors, setFieldValue, values, handleSubmit }) => (
+            <div className="flex flex-col justify-center items-center">
+              <Form className="flex flex-col w-full" onSubmit={handleSubmit}>
+                <div className="subtitle">Додати відгук</div>
+                {inputs.map((item, i) => (
+                  <div key={i}>
+                    {item.type === "switcher" ? (
+                      <Switcher
+                        id={item.id}
+                        label={item.label}
+                        checked={values[item.id as keyof InitialStateType] as boolean}
+                        onChange={checked =>
+                          setFieldValue(item.id as keyof InitialStateType, checked)
+                        }
+                      />
+                    ) : (
+                      <FormField item={item} errors={errors} setFieldValue={setFieldValue} />
+                    )}
+                  </div>
+                ))}
+                <div className="mb-4">
+                  {values.rating === null && (
+                    <div className="text-sm text-gray-500 mt-2 italic">
+                      Ви можете залишити відгук і без оцінки ⭐
+                    </div>
                   )}
+                  <Rating
+                    value={values.rating ?? null}
+                    setFieldValue={setFieldValue}
+                    errors={errors}
+                  />
                 </div>
-              ))}
-              <div className="mb-4">
-                <label htmlFor="rating" className="block mb-2">
-                  Ваша оцінка
-                </label>
-                <ReactStars
-                  count={5}
-                  value={values.rating}
-                  onChange={(value: number) => setFieldValue("rating", value)}
-                  size={24}
-                  color2={"#ffd700"}
-                />
-              </div>
-            </Form>
-          </div>
-        )
-        return (
-          <Modal
-            title="Додати відгук"
-            actionLabel="Додати"
-            secondaryAction={closeModal}
-            secondaryActionLabel="Продовжити покупки"
-            body={bodyContent}
-            isOpen={isOpen}
-            onClose={closeModal}
-            onSubmit={handleSubmit}
-          />
-        )
-      }}
-    </Formik>
+                <div className="grid grid-cols-2 gap-4">
+                  <Button type="button" label="Скасувати" onClick={handleClose} small outline />
+                  <Button type="submit" label="Підтвердити" small />
+                </div>
+              </Form>
+            </div>
+          )}
+        </Formik>
+      </div>
+    </div>
   )
 }
 

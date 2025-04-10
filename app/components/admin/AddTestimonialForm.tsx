@@ -4,6 +4,7 @@ import { testimonialFormSchema } from "@/helpers/index"
 import { useAddData } from "@/hooks/useAddData"
 import { useUpdateData } from "@/hooks/useUpdateData"
 import { ITestimonial } from "@/types/index"
+import { useQueryClient } from "@tanstack/react-query"
 import { Form, Formik, FormikState } from "formik"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
@@ -36,6 +37,7 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
   const updateTestimonialMutation = useUpdateData(action, ["testimonials"])
   const [name, surname] = testimonial?.name?.split(" ") || ["", ""]
   const isUpdating = Boolean(testimonial?._id)
+  const queryClient = useQueryClient()
 
   const textareaStyles: React.CSSProperties = {
     height: "100px",
@@ -81,7 +83,8 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
     text: testimonial?.text || "",
     rating: testimonial?.rating || 0,
     createdAt: testimonial?.createdAt || "",
-    isActive: testimonial?.isActive || false
+    isActive: testimonial?.isActive || false,
+    product: testimonial?.product || ""
   }
 
   const handleSubmit = async (values: ITestimonial, { resetForm }: ResetFormProps) => {
@@ -108,6 +111,8 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
         return
       }
 
+      await queryClient.invalidateQueries({ queryKey: ["testimonials"] })
+      await queryClient.refetchQueries({ queryKey: ["testimonials"] })
       resetForm()
       toast.success(isUpdating ? "Відгук оновлено!" : "Новий відгук додано!")
       push("/admin/testimonials")
