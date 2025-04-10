@@ -53,26 +53,19 @@ const Modal = ({ isOpen, onClose, body, disabled }: ModalProps) => {
   return (
     <div
       onClick={handleBackdropClick}
-      className="justify-center
-      items-center
-      flex
-      overflow-x-hidden
-      overflow-y-auto
-      fixed
-      inset-0
-      z-50
-      outline-none
-      focus:outline-none
-      bg-neutral-800/70"
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300 ${
+        showModal ? "opacity-100" : "opacity-0 pointer-events-none"
+      }`}
     >
       <div
-        className={`translate duration-300  ${
-          showModal ? "translate-x-0" : "translate-x-[50%]"
-        } ${showModal ? "opacity-100" : "opacity-0"} bg-white p-6 rounded-lg w-full md:w-4/6 lg:w-3/6 xl:w-3/5 mx-auto lg:h-auto md:h-auto`}
+        className={`relative w-full max-w-2xl mx-auto my-10 rounded-2xl bg-white p-6 shadow-2xl transform transition-all duration-300 ${
+          showModal ? "translate-y-0 scale-100 opacity-100" : "translate-y-10 scale-95 opacity-0"
+        }`}
+        style={{ maxHeight: "90vh", overflowY: "auto" }}
       >
         <button
           onClick={() => handleClose()}
-          className="p-1 border-[1px] rounded-full border-neutral-600 hover:opacity-70 transition absolute right-9 hover:border-primaryAccentColor"
+          className="absolute right-4 top-4 p-1 border rounded-full border-neutral-400 hover:border-primaryAccentColor hover:opacity-70 transition"
         >
           <IoMdClose size={18} />
         </button>

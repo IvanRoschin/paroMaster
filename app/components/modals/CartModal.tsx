@@ -2,7 +2,6 @@
 
 import { useShoppingCart } from "app/context/ShoppingCartContext"
 import { useRouter } from "next/navigation"
-import CartClient from "../Cart/CartClient"
 import Modal from "./Old_Modal"
 
 interface CartModalProps {
@@ -18,11 +17,7 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen }) => {
     push("/order")
   }
 
-  const bodyContent = (
-    <div className="flex flex-col gap-4">
-      <CartClient />
-    </div>
-  )
+  const bodyContent = <div className="flex flex-col gap-4">{/* <CartClient /> */}</div>
 
   const footerContent = (
     <div className="flex flex-col gap-4 mt-3">
