@@ -1,17 +1,19 @@
 "use client"
 
+import useCartModal from "@/hooks/useCartModal"
 import { useShoppingCart } from "app/context/ShoppingCartContext"
 import { Icon } from "../Icon"
 
 type Props = {}
 
-const Cart = (props: Props) => {
-  const { openCart, cartQuantity } = useShoppingCart()
+const CartButton = (props: Props) => {
+  const { cartQuantity } = useShoppingCart()
+  const cartModal = useCartModal()
 
   return (
     <div className="relative">
       {cartQuantity > 0 && (
-        <button onClick={openCart} className="flex items-center">
+        <button onClick={cartModal.onOpen} className="flex items-center">
           <Icon
             name="lucide/shopping-cart"
             className="w-8 h-8 cursor-pointer hover:text-primaryAccentColor focus:text-primaryAccentColor"
@@ -36,4 +38,4 @@ const Cart = (props: Props) => {
   )
 }
 
-export default Cart
+export default CartButton
