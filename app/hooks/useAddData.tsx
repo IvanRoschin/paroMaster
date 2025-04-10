@@ -8,7 +8,6 @@ export const useAddData = (actionFn: AddAction, key: QueryKey) => {
   return useMutation({
     mutationFn: async (newDataItem: any) => actionFn(newDataItem),
     onSuccess: async () => {
-      // @ts-ignore
       await queryClient.invalidateQueries({ queryKey: [key] })
     },
     onError: () => {

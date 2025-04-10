@@ -7,8 +7,8 @@ import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useCallback } from "react"
 import { useScreenSize } from "../hooks"
-import AddLidForm from "./AddLidForm"
 import EmptyState from "./EmptyState"
+import LidForm from "./forms/LidForm"
 import Logo from "./Logo"
 import Socials from "./Socials"
 
@@ -248,7 +248,7 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
           )}
         </div>
         <div id="contactForm" className={`${isMobile ? "mb-4" : "mb-0"}`}>
-          <AddLidForm action={addNewLid} title="Замовити зворотній дзвінок" />
+          <LidForm action={addNewLid} title="Замовити зворотній дзвінок" />
         </div>
       </div>
       {!isMobile && <div className="border-b border-primaryAccentColor mb-5" />}

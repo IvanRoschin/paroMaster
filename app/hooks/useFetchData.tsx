@@ -8,7 +8,7 @@ export const useFetchData = <T,>(
   key: string
 ) => {
   const { data, isLoading, error, isError, refetch } = useQuery({
-    queryKey: [key, params],
+    queryKey: [key],
     queryFn: async () => action(params)
   })
 

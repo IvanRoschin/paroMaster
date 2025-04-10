@@ -3,8 +3,8 @@ import { signOut } from "next-auth/react"
 import Link from "next/link"
 import { MdLogout } from "react-icons/md"
 import { menu } from "../config/constants"
-import Button from "./Button"
 import { Icon } from "./Icon"
+import Button from "./ui/Button"
 
 interface MenuProps {
   session?: any

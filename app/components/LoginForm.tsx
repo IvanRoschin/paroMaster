@@ -7,8 +7,8 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { FcGoogle } from "react-icons/fc"
 import { toast } from "sonner"
-import Button from "./Button"
 import FormField from "./input/FormField"
+import Button from "./ui/Button"
 
 interface InitialStateType {
   email: string

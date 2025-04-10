@@ -7,7 +7,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { FaPen } from "react-icons/fa"
-import Button from "../Button"
+import Button from "../ui/Button"
 
 interface ItemListCardProps {
   item: IGood

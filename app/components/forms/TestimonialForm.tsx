@@ -8,10 +8,10 @@ import { Form, Formik, FormikState } from "formik"
 import { useSession } from "next-auth/react"
 import { useState } from "react"
 import { toast } from "sonner"
-import Button from "../Button"
 import FormField from "../input/FormField"
 import Rating from "../Rating/Rating"
 import Switcher from "../Switcher"
+import Button from "../ui/Button"
 
 interface InitialStateType extends Omit<ITestimonial, "_id"> {}
 
@@ -26,7 +26,7 @@ interface TestimonialFormProps {
 const TestimonialForm = ({ productId }: TestimonialFormProps) => {
   const { data: session } = useSession()
   const [isLoading, setIsLoading] = useState(false)
-  const addTestimonialMutation = useAddTestimonial(addTestimonial, ["testimonials"], productId)
+  const addTestimonialMutation = useAddTestimonial(addTestimonial, ["goodById"], productId)
   const testinomialModal = useTestimonialModal()
 
   const isAdmin = !!session?.user
@@ -40,6 +40,7 @@ const TestimonialForm = ({ productId }: TestimonialFormProps) => {
         ...values,
         name: fullName
       }
+      console.log("values.rating", values.rating)
       if (!values.rating) {
         delete newTestimonialData.rating
       }

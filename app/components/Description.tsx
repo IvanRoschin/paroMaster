@@ -7,7 +7,7 @@ import { ISlider } from "@/types/index"
 import { useSession } from "next-auth/react"
 import { ReactNode } from "react"
 import { FaPen } from "react-icons/fa"
-import Button from "./Button"
+import Button from "./ui/Button"
 
 type Props = {
   activeImage: number

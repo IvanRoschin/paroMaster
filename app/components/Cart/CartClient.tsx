@@ -3,7 +3,7 @@
 import { storageKeys } from "@/helpers/storageKeys"
 import { useShoppingCart } from "app/context/ShoppingCartContext"
 import { useEffect, useState } from "react"
-import Button from "../Button"
+import Button from "../ui/Button"
 import CartItem from "./CartItem"
 
 export const CartClient = ({

@@ -2,8 +2,8 @@
 
 import { deleteTestimonial, getAllTestimonials, updateTestimonial } from "@/actions/testimonials"
 import Pagination from "@/components/admin/Pagination"
-import Button from "@/components/Button"
 import { EmptyState, Loader, Search, Switcher } from "@/components/index"
+import Button from "@/components/ui/Button"
 import { useDeleteData, useFetchData } from "@/hooks/index"
 import { ITestimonial } from "@/types/index"
 import { ISearchParams } from "@/types/searchParams"

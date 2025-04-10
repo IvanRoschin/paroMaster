@@ -43,7 +43,9 @@ container sizes: xsm: max-480px sm: 480px md: 768px lg: 1280px
     scroll-behavior: smooth;
   }
 }
-
+.clip-half {
+  clip-path: inset(0 50% 0 0);
+}
 @layer components {
   .custom-checkbox {
     appearance: none;

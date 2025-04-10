@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { IconType } from "react-icons"
-import Button from "../Button"
+import Button from "../ui/Button"
 
 interface CardProps {
   title: string
