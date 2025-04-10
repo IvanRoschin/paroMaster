@@ -229,7 +229,6 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
                 )}
               </div>
             ))}
-
             <CustomButton label="Зберегти" disabled={isLoading} />
           </Form>
         )}

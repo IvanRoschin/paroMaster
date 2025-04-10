@@ -49,6 +49,12 @@ const goodSchema = new Schema(
     },
     compatibility: {
       type: String
+    },
+    averageRating: {
+      type: Number
+    },
+    ratingCount: {
+      type: Number
     }
   },
   { versionKey: false, timestamps: true }

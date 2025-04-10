@@ -12,6 +12,7 @@ interface ButtonProps {
   color?: string
   width?: string
   type?: "submit" | "reset" | "button"
+  bg?: string
   children?: React.ReactNode
 }
 
@@ -25,7 +26,8 @@ const Button: React.FC<ButtonProps> = ({
   width,
   type,
   icon: Icon,
-  children
+  children,
+  bg
 }) => {
   return (
     <button
@@ -35,7 +37,7 @@ const Button: React.FC<ButtonProps> = ({
       className={` 
 				flex items-center justify-center
 				disabled:opacity-70 disabled:cursor-not-allowed rounded-lg hover:opacity-80 transition
-				${width ? `w-[${width}px]` : `w-[600px]`}
+				${width ? `w-[${width}px]` : `w-full`}
 			${small && color ? `${color}` : "bg-orange-600"} 
 			${outline ? "bg-white" : "bg-orange-600"} 
       ${outline ? "border-orange-600" : "border-orange-600"} 
@@ -45,10 +47,18 @@ const Button: React.FC<ButtonProps> = ({
       ${small ? "text-md" : "text-md"} 
       ${small ? "border-[1px]" : "border-2"}
       ${small && width ? `w-[${width}px]` : "w-full"}
+      ${small && bg ? "border-none" : "border-[1px]"}
       `}
     >
-      {Icon && <Icon size={12} className=" " />}
-      {label || children}
+      <span
+        className={`cursor-pointer rounded-full flex justify-center items-center hover:opacity-80
+          ${bg ? "bg-orange-600" : "bg-none"} 
+          ${bg ? "w-[30px] h-[30px]" : "w-full h-full"} 
+          `}
+      >
+        {Icon && <Icon size={12} className={`${bg ? "text-white" : "text-black"}`} />}
+        {label || children}
+      </span>
     </button>
   )
 }

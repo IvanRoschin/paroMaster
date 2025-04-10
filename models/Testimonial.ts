@@ -18,7 +18,15 @@ const testimonialsSchema = new Schema(
     },
     rating: {
       type: Number,
-      required: true
+      required: false,
+      default: null, // Set default to null if no rating is provided
+      validate: {
+        validator: function (v: null | number) {
+          // Allow null or numbers between 1 and 5
+          return v === null || (v >= 1 && v <= 5)
+        },
+        message: "Rating must be between 1 and 5, or null"
+      }
     },
     isActive: {
       type: Boolean,
@@ -31,6 +39,6 @@ const testimonialsSchema = new Schema(
 testimonialsSchema.index({ "$**": "text" })
 
 const Testimonials =
-  mongoose.models.Testimonials || mongoose.model("Testimonials", testimonialsSchema)
+  mongoose.models.Testimonial || mongoose.model("Testimonial", testimonialsSchema)
 
 export default Testimonials

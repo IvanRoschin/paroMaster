@@ -14,6 +14,7 @@
   "dependencies": {
     "@react-google-maps/api": "^2.19.3",
     "@sendgrid/mail": "^8.1.4",
+    "@smastrom/react-rating": "^1.5.0",
     "@tanstack/react-query": "^5.52.1",
     "@tanstack/react-query-devtools": "^5.53.1",
     "@types/react-star-rating-component": "^1.4.4",
