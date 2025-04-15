@@ -6,7 +6,7 @@ const testimonialsSchema = new Schema(
     product: {
       type: Schema.Types.ObjectId,
       ref: "Good",
-      required: true
+      required: false
     },
     name: {
       type: String,

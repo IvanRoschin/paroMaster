@@ -68,7 +68,7 @@ export default async function Admin() {
     { key: "customers", fetchFn: fetchCustomers },
     { key: "orders", fetchFn: fetchOrders },
     { key: "slides", fetchFn: fetchSlides },
-    { key: "testimonials", fetchFn: fetchTestimonials },
+    { key: "allTestimonials", fetchFn: fetchTestimonials },
     { key: "goods", fetchFn: fetchGoods },
     { key: "categories", fetchFn: fetchCategories }
   ]
@@ -125,7 +125,7 @@ export default async function Admin() {
     },
     {
       title: "Відгуки",
-      count: getCount("testimonials"),
+      count: getCount("AllTestimonials"),
       link: "admin/testimonials",
       icon: SiTestinglibrary
     }

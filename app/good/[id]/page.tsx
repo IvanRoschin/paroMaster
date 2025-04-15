@@ -2,7 +2,6 @@
 
 import { getGoodById } from "@/actions/goods"
 import ImagesBlock from "@/components/ImagesBlock"
-import Loader from "@/components/Loader"
 import Button from "@/components/ui/Button"
 import { useFetchDataById } from "@/hooks/useFetchDataById"
 import { IGood, ITestimonial } from "@/types/index"
@@ -15,31 +14,55 @@ import { FaPen, FaRegStar, FaStar, FaStarHalfAlt, FaTrash } from "react-icons/fa
 import { deleteTestimonial } from "@/actions/testimonials"
 import DeleteConfirmation from "@/components/DeleteConfirmation"
 import TestimonialForm from "@/components/forms/TestimonialForm"
+import Loader from "@/components/Loader"
 import Modal from "@/components/modals/Modal"
+import { useDeleteData } from "@/hooks/useDeleteData"
 import useDeleteModal from "@/hooks/useDeleteModal"
-import { useDeleteTestimonial } from "@/hooks/useDeleteTestimonial"
+import { useQueryTestimonials } from "@/hooks/useQueryTestimonials"
 import useTestimonialModal from "@/hooks/useTestimonialsModal"
+import { useQueryClient } from "@tanstack/react-query"
 
 export default function Item({ params }: { params: any }) {
   const { data: session } = useSession()
   const isAdmin = session?.user
   const [, setAmount] = useState(0)
+  const queryClient = useQueryClient()
 
   const [testimonialToDelete, setTestimonialToDelete] = useState<string>("")
 
   const { getItemQuantity, increaseCartQuantity, decreaseCartQuantity, removeFromCart } =
     useShoppingCart()
 
+  // const uuidKey = useLocalUuid(state => state.uuidKey)
+  // console.log("uuidKeyPage:", uuidKey)
+
   const { data, isLoading, isError, error } = useFetchDataById(getGoodById, ["goodById"], params.id)
+
+  const { data: testimonials, isFetching } = useQueryTestimonials(params.id)
+
+  const { mutate: deleteTestimonialById } = useDeleteData(deleteTestimonial, "testimonials")
+
+  const handleDelete = (id: string) => {
+    deleteTestimonialById(id)
+  }
+
+  // const handleDeleteTestimonial = (id: string) => {
+  //   deleteTestimonial(id)
+
+  //   // queryClient.invalidateQueries({ queryKey: ["testimonials"] })
+  //   // deleteMutation.mutateAsync(id)
+  // }
+
+  // const deleteMutation = useMutateDeleteTestimonial()
+
+  // console.log("Component render, testimonials:", {
+  //   count: testimonials?.length ?? 0
+  // })
+
+  // const { data: testimonials } = useGetTestimonial(getGoodTestimonials, params.id)
 
   const testimonialModal = useTestimonialModal()
   const deleteModal = useDeleteModal()
-
-  const { mutate: deleteTestimonialById } = useDeleteTestimonial(
-    deleteTestimonial,
-    ["goodById"],
-    params.id
-  )
 
   useEffect(() => {
     if (!data) {
@@ -50,15 +73,23 @@ export default function Item({ params }: { params: any }) {
     localStorage.setItem(`amount-${data._id}`, JSON.stringify(newAmount))
   }, [data, getItemQuantity])
 
-  const handleDelete = (id: string) => {
-    setTestimonialToDelete(id)
-    deleteModal.onOpen()
-    // setIsDeleteModalOpen(true)
-  }
+  useEffect(() => {}, [])
 
-  const handleDeleteTestimonial = (testimonialToDelete: string) => {
-    deleteTestimonialById(testimonialToDelete)
-  }
+  // const handleDelete = (id: string) => {
+  //   setTestimonialToDelete(id)
+  //   deleteModal.onOpen()
+  //   // setIsDeleteModalOpen(true)
+  // }
+
+  // const handleDeleteTestimonial = async (id: string) => {
+  //   try {
+  //     await deleteTestimonial(id)
+  //   } catch (error) {
+  //     console.log("error", error)
+  //   }
+  //   // queryClient.invalidateQueries({ queryKey: ["testimonials"] })
+  //   // deleteMutation.mutateAsync(id)
+  // }
 
   if (isLoading || !data) return <Loader />
   if (isError) {
@@ -68,8 +99,6 @@ export default function Item({ params }: { params: any }) {
       </div>
     )
   }
-
-  console.log("data", data)
 
   const quantity = getItemQuantity(data._id)
 
@@ -150,7 +179,6 @@ export default function Item({ params }: { params: any }) {
               type="button"
               label="Додати відгук"
               onClick={() => {
-                console.log("click")
                 testimonialModal.onOpen()
               }}
             />
@@ -161,9 +189,9 @@ export default function Item({ params }: { params: any }) {
       {/* Display reviews */}
       <div className="mt-10">
         <h3 className="text-2xl font-semibold mb-4">Відгуки</h3>
-        {data.testimonials && data.testimonials.length > 0 ? (
+        {testimonials && testimonials.length > 0 ? (
           <ul className="grid gap-4 md:gap-6">
-            {data.testimonials.map((review: ITestimonial) => (
+            {testimonials.map((review: ITestimonial) => (
               <div key={review._id} className="relative">
                 {isAdmin && (
                   <div className="absolute top-0 right-0">
@@ -222,7 +250,7 @@ export default function Item({ params }: { params: any }) {
         body={<TestimonialForm productId={data._id} />}
         isOpen={testimonialModal.isOpen}
         onClose={testimonialModal.onClose}
-        disabled={isLoading}
+        // disabled={isLoading}
       />
 
       {/* Модалка для підтвердження видалення */}
@@ -231,7 +259,7 @@ export default function Item({ params }: { params: any }) {
           <DeleteConfirmation
             onConfirm={() => {
               if (testimonialToDelete) {
-                handleDeleteTestimonial(testimonialToDelete)
+                // handleDeleteTestimonial(testimonialToDelete)
                 deleteModal.onClose()
               }
             }}
@@ -241,7 +269,7 @@ export default function Item({ params }: { params: any }) {
         }
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.onClose}
-        disabled={isLoading}
+        // disabled={isLoading}
       />
     </div>
   )

@@ -33,8 +33,8 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
   const [isLoading, setIsLoading] = useState(false)
   const { push } = useRouter()
   const { data: session } = useSession()
-  const addTestimonialMutation = useAddData(action, ["testimonials"])
-  const updateTestimonialMutation = useUpdateData(action, ["testimonials"])
+  const addTestimonialMutation = useAddData(action, ["allTestimonials"])
+  const updateTestimonialMutation = useUpdateData(action, ["allTestimonials"])
   const [name, surname] = testimonial?.name?.split(" ") || ["", ""]
   const isUpdating = Boolean(testimonial?._id)
   const queryClient = useQueryClient()
@@ -111,8 +111,8 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
         return
       }
 
-      await queryClient.invalidateQueries({ queryKey: ["testimonials"] })
-      await queryClient.refetchQueries({ queryKey: ["testimonials"] })
+      // await queryClient.invalidateQueries({ queryKey: ["allTestimonials"] })
+      // await queryClient.refetchQueries({ queryKey: ["allTestimonials"] })
       resetForm()
       toast.success(isUpdating ? "Відгук оновлено!" : "Новий відгук додано!")
       push("/admin/testimonials")
@@ -163,8 +163,12 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
                 </label>
                 <ReactStars
                   count={5}
-                  value={values.rating}
-                  onChange={(value: number) => setFieldValue("rating", value)}
+                  value={values.rating ?? undefined}
+                  onChange={(value: number) => {
+                    if (value !== values.rating) {
+                      setFieldValue("rating", value)
+                    }
+                  }}
                   size={24}
                   color2={"#ffd700"}
                 />

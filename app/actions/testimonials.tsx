@@ -14,18 +14,13 @@ export interface IGetAllTestimonials {
   count: number
 }
 
-export async function addTestimonial(values: ITestimonial) {
-  console.log("values", values)
-
+export async function addTestimonial(values: Partial<ITestimonial>) {
   if (!values.name) {
     throw new Error("Name is required.")
   }
-
-  if (!values.text && typeof values.text !== "string") {
+  if (!values.text || typeof values.text !== "string") {
     throw new Error("Text is required and must be a string")
   }
-
-  // Remove the check for rating and handle it being optional
   if (values.isActive === undefined) {
     throw new Error("isActive field is required.")
   }
@@ -42,45 +37,46 @@ export async function addTestimonial(values: ITestimonial) {
       throw new Error("This testimonial already exists")
     }
 
-    // const testimonialData: Partial<ITestimonial> = {
-    //   name: values.name,
-    //   text: values.text,
-    //   isActive: values.isActive,
-    //   product: values.product
-    // }
-
-    const newTestimonial = await Testimonial.create(values)
-
-    // 2. Отримуємо всі активні відгуки по товару (включаючи щойно створений)
-    const testimonials = await Testimonial.find({
-      product: values.product,
-      isActive: true,
-      rating: { $gt: 0 }
-    })
-
-    const ratingSum = testimonials.reduce((acc, t) => acc + t.rating, 0)
-    const ratingCount = testimonials.length
-    const averageRating = ratingCount ? ratingSum / ratingCount : null
-
-    // 3. Оновлюємо товар з новим рейтингом
-    const updatedGood = await Good.findByIdAndUpdate(
-      values.product,
-      {
-        averageRating,
-        ratingCount
-      },
-      { new: true } // <-- поверне оновлений документ
-    )
-
-    if (!updatedGood) {
-      throw new Error("Product not found")
+    const testimonialData: Partial<ITestimonial> = {
+      name: values.name,
+      text: values.text,
+      isActive: values.isActive,
+      ...(values.product && { product: values.product }),
+      ...(values.rating && { rating: values.rating })
     }
 
-    // 4. Повертаємо оновлений товар
+    const newTestimonial = await Testimonial.create(testimonialData)
+
+    // Якщо передано product — оновлюємо середню оцінку
+    if (values.product) {
+      const testimonials = await Testimonial.find({
+        product: values.product,
+        isActive: true,
+        rating: { $gt: 0 }
+      })
+
+      const ratingSum = testimonials.reduce((acc, t) => acc + t.rating, 0)
+      const ratingCount = testimonials.length
+      const averageRating = ratingCount ? ratingSum / ratingCount : null
+
+      const updatedGood = await Good.findByIdAndUpdate(
+        values.product,
+        {
+          averageRating,
+          ratingCount
+        },
+        { new: true }
+      )
+
+      if (!updatedGood) {
+        throw new Error("Product not found")
+      }
+    }
+
     return {
-      updatedGood: JSON.parse(JSON.stringify(updatedGood)),
       success: true,
-      message: "Testimonial added successfully"
+      message: "Відгук додано",
+      testimonial: JSON.parse(JSON.stringify(newTestimonial))
     }
   } catch (error) {
     if (error instanceof Error) {
@@ -90,16 +86,14 @@ export async function addTestimonial(values: ITestimonial) {
       console.error("Unknown error:", error)
       throw new Error("Failed to add Testimonial: Unknown error")
     }
-  } finally {
-    revalidatePath("/admin/testimonials")
   }
 }
 
 export async function getAllTestimonials(
-  searchParams: ISearchParams
+  searchParams?: ISearchParams
 ): Promise<IGetAllTestimonials> {
-  const limit = searchParams.limit || 4
-  const page = searchParams.page || 1
+  const limit = searchParams?.limit || 4
+  const page = searchParams?.page || 1
 
   try {
     await connectToDB()
@@ -115,10 +109,10 @@ export async function getAllTestimonials(
     return {
       success: true,
       testimonials: JSON.parse(JSON.stringify(testimonials)),
-      count: count
+      count
     }
   } catch (error) {
-    console.log(error)
+    console.error("Error in getAllTestimonials:", error)
     return { success: false, testimonials: [], count: 0 }
   }
 }
@@ -139,14 +133,18 @@ export async function getTestimonialById(id: string) {
   }
 }
 
-export async function deleteTestimonial(id: string) {
-  if (!id) {
+export async function deleteTestimonial(testimonialId: string) {
+  if (!testimonialId) {
     console.error("No ID provided")
     return
   }
   try {
     await connectToDB()
-    await Testimonial.findByIdAndDelete(id)
+    await Testimonial.findByIdAndDelete(testimonialId)
+    // return {
+    //   success: true,
+    //   message: "Відгук видалено"
+    // }
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error delete category:", error)
@@ -155,8 +153,6 @@ export async function deleteTestimonial(id: string) {
       console.error("Unknown error:", error)
       throw new Error("Failed to delete category: Unknown error")
     }
-  } finally {
-    revalidatePath("/admin/testimonials")
   }
 }
 
@@ -204,12 +200,15 @@ export async function updateTestimonial(values: any) {
   }
 }
 
-export async function getTestimonialsByGoods() {
+export async function getGoodTestimonials(productId: string) {
   try {
     await connectToDB()
-    const testimonials = await Testimonial.find({ isActive: true }).populate("product")
-    console.log("testimonials:", testimonials)
-    return testimonials
+    const testimonials = await Testimonial.find({ product: productId }).sort({ createdAt: -1 })
+    // console.log(`getGoodTestimonials for productId ${productId}:`, {
+    //   count: testimonials.length,
+    //   ids: testimonials.map(t => t._id.toString())
+    // })
+    return JSON.parse(JSON.stringify(testimonials))
   } catch (error) {
     console.error("Error updating testimonial:", error)
     return {

@@ -18,7 +18,7 @@ export default async function Home({ searchParams }: { searchParams: ISearchPara
       queryFn: () => getAllSlides(searchParams)
     })
     await queryClient.prefetchQuery({
-      queryKey: ["testimonials"],
+      queryKey: ["allTestimonials"],
       queryFn: () => getAllTestimonials(searchParams)
     })
     await queryClient.prefetchQuery({
@@ -34,7 +34,7 @@ export default async function Home({ searchParams }: { searchParams: ISearchPara
   const goods = (queryState?.data as GoodsData)?.goods || []
 
   const slidesData = queryClient.getQueryData<IGetAllSlides>(["slides"])
-  const testimonialsData = queryClient.getQueryData<IGetAllTestimonials>(["testimonials"])
+  const testimonialsData = queryClient.getQueryData<IGetAllTestimonials>(["allTestimonials"])
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
