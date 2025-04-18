@@ -11,16 +11,13 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { FaPen, FaRegStar, FaStar, FaStarHalfAlt, FaTrash } from "react-icons/fa"
 
-import { deleteTestimonial } from "@/actions/testimonials"
+import { deleteTestimonial, getGoodTestimonials } from "@/actions/testimonials"
 import DeleteConfirmation from "@/components/DeleteConfirmation"
 import TestimonialForm from "@/components/forms/TestimonialForm"
 import Loader from "@/components/Loader"
 import Modal from "@/components/modals/Modal"
 import ErrorMessage from "@/components/ui/Error"
-import { useDeleteData } from "@/hooks/useDeleteData"
-import useDeleteModal from "@/hooks/useDeleteModal"
-import { useQueryTestimonials } from "@/hooks/useQueryTestimonials"
-import useTestimonialModal from "@/hooks/useTestimonialsModal"
+import { useDeleteData, useDeleteModal, useFetchData, useTestimonialModal } from "@/hooks/index"
 
 export default function Item({ params }: { params: any }) {
   const { data: session } = useSession()
@@ -39,9 +36,9 @@ export default function Item({ params }: { params: any }) {
     isLoading: isTestimonialsLoading,
     isError: isTestimonialsError,
     error: testimonialsError
-  } = useQueryTestimonials(params.id)
+  } = useFetchData(() => getGoodTestimonials(params.id), ["testimonials"])
 
-  const { mutate: deleteTestimonialById } = useDeleteData(deleteTestimonial, "testimonials")
+  const { mutate: deleteTestimonialById } = useDeleteData(deleteTestimonial, ["testimonials"])
 
   const testimonialModal = useTestimonialModal()
   const deleteModal = useDeleteModal()

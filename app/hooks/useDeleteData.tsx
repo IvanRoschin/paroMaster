@@ -1,11 +1,11 @@
 "use client"
 
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { QueryKey, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
 type DeleteAction = (id: string) => Promise<void>
 
-export const useDeleteData = (action: DeleteAction, key: string) => {
+export const useDeleteData = (action: DeleteAction, key: QueryKey) => {
   const queryClient = useQueryClient()
 
   return useMutation({
