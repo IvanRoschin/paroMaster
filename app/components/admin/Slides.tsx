@@ -11,11 +11,12 @@ import { ISearchParams } from "@/types/searchParams"
 import Image from "next/image"
 import Link from "next/link"
 import { FaPen, FaTrash } from "react-icons/fa"
+import ErrorMessage from "../ui/Error"
 
 export default function Slides({ searchParams }: { searchParams: ISearchParams }) {
-  const { data, isLoading, isError } = useFetchData(searchParams, getAllSlides, "slides")
+  const { data, isLoading, isError, error } = useFetchData(getAllSlides, ["slides"], searchParams)
 
-  const { mutate: deleteSliderById } = useDeleteData(deleteSlide, "slides")
+  const { mutate: deleteSliderById } = useDeleteData(deleteSlide, ["slides"])
 
   const handleDelete = (id: string) => {
     deleteSliderById(id)
@@ -26,7 +27,7 @@ export default function Slides({ searchParams }: { searchParams: ISearchParams }
   }
 
   if (isError) {
-    return <div>Error fetching data.</div>
+    return <ErrorMessage error={error} />
   }
 
   if (!data?.slides || data.slides.length === 0) {

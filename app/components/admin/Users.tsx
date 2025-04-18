@@ -1,6 +1,6 @@
 "use client"
 
-import { deleteUser, getAllUsers } from "@/actions/users"
+import { deleteUser, getAllUsers, updateUser } from "@/actions/users"
 import Search from "@/components/admin/AdminSearch"
 import Pagination from "@/components/admin/Pagination"
 import EmptyState from "@/components/EmptyState"
@@ -9,15 +9,40 @@ import Button from "@/components/ui/Button"
 import { useDeleteData, useFetchData } from "@/hooks/index"
 import { ISearchParams, IUser } from "@/types/index"
 import Link from "next/link"
+import { useState } from "react"
 import { FaPen, FaTrash } from "react-icons/fa"
+import { toast } from "sonner"
+import Switcher from "../Switcher"
+import ErrorMessage from "../ui/Error"
 
 export default function Users({ searchParams }: { searchParams: ISearchParams }) {
-  const { data, isLoading, isError } = useFetchData(searchParams, getAllUsers, "users")
+  const [statusFilter, setStatusFilter] = useState<string | null>(null)
+  const { data, isLoading, isError, error, refetch } = useFetchData(
+    getAllUsers,
+    ["users"],
+    searchParams
+  )
 
-  const { mutate: deleteUserById } = useDeleteData(deleteUser, "users")
+  const { mutate: deleteUserById } = useDeleteData(deleteUser, ["users"])
 
   const handleDelete = (id: string) => {
     deleteUserById(id)
+  }
+
+  const handleStatusToggle = async (_id: string | undefined, isActive: boolean) => {
+    if (!_id) {
+      toast.error("Invalid testimonial ID.")
+      return
+    }
+    try {
+      const values = { _id, isActive: !isActive }
+      await updateUser(values as Partial<IUser> & { _id: string })
+      refetch()
+      toast.success("Статус користувача змінено!")
+    } catch (error) {
+      toast.error("Unknown error occurred.")
+      console.error("Error updating testimonial status:", error)
+    }
   }
 
   if (isLoading) {
@@ -25,7 +50,7 @@ export default function Users({ searchParams }: { searchParams: ISearchParams })
   }
 
   if (isError) {
-    return <div>Error fetching data.</div>
+    return <ErrorMessage error={error} />
   }
 
   if (!data?.users || data.users.length === 0) {
@@ -81,7 +106,10 @@ export default function Users({ searchParams }: { searchParams: ISearchParams })
                 </td>
                 <td className="p-2 border-r-2 text-center">{user.isAdmin ? "admin" : "user"}</td>
                 <td className="p-2 border-r-2 text-center">
-                  {user.isActive ? "active" : "passive"}
+                  <Switcher
+                    checked={user.isActive}
+                    onChange={() => user._id && handleStatusToggle(user._id, user.isActive)}
+                  />
                 </td>
                 <td className="p-2 border-r-2 text-center">
                   <Link

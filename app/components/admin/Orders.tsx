@@ -10,26 +10,24 @@ import { ISearchParams } from "@/types/searchParams"
 import Link from "next/link"
 import { useState } from "react"
 import { FaPen, FaTrash } from "react-icons/fa"
+import ErrorMessage from "../ui/Error"
 
 export default function Orders({ searchParams }: { searchParams: ISearchParams }) {
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
 
-  // Вызов хуков на верхнем уровне
-  const { mutate: deleteOrderById } = useDeleteData(deleteOrder, "orders")
+  const { mutate: deleteOrderById } = useDeleteData(deleteOrder, ["orders"])
 
-  // Получаем данные с сервера
-  const { data, isLoading, isError, refetch } = useFetchData(
-    { ...searchParams, status: statusFilter },
-    getAllOrders,
-    "orders"
-  )
+  const { data, isLoading, isError, error, refetch } = useFetchData(getAllOrders, ["orders"], {
+    ...searchParams,
+    status: statusFilter
+  })
 
   if (isLoading) {
     return <Loader />
   }
 
   if (isError) {
-    return <div>Error fetching data.</div>
+    return <ErrorMessage error={error} />
   }
 
   if (!data?.orders || data?.orders.length === 0) {
@@ -37,13 +35,7 @@ export default function Orders({ searchParams }: { searchParams: ISearchParams }
   }
 
   const handleDelete = (id: string) => {
-    // Удаляем заказ
-    deleteOrderById(id, {
-      onSuccess: () => {
-        // После удаления перезагружаем данные
-        refetch() // Это перезагружает запрос с сервера и обновляет данные
-      }
-    })
+    deleteOrderById(id)
   }
 
   const ordersCount = data?.count || 0

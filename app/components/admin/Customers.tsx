@@ -9,10 +9,15 @@ import { useDeleteData, useFetchData } from "@/hooks/index"
 import { ISearchParams } from "@/types/searchParams"
 import Link from "next/link"
 import { FaPen, FaTrash } from "react-icons/fa"
+import ErrorMessage from "../ui/Error"
 
 export default function Customers({ searchParams }: { searchParams: ISearchParams }) {
-  const { data, isLoading, isError } = useFetchData(searchParams, getAllCustomers, "customers")
-  const { mutate: deleteCustomerById } = useDeleteData(deleteCustomer, "customers")
+  const { data, isLoading, isError, error } = useFetchData(
+    getAllCustomers,
+    ["customers"],
+    searchParams
+  )
+  const { mutate: deleteCustomerById } = useDeleteData(deleteCustomer, ["customers"])
 
   const handleDelete = (id: string) => {
     deleteCustomerById(id)
@@ -23,7 +28,7 @@ export default function Customers({ searchParams }: { searchParams: ISearchParam
   }
 
   if (isError) {
-    return <div>Error fetching data.</div>
+    return <ErrorMessage error={error} />
   }
 
   if (!data?.customers || data.customers.length === 0) {
