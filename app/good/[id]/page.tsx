@@ -16,50 +16,32 @@ import DeleteConfirmation from "@/components/DeleteConfirmation"
 import TestimonialForm from "@/components/forms/TestimonialForm"
 import Loader from "@/components/Loader"
 import Modal from "@/components/modals/Modal"
+import ErrorMessage from "@/components/ui/Error"
 import { useDeleteData } from "@/hooks/useDeleteData"
 import useDeleteModal from "@/hooks/useDeleteModal"
 import { useQueryTestimonials } from "@/hooks/useQueryTestimonials"
 import useTestimonialModal from "@/hooks/useTestimonialsModal"
-import { useQueryClient } from "@tanstack/react-query"
 
 export default function Item({ params }: { params: any }) {
   const { data: session } = useSession()
   const isAdmin = session?.user
   const [, setAmount] = useState(0)
-  const queryClient = useQueryClient()
 
   const [testimonialToDelete, setTestimonialToDelete] = useState<string>("")
 
   const { getItemQuantity, increaseCartQuantity, decreaseCartQuantity, removeFromCart } =
     useShoppingCart()
 
-  // const uuidKey = useLocalUuid(state => state.uuidKey)
-  // console.log("uuidKeyPage:", uuidKey)
-
   const { data, isLoading, isError, error } = useFetchDataById(getGoodById, ["goodById"], params.id)
 
-  const { data: testimonials, isFetching } = useQueryTestimonials(params.id)
+  const {
+    data: testimonials,
+    isLoading: isTestimonialsLoading,
+    isError: isTestimonialsError,
+    error: testimonialsError
+  } = useQueryTestimonials(params.id)
 
   const { mutate: deleteTestimonialById } = useDeleteData(deleteTestimonial, "testimonials")
-
-  const handleDelete = (id: string) => {
-    deleteTestimonialById(id)
-  }
-
-  // const handleDeleteTestimonial = (id: string) => {
-  //   deleteTestimonial(id)
-
-  //   // queryClient.invalidateQueries({ queryKey: ["testimonials"] })
-  //   // deleteMutation.mutateAsync(id)
-  // }
-
-  // const deleteMutation = useMutateDeleteTestimonial()
-
-  // console.log("Component render, testimonials:", {
-  //   count: testimonials?.length ?? 0
-  // })
-
-  // const { data: testimonials } = useGetTestimonial(getGoodTestimonials, params.id)
 
   const testimonialModal = useTestimonialModal()
   const deleteModal = useDeleteModal()
@@ -73,31 +55,25 @@ export default function Item({ params }: { params: any }) {
     localStorage.setItem(`amount-${data._id}`, JSON.stringify(newAmount))
   }, [data, getItemQuantity])
 
-  useEffect(() => {}, [])
+  const handleDelete = (id: string) => {
+    setTestimonialToDelete(id)
+    deleteModal.onOpen()
+  }
 
-  // const handleDelete = (id: string) => {
-  //   setTestimonialToDelete(id)
-  //   deleteModal.onOpen()
-  //   // setIsDeleteModalOpen(true)
-  // }
+  const handleDeleteTestimonial = (id: string) => {
+    try {
+      deleteTestimonialById(id)
+    } catch (error) {
+      console.error("Error deleting testimonial:", error)
+    }
+  }
 
-  // const handleDeleteTestimonial = async (id: string) => {
-  //   try {
-  //     await deleteTestimonial(id)
-  //   } catch (error) {
-  //     console.log("error", error)
-  //   }
-  //   // queryClient.invalidateQueries({ queryKey: ["testimonials"] })
-  //   // deleteMutation.mutateAsync(id)
-  // }
+  if (isLoading || isTestimonialsLoading || !data || !testimonials) {
+    return <Loader />
+  }
 
-  if (isLoading || !data) return <Loader />
-  if (isError) {
-    return (
-      <div>
-        Error fetching good data: {error instanceof Error ? error.message : "Unknown error"}
-      </div>
-    )
+  if (isError || isTestimonialsError) {
+    return <ErrorMessage error={error || testimonialsError} />
   }
 
   const quantity = getItemQuantity(data._id)
@@ -250,7 +226,7 @@ export default function Item({ params }: { params: any }) {
         body={<TestimonialForm productId={data._id} />}
         isOpen={testimonialModal.isOpen}
         onClose={testimonialModal.onClose}
-        // disabled={isLoading}
+        disabled={isLoading}
       />
 
       {/* Модалка для підтвердження видалення */}
@@ -259,7 +235,7 @@ export default function Item({ params }: { params: any }) {
           <DeleteConfirmation
             onConfirm={() => {
               if (testimonialToDelete) {
-                // handleDeleteTestimonial(testimonialToDelete)
+                handleDeleteTestimonial(testimonialToDelete)
                 deleteModal.onClose()
               }
             }}
@@ -269,7 +245,7 @@ export default function Item({ params }: { params: any }) {
         }
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.onClose}
-        // disabled={isLoading}
+        disabled={isLoading}
       />
     </div>
   )
