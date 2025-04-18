@@ -4,7 +4,6 @@ import User from "@/models/User"
 import { ISearchParams } from "@/types/index"
 import { IUser } from "@/types/user/IUser"
 import { connectToDB } from "@/utils/dbConnect"
-import bcrypt from "bcrypt"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
@@ -99,42 +98,37 @@ export async function deleteUser(id: string) {
   revalidatePath("/admin/users")
 }
 
-export async function updateUser(formData: FormData) {
-  const entries = Object.fromEntries(formData.entries())
-
-  const { id, name, phone, email, password, isAdmin, isActive } = entries as {
-    id: string
-    name?: string
-    phone?: string
-    email?: string
-    password?: string
-    isAdmin?: string
-    isActive?: string
-  }
-
+export async function updateUser(values: any) {
   try {
     await connectToDB()
 
-    const updateFields: Partial<IUser> = {
-      name,
-      phone,
-      email,
-      isAdmin: isAdmin === "true",
-      isActive: isActive === "true"
-    }
-
-    if (password) {
-      updateFields.password = await bcrypt.hash(password, 10)
-    }
-
-    Object.keys(updateFields).forEach(
-      key =>
-        (updateFields[key as keyof IUser] === "" ||
-          updateFields[key as keyof IUser] === undefined) &&
-        delete updateFields[key as keyof IUser]
+    const updateFields = Object.fromEntries(
+      Object.entries(values).filter(([key, value]) => key !== "_id" && value !== undefined)
     )
 
-    await User.findByIdAndUpdate(id, updateFields)
+    if (Object.keys(updateFields).length === 0) {
+      return {
+        success: false,
+        message: "No valid fields to update."
+      }
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      values._id,
+      { $set: updateFields },
+      { new: true }
+    )
+
+    if (!updatedUser) {
+      return {
+        success: false,
+        message: "User not found."
+      }
+    }
+    return {
+      success: true,
+      message: "Користувача оновлено успішно "
+    }
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error update user:", error)

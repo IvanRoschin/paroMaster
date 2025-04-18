@@ -11,10 +11,15 @@ import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
 import { FaPen, FaSortAlphaDown, FaSortAlphaUp, FaTrash } from "react-icons/fa"
+import ErrorMessage from "../ui/Error"
 export default function Categories({ searchParams }: { searchParams: ISearchParams }) {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
 
-  const { data, isLoading, isError } = useFetchData(searchParams, getAllCategories, "categories")
+  const { data, isLoading, isError, error } = useFetchData(
+    getAllCategories,
+    ["categories"],
+    searchParams
+  )
 
   const { mutate: deleteCategoryById } = useDeleteData(deleteCategory, ["categories"])
 
@@ -27,7 +32,7 @@ export default function Categories({ searchParams }: { searchParams: ISearchPara
   }
 
   if (isError) {
-    return <div>Error fetching data.</div>
+    return <ErrorMessage error={error} />
   }
 
   if (!data?.categories || data.categories.length === 0) {

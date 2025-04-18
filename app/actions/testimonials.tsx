@@ -5,8 +5,6 @@ import Testimonial from "@/models/Testimonial"
 
 import { ISearchParams, ITestimonial } from "@/types/index"
 import { connectToDB } from "@/utils/dbConnect"
-import { revalidatePath } from "next/cache"
-import { redirect } from "next/navigation"
 
 export interface IGetAllTestimonials {
   success: boolean
@@ -93,13 +91,21 @@ export async function getAllTestimonials(
 ): Promise<IGetAllTestimonials> {
   const limit = searchParams?.limit || 4
   const page = searchParams?.page || 1
+  const statusFilter = searchParams?.statusFilter
 
   try {
     await connectToDB()
 
+    const filter: any = {}
+    if (statusFilter === "Опублікований") {
+      filter.isActive = true
+    } else if (statusFilter === "Не публікується") {
+      filter.isActive = false
+    }
+
     const count = await Testimonial.countDocuments()
 
-    const testimonials: ITestimonial[] = await Testimonial.find()
+    const testimonials: ITestimonial[] = await Testimonial.find(filter)
       .sort({ createdAt: -1 })
       .skip(limit * (page - 1))
       .limit(limit)
@@ -193,9 +199,6 @@ export async function updateTestimonial(values: any) {
       success: false,
       message: error instanceof Error ? error.message : "Unknown error occurred"
     }
-  } finally {
-    revalidatePath("/admin/testimonials")
-    redirect("/admin/testimonials")
   }
 }
 

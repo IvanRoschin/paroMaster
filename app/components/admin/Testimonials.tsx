@@ -11,16 +11,20 @@ import Link from "next/link"
 import { useState } from "react"
 import { FaPen, FaTrash } from "react-icons/fa"
 import { toast } from "sonner"
+import ErrorMessage from "../ui/Error"
 
 export default function Testimonials({ searchParams }: { searchParams: ISearchParams }) {
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
 
-  const { data, isLoading, isError, refetch } = useFetchData(
-    { ...searchParams, statusFilter },
+  const { data, isLoading, isError, error, refetch } = useFetchData(
     getAllTestimonials,
-    "testimonials"
+    ["testimonials"],
+    {
+      ...searchParams,
+      statusFilter
+    }
   )
-  const { mutate: deleteTestimonialById } = useDeleteData(deleteTestimonial, "testimonials")
+  const { mutate: deleteTestimonialById } = useDeleteData(deleteTestimonial, ["testimonials"])
 
   const handleDelete = (id: string) => {
     deleteTestimonialById(id)
@@ -43,7 +47,7 @@ export default function Testimonials({ searchParams }: { searchParams: ISearchPa
   }
 
   if (isLoading) return <Loader />
-  if (isError) return <div>Error fetching data.</div>
+  if (isError) return <ErrorMessage error={error} />
   if (!data?.testimonials || data.testimonials.length === 0) return <EmptyState showReset />
 
   // Pagination setup
