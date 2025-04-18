@@ -1,15 +1,14 @@
 "use client"
 import { testimonialFormSchema } from "@/helpers/index"
-import useLocalUuid from "@/hooks/useLocalUuid"
-import { useMutateAddTestimonial } from "@/hooks/useQueryTestimonials"
-import useTestimonialModal from "@/hooks/useTestimonialsModal"
+// import { useMutateAddTestimonial } from "@/hooks/useQueryTestimonials"
+import { addTestimonial } from "@/actions/testimonials"
+import { useAddData, useTestimonialModal } from "@/hooks/index"
 import { ITestimonial } from "@/types/index"
 import { Form, Formik, FormikState } from "formik"
 import { useSession } from "next-auth/react"
 import { useState } from "react"
 import ReactStars from "react-stars"
 import { toast } from "sonner"
-import { v4 as uuidv4 } from "uuid"
 import FormField from "../input/FormField"
 import Switcher from "../Switcher"
 import Button from "../ui/Button"
@@ -25,21 +24,16 @@ interface TestimonialFormProps {
 }
 
 const TestimonialForm = ({ productId }: TestimonialFormProps) => {
-  const setKey = useLocalUuid(state => state.setKey)
-  const uuidKey = useLocalUuid(state => state.uuidKey)
-  console.log("uuidKeyForm:", uuidKey)
-
   const { data: session } = useSession()
   const [isLoading, setIsLoading] = useState(false)
-  const addMutation = useMutateAddTestimonial(productId)
+
+  const addTestimonialMutation = useAddData(addTestimonial, ["testimonials"])
 
   const testinomialModal = useTestimonialModal()
 
   const isAdmin = !!session?.user
 
   const handleSubmit = async (values: ITestimonial, { resetForm }: ResetFormProps) => {
-    const uuidKey = uuidv4()
-    setKey(uuidKey)
     try {
       if (isLoading) return
       setIsLoading(true)
@@ -51,13 +45,13 @@ const TestimonialForm = ({ productId }: TestimonialFormProps) => {
       if (!values.rating) {
         delete newTestimonialData.rating
       }
-      const result = await addMutation.mutateAsync(newTestimonialData)
+      const result = await addTestimonialMutation.mutateAsync(newTestimonialData)
       if (result?.success === false) {
         toast.error("Щось пішло не так")
         return
       }
       testinomialModal.onClose()
-      // toast.success("Новий відгук додано!")
+      toast.success("Новий відгук додано!")
     } catch (error) {
       toast.error("Помилка при додаванні відгуку")
       console.error(error)
@@ -130,11 +124,6 @@ const TestimonialForm = ({ productId }: TestimonialFormProps) => {
                   size={24}
                   color2={"#ffd700"}
                 />
-                {/* <Rating
-                  value={values.rating ?? null}
-                  setFieldValue={setFieldValue}
-                  errors={errors}
-                /> */}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <Button

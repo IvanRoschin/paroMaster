@@ -47,7 +47,6 @@ export async function addTestimonial(values: Partial<ITestimonial>) {
 
     const newTestimonial = await Testimonial.create(testimonialData)
 
-    // Якщо передано product — оновлюємо середню оцінку
     if (values.product) {
       const testimonials = await Testimonial.find({
         product: values.product,
@@ -204,10 +203,6 @@ export async function getGoodTestimonials(productId: string) {
   try {
     await connectToDB()
     const testimonials = await Testimonial.find({ product: productId }).sort({ createdAt: -1 })
-    // console.log(`getGoodTestimonials for productId ${productId}:`, {
-    //   count: testimonials.length,
-    //   ids: testimonials.map(t => t._id.toString())
-    // })
     return JSON.parse(JSON.stringify(testimonials))
   } catch (error) {
     console.error("Error updating testimonial:", error)

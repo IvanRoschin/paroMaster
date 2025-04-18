@@ -110,9 +110,6 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
         toast.error("Something went wrong")
         return
       }
-
-      // await queryClient.invalidateQueries({ queryKey: ["allTestimonials"] })
-      // await queryClient.refetchQueries({ queryKey: ["allTestimonials"] })
       resetForm()
       toast.success(isUpdating ? "Відгук оновлено!" : "Новий відгук додано!")
       push("/admin/testimonials")
