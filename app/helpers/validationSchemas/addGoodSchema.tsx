@@ -2,22 +2,10 @@ import * as Yup from "yup"
 
 const goodFormSchema = Yup.object().shape({
   category: Yup.string()
-    .oneOf(
-      [
-        "Аксесуари та комплектуючі",
-        "Електроклапани",
-        "Корпус станції",
-        "Насоси(помпи)",
-        "Підошви для прасок",
-        "Плати керування",
-        "Провода та шланги",
-        "Резервуари для води",
-        "Бойлери",
-        "Корпус для прасок"
-      ],
-      "Немає такої категорії"
-    )
+    .min(2, "Мінімум 2 символи")
+    .max(50, "Максимум 50 символів")
     .required(`Обов'язкове поле`),
+
   title: Yup.string()
     .min(2, "Мінімум 2 символи")
     .max(50, "Максимум 50 символів")
@@ -43,6 +31,7 @@ const goodFormSchema = Yup.object().shape({
     .min(0, "Ціна товару повинан бути вище 0")
     .required(`Обов'язкове поле`)
     .nullable(),
+  isCondition: Yup.boolean().required(`Обов'язкове поле`),
   isAvailable: Yup.boolean().required(`Обов'язкове поле`),
   isCompatible: Yup.boolean().required(`Обов'язкове поле`),
   compatibility: Yup.string().notRequired()

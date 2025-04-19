@@ -1,7 +1,7 @@
 "use client"
 
 import { addNewLid } from "@/actions/lids"
-import AddLidForm from "@/components/AddLidForm"
+import AddLidForm from "@/components/forms/LidForm"
 import Logo from "@/components/Logo"
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api"
 import { FaCalendarAlt, FaMapMarkerAlt } from "react-icons/fa"

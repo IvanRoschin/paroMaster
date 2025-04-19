@@ -1,6 +1,7 @@
 "use server"
 
 import Good from "@/models/Good"
+import Testimonial from "@/models/Testimonial"
 import { IGood } from "@/types/good/IGood"
 import { ISearchParams } from "@/types/index"
 import { connectToDB } from "@/utils/dbConnect"
@@ -111,7 +112,11 @@ export async function getGoodById(id: string) {
   try {
     await connectToDB()
     const good = await Good.findById({ _id: id })
-    return JSON.parse(JSON.stringify(good))
+    const testimonials = await Testimonial.find({
+      product: id,
+      isActive: true
+    }).sort({ createdAt: -1 })
+    return JSON.parse(JSON.stringify({ ...good.toObject(), testimonials }))
   } catch (error) {
     console.log(error)
   }
@@ -184,6 +189,7 @@ export async function addGood(formData: FormData) {
       description: values.description,
       src: Array.isArray(values.src) ? values.src : [values.src],
       vendor: values.vendor,
+      isCondition: values.isAvailable === "true",
       isAvailable: values.isAvailable === "true",
       isCompatible: values.isCompatible === "true",
       compatibility: values.compatibility
@@ -211,6 +217,13 @@ export async function deleteGood(id: string) {
   }
   try {
     await connectToDB()
+    const deletedReviews = await Testimonial.deleteMany({ product: id })
+
+    if (deletedReviews.deletedCount > 0) {
+      console.log(`Видалено ${deletedReviews.deletedCount} відгуків для товару з ID: ${id}`)
+    } else {
+      console.log("Відгуків не було знайдено для видалення")
+    }
     await Good.findByIdAndDelete(id)
   } catch (error) {
     console.error("Failed to delete the good:", error)
@@ -242,6 +255,7 @@ export async function updateGood(formData: FormData) {
     title,
     description,
     price,
+    isCondition,
     isAvailable,
     isCompatible,
     compatibility
@@ -255,6 +269,7 @@ export async function updateGood(formData: FormData) {
     title?: string
     description?: string
     price?: number
+    isCondition?: string
     isAvailable?: string
     isCompatible?: string
     compatibility?: any
@@ -272,6 +287,7 @@ export async function updateGood(formData: FormData) {
       title,
       description,
       price: Number(price),
+      isCondition: isCondition === "true",
       isAvailable: isAvailable === "true",
       isCompatible: isCompatible === "true",
       compatibility
@@ -319,61 +335,24 @@ export async function uniqueBrands(): Promise<IGetAllBrands> {
   }
 }
 
-// export async function getMinMaxPrice() {
-//   try {
-//     // Connect to the database
-//     await connectToDB()
+export async function getMostPopularGoods() {
+  try {
+    await connectToDB()
+    const mostPopularGoods: IGood[] = await Good.find()
+      .sort({ averageRating: -1, ratingCount: -1 })
+      .limit(10)
 
-//     // Perform the aggregation
-//     const result = await Good.aggregate([
-//       {
-//         $project: {
-//           // Convert price to double, exclude documents where price is not a number
-//           price: {
-//             $cond: {
-//               if: { $isNumber: { $toDouble: "$price" } },
-//               then: { $toDouble: "$price" },
-//               else: null
-//             }
-//           }
-//         }
-//       },
-//       {
-//         $match: {
-//           // Filter out documents where price is null (i.e., was not a number)
-//           price: { $ne: null }
-//         }
-//       },
-//       {
-//         $group: {
-//           _id: null,
-//           minPrice: { $min: "$price" },
-//           maxPrice: { $max: "$price" }
-//         }
-//       },
-//       {
-//         $project: {
-//           _id: 0,
-//           minPrice: 1,
-//           maxPrice: 1
-//         }
-//       }
-//     ]).exec()
-
-//     // Handle the case where no goods are found
-//     if (result.length === 0) {
-//       throw new Error("No valid goods found")
-//     }
-
-//     return {
-//       success: true,
-//       minPrice: result[0].minPrice,
-//       maxPrice: result[0].maxPrice
-//     }
-//   } catch (error) {
-//     console.error("Error fetching min and max prices:", error)
-//   }
-// }
+    return {
+      success: true,
+      goods: JSON.parse(JSON.stringify(mostPopularGoods))
+    }
+  } catch (error) {
+    console.log("Error fetching most popular goods:", error)
+    return { success: false, goods: [] }
+  } finally {
+    revalidatePath("/")
+  }
+}
 
 export async function getMinMaxPrice(): Promise<{
   success: boolean

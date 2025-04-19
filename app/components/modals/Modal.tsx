@@ -1,36 +1,20 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { IoMdClose } from "react-icons/io"
-import Button from "../Button"
 
 interface ModalProps {
-  title?: string
-  actionLabel: string
-  secondaryAction?: () => void
-  secondaryActionLabel?: string
-  body?: JSX.Element
-  footer?: JSX.Element
+  body?: React.ReactElement
   isOpen?: boolean
   onClose: () => void
-  onSubmit: () => Promise<void> | void
   disabled?: boolean
 }
 
-const Modal: React.FC<ModalProps> = ({
-  isOpen,
-  onClose,
-  onSubmit,
-  title,
-  body,
-  footer,
-  actionLabel,
-  disabled,
-  secondaryAction,
-  secondaryActionLabel
-}) => {
+const Modal = ({ isOpen, onClose, body, disabled }: ModalProps) => {
   const [showModal, setShowModal] = useState(isOpen)
-  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    setShowModal(isOpen)
+  }, [isOpen])
 
   useEffect(() => {
     setShowModal(isOpen)
@@ -62,20 +46,6 @@ const Modal: React.FC<ModalProps> = ({
     if (e.currentTarget === e.target) handleClose()
   }
 
-  const handleSubmit = useCallback(() => {
-    if (disabled) {
-      return
-    }
-    onSubmit()
-  }, [disabled, onSubmit])
-
-  const handleSecondaryAction = useCallback(() => {
-    if (disabled || !secondaryAction) {
-      return
-    }
-    secondaryAction()
-  }, [disabled, secondaryAction])
-
   if (!isOpen) {
     return null
   }
@@ -83,119 +53,25 @@ const Modal: React.FC<ModalProps> = ({
   return (
     <div
       onClick={handleBackdropClick}
-      className="
-      justify-center
-      items-center
-      flex
-      overflow-x-hidden
-      overflow-y-auto
-      fixed
-      inset-0
-      z-50
-      outline-none
-      focus:outline-none
-      bg-neutral-800/70"
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300 ${
+        showModal ? "opacity-100" : "opacity-0 pointer-events-none"
+      }`}
     >
       <div
-        ref={ref}
-        className="
-          relative 
-          w-full 
-          md:w-4/6 
-          lg:w-3/6 
-          xl:w-3/5 
-					mr-0
-          mx-auto 
-          lg:h-auto 
-          md:h-auto
-        "
+        className={`relative w-full max-w-2xl mx-auto my-10 rounded-2xl bg-white p-6 shadow-2xl transform transition-all duration-300 ${
+          showModal ? "translate-y-0 scale-100 opacity-100" : "translate-y-10 scale-95 opacity-0"
+        }`}
+        style={{ maxHeight: "90vh", overflowY: "auto" }}
       >
-        {/* Content*/}
-        <div
-          className={`translate duration-300  ${
-            showModal ? "translate-x-0" : "translate-x-[50%]"
-          } ${showModal ? "opacity-100" : "opacity-0"}`}
+        <button
+          onClick={() => handleClose()}
+          className="absolute right-4 top-4 p-1 border rounded-full border-neutral-400 hover:border-primaryAccentColor hover:opacity-70 transition"
         >
-          <div
-            className="
-            translate
-            border-0
-            rounded-lg
-            shadow-lg
-            relative
-            flex
-            flex-col
-            w-full
-            bg-white
-            outline-none
-            focus:outline-none
-						"
-          >
-            {/* Header*/}
-            <div
-              className="
-              flex 
-              items-center 
-              p-8
-              border-nuatral:800 
-              justify-center
-              relative
-              border-[1px]"
-            >
-              <div className="text-lg font-semibold">{title}</div>
-              <button
-                onClick={handleClose}
-                className="
-                  p-1 
-                  border-[1px] 
-                  rounded-full 
-                  border-neutral-600 
-                  hover:opacity-70 
-                  transition 
-                  absolute 
-                  right-9
-									hover:border-primaryAccentColor
-									"
-              >
-                <IoMdClose size={18} />
-              </button>
-            </div>
-            {/*Body */}
-            <div
-              className=" p-6 flex-auto"
-              style={{ maxHeight: "calc(100vh - 300px)", overflowY: "auto" }}
-            >
-              {body}
-            </div>
-            {/**Footer */}
-            <div className="flex flex-col gap-2 p-6">
-              <div
-                className="
-                flex 
-                flex-row 
-                items-center 
-                gap-4
-                w-full"
-              >
-                {secondaryAction && secondaryActionLabel && (
-                  <Button
-                    outline
-                    disabled={disabled}
-                    label={secondaryActionLabel}
-                    onClick={handleSecondaryAction}
-                  />
-                )}
-                <Button
-                  type="submit"
-                  disabled={disabled}
-                  label={actionLabel}
-                  onClick={handleSubmit}
-                />
-              </div>
-              {footer}
-            </div>
-          </div>
-        </div>
+          <IoMdClose size={18} />
+        </button>
+        {/* Content*/}
+
+        {body}
       </div>
     </div>
   )

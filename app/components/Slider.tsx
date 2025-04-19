@@ -4,6 +4,7 @@ import Image from "next/image"
 import { useCallback, useEffect, useState } from "react"
 import { IoIosArrowDropleft, IoIosArrowDropright } from "react-icons/io"
 import EmptyState from "./EmptyState"
+import Loader from "./Loader"
 import Testimonial from "./Testimonial"
 
 interface SliderProps {
@@ -21,22 +22,19 @@ const Slider: React.FC<SliderProps> = ({
 }) => {
   const [activeImage, setActiveImage] = useState(0)
 
-  // Safely accessing the slides array
+  // slides завжди визначається, навіть якщо undefined
   const slides = testimonials ? testimonialsData?.testimonials : slidesData?.slides
 
+  // викликаємо useCallback ДО return'ів
   const clickNext = useCallback(() => {
     if (slides && slides.length > 0) {
-      setActiveImage(prevActiveImage =>
-        prevActiveImage === slides.length - 1 ? 0 : prevActiveImage + 1
-      )
+      setActiveImage(prev => (prev === slides.length - 1 ? 0 : prev + 1))
     }
   }, [slides])
 
   const clickPrev = useCallback(() => {
     if (slides && slides.length > 0) {
-      setActiveImage(prevActiveImage =>
-        prevActiveImage === 0 ? slides.length - 1 : prevActiveImage - 1
-      )
+      setActiveImage(prev => (prev === 0 ? slides.length - 1 : prev - 1))
     }
   }, [slides])
 
@@ -49,7 +47,12 @@ const Slider: React.FC<SliderProps> = ({
     }
   }, [activeImage, slides, clickNext])
 
-  if (!slides || slides.length === 0) {
+  // Після хуків — вже можна повертати щось умовно
+  if (!slides) {
+    return <Loader />
+  }
+
+  if (slides.length === 0) {
     return <EmptyState showReset />
   }
 

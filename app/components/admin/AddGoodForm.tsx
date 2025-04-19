@@ -3,8 +3,9 @@
 import { CustomButton, FormField, ImageUploadCloudinary, Switcher } from "@/components/index"
 import { goodFormSchema } from "@/helpers/index"
 import { useAddData, useUpdateData } from "@/hooks/index"
+import { useCategoriesEnum } from "@/hooks/useCategoriesEnum"
 import { IGood } from "@/types/good/IGood"
-import { categoryList } from "app/config/constants"
+import { ICategory } from "@/types/index"
 import { Form, Formik, FormikState } from "formik"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -27,8 +28,10 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
   const { push } = useRouter()
   const isUpdating = Boolean(good?._id)
 
-  const addGoodMutation = useAddData(action, "goods")
-  const updateGoodMutation = useUpdateData(action, "goods")
+  const { categories, allowedCategories } = useCategoriesEnum()
+
+  const addGoodMutation = useAddData(action, ["goods"])
+  const updateGoodMutation = useUpdateData(action, ["goods"])
 
   const textareaStyles: React.CSSProperties = {
     height: "100px",
@@ -38,8 +41,12 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
   const inputs = [
     {
       id: "category",
+      label: "Оберіть категорію",
       type: "select",
-      options: categoryList.map(category => ({ value: category.title, label: category.title })),
+      options: categories?.map((category: ICategory) => ({
+        value: category.title,
+        label: category.title
+      })),
       required: true
     },
     {
@@ -73,6 +80,11 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
       required: true
     },
     {
+      id: "isCondition",
+      label: "Новий?",
+      type: "switcher"
+    },
+    {
       id: "isAvailable",
       label: "В наявності?",
       type: "switcher"
@@ -96,7 +108,7 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
   ]
 
   const initialValues: InitialStateType = {
-    category: good?.category || categoryList[0].title,
+    category: good?.category || allowedCategories[0],
     src: good?.src || [],
     brand: good?.brand || "",
     model: good?.model || "",
@@ -104,6 +116,7 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
     title: good?.title || "",
     description: good?.description || "",
     price: good?.price || 0,
+    isCondition: good?.isCondition || false,
     isAvailable: good?.isAvailable || false,
     isCompatible: good?.isCompatible || false,
     compatibility: good?.compatibility || ""
@@ -132,12 +145,23 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
         : await addGoodMutation.mutateAsync(formData)
 
       // Ensure result contains 'success'
-      if (result?.success === false) {
-        toast.error(result.message || "Something went wrong")
-        return
+      if (result.success) {
+        toast.success(isUpdating ? "Товар оновлено!" : "Новий товар додано!")
+        push("/admin/goods")
       }
 
-      resetForm()
+      resetForm({
+        values: {
+          ...values,
+          title: "",
+          vendor: "",
+          model: "",
+          price: 0,
+          description: "",
+          src: [],
+          compatibility: ""
+        }
+      })
       toast.success(isUpdating ? "Товар оновлено!" : "Новий товар додано!")
       push("/admin/goods")
     } catch (error) {
@@ -172,12 +196,34 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
             {inputs.map((item, i) => (
               <div key={i}>
                 {item.type === "switcher" ? (
-                  <Switcher
-                    id={item.id}
-                    label={item.label}
-                    checked={!!(values as Record<string, any>)[item.id]}
-                    onChange={checked => setFieldValue(item.id, checked)}
-                  />
+                  <>
+                    {(item.id === "isCondition" ||
+                      item.id === "isAvailable" ||
+                      item.id === "isCompatible") && (
+                      <div className="mb-1 text-sm text-gray-600">
+                        {item.id === "isCondition" &&
+                          `Стан: ${values.isCondition ? "Б/У" : "Нова"}`}
+                        {item.id === "isAvailable" &&
+                          `Наявність: ${values.isAvailable ? "Є в наявності" : "Немає"}`}
+                        {item.id === "isCompatible" &&
+                          `Сумісність: ${values.isCompatible ? "Сумісний" : "Не сумісний"}`}
+                      </div>
+                    )}
+                    <Switcher
+                      id={item.id}
+                      label={
+                        item.id === "isCondition"
+                          ? "Б/У?"
+                          : item.id === "isAvailable"
+                            ? "Є в наявності?"
+                            : item.id === "isCompatible"
+                              ? "Сумісний?"
+                              : item.label
+                      }
+                      checked={!!(values as Record<string, any>)[item.id]}
+                      onChange={checked => setFieldValue(item.id, checked)}
+                    />
+                  </>
                 ) : (
                   <FormField item={item} setFieldValue={setFieldValue} errors={errors} />
                 )}

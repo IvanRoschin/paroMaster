@@ -4,26 +4,25 @@ import User from "@/models/User"
 import { ISearchParams } from "@/types/index"
 import { IUser } from "@/types/user/IUser"
 import { connectToDB } from "@/utils/dbConnect"
-import bcrypt from "bcrypt"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
-export async function addUser(formData: FormData): Promise<void> {
+export async function addUser(values: any): Promise<{ success: boolean; message: string }> {
   try {
     await connectToDB()
     // Check if email already exists
-    const email = formData.get("email") as string
+    const email = values.email as string
 
     const existingUser = await User.findOne({ email })
     if (existingUser) {
       throw new Error("Email already exists")
     }
 
-    const name = formData.get("name") as string
-    const phone = formData.get("phone") as string
-    const isAdmin = formData.get("isAdmin") === "true"
-    const isActive = formData.get("isActive") === "true"
-    const password = formData.get("password") as string
+    const name = values.name as string
+    const phone = values.phone as string
+    const isAdmin = values.isAdmin
+    const isActive = values.isActive
+    const password = values.password as string
 
     const newUser = new User({
       name,
@@ -36,6 +35,10 @@ export async function addUser(formData: FormData): Promise<void> {
     newUser.setPassword(password)
 
     await newUser.save()
+    return {
+      success: true,
+      message: "Користувача додано успішно!"
+    }
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error adding newUser:", error)
@@ -50,7 +53,8 @@ export async function addUser(formData: FormData): Promise<void> {
   }
 }
 
-export async function getAllUsers(searchParams: ISearchParams, limit: number) {
+export async function getAllUsers(searchParams: ISearchParams) {
+  const limit = searchParams.limit || 10
   const q = searchParams.q || ""
   const page = searchParams.page || 1
   const ITEM_PER_PAGE = limit
@@ -98,50 +102,41 @@ export async function deleteUser(id: string) {
   revalidatePath("/admin/users")
 }
 
-export async function updateUser(formData: FormData) {
-  const entries = Object.fromEntries(formData.entries())
-
-  const { id, name, phone, email, password, isAdmin, isActive } = entries as {
-    id: string
-    name?: string
-    phone?: string
-    email?: string
-    password?: string
-    isAdmin?: string
-    isActive?: string
-  }
-
+export async function updateUser(values: any): Promise<{ success: boolean; message: string }> {
   try {
     await connectToDB()
 
-    const updateFields: Partial<IUser> = {
-      name,
-      phone,
-      email,
-      isAdmin: isAdmin === "true",
-      isActive: isActive === "true"
-    }
-
-    if (password) {
-      updateFields.password = await bcrypt.hash(password, 10)
-    }
-
-    Object.keys(updateFields).forEach(
-      key =>
-        (updateFields[key as keyof IUser] === "" ||
-          updateFields[key as keyof IUser] === undefined) &&
-        delete updateFields[key as keyof IUser]
+    const updateFields = Object.fromEntries(
+      Object.entries(values).filter(([key, value]) => key !== "_id" && value !== undefined)
     )
 
-    await User.findByIdAndUpdate(id, updateFields)
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error update user:", error)
-      throw new Error("Failed to update user: " + error.message)
-    } else {
-      console.error("Unknown error:", error)
-      throw new Error("Failed to update user: Unknown error")
+    if (Object.keys(updateFields).length === 0) {
+      return {
+        success: false,
+        message: "No valid fields to update."
+      }
     }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      values._id,
+      { $set: updateFields },
+      { new: true }
+    )
+
+    if (!updatedUser) {
+      return {
+        success: false,
+        message: "User not found."
+      }
+    }
+
+    return {
+      success: true,
+      message: "Користувача оновлено успішно"
+    }
+  } catch (error) {
+    console.error("Error update user:", error)
+    throw new Error("Failed to update user")
   } finally {
     revalidatePath("/admin/users")
     redirect("/admin/users")

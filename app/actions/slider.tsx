@@ -36,10 +36,9 @@ export async function addSlide(formData: FormData) {
   }
 }
 
-export async function getAllSlides(
-  searchParams: ISearchParams,
-  limit: number
-): Promise<IGetAllSlides> {
+export async function getAllSlides(searchParams: ISearchParams): Promise<IGetAllSlides> {
+  const limit = searchParams?.limit || 3
+
   const page = searchParams.page || 1
 
   try {

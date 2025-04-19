@@ -13,10 +13,9 @@ interface IGetAllCostomers {
   count: number
 }
 
-export async function getAllCustomers(
-  searchParams: ISearchParams,
-  limit: number
-): Promise<IGetAllCostomers> {
+export async function getAllCustomers(searchParams: ISearchParams): Promise<IGetAllCostomers> {
+  const limit = searchParams.limit || 10
+
   const page = searchParams.page || 1
 
   try {

@@ -20,11 +20,15 @@ const testimonialFormSchema = Yup.object().shape({
   text: Yup.string()
     .min(20, "Мінімум 20 символів")
     .max(200, "Максимум 200 символів")
+    .matches(
+      /^(?!.*\b(?:http|HTTP|ftp|FTP|www|WWW)\b)[a-zA-Z0-9\sа-яА-ЯёЁїЇіІєЄ,.;:@#\$%&*\(\)\-_=\+\[\]\|\\\/\?`~!№"']+$/u,
+      "Only letters, numbers, commas, periods, colons, semicolons are allowed"
+    )
     .required(`Обов'язкове поле`),
   rating: Yup.number()
-    .min(0, "Ціна товару повинна бути вище 0")
-    .required(`Обов'язкове поле`)
-    .nullable(),
+    .min(1, "Оцінка має бути не менше 1")
+    .max(5, "Оцінка не може бути більшою за 5")
+    .notRequired(),
   isActive: Yup.boolean().required(`Обов'язкове поле`)
 })
 

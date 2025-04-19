@@ -2,22 +2,25 @@
 
 import { getGoodById } from "@/actions/goods"
 import { Icon } from "@/components/Icon"
+import { useFetchDataById } from "@/hooks/useFetchDataById"
 import { SGood } from "@/types/good/IGood"
 import { useShoppingCart } from "app/context/ShoppingCartContext"
-import useSWR from "swr"
 import ImagesBlock from "../ImagesBlock"
 import Loader from "../Loader"
 
 export default function ItemClient({ id }: { id: string }) {
   const { getItemQuantity, increaseCartQuantity, decreaseCartQuantity, removeFromCart } =
     useShoppingCart()
-  const { data, error } = useSWR(id ? "data" : null, () => getGoodById(id))
 
-  if (error) {
-    console.error("Error fetching item:", error)
-  }
-  if (!data) {
-    return <Loader />
+  const { data, isLoading, isError, error } = useFetchDataById(getGoodById, ["goodById"], id)
+
+  if (isLoading || !data) return <Loader />
+  if (isError) {
+    return (
+      <div>
+        Error fetching good data: {error instanceof Error ? error.message : "Unknown error"}
+      </div>
+    )
   }
 
   const item: SGood = JSON.parse(data)

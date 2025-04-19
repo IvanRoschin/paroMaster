@@ -1,17 +1,16 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { QueryKey, useQuery } from "@tanstack/react-query"
 
 export const useFetchDataById = <T,>(
-  id: string,
   action: (id: string) => Promise<T>,
-  key: string
+  key: QueryKey,
+  id: string
 ) => {
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: [key, id],
-    queryFn: async () => action(id),
-    enabled: !!id // Ensures the query runs only if `id` is defined
+    queryFn: async () => action(id)
   })
 
-  return { data, isError, isLoading, error }
+  return { data, isError, isLoading, error, refetch }
 }

@@ -2,28 +2,22 @@
 
 import { deleteCustomer, getAllCustomers } from "@/actions/customers"
 import Pagination from "@/components/admin/Pagination"
-import Button from "@/components/Button"
 import EmptyState from "@/components/EmptyState"
 import { Loader, Search } from "@/components/index"
+import Button from "@/components/ui/Button"
 import { useDeleteData, useFetchData } from "@/hooks/index"
 import { ISearchParams } from "@/types/searchParams"
 import Link from "next/link"
 import { FaPen, FaTrash } from "react-icons/fa"
+import ErrorMessage from "../ui/Error"
 
-export default function Customers({
-  searchParams,
-  limit
-}: {
-  searchParams: ISearchParams
-  limit: number
-}) {
-  const { data, isLoading, isError } = useFetchData(
-    searchParams,
-    limit,
+export default function Customers({ searchParams }: { searchParams: ISearchParams }) {
+  const { data, isLoading, isError, error } = useFetchData(
     getAllCustomers,
-    "customers"
+    ["customers"],
+    searchParams
   )
-  const { mutate: deleteCustomerById } = useDeleteData(deleteCustomer, "customers")
+  const { mutate: deleteCustomerById } = useDeleteData(deleteCustomer, ["customers"])
 
   const handleDelete = (id: string) => {
     deleteCustomerById(id)
@@ -34,7 +28,7 @@ export default function Customers({
   }
 
   if (isError) {
-    return <div>Error fetching data.</div>
+    return <ErrorMessage error={error} />
   }
 
   if (!data?.customers || data.customers.length === 0) {
@@ -42,9 +36,8 @@ export default function Customers({
   }
 
   const customersCount = data?.count || 0
-
   const page = searchParams.page ? Number(searchParams.page) : 1
-
+  const limit = Number(searchParams.limit) || 10
   const totalPages = Math.ceil(customersCount / limit)
   const pageNumbers = []
   const offsetNumber = 3
