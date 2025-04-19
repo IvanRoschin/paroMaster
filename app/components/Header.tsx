@@ -1,7 +1,7 @@
 "use client"
 
 import { useScreenSize } from "../hooks" // Adjust the path if necessary
-import Cart from "./Cart/Cart"
+import Cart from "./Cart/CartButton"
 import Logo from "./Logo"
 import Menu from "./Menu"
 import MobileMenu from "./MobileMenu"

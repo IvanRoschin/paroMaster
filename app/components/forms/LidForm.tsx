@@ -29,7 +29,7 @@ interface NewLidFormProps {
   icon?: React.ReactNode
 }
 
-const NewLidForm: React.FC<NewLidFormProps> = ({ lid, title, action, subtitle, icon }) => {
+const LidForm: React.FC<NewLidFormProps> = ({ lid, title, action, subtitle, icon }) => {
   const inputs = [
     {
       id: "name",
@@ -106,4 +106,4 @@ const NewLidForm: React.FC<NewLidFormProps> = ({ lid, title, action, subtitle, i
   )
 }
 
-export default NewLidForm
+export default LidForm

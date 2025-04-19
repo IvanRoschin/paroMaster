@@ -4,8 +4,8 @@ import { IGood } from "@/types/good/IGood"
 import { useShoppingCart } from "app/context/ShoppingCartContext"
 import Image from "next/image"
 import { useEffect, useState } from "react"
-import Button from "../Button"
 import { Icon } from "../Icon"
+import Button from "../ui/Button"
 
 type CartItemProps = {
   good: IGood

@@ -9,12 +9,12 @@ export default async function SlidesPage({ searchParams }: { searchParams: ISear
   const queryClinet = new QueryClient()
   await queryClinet.prefetchQuery({
     queryKey: ["slides"],
-    queryFn: () => getAllSlides(searchParams, limit)
+    queryFn: () => getAllSlides(searchParams)
   })
 
   return (
     <HydrationBoundary state={dehydrate(queryClinet)}>
-      <Slides searchParams={searchParams} limit={limit} />
+      <Slides searchParams={searchParams} />
     </HydrationBoundary>
   )
 }

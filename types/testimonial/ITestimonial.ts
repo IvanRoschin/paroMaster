@@ -2,8 +2,9 @@ export interface ITestimonial {
   createdAt: string | number | Date
   _id?: string
   name: string
-  surname: string
+  surname?: string
   text: string
-  rating: number
+  rating?: number | null
   isActive: boolean
+  product?: string
 }

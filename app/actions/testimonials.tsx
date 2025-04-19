@@ -1,10 +1,10 @@
 "use server"
 
-import Testimonials from "@/models/Testimonials"
+import Good from "@/models/Good"
+import Testimonial from "@/models/Testimonial"
+
 import { ISearchParams, ITestimonial } from "@/types/index"
 import { connectToDB } from "@/utils/dbConnect"
-import { revalidatePath } from "next/cache"
-import { redirect } from "next/navigation"
 
 export interface IGetAllTestimonials {
   success: boolean
@@ -12,14 +12,21 @@ export interface IGetAllTestimonials {
   count: number
 }
 
-export async function addTestimonial(values: ITestimonial) {
-  console.log("values", values)
-  if (!values.name || !values.text || !values.rating || !values.isActive) {
-    throw new Error("All fields are required")
+export async function addTestimonial(values: Partial<ITestimonial>) {
+  if (!values.name) {
+    throw new Error("Name is required.")
   }
+  if (!values.text || typeof values.text !== "string") {
+    throw new Error("Text is required and must be a string")
+  }
+  if (values.isActive === undefined) {
+    throw new Error("isActive field is required.")
+  }
+
   try {
     await connectToDB()
-    const existingTestimonial = await Testimonials.findOne({
+
+    const existingTestimonial = await Testimonial.findOne({
       name: values.name,
       text: values.text
     })
@@ -28,15 +35,45 @@ export async function addTestimonial(values: ITestimonial) {
       throw new Error("This testimonial already exists")
     }
 
-    await Testimonials.create({
+    const testimonialData: Partial<ITestimonial> = {
       name: values.name,
       text: values.text,
-      rating: Number(values.rating),
-      isActive: values.isActive
-    })
+      isActive: values.isActive,
+      ...(values.product && { product: values.product }),
+      ...(values.rating && { rating: values.rating })
+    }
+
+    const newTestimonial = await Testimonial.create(testimonialData)
+
+    if (values.product) {
+      const testimonials = await Testimonial.find({
+        product: values.product,
+        isActive: true,
+        rating: { $gt: 0 }
+      })
+
+      const ratingSum = testimonials.reduce((acc, t) => acc + t.rating, 0)
+      const ratingCount = testimonials.length
+      const averageRating = ratingCount ? ratingSum / ratingCount : null
+
+      const updatedGood = await Good.findByIdAndUpdate(
+        values.product,
+        {
+          averageRating,
+          ratingCount
+        },
+        { new: true }
+      )
+
+      if (!updatedGood) {
+        throw new Error("Product not found")
+      }
+    }
+
     return {
       success: true,
-      message: "Testimonial added successfully"
+      message: "Відгук додано",
+      testimonial: JSON.parse(JSON.stringify(newTestimonial))
     }
   } catch (error) {
     if (error instanceof Error) {
@@ -46,23 +83,29 @@ export async function addTestimonial(values: ITestimonial) {
       console.error("Unknown error:", error)
       throw new Error("Failed to add Testimonial: Unknown error")
     }
-  } finally {
-    revalidatePath("/admin/testimonials")
   }
 }
 
 export async function getAllTestimonials(
-  searchParams: ISearchParams,
-  limit: number
+  searchParams?: ISearchParams
 ): Promise<IGetAllTestimonials> {
-  const page = searchParams.page || 1
+  const limit = searchParams?.limit || 4
+  const page = searchParams?.page || 1
+  const statusFilter = searchParams?.statusFilter
 
   try {
     await connectToDB()
 
-    const count = await Testimonials.countDocuments()
+    const filter: any = {}
+    if (statusFilter === "Опублікований") {
+      filter.isActive = true
+    } else if (statusFilter === "Не публікується") {
+      filter.isActive = false
+    }
 
-    const testimonials: ITestimonial[] = await Testimonials.find()
+    const count = await Testimonial.countDocuments()
+
+    const testimonials: ITestimonial[] = await Testimonial.find(filter)
       .sort({ createdAt: -1 })
       .skip(limit * (page - 1))
       .limit(limit)
@@ -71,10 +114,10 @@ export async function getAllTestimonials(
     return {
       success: true,
       testimonials: JSON.parse(JSON.stringify(testimonials)),
-      count: count
+      count
     }
   } catch (error) {
-    console.log(error)
+    console.error("Error in getAllTestimonials:", error)
     return { success: false, testimonials: [], count: 0 }
   }
 }
@@ -82,8 +125,8 @@ export async function getAllTestimonials(
 export async function getTestimonialById(id: string) {
   try {
     await connectToDB()
-    const category = await Testimonials.findById({ _id: id })
-    return JSON.parse(JSON.stringify(category))
+    const testimonial = await Testimonial.findById({ _id: id })
+    return JSON.parse(JSON.stringify(testimonial))
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error getting testimonials:", error)
@@ -95,14 +138,18 @@ export async function getTestimonialById(id: string) {
   }
 }
 
-export async function deleteTestimonial(id: string) {
-  if (!id) {
+export async function deleteTestimonial(testimonialId: string) {
+  if (!testimonialId) {
     console.error("No ID provided")
     return
   }
   try {
     await connectToDB()
-    await Testimonials.findByIdAndDelete(id)
+    await Testimonial.findByIdAndDelete(testimonialId)
+    // return {
+    //   success: true,
+    //   message: "Відгук видалено"
+    // }
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error delete category:", error)
@@ -111,8 +158,6 @@ export async function deleteTestimonial(id: string) {
       console.error("Unknown error:", error)
       throw new Error("Failed to delete category: Unknown error")
     }
-  } finally {
-    revalidatePath("/admin/testimonials")
   }
 }
 
@@ -131,7 +176,7 @@ export async function updateTestimonial(values: any) {
       }
     }
 
-    const updatedTestimonial = await Testimonials.findByIdAndUpdate(
+    const updatedTestimonial = await Testimonial.findByIdAndUpdate(
       values._id,
       { $set: updateFields },
       { new: true }
@@ -154,8 +199,20 @@ export async function updateTestimonial(values: any) {
       success: false,
       message: error instanceof Error ? error.message : "Unknown error occurred"
     }
+  }
+}
+
+export async function getGoodTestimonials(productId: string) {
+  try {
+    await connectToDB()
+    const testimonials = await Testimonial.find({ product: productId }).sort({ createdAt: -1 })
+    return JSON.parse(JSON.stringify(testimonials))
+  } catch (error) {
+    console.error("Error updating testimonial:", error)
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Unknown error occurred"
+    }
   } finally {
-    revalidatePath("/admin/testimonials")
-    redirect("/admin/testimonials")
   }
 }

@@ -2,26 +2,21 @@
 
 import { deleteSlide, getAllSlides } from "@/actions/slider"
 import Pagination from "@/components/admin/Pagination"
-import Button from "@/components/Button"
 import EmptyState from "@/components/EmptyState"
 import Loader from "@/components/Loader"
 import Search from "@/components/Search"
+import Button from "@/components/ui/Button"
 import { useDeleteData, useFetchData } from "@/hooks/index"
 import { ISearchParams } from "@/types/searchParams"
 import Image from "next/image"
 import Link from "next/link"
 import { FaPen, FaTrash } from "react-icons/fa"
+import ErrorMessage from "../ui/Error"
 
-export default function Slides({
-  searchParams,
-  limit
-}: {
-  searchParams: ISearchParams
-  limit: number
-}) {
-  const { data, isLoading, isError } = useFetchData(searchParams, limit, getAllSlides, "slides")
+export default function Slides({ searchParams }: { searchParams: ISearchParams }) {
+  const { data, isLoading, isError, error } = useFetchData(getAllSlides, ["slides"], searchParams)
 
-  const { mutate: deleteSliderById } = useDeleteData(deleteSlide, "slides")
+  const { mutate: deleteSliderById } = useDeleteData(deleteSlide, ["slides"])
 
   const handleDelete = (id: string) => {
     deleteSliderById(id)
@@ -32,7 +27,7 @@ export default function Slides({
   }
 
   if (isError) {
-    return <div>Error fetching data.</div>
+    return <ErrorMessage error={error} />
   }
 
   if (!data?.slides || data.slides.length === 0) {
@@ -42,7 +37,7 @@ export default function Slides({
   const slidesCount = data?.count || 0
 
   const page = searchParams.page ? Number(searchParams.page) : 1
-
+  const limit = Number(searchParams.limit) || 10
   const totalPages = Math.ceil(slidesCount / limit)
   const pageNumbers = []
   const offsetNumber = 3

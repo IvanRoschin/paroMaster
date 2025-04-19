@@ -8,7 +8,7 @@ import AddSlideForm from "@/components/admin/AddSlideForm"
 import TestimonialForm from "@/components/admin/AddTestimonialForm"
 import AdminMenu from "@/components/admin/Navbar"
 import Advantages from "@/components/Advantages"
-import Cart from "@/components/Cart/Cart"
+import Cart from "@/components/Cart/CartButton"
 import Description from "@/components/Description"
 import EmptyState from "@/components/EmptyState"
 import Footer from "@/components/Footer"
@@ -43,9 +43,9 @@ export {
   Footer,
   FormField,
   Header,
-  ImageUploadCloudinary,
   ImagesBlock,
   ImagesUpload,
+  ImageUploadCloudinary,
   ItemListCard,
   ItemsList,
   Loader,

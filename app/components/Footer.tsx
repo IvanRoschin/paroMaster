@@ -7,8 +7,8 @@ import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useCallback } from "react"
 import { useScreenSize } from "../hooks"
-import AddLidForm from "./AddLidForm"
 import EmptyState from "./EmptyState"
+import LidForm from "./forms/LidForm"
 import Logo from "./Logo"
 import Socials from "./Socials"
 
@@ -32,6 +32,17 @@ const links = [
   {
     title: "Політика Конфіденційності",
     link: "privacypolicy"
+  }
+]
+
+const goodsLinks = [
+  {
+    title: "Популярні товари",
+    link: "populargoods"
+  },
+  {
+    title: "Акції та знижки",
+    link: "/"
   }
 ]
 
@@ -138,12 +149,14 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
                   Товари
                   <div className="border-b border-primaryAccentColor" />
                   <ul className="text-sm">
-                    {["Популярні", "Акції та знижки"].map((text, index) => (
+                    {goodsLinks.map((item, index) => (
                       <li
                         key={index}
                         className="nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200"
                       >
-                        <Link href={`/${text.toLowerCase().replace(/ /g, "-")}`}>{text}</Link>
+                        <Link href={`/${item.link.toLowerCase().replace(/ /g, "-")}`}>
+                          {item.title}
+                        </Link>
                       </li>
                     ))}
                   </ul>
@@ -196,12 +209,14 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
                 Товари
                 <div className="border-b border-primaryAccentColor" />
                 <ul className="text-sm">
-                  {["Популярні", "Акції та знижки"].map((text, index) => (
+                  {goodsLinks.map((item, index) => (
                     <li
                       key={index}
                       className="nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200"
                     >
-                      <Link href={`/${text.toLowerCase().replace(/ /g, "-")}`}>{text}</Link>
+                      <Link href={`/${item.link.toLowerCase().replace(/ /g, "-")}`}>
+                        {item.title}
+                      </Link>
                     </li>
                   ))}
                 </ul>
@@ -233,7 +248,7 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
           )}
         </div>
         <div id="contactForm" className={`${isMobile ? "mb-4" : "mb-0"}`}>
-          <AddLidForm action={addNewLid} title="Замовити зворотній дзвінок" />
+          <LidForm action={addNewLid} title="Замовити зворотній дзвінок" />
         </div>
       </div>
       {!isMobile && <div className="border-b border-primaryAccentColor mb-5" />}

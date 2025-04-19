@@ -4,6 +4,7 @@ import { testimonialFormSchema } from "@/helpers/index"
 import { useAddData } from "@/hooks/useAddData"
 import { useUpdateData } from "@/hooks/useUpdateData"
 import { ITestimonial } from "@/types/index"
+import { useQueryClient } from "@tanstack/react-query"
 import { Form, Formik, FormikState } from "formik"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
@@ -32,10 +33,11 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
   const [isLoading, setIsLoading] = useState(false)
   const { push } = useRouter()
   const { data: session } = useSession()
-  const addTestimonialMutation = useAddData(action, "testimonials")
-  const updateTestimonialMutation = useUpdateData(action, "testimonials")
+  const addTestimonialMutation = useAddData(action, ["allTestimonials"])
+  const updateTestimonialMutation = useUpdateData(action, ["allTestimonials"])
   const [name, surname] = testimonial?.name?.split(" ") || ["", ""]
   const isUpdating = Boolean(testimonial?._id)
+  const queryClient = useQueryClient()
 
   const textareaStyles: React.CSSProperties = {
     height: "100px",
@@ -81,12 +83,11 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
     text: testimonial?.text || "",
     rating: testimonial?.rating || 0,
     createdAt: testimonial?.createdAt || "",
-    isActive: testimonial?.isActive || false
+    isActive: testimonial?.isActive || false,
+    product: testimonial?.product || ""
   }
 
   const handleSubmit = async (values: ITestimonial, { resetForm }: ResetFormProps) => {
-    console.log("Submit triggered")
-
     try {
       if (isLoading) return
       setIsLoading(true)
@@ -96,7 +97,6 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
         ...values,
         name: fullName
       }
-      console.log("newestimonialData", newestimonialData)
 
       const updateTestimonialData = isUpdating
         ? { ...newestimonialData, _id: testimonial?._id }
@@ -110,7 +110,6 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
         toast.error("Something went wrong")
         return
       }
-
       resetForm()
       toast.success(isUpdating ? "Відгук оновлено!" : "Новий відгук додано!")
       push("/admin/testimonials")
@@ -161,8 +160,12 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
                 </label>
                 <ReactStars
                   count={5}
-                  value={values.rating}
-                  onChange={(value: number) => setFieldValue("rating", value)}
+                  value={values.rating ?? undefined}
+                  onChange={(value: number) => {
+                    if (value !== values.rating) {
+                      setFieldValue("rating", value)
+                    }
+                  }}
                   size={24}
                   color2={"#ffd700"}
                 />

@@ -8,14 +8,12 @@ interface GoodsData {
   goods: IGood[]
 }
 
-const limit = 4
-
 export default async function CatalogPage({ searchParams }: { searchParams: ISearchParams }) {
   const queryClient = new QueryClient()
 
   await queryClient.prefetchQuery({
     queryKey: ["goods"],
-    queryFn: () => getAllGoods(searchParams, limit)
+    queryFn: () => getAllGoods(searchParams)
   })
   const queryState = queryClient.getQueryState(["goods"])
 

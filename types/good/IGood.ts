@@ -10,6 +10,7 @@ export interface IGood {
   title: string
   description: string
   price: number
+  isCondition: boolean
   isAvailable: boolean
   isCompatible: boolean
   compatibility: string
@@ -27,6 +28,7 @@ export interface SGood {
   title: string
   description: string
   price: number
+  isCondition: boolean
   isAvailable: boolean
   isCompatible: boolean
   compatibility: string

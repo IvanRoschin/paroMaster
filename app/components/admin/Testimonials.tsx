@@ -2,8 +2,8 @@
 
 import { deleteTestimonial, getAllTestimonials, updateTestimonial } from "@/actions/testimonials"
 import Pagination from "@/components/admin/Pagination"
-import Button from "@/components/Button"
 import { EmptyState, Loader, Search, Switcher } from "@/components/index"
+import Button from "@/components/ui/Button"
 import { useDeleteData, useFetchData } from "@/hooks/index"
 import { ITestimonial } from "@/types/index"
 import { ISearchParams } from "@/types/searchParams"
@@ -11,23 +11,20 @@ import Link from "next/link"
 import { useState } from "react"
 import { FaPen, FaTrash } from "react-icons/fa"
 import { toast } from "sonner"
+import ErrorMessage from "../ui/Error"
 
-export default function Testimonials({
-  searchParams,
-  limit
-}: {
-  searchParams: ISearchParams
-  limit: number
-}) {
+export default function Testimonials({ searchParams }: { searchParams: ISearchParams }) {
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
 
-  const { data, isLoading, isError, refetch } = useFetchData(
-    { ...searchParams, statusFilter },
-    limit,
+  const { data, isLoading, isError, error, refetch } = useFetchData(
     getAllTestimonials,
-    "testimonials"
+    ["testimonials"],
+    {
+      ...searchParams,
+      statusFilter
+    }
   )
-  const { mutate: deleteTestimonialById } = useDeleteData(deleteTestimonial, "testimonials")
+  const { mutate: deleteTestimonialById } = useDeleteData(deleteTestimonial, ["testimonials"])
 
   const handleDelete = (id: string) => {
     deleteTestimonialById(id)
@@ -50,12 +47,13 @@ export default function Testimonials({
   }
 
   if (isLoading) return <Loader />
-  if (isError) return <div>Error fetching data.</div>
+  if (isError) return <ErrorMessage error={error} />
   if (!data?.testimonials || data.testimonials.length === 0) return <EmptyState showReset />
 
   // Pagination setup
   const testimonialsCount = data?.count || 0
   const page = searchParams.page ? Number(searchParams.page) : 1
+  const limit = Number(searchParams.limit) || 10
   const totalPages = Math.ceil(testimonialsCount / limit)
   const pageNumbers = []
   const offsetNumber = 3

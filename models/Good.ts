@@ -5,18 +5,6 @@ const goodSchema = new Schema(
   {
     category: {
       type: String,
-      enum: [
-        "Бойлери",
-        "Корпус станції",
-        "Корпус для прасок",
-        "Підошви для прасок",
-        "Плати керування",
-        "Електроклапани",
-        "Насоси(помпи)",
-        "Резервуари для води",
-        "Провода та шланги",
-        "Аксесуари та комплектуючі"
-      ],
       required: true
     },
     title: {
@@ -47,6 +35,10 @@ const goodSchema = new Schema(
       type: Number,
       required: true
     },
+    isCondition: {
+      type: Boolean,
+      required: true
+    },
     isAvailable: {
       type: Boolean,
       required: true
@@ -57,6 +49,12 @@ const goodSchema = new Schema(
     },
     compatibility: {
       type: String
+    },
+    averageRating: {
+      type: Number
+    },
+    ratingCount: {
+      type: Number
     }
   },
   { versionKey: false, timestamps: true }

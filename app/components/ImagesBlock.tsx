@@ -12,68 +12,50 @@ interface ImagesBlockProps {
 const ImagesBlock: React.FC<ImagesBlockProps> = ({ item, values }) => {
   const [index, setIndex] = useState<number>(0)
 
-  return (
-    <div>
-      {item && item.src && item.src.length > 0 ? (
-        <div className="mr-[50px] pb-[40px]">
-          <div className="w-[400px] h-[400px]">
+  const renderImageGallery = (images: string[], altText: string) => (
+    <div className="mr-[50px] pb-[40px]">
+      <div className="w-[400px] h-[400px] mb-6">
+        <Image
+          src={images[index]}
+          alt={altText}
+          width={400}
+          height={400}
+          className="rounded-md object-cover w-full h-full"
+          priority={true}
+        />
+      </div>
+      <ul className="grid grid-cols-3 gap-3">
+        {images.map((img, imgIndex) => (
+          <li key={imgIndex}>
             <Image
-              src={item.src[index]}
-              alt={item.title}
-              width={400}
-              height={400}
-              className="self-center mb-[30px]"
+              src={img}
+              alt={`${altText} ${imgIndex + 1}`}
+              width={120}
+              height={120}
+              className={`
+                border border-gray-300 block cursor-pointer 
+                rounded-md object-cover 
+                transition-all duration-200 
+                hover:shadow-md hover:scale-105
+                ${imgIndex === images.length - 1 ? "mr-0" : ""}
+              `}
+              onClick={() => setIndex(imgIndex)}
               priority={true}
             />
-          </div>
-          <ul className="grid grid-cols-3 gap-3">
-            {item.src.map((img: string, imgIndex: number) => (
-              <li key={imgIndex}>
-                <Image
-                  src={img}
-                  alt={item.title}
-                  width={120}
-                  height={120}
-                  className="border border-gray-400 block cursor-pointer hover:shadow-[10px_10px_15px_-3px_rgba(0,0,0,0.3)] hover:scale-105 transition-all"
-                  onClick={() => setIndex(imgIndex)}
-                  priority={true}
-                />
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : (
-        Array.isArray(values) &&
-        values.length > 0 && (
-          <div className="mr-[50px] pb-[40px]">
-            <div className="w-[400px] h-[400px]">
-              <Image
-                src={values[index]}
-                alt="another image"
-                width={400}
-                height={400}
-                className="self-center mb-[30px]"
-                priority={true}
-              />
-            </div>
-            <ul className="grid grid-cols-3 gap-3">
-              {values.map((img: string, imgIndex: number) => (
-                <li key={imgIndex}>
-                  <Image
-                    src={img}
-                    alt="item another look"
-                    width={120}
-                    height={120}
-                    className="border border-gray-400 block cursor-pointer hover:shadow-[10px_10px_15px_-3px_rgba(0,0,0,0.3)] hover:scale-105 transition-all"
-                    onClick={() => setIndex(imgIndex)}
-                    priority={true}
-                  />
-                </li>
-              ))}
-            </ul>
-          </div>
-        )
-      )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+
+  return (
+    <div>
+      {item &&
+        (item.src?.length > 0
+          ? renderImageGallery(item.src, item.title)
+          : Array.isArray(values) && values.length > 0
+            ? renderImageGallery(values, "Зображення")
+            : null)}
     </div>
   )
 }
