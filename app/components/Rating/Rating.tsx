@@ -61,9 +61,9 @@ const Rating = ({ errors, value, setFieldValue, fieldName = "rating" }: Props) =
           )
         })}
       </div>
-      {typeof errors?.[fieldName] === "string" && (
-        <div className="text-sm text-red-500 mt-2">{errors[fieldName]}</div>
-      )}
+      {typeof errors?.[fieldName] === "string" ? (
+        <div className="text-sm text-red-500 mt-2">{errors[fieldName] as string}</div>
+      ) : null}
     </div>
   )
 }

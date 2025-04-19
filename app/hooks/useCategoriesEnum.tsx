@@ -3,7 +3,7 @@ import { ICategory } from "@/types/index"
 import { useFetchData } from "../hooks"
 
 export const useCategoriesEnum = () => {
-  const { data, isLoading, isError } = useFetchData(getAllCategories, "categories", {
+  const { data, isLoading, isError } = useFetchData(getAllCategories, ["categories"], {
     limit: 100,
     page: 1
   })

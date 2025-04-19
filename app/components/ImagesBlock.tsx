@@ -50,11 +50,12 @@ const ImagesBlock: React.FC<ImagesBlockProps> = ({ item, values }) => {
 
   return (
     <div>
-      {item?.src?.length > 0
-        ? renderImageGallery(item.src, item.title)
-        : Array.isArray(values) && values.length > 0
-          ? renderImageGallery(values, "Зображення")
-          : null}
+      {item &&
+        (item.src?.length > 0
+          ? renderImageGallery(item.src, item.title)
+          : Array.isArray(values) && values.length > 0
+            ? renderImageGallery(values, "Зображення")
+            : null)}
     </div>
   )
 }
