@@ -7,22 +7,22 @@ import { connectToDB } from "@/utils/dbConnect"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
-export async function addUser(formData: FormData): Promise<void> {
+export async function addUser(values: any): Promise<{ success: boolean; message: string }> {
   try {
     await connectToDB()
     // Check if email already exists
-    const email = formData.get("email") as string
+    const email = values.email as string
 
     const existingUser = await User.findOne({ email })
     if (existingUser) {
       throw new Error("Email already exists")
     }
 
-    const name = formData.get("name") as string
-    const phone = formData.get("phone") as string
-    const isAdmin = formData.get("isAdmin") === "true"
-    const isActive = formData.get("isActive") === "true"
-    const password = formData.get("password") as string
+    const name = values.name as string
+    const phone = values.phone as string
+    const isAdmin = values.isAdmin
+    const isActive = values.isActive
+    const password = values.password as string
 
     const newUser = new User({
       name,
@@ -35,6 +35,10 @@ export async function addUser(formData: FormData): Promise<void> {
     newUser.setPassword(password)
 
     await newUser.save()
+    return {
+      success: true,
+      message: "Користувача додано успішно!"
+    }
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error adding newUser:", error)
@@ -98,7 +102,7 @@ export async function deleteUser(id: string) {
   revalidatePath("/admin/users")
 }
 
-export async function updateUser(values: any) {
+export async function updateUser(values: any): Promise<{ success: boolean; message: string }> {
   try {
     await connectToDB()
 
@@ -125,18 +129,14 @@ export async function updateUser(values: any) {
         message: "User not found."
       }
     }
+
     return {
       success: true,
-      message: "Користувача оновлено успішно "
+      message: "Користувача оновлено успішно"
     }
   } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error update user:", error)
-      throw new Error("Failed to update user: " + error.message)
-    } else {
-      console.error("Unknown error:", error)
-      throw new Error("Failed to update user: Unknown error")
-    }
+    console.error("Error update user:", error)
+    throw new Error("Failed to update user")
   } finally {
     revalidatePath("/admin/users")
     redirect("/admin/users")

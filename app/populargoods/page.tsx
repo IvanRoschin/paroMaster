@@ -2,6 +2,7 @@
 
 import { getMostPopularGoods } from "@/actions/goods"
 import InfiniteScrollGoods from "@/components/InfiniteScrollGoods"
+import ErrorMessage from "@/components/ui/Error"
 import { IGood, ISearchParams } from "@/types/index"
 import { Loader } from "../components"
 import { useFetchData } from "../hooks"
@@ -15,9 +16,9 @@ export default async function MostPopularGoodsPage({
   searchParams: ISearchParams
 }) {
   const { data, error, isError, isLoading, refetch } = useFetchData(
-    searchParams,
     getMostPopularGoods,
-    "populargoods"
+    ["populargoods"],
+    searchParams
   )
 
   if (!data || isLoading) {
@@ -25,7 +26,7 @@ export default async function MostPopularGoodsPage({
   }
 
   if (error) {
-    return <div>Ошибка загрузки</div>
+    return <ErrorMessage error={error} />
   }
 
   return (

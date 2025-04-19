@@ -4,13 +4,13 @@ import Link from "next/link"
 import { FaPen, FaRegStar, FaStar, FaStarHalfAlt, FaTrash } from "react-icons/fa"
 
 type StarProps = {
-  rating: number
+  rating?: number
   size?: number
 }
 
 const StarDisplay = ({ rating, size = 18 }: StarProps) => {
-  const fullStars = Math.floor(rating)
-  const hasHalfStar = rating - fullStars >= 0.5
+  const fullStars = rating ? Math.floor(rating) : 0
+  const hasHalfStar = rating ? rating - fullStars >= 0.5 : false
   const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0)
 
   return (
@@ -60,7 +60,11 @@ const ReviewList = ({ data, isAdmin = false, handleDelete }: Props) => {
                       small
                       outline
                       bg="bg"
-                      onClick={() => handleDelete(review && review?._id.toString())}
+                      onClick={() => {
+                        if (review?._id) {
+                          handleDelete(review._id.toString())
+                        }
+                      }}
                     />
                   </div>
                 </div>
@@ -68,7 +72,7 @@ const ReviewList = ({ data, isAdmin = false, handleDelete }: Props) => {
               <li className="border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-lg font-medium">{review.name}</p>
-                  <StarDisplay rating={review?.rating} />
+                  <StarDisplay rating={review?.rating ?? undefined} />
                 </div>
                 <p className="text-gray-600 italic mb-2">&ldquo;{review.text}&rdquo;</p>
                 <p className="text-sm text-gray-400">

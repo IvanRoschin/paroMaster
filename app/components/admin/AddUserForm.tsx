@@ -16,7 +16,7 @@ interface ResetFormProps {
 interface UserFormProps {
   user?: Partial<IUser>
   title?: string
-  action: (data: FormData) => Promise<void>
+  action: (data: FormData) => Promise<{ success: boolean; message: string }>
 }
 
 const UserForm: React.FC<UserFormProps> = ({ user, title, action }) => {

@@ -43,7 +43,7 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
       id: "category",
       label: "Оберіть категорію",
       type: "select",
-      options: categories?.categories.map((category: ICategory) => ({
+      options: categories?.map((category: ICategory) => ({
         value: category.title,
         label: category.title
       })),
