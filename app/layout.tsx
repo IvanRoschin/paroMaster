@@ -6,6 +6,7 @@ import type { Metadata } from "next"
 import { getServerSession } from "next-auth"
 import { Inter } from "next/font/google"
 import { Footer, Header, Sidebar } from "./components"
+import ErrorMessage from "./components/ui/Error"
 import { authOptions } from "./config/authOptions"
 import "./globals.css"
 import { brandsOptions } from "./prefetchOptions/brandsOptions"
@@ -87,7 +88,9 @@ export default async function RootLayout({
                 <div className="w-full">{children}</div>
               </HydrationBoundary>
             ) : (
-              <div>Error loading data</div>
+              <div>
+                <ErrorMessage error={"Error loading data"} />
+              </div>
             )}
           </div>
           <section id="footer" className="snap-start px-4">

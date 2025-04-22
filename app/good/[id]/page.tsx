@@ -14,6 +14,7 @@ import { FaPen, FaRegStar, FaStar, FaStarHalfAlt, FaTrash } from "react-icons/fa
 import { deleteTestimonial, getGoodTestimonials } from "@/actions/testimonials"
 import DeleteConfirmation from "@/components/DeleteConfirmation"
 import TestimonialForm from "@/components/forms/TestimonialForm"
+import { ItemsList } from "@/components/index"
 import Loader from "@/components/Loader"
 import Modal from "@/components/modals/Modal"
 import ErrorMessage from "@/components/ui/Error"
@@ -75,6 +76,8 @@ export default function Item({ params }: { params: any }) {
 
   const quantity = getItemQuantity(data._id)
 
+  console.log("data.compatibleGoods", data.compatibleGoods)
+
   return (
     <div className="m-6">
       <div className="flex flex-col justify-evenly lg:flex-row mb-4 lg:mb-0">
@@ -90,7 +93,7 @@ export default function Item({ params }: { params: any }) {
               </span>
             </Link>
           )}
-          <h2 className="font-semibold text-2xl mb-[40px]">{data.title}</h2>
+          <h2 className="subtitle mb-[40px]">{data.title}</h2>
           <p className="mb-[20px]">{data.description}</p>
           <p className={`mb-[30px] ${data.isAvailable ? "text-green-600" : "text-red-600"}`}>
             {data.isAvailable ? "В наявності" : "Немає в наявності"}
@@ -161,7 +164,7 @@ export default function Item({ params }: { params: any }) {
 
       {/* Display reviews */}
       <div className="mt-10">
-        <h3 className="text-2xl font-semibold mb-4">Відгуки</h3>
+        <h3 className="subtitle">Відгуки</h3>
         {testimonials && testimonials.length > 0 ? (
           <ul className="grid gap-4 md:gap-6">
             {testimonials.map((review: ITestimonial) => (
@@ -218,6 +221,14 @@ export default function Item({ params }: { params: any }) {
         )}
       </div>
 
+      {/* Display compatibleGoods */}
+      {data.compatibleGoods.length > 0 && (
+        <div className="mt-10">
+          <h3 className="subtitle">Сумісні товари</h3>
+          <ItemsList goods={data.compatibleGoods} />
+        </div>
+      )}
+
       {/* Модалка для відгуку */}
       <Modal
         body={<TestimonialForm productId={data._id} />}
@@ -250,17 +261,30 @@ export default function Item({ params }: { params: any }) {
     return (
       <>
         <p className="font-light text-gray-500">
-          Сумісність з брендами:{" "}
+          Сумісність з іншими моделями:{" "}
           <span className="font-bold">{item.isCompatible ? "так" : "ні"}</span>
         </p>
         <p className="font-light text-gray-500">
-          Brand: <span className="font-bold"> {item.brand}</span>
+          Виробник: <span className="font-bold"> {item.brand}</span>
         </p>
         <p className="font-light text-gray-500">
-          Model: <span className="font-bold">{item.model}</span>{" "}
+          Модель: <span className="font-bold">{item.model}</span>{" "}
         </p>
         <p className="font-light text-gray-500">
-          Сумісність з брендами: <span className="font-bold">{item.compatibility}</span>
+          Сумісний з моделями:{" "}
+          <span className="font-bold">
+            {data.compatibleGoods.map((product: IGood, i: number) => (
+              <span key={product._id}>
+                <Link
+                  href={`/good/${product._id}`}
+                  className="text-primaryAccentColor hover:underline"
+                >
+                  {product.model}
+                </Link>
+                {i < data.compatibleGoods.length - 1 ? ", " : ""}
+              </span>
+            ))}
+          </span>
         </p>
       </>
     )
