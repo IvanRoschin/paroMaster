@@ -24,6 +24,41 @@ interface FormFieldProps {
 const FormField: React.FC<FormFieldProps> = ({ item, errors, setFieldValue }) => {
   const [, meta] = useField(item.id)
 
+  // В FormField перед рендером <Field />
+  if (item.id === "compatibility") {
+    return (
+      <div className="relative w-full mb-4">
+        <input
+          type="text"
+          value={(Array.isArray(meta.value) ? meta.value.join(", ") : meta.value) || ""}
+          onChange={e => {
+            const value = e.target.value
+            const array = value
+              .split(",")
+              .map(item => item.trim())
+              .filter(Boolean)
+            setFieldValue?.(item.id, array)
+          }}
+          className={`text-primaryTextColor peer w-full p-4 pt-6 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
+        ${meta.error && meta.touched ? "border-rose-500" : "border-neutral-300"}
+        ${meta.error && meta.touched ? "focus:border-rose-500" : "focus:border-green-500"}
+        `}
+        />
+        <label
+          className="text-primaryTextColor absolute text-md duration-150 left-3 top-5 z-10 origin-[0] transform -translate-y-3
+        peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
+        >
+          {item.label}
+        </label>
+        {meta.touched && meta.error && (
+          <div className="text-rose-500 text-sm mt-1">
+            <ErrorMessage name={item.id} />
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="relative w-full mb-4">
       {item.options ? (

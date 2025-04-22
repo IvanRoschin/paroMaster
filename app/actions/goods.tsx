@@ -6,7 +6,6 @@ import { IGood } from "@/types/good/IGood"
 import { ISearchParams } from "@/types/index"
 import { connectToDB } from "@/utils/dbConnect"
 import { revalidatePath } from "next/cache"
-import { redirect } from "next/navigation"
 
 export interface IGetAllGoods {
   success: boolean
@@ -49,6 +48,7 @@ export async function getAllGoods(
             { title: { $regex: searchParams.search, $options: "i" } },
             { vendor: searchParams.search },
             { brand: { $regex: searchParams.search, $options: "i" } },
+            { model: { $regex: searchParams.search, $options: "i" } },
             { compatibility: { $regex: searchParams.search, $options: "i" } }
           ]
         }
@@ -112,11 +112,24 @@ export async function getGoodById(id: string) {
   try {
     await connectToDB()
     const good = await Good.findById({ _id: id })
+    if (!good) return null
+
     const testimonials = await Testimonial.find({
       product: id,
       isActive: true
     }).sort({ createdAt: -1 })
-    return JSON.parse(JSON.stringify({ ...good.toObject(), testimonials }))
+
+    const compatibleGoods = await Good.find({
+      isCompatible: true,
+      compatibility: { $regex: good.model, $options: "i" }
+    })
+    return JSON.parse(
+      JSON.stringify({
+        ...good.toObject(),
+        testimonials,
+        compatibleGoods
+      })
+    )
   } catch (error) {
     console.log(error)
   }
@@ -231,20 +244,16 @@ export async function deleteGood(id: string) {
 }
 
 export async function updateGood(formData: FormData) {
-  // const entries = Object.fromEntries(formData.entries())
   const values: any = {}
   formData.forEach((value, key) => {
-    if (!values[key]) {
-      values[key] = []
-    }
+    if (!values[key]) values[key] = []
     values[key].push(value)
   })
 
   Object.keys(values).forEach(key => {
-    if (values[key].length === 1) {
-      values[key] = values[key][0]
-    }
+    if (values[key].length === 1) values[key] = values[key][0]
   })
+
   const {
     id,
     category,
@@ -299,6 +308,7 @@ export async function updateGood(formData: FormData) {
           updateFields[key as keyof IGood] === undefined) &&
         delete updateFields[key as keyof IGood]
     )
+
     await Good.findByIdAndUpdate(id, updateFields)
 
     return {
@@ -313,9 +323,10 @@ export async function updateGood(formData: FormData) {
         message: error.message || "Error updating good"
       }
     }
-  } finally {
-    revalidatePath("/admin/goods")
-    redirect("/admin/goods")
+    return {
+      success: false,
+      message: "Unknown error occurred"
+    }
   }
 }
 

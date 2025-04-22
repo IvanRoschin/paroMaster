@@ -37,8 +37,11 @@ const Search = ({ placeholder }: { placeholder: string }) => {
     }
 
     if (value.length > 2 && data?.goods) {
+      const searchFields: (keyof IGood)[] = ["title", "model", "vendor", "brand"]
       const filtered = data.goods.filter(good =>
-        good.title.toLowerCase().includes(value.toLowerCase())
+        searchFields.some(field =>
+          good[field]?.toString().toLowerCase().includes(value.toLowerCase())
+        )
       )
       setSuggestions(filtered)
     } else {
@@ -79,7 +82,6 @@ const Search = ({ placeholder }: { placeholder: string }) => {
     setSuggestions([])
   }
 
-  console.log("suggestions", suggestions)
   return (
     <form className="w-full mx-7 relative" onSubmit={handleSubmit}>
       <label className="mb-2 text-sm font-medium text-gray-900 sr-only">Пошук</label>
@@ -124,9 +126,13 @@ const Search = ({ placeholder }: { placeholder: string }) => {
                 }}
               >
                 <div className="font-medium">{product.category}</div>
-                <div className="text-gray-500 text-sm">
-                  {product.brand} &middot; {Number(product.price).toFixed(2)} ₴
+                <div className="text-gray-600 text-sm">
+                  {product.title} &middot; {product.brand} &middot;
+                  {Number(product.price).toFixed(2)} ₴
                 </div>
+                {product.model && (
+                  <div className="text-gray-500 text-sm mt-1">Модель: {product.model}</div>
+                )}
               </Link>
             </li>
           ))}
