@@ -23,7 +23,7 @@ export default async function Home({ searchParams }: { searchParams: ISearchPara
     })
     await queryClient.prefetchQuery({
       queryKey: ["goods", { limit: 4 }],
-      queryFn: () => getAllGoods({ ...searchParams, limit: 4 })
+      queryFn: () => getAllGoods({ limit: 4 })
     })
   } catch (error) {
     console.error("Error prefetching data:", error)
