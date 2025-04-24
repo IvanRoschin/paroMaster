@@ -13,7 +13,7 @@ export interface IGood {
   isCondition: boolean
   isAvailable: boolean
   isCompatible: boolean
-  compatibility: string
+  compatibility: string[]
   quantity?: number
 }
 
@@ -31,5 +31,5 @@ export interface SGood {
   isCondition: boolean
   isAvailable: boolean
   isCompatible: boolean
-  compatibility: string
+  compatibility: string[]
 }

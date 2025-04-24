@@ -9,19 +9,19 @@ interface GoodsData {
   goods: IGood[]
 }
 
+export const dynamic = "force-dynamic"
+
 const AddOrderPage = async ({ searchParams }: { searchParams: ISearchParams }) => {
   const queryClient = new QueryClient()
-  try {
-    await queryClient.prefetchQuery({
-      queryKey: ["goods"],
-      queryFn: () => getAllGoods(searchParams)
-    })
-  } catch (error) {
-    console.error("Error prefetching data:", error)
-  }
-  const queryState = queryClient.getQueryState(["goods"])
 
-  const goods = (queryState?.data as GoodsData)?.goods || []
+  const goodsKey = ["goods", searchParams]
+
+  await queryClient.prefetchQuery({
+    queryKey: goodsKey,
+    queryFn: () => getAllGoods(searchParams)
+  })
+
+  const goods = (queryClient.getQueryData(goodsKey) as GoodsData)?.goods || []
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

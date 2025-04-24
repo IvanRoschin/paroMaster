@@ -1,6 +1,6 @@
 "use client"
 
-import { useScreenSize } from "../hooks" // Adjust the path if necessary
+import { useMediaQuery } from "../hooks" // Adjust the path if necessary
 import Cart from "./Cart/CartButton"
 import Logo from "./Logo"
 import Menu from "./Menu"
@@ -13,8 +13,9 @@ interface HeaderProps {
 }
 
 const Header = ({ session }: HeaderProps) => {
-  const { width } = useScreenSize()
-  const isMobile = width <= 767
+  const isMobile = useMediaQuery("(max-width: 767px)")
+  const isTablet = useMediaQuery("(min-width: 768px) and (max-width: 1024px)")
+  const isDesktop = useMediaQuery("(min-width: 1025px)")
 
   return (
     <div className="">

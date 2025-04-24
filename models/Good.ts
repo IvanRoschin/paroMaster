@@ -48,7 +48,8 @@ const goodSchema = new Schema(
       required: true
     },
     compatibility: {
-      type: String
+      type: [String],
+      default: []
     },
     averageRating: {
       type: Number

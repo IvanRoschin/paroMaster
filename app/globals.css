@@ -47,6 +47,26 @@ container sizes: xsm: max-480px sm: 480px md: 768px lg: 1280px
   clip-path: inset(0 50% 0 0);
 }
 @layer components {
+  .suggestion-title {
+    background-color: #f9f9f9;
+  }
+
+  .suggestion-model {
+    background-color: #e9f7fa;
+  }
+
+  .suggestion-vendor {
+    background-color: #fff3cd;
+  }
+
+  .suggestion-brand {
+    background-color: #d4edda;
+  }
+
+  .suggestion-default {
+    background-color: #ffffff;
+  }
+
   .custom-checkbox {
     appearance: none;
     width: 16px;
