@@ -1,7 +1,6 @@
 "use client"
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useCallback } from "react"
 import { useScreenSize } from "../hooks"
 
 const BrandFilter = ({ brands }: { brands: string[] }) => {
@@ -12,36 +11,29 @@ const BrandFilter = ({ brands }: { brands: string[] }) => {
   const pathname = usePathname()
   const { push } = useRouter()
 
-  const createQueryString = useCallback(
-    (name: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString())
-      if (value) {
-        params.set(name, value)
-      } else {
-        params.delete(name)
-      }
-      return params.toString()
-    },
-    [searchParams]
-  )
-
-  if (brands.length === 0) {
-    return <h2 className="text-4xl mb-4">Бренд не знайдений</h2>
-  }
+  const selectedBrands = searchParams.getAll("brand")
 
   const handleBrandCheckboxClick = (brand: string) => {
-    const selectedBrand = searchParams.get("brand")
-    const newBrand = selectedBrand === brand ? null : brand
-    push(pathname + "?" + createQueryString("brand", newBrand as string), { scroll: false })
+    let updatedBrands: string[]
+    if (selectedBrands.includes(brand)) {
+      updatedBrands = selectedBrands.filter(b => b !== brand)
+    } else {
+      updatedBrands = [...selectedBrands, brand]
+    }
+
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete("brand")
+    updatedBrands.forEach(b => params.append("brand", b))
+
+    push(`${pathname}?${params.toString()}`, { scroll: false })
   }
 
   return (
     <div>
-      <h2 className="subtitle-main">Бренди</h2>{" "}
+      <h2 className="subtitle-main">Бренди</h2>
       <ul className={`p-4 ${isMobile ? "grid grid-cols-3 gap-3" : ""}`}>
-        {" "}
-        {brands?.map((brand, index) => {
-          const isChecked = searchParams.get("brand") === brand
+        {brands.map((brand, index) => {
+          const isChecked = selectedBrands.includes(brand)
           return (
             <li key={index} className="flex items-center space-x-2">
               <input

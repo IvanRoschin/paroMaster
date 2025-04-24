@@ -11,12 +11,8 @@ import Link from "next/link"
 import { FaPen, FaTrash } from "react-icons/fa"
 import ErrorMessage from "../ui/Error"
 
-export default function Customers({ searchParams }: { searchParams: ISearchParams }) {
-  const { data, isLoading, isError, error } = useFetchData(
-    getAllCustomers,
-    ["customers"],
-    searchParams
-  )
+export default function Customers({ params }: { params: ISearchParams }) {
+  const { data, isLoading, isError, error } = useFetchData(getAllCustomers, ["customers"], params)
   const { mutate: deleteCustomerById } = useDeleteData(deleteCustomer, ["customers"])
 
   const handleDelete = (id: string) => {
@@ -36,8 +32,8 @@ export default function Customers({ searchParams }: { searchParams: ISearchParam
   }
 
   const customersCount = data?.count || 0
-  const page = searchParams.page ? Number(searchParams.page) : 1
-  const limit = Number(searchParams.limit) || 10
+  const page = params.page ? Number(params.page) : 1
+  const limit = Number(params.limit) || 10
   const totalPages = Math.ceil(customersCount / limit)
   const pageNumbers = []
   const offsetNumber = 3

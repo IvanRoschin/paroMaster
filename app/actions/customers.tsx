@@ -6,6 +6,7 @@ import { ISearchParams } from "@/types/index"
 import { connectToDB } from "@/utils/dbConnect"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+import { buildPagination } from "../helpers"
 
 interface IGetAllCostomers {
   success: boolean
@@ -13,10 +14,11 @@ interface IGetAllCostomers {
   count: number
 }
 
-export async function getAllCustomers(searchParams: ISearchParams): Promise<IGetAllCostomers> {
-  const limit = searchParams.limit || 10
-
-  const page = searchParams.page || 1
+export async function getAllCustomers(
+  searchParams: ISearchParams,
+  currentPage = 1
+): Promise<IGetAllCostomers> {
+  const { skip, limit } = buildPagination(searchParams, currentPage)
 
   try {
     await connectToDB()
@@ -25,7 +27,7 @@ export async function getAllCustomers(searchParams: ISearchParams): Promise<IGet
 
     const customers: ICustomer[] = await Customer.find()
       .sort({ createdAt: -1 })
-      .skip(limit * (page - 1))
+      .skip(skip)
       .limit(limit)
       .exec()
 

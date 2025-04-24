@@ -6,6 +6,7 @@ import { ISearchParams } from "@/types/index"
 import { connectToDB } from "@/utils/dbConnect"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+import { buildPagination } from "../helpers"
 
 export interface IGetAllCategories {
   success: boolean
@@ -52,19 +53,18 @@ export async function addCategory(formData: FormData) {
   }
 }
 
-export async function getAllCategories(searchParams?: ISearchParams): Promise<IGetAllCategories> {
-  const limit = searchParams?.limit || 10
-  const page = searchParams?.page || 1
+export async function getAllCategories(
+  searchParams: ISearchParams,
+  currentPage = 1
+): Promise<IGetAllCategories> {
+  const { skip, limit } = buildPagination(searchParams, currentPage)
 
   try {
     await connectToDB()
 
     const count = await Category.countDocuments()
 
-    const categories: ICategory[] = await Category.find()
-      .skip(limit * (page - 1))
-      .limit(limit)
-      .exec()
+    const categories: ICategory[] = await Category.find().skip(skip).limit(limit).exec()
 
     return {
       success: true,

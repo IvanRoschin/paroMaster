@@ -27,6 +27,7 @@ interface CardData {
 
 export default async function Admin() {
   const queryClient = new QueryClient()
+  const params = new URLSearchParams()
 
   // Define wrapper functions for prefetching with default parameters
   const fetchUsers = async () => {
@@ -58,7 +59,7 @@ export default async function Admin() {
   }
 
   const fetchCategories = async () => {
-    const response = await getAllCategories()
+    const response = await getAllCategories({} as ISearchParams)
     return { success: true, users: response.categories, count: response.count }
   }
 
