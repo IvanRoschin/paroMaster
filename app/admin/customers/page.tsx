@@ -14,7 +14,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: IS
 
   return (
     <HydrationBoundary state={dehydrate(queryClinet)}>
-      <Customers searchParams={searchParams} />
+      <Customers params={searchParams} />
     </HydrationBoundary>
   )
 }

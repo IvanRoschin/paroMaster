@@ -1,9 +1,10 @@
 "use server"
 
+import { buildFilter, buildPagination, buildSort } from "@/helpers/index"
 import Good from "@/models/Good"
 import Testimonial from "@/models/Testimonial"
 import { IGood } from "@/types/good/IGood"
-import { ISearchParams } from "@/types/index"
+import { ISearchParams } from "@/types/searchParams"
 import { connectToDB } from "@/utils/dbConnect"
 import { revalidatePath } from "next/cache"
 
@@ -25,85 +26,26 @@ export interface IGetPrices {
 }
 export async function getAllGoods(
   searchParams: ISearchParams,
-  nextPage?: number
+  currentPage = 1
 ): Promise<IGetAllGoods> {
-  const limit = searchParams?.limit || 10
-  let skip: number
-
-  if (nextPage) {
-    skip = (nextPage - 1) * limit
-  } else {
-    const page = searchParams?.page || 1
-    skip = (page - 1) * limit
-  }
-
   try {
     await connectToDB()
-    let filter: any = {}
 
-    if (searchParams?.search) {
-      filter.$and = [
-        {
-          $or: [
-            { title: { $regex: searchParams.search, $options: "i" } },
-            { vendor: searchParams.search },
-            { brand: { $regex: searchParams.search, $options: "i" } },
-            { model: { $regex: searchParams.search, $options: "i" } },
-            { compatibility: { $regex: searchParams.search, $options: "i" } }
-          ]
-        }
-      ]
-    }
+    const filter = buildFilter(searchParams)
+    const sortOption = buildSort(searchParams)
+    const { skip, limit } = buildPagination(searchParams, currentPage)
 
-    let priceFilter: any = {}
-    if (searchParams?.low && searchParams?.high) {
-      const lowPrice = Number(searchParams.low)
-      const highPrice = Number(searchParams.high)
-
-      if (!isNaN(lowPrice) && !isNaN(highPrice)) {
-        priceFilter = {
-          $expr: {
-            $and: [
-              { $gte: [{ $toDouble: "$price" }, lowPrice] },
-              { $lte: [{ $toDouble: "$price" }, highPrice] }
-            ]
-          }
-        }
-      }
-    }
-
-    filter = {
-      $and: [priceFilter, ...(filter.$and || [])]
-    }
-
-    if (searchParams?.brand) {
-      filter.brand = searchParams.brand
-    }
-
-    if (searchParams?.category) {
-      filter.category = searchParams.category
-    }
-
-    // Handle sort by price
-    let sortOption: any = {}
-    if (searchParams?.sort === "desc") {
-      sortOption = { price: -1 }
-    } else {
-      sortOption = { price: 1 }
-    }
-
-    // Query the count of documents matching the filter
     const count = await Good.countDocuments(filter)
 
-    // Query the actual documents with pagination
     const goods: IGood[] = await Good.find(filter).sort(sortOption).skip(skip).limit(limit).exec()
+
     return {
       success: true,
       goods: JSON.parse(JSON.stringify(goods)),
-      count: count
+      count
     }
   } catch (error) {
-    console.log("Error fetching goods:", error)
+    console.error("Error fetching goods:", error)
     return { success: false, goods: [], count: 0 }
   }
 }

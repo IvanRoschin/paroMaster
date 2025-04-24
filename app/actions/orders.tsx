@@ -5,30 +5,34 @@ import { IAdminOrder, IOrder } from "@/types/order/IOrder"
 import { connectToDB } from "@/utils/dbConnect"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+import { buildFilter, buildPagination, buildSort } from "../helpers"
 
 interface IGetAllOrdesResponse {
   success: boolean
   orders: IOrder[] | IAdminOrder[]
   count: number
 }
-export async function getAllOrders(searchParams: ISearchParams): Promise<IGetAllOrdesResponse> {
-  const limit = searchParams.limit || 10
-  const page = searchParams.page || 1
-  const status = searchParams.status === null ? "all" : searchParams.status
+export async function getAllOrders(
+  searchParams: ISearchParams,
+  currentPage = 1
+): Promise<IGetAllOrdesResponse> {
+  const { skip, limit } = buildPagination(searchParams, currentPage)
+  const filter = buildFilter(searchParams)
+  const sortOption = buildSort(searchParams)
 
   try {
     await connectToDB()
 
-    let query = {}
-    if (status !== "all") {
-      query = { status }
-    }
+    // let query = {}
+    // if (status !== "all") {
+    //   query = { status }
+    // }
 
     const count = await Order.countDocuments()
 
-    const orders: IOrder[] = await Order.find(query)
-      .sort({ createdAt: -1 })
-      .skip(limit * (page - 1))
+    const orders: IOrder[] = await Order.find(filter)
+      .sort(sortOption)
+      .skip(skip)
       .limit(limit)
       .exec()
 

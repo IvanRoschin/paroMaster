@@ -31,9 +31,9 @@ const Search = ({ placeholder }: { placeholder: string }) => {
     const params = new URLSearchParams(searchParams.toString())
 
     if (value) {
-      params.set("search", value)
+      params.set("q", value)
     } else {
-      params.delete("search")
+      params.delete("q")
     }
 
     if (value.length > 2 && data?.goods) {
@@ -65,7 +65,7 @@ const Search = ({ placeholder }: { placeholder: string }) => {
     setInputValue("")
     setSuggestions([])
     const params = new URLSearchParams(searchParams.toString())
-    params.delete("search")
+    params.delete("q")
     replace(`${pathname}?${params.toString()}`, { scroll: false })
   }
 
@@ -76,7 +76,7 @@ const Search = ({ placeholder }: { placeholder: string }) => {
     if (value.length === 0) return
 
     const params = new URLSearchParams(searchParams.toString())
-    params.set("search", value)
+    params.set("q", value)
 
     push(`/search?${params.toString()}`)
     setSuggestions([])
