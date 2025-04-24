@@ -34,7 +34,13 @@ const goodFormSchema = Yup.object().shape({
   isCondition: Yup.boolean().required(`Обов'язкове поле`),
   isAvailable: Yup.boolean().required(`Обов'язкове поле`),
   isCompatible: Yup.boolean().required(`Обов'язкове поле`),
-  compatibility: Yup.string().notRequired()
+  compatibility: Yup.array()
+    .of(Yup.string())
+    .when("isCompatible", {
+      is: true,
+      then: schema => schema.required("Заповніть поле сумісності"),
+      otherwise: schema => schema.notRequired()
+    })
 })
 
 export default goodFormSchema

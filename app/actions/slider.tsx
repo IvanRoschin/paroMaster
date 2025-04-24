@@ -6,6 +6,7 @@ import { ISearchParams } from "@/types/searchParams"
 import { connectToDB } from "@/utils/dbConnect"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+import { buildPagination } from "../helpers"
 
 export interface IGetAllSlides {
   success: boolean
@@ -36,20 +37,18 @@ export async function addSlide(formData: FormData) {
   }
 }
 
-export async function getAllSlides(searchParams: ISearchParams): Promise<IGetAllSlides> {
-  const limit = searchParams?.limit || 3
-
-  const page = searchParams.page || 1
+export async function getAllSlides(
+  searchParams: ISearchParams,
+  currentPage = 1
+): Promise<IGetAllSlides> {
+  const { skip, limit } = buildPagination(searchParams, currentPage)
 
   try {
     await connectToDB()
 
     const count = await Slider.countDocuments()
 
-    const slides: ISlider[] = await Slider.find()
-      .skip(limit * (page - 1))
-      .limit(limit)
-      .exec()
+    const slides: ISlider[] = await Slider.find().skip(skip).limit(limit).exec()
 
     return {
       success: true,

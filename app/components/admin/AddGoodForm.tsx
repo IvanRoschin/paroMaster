@@ -119,8 +119,19 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
     isCondition: good?.isCondition || false,
     isAvailable: good?.isAvailable || false,
     isCompatible: good?.isCompatible || false,
-    compatibility: good?.compatibility || ""
+    compatibility: good?.compatibility || []
   }
+
+  // const normalizeToArray = (value: unknown): string[] => {
+  //   if (typeof value === "string") {
+  //     return value
+  //       .split(",")
+  //       .map(item => item.trim())
+  //       .filter(Boolean)
+  //   }
+  //   if (Array.isArray(value)) return value
+  //   return []
+  // }
 
   const handleSubmit = async (values: InitialStateType, { resetForm }: ResetFormProps) => {
     try {
@@ -139,15 +150,14 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
         formData.append("id", good._id as string)
       }
 
-      // Perform the mutation (add or update)
       const result = isUpdating
         ? await updateGoodMutation.mutateAsync(formData)
         : await addGoodMutation.mutateAsync(formData)
 
-      // Ensure result contains 'success'
       if (result.success) {
-        toast.success(isUpdating ? "Товар оновлено!" : "Новий товар додано!")
-        push("/admin/goods")
+        toast.success(
+          isUpdating ? result.message || "Товар оновлено!" : result.message || "Новий товар додано!"
+        )
       }
 
       resetForm({
@@ -158,12 +168,9 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
           model: "",
           price: 0,
           description: "",
-          src: [],
-          compatibility: ""
+          src: []
         }
       })
-      toast.success(isUpdating ? "Товар оновлено!" : "Новий товар додано!")
-      push("/admin/goods")
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message)

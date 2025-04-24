@@ -8,15 +8,19 @@ interface GoodsData {
   goods: IGood[]
 }
 
+export const dynamic = "force-dynamic"
+
 export default async function CatalogPage({ searchParams }: { searchParams: ISearchParams }) {
   const queryClient = new QueryClient()
 
+  const goodsKey = ["goods", searchParams]
+
   await queryClient.prefetchQuery({
-    queryKey: ["goods"],
+    queryKey: goodsKey,
     queryFn: () => getAllGoods(searchParams)
   })
-  const queryState = queryClient.getQueryState(["goods"])
 
+  const queryState = queryClient.getQueryState(goodsKey)
   const goods = (queryState?.data as GoodsData)?.goods || []
 
   return (

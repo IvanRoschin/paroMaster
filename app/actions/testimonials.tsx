@@ -5,6 +5,7 @@ import Testimonial from "@/models/Testimonial"
 
 import { ISearchParams, ITestimonial } from "@/types/index"
 import { connectToDB } from "@/utils/dbConnect"
+import { buildFilter, buildPagination, buildSort } from "../helpers"
 
 export interface IGetAllTestimonials {
   success: boolean
@@ -87,27 +88,28 @@ export async function addTestimonial(values: Partial<ITestimonial>) {
 }
 
 export async function getAllTestimonials(
-  searchParams?: ISearchParams
+  searchParams: ISearchParams,
+  currentPage = 1
 ): Promise<IGetAllTestimonials> {
-  const limit = searchParams?.limit || 4
-  const page = searchParams?.page || 1
-  const statusFilter = searchParams?.statusFilter
+  const { skip, limit } = buildPagination(searchParams, currentPage)
+  const filter = buildFilter(searchParams)
+  const sortOption = buildSort(searchParams)
 
   try {
     await connectToDB()
 
-    const filter: any = {}
-    if (statusFilter === "Опублікований") {
-      filter.isActive = true
-    } else if (statusFilter === "Не публікується") {
-      filter.isActive = false
-    }
+    // const filter: any = {}
+    // if (statusFilter === "Опублікований") {
+    //   filter.isActive = true
+    // } else if (statusFilter === "Не публікується") {
+    //   filter.isActive = false
+    // }
 
     const count = await Testimonial.countDocuments()
 
     const testimonials: ITestimonial[] = await Testimonial.find(filter)
-      .sort({ createdAt: -1 })
-      .skip(limit * (page - 1))
+      .sort(sortOption)
+      .skip(skip)
       .limit(limit)
       .exec()
 

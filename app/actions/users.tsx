@@ -6,6 +6,7 @@ import { IUser } from "@/types/user/IUser"
 import { connectToDB } from "@/utils/dbConnect"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+import { buildFilter, buildPagination, buildSort } from "../helpers"
 
 export async function addUser(values: any): Promise<{ success: boolean; message: string }> {
   try {
@@ -53,19 +54,16 @@ export async function addUser(values: any): Promise<{ success: boolean; message:
   }
 }
 
-export async function getAllUsers(searchParams: ISearchParams) {
-  const limit = searchParams.limit || 10
-  const q = searchParams.q || ""
-  const page = searchParams.page || 1
-  const ITEM_PER_PAGE = limit
-  const regex = new RegExp(q, "i")
+export async function getAllUsers(searchParams: ISearchParams, currentPage = 1) {
+  const { skip, limit } = buildPagination(searchParams, currentPage)
+  const filter = buildFilter(searchParams)
+  const sortOption = buildSort(searchParams)
+
   try {
     await connectToDB()
-    const count = await User.find({ name: { $regex: regex } }).countDocuments()
-    const users: IUser[] = await User.find({ name: { $regex: regex } })
-      .sort({ createdAt: -1 })
-      .limit(ITEM_PER_PAGE)
-      .skip(ITEM_PER_PAGE * (page - 1))
+    const count = await User.countDocuments()
+
+    const users: IUser[] = await User.find(filter).sort(sortOption).limit(limit).skip(skip)
     return { success: true, users: JSON.parse(JSON.stringify(users)), count: count }
   } catch (error) {
     if (error instanceof Error) {
