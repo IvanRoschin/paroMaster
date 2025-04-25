@@ -3,11 +3,11 @@
 import { deleteGood, getAllGoods } from "@/actions/goods"
 import Pagination from "@/components/admin/Pagination"
 import EmptyState from "@/components/EmptyState"
-import { Loader, Search } from "@/components/index"
+import { Loader } from "@/components/index"
 import Button from "@/components/ui/Button"
 import { useDeleteData, useFetchData } from "@/hooks/index"
-import { IGood, ISearchParams } from "@/types/index"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { useMemo, useState } from "react"
 import {
   FaPen,
@@ -19,10 +19,10 @@ import {
 } from "react-icons/fa"
 import ErrorMessage from "../ui/Error"
 
-interface Props {
-  goods: IGood[]
-  searchParams: ISearchParams
-}
+// interface Props {
+//   goods: IGood[]
+//   searchParams: ISearchParams
+// }
 
 type SortKey = "category" | "brand" | "price" | "availability" | "condition"
 
@@ -34,12 +34,18 @@ const getPageNumbers = (page: number, totalPages: number, offset = 3): number[] 
   return pages
 }
 
-export default function Goods({ goods, searchParams }: Props) {
+export default function Goods() {
+  const searchParams = useSearchParams()
+
+  const page = parseInt(searchParams.get("page") || "1")
+  const limit = parseInt(searchParams.get("limit") || "10")
+
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
   const [sortBy, setSortBy] = useState<SortKey>("category")
 
   const { data, isLoading, isError, error } = useFetchData(getAllGoods, ["goods"], {
-    ...searchParams,
+    page,
+    limit,
     sortOrder,
     sortBy
   })
@@ -49,8 +55,8 @@ export default function Goods({ goods, searchParams }: Props) {
     deleteGoodById(id)
   }
 
-  const page = searchParams.page ? Number(searchParams.page) : 1
-  const limit = Number(searchParams.limit) || 10
+  // const page = searchParams.page ? Number(searchParams.page) : 1
+  // const limit = Number(searchParams.limit) || 10
   const goodsCount = data?.count || 0
   const totalPages = Math.ceil(goodsCount / limit)
   const pageNumbers = getPageNumbers(page, totalPages)
@@ -101,8 +107,17 @@ export default function Goods({ goods, searchParams }: Props) {
 
   return (
     <div className="p-3">
+      {/* <div className="flex justify-end mb-8">
+        <Link href="/admin/goods/add">
+          <Button type="button" label="Додати" small outline color="border-green-400" />
+        </Link>
+      </div> */}
       <div className="flex items-center justify-between mb-8">
-        <Search placeholder="Знайти товар" />
+        {/* <Search placeholder="Знайти товар" /> */}{" "}
+        <p className=" text-lg">
+          {" "}
+          Всього в базі <span className="subtitle text-lg">{goodsCount}</span> товара(-ів)
+        </p>
         <Link href="/admin/goods/add">
           <Button type="button" label="Додати" small outline color="border-green-400" />
         </Link>

@@ -53,10 +53,8 @@ export async function addCategory(formData: FormData) {
   }
 }
 
-export async function getAllCategories(
-  searchParams: ISearchParams,
-  currentPage = 1
-): Promise<IGetAllCategories> {
+export async function getAllCategories(searchParams: ISearchParams): Promise<IGetAllCategories> {
+  const currentPage = Number(searchParams.page) || 1
   const { skip, limit } = buildPagination(searchParams, currentPage)
 
   try {

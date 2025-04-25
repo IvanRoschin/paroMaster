@@ -18,12 +18,12 @@ export default async function Home({ searchParams }: { searchParams: ISearchPara
       queryFn: () => getAllSlides(searchParams)
     })
     await queryClient.prefetchQuery({
-      queryKey: ["allTestimonials"],
+      queryKey: ["testimonials"],
       queryFn: () => getAllTestimonials(searchParams)
     })
     await queryClient.prefetchQuery({
       queryKey: ["goods"],
-      queryFn: () => getAllGoods({ searchParams: { limit: 4 } })
+      queryFn: () => getAllGoods({ limit: String(4) })
     })
   } catch (error) {
     console.error("Error prefetching data:", error)

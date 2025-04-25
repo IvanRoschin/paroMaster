@@ -10,7 +10,7 @@ export default async function TestimonialsPage({ searchParams }: { searchParams:
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <Testimonials searchParams={searchParams} />
+      <Testimonials />
     </HydrationBoundary>
   )
 }

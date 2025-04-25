@@ -1,12 +1,12 @@
-import { FilterParams } from "@/types/searchParams"
+import { ISearchParams } from "@/types/searchParams"
 
-export const buildFilter = (params: FilterParams): any => {
+export const buildFilter = (searchParams: ISearchParams): any => {
   const filter: any = {}
   const andConditions = []
 
   // Цена
-  const low = Number(params.low)
-  const high = Number(params.high)
+  const low = Number(searchParams.low)
+  const high = Number(searchParams.high)
   if (!isNaN(low) && !isNaN(high)) {
     andConditions.push({
       $expr: {
@@ -16,14 +16,14 @@ export const buildFilter = (params: FilterParams): any => {
   }
 
   // Поиск
-  if (params.q) {
+  if (searchParams.q) {
     andConditions.push({
       $or: [
-        { title: { $regex: params.q, $options: "i" } },
-        { vendor: params.q },
-        { brand: { $regex: params.q, $options: "i" } },
-        { model: { $regex: params.q, $options: "i" } },
-        { compatibility: { $regex: params.q, $options: "i" } }
+        { title: { $regex: searchParams.q, $options: "i" } },
+        { vendor: searchParams.q },
+        { brand: { $regex: searchParams.q, $options: "i" } },
+        { model: { $regex: searchParams.q, $options: "i" } },
+        { compatibility: { $regex: searchParams.q, $options: "i" } }
       ]
     })
   }
@@ -33,8 +33,9 @@ export const buildFilter = (params: FilterParams): any => {
   }
 
   // Прямые фильтры
-  if (params.brand) filter.brand = params.brand
-  if (params.category) filter.category = params.category
+  if (searchParams.isActive) filter.isActive = searchParams.isActive
+  if (searchParams.brand) filter.brand = searchParams.brand
+  if (searchParams.category) filter.category = searchParams.category
 
   return filter
 }

@@ -4,8 +4,8 @@ type Props = {}
 
 const GuaranteePage = (props: Props) => {
   return (
-    <div className="container mx-auto p-8">
-      <h2 className="title mb-1">Гарантія</h2>
+    <div className="max-w-6xl mx-auto py-3 container">
+      <h2 className="subtitle mb-4 text-center">Гарантія</h2>
       <section className="mb-8">
         <h3 className="subtitle">Тривалість гарантії</h3>
         <p className="text-lg text-gray-700 mb-4">

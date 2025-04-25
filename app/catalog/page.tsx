@@ -25,8 +25,8 @@ export default async function CatalogPage({ searchParams }: { searchParams: ISea
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <div className="container">
-        <h2 className="title mb-1">Каталог товарів</h2>
+      <div className="max-w-6xl mx-auto py-3 container">
+        <h2 className="subtitle text-center">Каталог товарів</h2>
         <div key={Math.random()}>
           <InfiniteScrollGoods initialGoods={goods} searchParams={searchParams} />
         </div>

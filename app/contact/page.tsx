@@ -20,8 +20,8 @@ const center = {
 
 const ContactPage = () => {
   return (
-    <div className="container mx-auto p-8">
-      <h2 className="text-4xl font-bold mb-8 text-center text-primaryAccentColor">Контакти</h2>
+    <div className="max-w-6xl mx-auto py-3 container">
+      <h2 className="subtitle mb-4 text-center">Контакти</h2>
 
       {/* Google Maps */}
       <section className="mb-8">

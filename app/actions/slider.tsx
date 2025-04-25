@@ -5,7 +5,6 @@ import { ISlider } from "@/types/index"
 import { ISearchParams } from "@/types/searchParams"
 import { connectToDB } from "@/utils/dbConnect"
 import { revalidatePath } from "next/cache"
-import { redirect } from "next/navigation"
 import { buildPagination } from "../helpers"
 
 export interface IGetAllSlides {
@@ -37,10 +36,9 @@ export async function addSlide(formData: FormData) {
   }
 }
 
-export async function getAllSlides(
-  searchParams: ISearchParams,
-  currentPage = 1
-): Promise<IGetAllSlides> {
+export async function getAllSlides(searchParams: ISearchParams): Promise<IGetAllSlides> {
+  const currentPage = Number(searchParams.page) || 1
+
   const { skip, limit } = buildPagination(searchParams, currentPage)
 
   try {
@@ -98,28 +96,30 @@ export async function deleteSlide(id: string) {
   }
 }
 
-export async function updateSlide(formData: FormData) {
-  const entries = Object.fromEntries(formData.entries())
-  const { id, title, desc, src } = entries as {
-    id: string
-    title?: string
-    desc?: string
-    src?: string
+export async function updateSlide(values: any) {
+  const updateFields = Object.fromEntries(
+    Object.entries(values).filter(([key, value]) => key !== "_id" && value !== undefined)
+  )
+  if (Object.keys(updateFields).length === 0) {
+    return {
+      success: false,
+      message: "No valid fields to update."
+    }
   }
   try {
     await connectToDB()
-    const updateFields: Partial<ISlider> = {
-      title,
-      src,
-      desc
-    }
-    Object.keys(updateFields).forEach(
-      key =>
-        (updateFields[key as keyof ISlider] === "" ||
-          updateFields[key as keyof ISlider] === undefined) &&
-        delete updateFields[key as keyof ISlider]
+
+    const updatedSlide = await Slider.findByIdAndUpdate(
+      values._id,
+      { $set: updateFields },
+      { new: true }
     )
-    await Slider.findByIdAndUpdate(id, updateFields)
+    if (!updatedSlide) {
+      return {
+        success: false,
+        message: "Slide not found."
+      }
+    }
     return {
       success: true,
       message: "Slide updated successfully"
@@ -132,8 +132,5 @@ export async function updateSlide(formData: FormData) {
       console.error("Unknown error:", error)
       throw new Error("Failed to update Slide: Unknown error")
     }
-  } finally {
-    revalidatePath("/admin/slider")
-    redirect("/admin/slider")
   }
 }

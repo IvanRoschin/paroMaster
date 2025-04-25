@@ -54,7 +54,9 @@ export async function addUser(values: any): Promise<{ success: boolean; message:
   }
 }
 
-export async function getAllUsers(searchParams: ISearchParams, currentPage = 1) {
+export async function getAllUsers(searchParams: ISearchParams) {
+  const currentPage = Number(searchParams.page) || 1
+
   const { skip, limit } = buildPagination(searchParams, currentPage)
   const filter = buildFilter(searchParams)
   const sortOption = buildSort(searchParams)

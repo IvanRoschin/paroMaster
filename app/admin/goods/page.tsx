@@ -21,7 +21,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: ISe
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <Goods searchParams={searchParams} goods={goods} />
+      <Goods />
     </HydrationBoundary>
   )
 }

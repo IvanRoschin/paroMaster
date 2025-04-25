@@ -30,8 +30,8 @@ export default async function MostPopularGoodsPage({
   }
 
   return (
-    <div className="container">
-      <h2 className="title mb-1">Популярні товари</h2>
+    <div className="max-w-6xl mx-auto py-3 container">
+      <h2 className="subtitle text-center">Популярні товари</h2>
       <div key={Math.random()}>
         <InfiniteScrollGoods initialGoods={data.goods} searchParams={searchParams} />
       </div>

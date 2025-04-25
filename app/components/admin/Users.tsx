@@ -1,7 +1,6 @@
 "use client"
 
 import { deleteUser, getAllUsers, updateUser } from "@/actions/users"
-import Search from "@/components/admin/AdminSearch"
 import Pagination from "@/components/admin/Pagination"
 import EmptyState from "@/components/EmptyState"
 import Loader from "@/components/Loader"
@@ -76,7 +75,11 @@ export default function Users({ searchParams }: { searchParams: ISearchParams })
   return (
     <div className="p-3 rounded-xl">
       <div className="flex items-center justify-between mb-8">
-        <Search placeholder="Знайти користувача" />
+        {/* <Search placeholder="Знайти товар" /> */}
+        <p className=" text-lg">
+          {" "}
+          Додай нового <span className="subtitle text-lg">{"адміна =>"}</span>
+        </p>{" "}
         <Link href="/admin/users/add">
           <Button type={"submit"} label="Додати" small outline color="border-green-400" />
         </Link>

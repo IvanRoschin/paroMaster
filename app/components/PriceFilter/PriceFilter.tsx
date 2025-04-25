@@ -9,6 +9,7 @@ interface PriceFilterProps {
   minPrice: number
   maxPrice: number
 }
+
 const PriceFilter: React.FC<PriceFilterProps> = ({ currencySymbol = "₴", minPrice, maxPrice }) => {
   const [values, setValues] = useState<string[]>([
     minPrice.toString() || "0",
@@ -51,6 +52,12 @@ const PriceFilter: React.FC<PriceFilterProps> = ({ currencySymbol = "₴", minPr
       setValues([minPrice.toString(), maxPrice.toString()])
     }
   }, [minPrice, maxPrice])
+
+  // Когда значение в "до" меняется, обновляем "от" автоматически
+  const handleMaxChange = (value: string) => {
+    const newMax = parseInt(value.replace(/\D/g, ""), 10) || 0
+    setValues([values[0], newMax.toString()])
+  }
 
   useEffect(() => {
     if (values) {
@@ -113,7 +120,7 @@ const PriceFilter: React.FC<PriceFilterProps> = ({ currencySymbol = "₴", minPr
               name="max_input"
               className="input-field"
               value={values[1]}
-              onChange={e => handleRangeChange("max", e.target.value)}
+              onChange={e => handleMaxChange(e.target.value)}
             />
           </div>
         </div>

@@ -25,8 +25,8 @@ export default async function categoryPage({ searchParams }: { searchParams: ISe
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <div>
-        <h2 className="text-4xl mb-4">{searchParams?.category}</h2>
+      <div className="max-w-6xl mx-auto px-4 pt-3 container">
+        <h2 className="subtitle mb-1 text-center">{searchParams?.category}</h2>
         <div key={Math.random()}>
           <InfiniteScrollGoods initialGoods={goods} searchParams={searchParams} />
         </div>

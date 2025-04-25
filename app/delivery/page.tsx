@@ -2,8 +2,8 @@ type Props = {}
 
 const DeliveryPage = (props: Props) => {
   return (
-    <div className="container mx-auto p-8">
-      <h2 className="title mb-1">Оплата та Доставка</h2>
+    <div className="max-w-6xl mx-auto py-3 container">
+      <h2 className="subtitle mb-4 text-center">Оплата та Доставка</h2>
       <section className="mb-8">
         <h3 className="subtitle">Оплата</h3>
         <ul className="list-disc pl-5 space-y-2">
