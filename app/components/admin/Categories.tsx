@@ -3,7 +3,6 @@ import { deleteCategory, getAllCategories } from "@/actions/categories"
 import Pagination from "@/components/admin/Pagination"
 import EmptyState from "@/components/EmptyState"
 import Loader from "@/components/Loader"
-import Search from "@/components/Search"
 import Button from "@/components/ui/Button"
 import { useDeleteData, useFetchData } from "@/hooks/index"
 import { ISearchParams } from "@/types/index"
@@ -68,7 +67,11 @@ export default function Categories({ searchParams }: { searchParams: ISearchPara
   return (
     <div className="p-3">
       <div className="flex items-center justify-between mb-8">
-        <Search placeholder="Знайти категорію" />
+        {/* <Search placeholder="Знайти товар" /> */}{" "}
+        <p className=" text-lg">
+          {" "}
+          Всього в базі <span className="subtitle text-lg">{categoriesCount}</span> категорія(-й)
+        </p>{" "}
         <Link href="/admin/categories/add">
           <Button type="button" label="Додати" small outline color="border-green-400" />
         </Link>

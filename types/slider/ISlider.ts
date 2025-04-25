@@ -3,6 +3,7 @@ export interface ISlider {
   title: string
   desc: string
   src: string
+  isActive: boolean
 }
 
 export interface IGetAllSlidersResponse {

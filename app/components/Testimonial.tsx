@@ -12,55 +12,48 @@ interface TestimonialProps {
 
 const Testimonial: React.FC<TestimonialProps> = ({ id, name, text, stars }) => {
   const { data: session } = useSession()
-
-  // Assuming isAdmin is based on user presence. Adjust logic if needed.
-  const isAdmin = session?.user !== undefined
+  const isAdmin = Boolean(session?.user)
 
   const renderStars = (rating: number) => {
-    const fullStars = Math.floor(rating)
-    const halfStars = rating % 1 >= 0.5 ? 1 : 0
-    const emptyStars = 5 - fullStars - halfStars
+    const full = Math.floor(rating)
+    const half = rating % 1 >= 0.5 ? 1 : 0
+    const empty = 5 - full - half
 
     return (
-      <>
-        {Array(fullStars)
+      <div className="flex items-center gap-1 text-yellow-400">
+        {Array(full)
           .fill(0)
-          .map((_, index) => (
-            <FaStar key={`full-${index}`} className="text-yellow-400" />
+          .map((_, i) => (
+            <FaStar key={`f-${i}`} />
           ))}
-        {Array(halfStars)
+        {Array(half)
           .fill(0)
-          .map((_, index) => (
-            <FaStarHalfAlt key={`half-${index}`} className="text-yellow-400" />
+          .map((_, i) => (
+            <FaStarHalfAlt key={`h-${i}`} />
           ))}
-        {Array(emptyStars)
+        {Array(empty)
           .fill(0)
-          .map((_, index) => (
-            <FaRegStar key={`empty-${index}`} className="text-yellow-400" />
+          .map((_, i) => (
+            <FaRegStar key={`e-${i}`} />
           ))}
-      </>
+      </div>
     )
   }
 
   return (
-    <div className="relative">
+    <div className="relative w-full h-full px-6 py-8 md:py-10 md:px-12 bg-white shadow-md rounded-xl flex flex-col justify-between gap-4 text-center md:text-left">
       {isAdmin && (
-        <Link
-          href={`/admin/testimonials/${id}`}
-          className="absolute top-0 right-0 flex items-center justify-center"
-        >
-          <span className="cursor-pointer w-[30px] h-[30px] rounded-full bg-orange-600 flex justify-center items-center hover:opacity-80">
-            <FaPen size={12} color="white" />
+        <Link href={`/admin/testimonials/${id}`}>
+          <span className="absolute top-3 right-3 cursor-pointer w-8 h-8 rounded-full bg-orange-500 hover:bg-orange-600 flex items-center justify-center">
+            <FaPen className="text-white text-sm" />
           </span>
         </Link>
       )}
-      <div className="rounded-lg p-1 lg:p-10 pr-4 lg:pr-10 m-2 lg:m-4 w-full h-[150px] mx-2 grid place-items-center md:grid-cols-2 grid-cols-1">
-        <div>
-          <div className="text-xl font-semibold">{name}</div>
-          <div className="flex items-center">{renderStars(stars)}</div>
-        </div>
-        <p className="text-gray-600">{text}</p>
-      </div>
+      <div className="text-lg font-semibold text-gray-800">{name}</div>
+      <div className="">{renderStars(stars)}</div>
+      <p className="text-gray-600 italic text-sm md:text-base leading-relaxed line-clamp-5">
+        “{text}”
+      </p>
     </div>
   )
 }

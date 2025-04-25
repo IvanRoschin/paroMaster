@@ -24,16 +24,13 @@ export interface IGetPrices {
   minPrice: number
   maxPrice: number
 }
-export async function getAllGoods(
-  searchParams: ISearchParams,
-  currentPage = 1
-): Promise<IGetAllGoods> {
+export async function getAllGoods(searchParams: ISearchParams): Promise<IGetAllGoods> {
+  const filter = buildFilter(searchParams)
+  const sortOption = buildSort(searchParams)
+  const currentPage = Number(searchParams.page) || 1
+  const { skip, limit } = buildPagination(searchParams, currentPage)
   try {
     await connectToDB()
-
-    const filter = buildFilter(searchParams)
-    const sortOption = buildSort(searchParams)
-    const { skip, limit } = buildPagination(searchParams, currentPage)
 
     const count = await Good.countDocuments(filter)
 

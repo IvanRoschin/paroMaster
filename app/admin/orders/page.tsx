@@ -3,8 +3,6 @@ import Orders from "@/components/admin/Orders"
 import { ISearchParams } from "@/types/searchParams"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 
-const limit = 4
-
 export default async function OrdersPage({ searchParams }: { searchParams: ISearchParams }) {
   const queryClinet = new QueryClient()
   await queryClinet.prefetchQuery({
@@ -14,7 +12,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: ISear
 
   return (
     <HydrationBoundary state={dehydrate(queryClinet)}>
-      <Orders searchParams={searchParams} />
+      <Orders />
     </HydrationBoundary>
   )
 }

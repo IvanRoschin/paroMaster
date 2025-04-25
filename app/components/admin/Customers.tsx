@@ -3,7 +3,7 @@
 import { deleteCustomer, getAllCustomers } from "@/actions/customers"
 import Pagination from "@/components/admin/Pagination"
 import EmptyState from "@/components/EmptyState"
-import { Loader, Search } from "@/components/index"
+import { Loader } from "@/components/index"
 import Button from "@/components/ui/Button"
 import { useDeleteData, useFetchData } from "@/hooks/index"
 import { ISearchParams } from "@/types/searchParams"
@@ -19,7 +19,7 @@ export default function Customers({ params }: { params: ISearchParams }) {
     deleteCustomerById(id)
   }
 
-  if (isLoading) {
+  if (!data || isLoading) {
     return <Loader />
   }
 
@@ -49,7 +49,11 @@ export default function Customers({ params }: { params: ISearchParams }) {
   return (
     <div className="p-3">
       <div className="flex items-center justify-between mb-8">
-        <Search placeholder="Знайти клієнта" />
+        {/* <Search placeholder="Знайти товар" /> */}{" "}
+        <p className=" text-lg">
+          {" "}
+          Всього в базі <span className="subtitle text-lg">{customersCount}</span> клієнта(-ів)
+        </p>{" "}
         <Link href="/admin/customers/add">
           <Button type="button" label="Додати" small outline color="border-green-400" />
         </Link>

@@ -3,26 +3,31 @@
 import { deleteOrder, getAllOrders } from "@/actions/orders"
 import Pagination from "@/components/admin/Pagination"
 import EmptyState from "@/components/EmptyState"
-import { Loader, Search } from "@/components/index"
+import { Loader } from "@/components/index"
 import Button from "@/components/ui/Button"
 import { useDeleteData, useFetchData } from "@/hooks/index"
-import { ISearchParams } from "@/types/searchParams"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { useState } from "react"
 import { FaPen, FaTrash } from "react-icons/fa"
 import ErrorMessage from "../ui/Error"
 
-export default function Orders({ searchParams }: { searchParams: ISearchParams }) {
+export default function Orders() {
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
+  const searchParams = useSearchParams()
+
+  const page = parseInt(searchParams.get("page") || "1")
+  const limit = parseInt(searchParams.get("limit") || "10")
 
   const { mutate: deleteOrderById } = useDeleteData(deleteOrder, ["orders"])
 
-  const { data, isLoading, isError, error, refetch } = useFetchData(getAllOrders, ["orders"], {
-    ...searchParams,
+  const { data, isLoading, isError, error } = useFetchData(getAllOrders, ["orders"], {
+    limit,
+    page,
     status: statusFilter
   })
 
-  if (isLoading) {
+  if (!data || isLoading) {
     return <Loader />
   }
 
@@ -31,7 +36,15 @@ export default function Orders({ searchParams }: { searchParams: ISearchParams }
   }
 
   if (!data?.orders || data?.orders.length === 0) {
-    return <EmptyState showReset title="Відсутні замовлення 🤷‍♂️" />
+    return (
+      <EmptyState
+        showReset
+        title="Відсутні замовлення 🤷‍♂️"
+        onReset={() => {
+          setStatusFilter(null)
+        }}
+      />
+    )
   }
 
   const handleDelete = (id: string) => {
@@ -39,8 +52,8 @@ export default function Orders({ searchParams }: { searchParams: ISearchParams }
   }
 
   const ordersCount = data?.count || 0
-  const page = searchParams.page ? Number(searchParams.page) : 1
-  const limit = Number(searchParams.limit) || 10
+  // const page = searchParams.page ? Number(searchParams.page) : 1
+  // const limit = Number(searchParams.limit) || 10
   const totalPages = Math.ceil(ordersCount / limit)
   const pageNumbers = []
   const offsetNumber = 3
@@ -56,8 +69,11 @@ export default function Orders({ searchParams }: { searchParams: ISearchParams }
   return (
     <div className="p-3">
       <div className="flex items-center justify-between mb-8">
-        <Search placeholder="Знайти замовлення" />
-
+        {/* <Search placeholder="Знайти товар" /> */}{" "}
+        <p className=" text-lg">
+          {" "}
+          Всього в базі <span className="subtitle text-lg">{ordersCount}</span> замовлення(-нь)
+        </p>
         <div className="flex items-center">
           {/* Status Filter Dropdown */}
           <select

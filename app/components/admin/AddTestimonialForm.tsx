@@ -4,7 +4,6 @@ import { testimonialFormSchema } from "@/helpers/index"
 import { useAddData } from "@/hooks/useAddData"
 import { useUpdateData } from "@/hooks/useUpdateData"
 import { ITestimonial } from "@/types/index"
-import { useQueryClient } from "@tanstack/react-query"
 import { Form, Formik, FormikState } from "formik"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
@@ -33,11 +32,10 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ testimonial, title, a
   const [isLoading, setIsLoading] = useState(false)
   const { push } = useRouter()
   const { data: session } = useSession()
-  const addTestimonialMutation = useAddData(action, ["allTestimonials"])
-  const updateTestimonialMutation = useUpdateData(action, ["allTestimonials"])
+  const addTestimonialMutation = useAddData(action, ["testimonials"])
+  const updateTestimonialMutation = useUpdateData(action, ["testimonials"])
   const [name, surname] = testimonial?.name?.split(" ") || ["", ""]
   const isUpdating = Boolean(testimonial?._id)
-  const queryClient = useQueryClient()
 
   const textareaStyles: React.CSSProperties = {
     height: "100px",

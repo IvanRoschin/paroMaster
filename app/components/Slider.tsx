@@ -22,10 +22,8 @@ const Slider: React.FC<SliderProps> = ({
 }) => {
   const [activeImage, setActiveImage] = useState(0)
 
-  // slides завжди визначається, навіть якщо undefined
   const slides = testimonials ? testimonialsData?.testimonials : slidesData?.slides
 
-  // викликаємо useCallback ДО return'ів
   const clickNext = useCallback(() => {
     if (slides && slides.length > 0) {
       setActiveImage(prev => (prev === slides.length - 1 ? 0 : prev + 1))
@@ -47,18 +45,17 @@ const Slider: React.FC<SliderProps> = ({
     }
   }, [activeImage, slides, clickNext])
 
-  // Після хуків — вже можна повертати щось умовно
   if (!slides) {
     return <Loader />
   }
 
   if (slides.length === 0) {
-    return <EmptyState showReset />
+    return <EmptyState showReset title="Відсутні слайди" />
   }
 
   return (
     <main
-      className={`grid place-items-center ${
+      className={`grid place-items-center mt-[65px] ${
         testimonials ? "grid-cols-1" : "grid-cols-2"
       } w-full mx-auto max-w-5xl shadow-2xl rounded-2xl mt-[40px] relative mb-20`}
     >
@@ -86,7 +83,7 @@ const Slider: React.FC<SliderProps> = ({
                 alt={slide.title}
                 width={400}
                 height={400}
-                className="w-full h-[80vh] object-cover md:rounded-tl-3xl md:rounded-bl-3xl"
+                className="w-full h-[80vh] object-cover md:rounded-tl-2xl md:rounded-bl-2xl"
                 priority={true}
               />
             )}

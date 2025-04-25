@@ -14,10 +14,8 @@ interface IGetAllCostomers {
   count: number
 }
 
-export async function getAllCustomers(
-  searchParams: ISearchParams,
-  currentPage = 1
-): Promise<IGetAllCostomers> {
+export async function getAllCustomers(searchParams: ISearchParams): Promise<IGetAllCostomers> {
+  const currentPage = Number(searchParams.page) || 1
   const { skip, limit } = buildPagination(searchParams, currentPage)
 
   try {

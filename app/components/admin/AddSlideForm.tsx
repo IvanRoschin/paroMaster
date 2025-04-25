@@ -1,11 +1,14 @@
 "use client"
 
+import { useAddData } from "@/hooks/useAddData"
+import { useUpdateData } from "@/hooks/useUpdateData"
 import { ISlider } from "@/types/index"
 import { Form, Formik, FormikState } from "formik"
 import React, { useState } from "react"
 import { toast } from "sonner"
 import ImageUploadCloudinary from "../ImageUploadCloudinary"
 import FormField from "../input/FormField"
+import Switcher from "../Switcher"
 import CustomButton from "./CustomFormikButton"
 
 interface InitialStateType extends Omit<ISlider, "_id"> {}
@@ -17,7 +20,7 @@ interface ResetFormProps {
 interface SliderFormProps {
   slide?: ISlider
   title?: string
-  action: (data: FormData) => Promise<{ success: boolean; message: string }>
+  action: (values: ISlider) => Promise<{ success: boolean; message: string }>
 }
 
 const AddSlideForm: React.FC<SliderFormProps> = ({ slide, title, action }) => {
@@ -25,13 +28,18 @@ const AddSlideForm: React.FC<SliderFormProps> = ({ slide, title, action }) => {
     height: "100px",
     overflowY: "auto"
   }
+  const addSlideMutation = useAddData(action, ["slides"])
+  const updateSlideMutation = useUpdateData(action, ["slides"])
+
+  const isUpdating = Boolean(slide?._id)
   const [images, setImages] = useState<File[]>([])
   const [isUploaded, setIsUploaded] = useState<boolean>(false)
 
   const initialValues: InitialStateType = {
     src: slide?.src || "",
     title: slide?.title || "",
-    desc: slide?.desc || ""
+    desc: slide?.desc || "",
+    isActive: slide?.isActive || false
   }
 
   const slideInputs = [
@@ -47,29 +55,34 @@ const AddSlideForm: React.FC<SliderFormProps> = ({ slide, title, action }) => {
       type: "textarea",
       required: true,
       style: textareaStyles
+    },
+    {
+      id: "isActive",
+      label: "Публікується?",
+      type: "switcher",
+      required: true
     }
   ]
 
-  const handleSubmit = async (values: InitialStateType, { resetForm }: ResetFormProps) => {
+  const handleSubmit = async (values: ISlider, { resetForm }: ResetFormProps) => {
     try {
-      const formData = new FormData()
+      const updateSliderData = isUpdating ? { ...values, _id: slide?._id } : {}
 
-      Object.keys(values).forEach(key => {
-        const value = (values as Record<string, any>)[key]
-        if (Array.isArray(value)) {
-          value.forEach(val => formData.append(key, val))
-        } else {
-          formData.append(key, value)
-        }
-      })
+      console.log("updateSliderData", updateSliderData)
+      console.log("values", values)
 
-      if (slide?._id) {
-        formData.append("id", slide._id as string)
+      const result = isUpdating
+        ? await updateSlideMutation.mutateAsync(updateSliderData)
+        : await addSlideMutation.mutateAsync(values)
+
+      if (result?.success === false) {
+        toast.error("Something went wrong")
+        return
       }
-
-      await action(formData)
-      resetForm()
-      toast.success(slide?._id ? "Слайд оновлено!" : "Новий слайд додано!")
+      if (result?.success === true) {
+        resetForm()
+        toast.success(isUpdating ? "Слайд оновлено!!" : "Новий слайд додано!")
+      }
     } catch (error) {
       toast.error("Помилка!")
       console.error("Error submitting form:", error)
@@ -79,17 +92,31 @@ const AddSlideForm: React.FC<SliderFormProps> = ({ slide, title, action }) => {
   return (
     <div className="my-10">
       <h3 className="text-lg mb-4">{title || "Додати слайд"}</h3>
-      <Formik initialValues={initialValues} onSubmit={handleSubmit}>
-        {({ setFieldValue, values, errors }) => (
+      <Formik initialValues={initialValues} onSubmit={handleSubmit} enableReinitialize>
+        {({ errors, setFieldValue, values }) => (
           <Form>
             {slideInputs.map((item, i) => (
-              <FormField key={i} item={item} errors={errors} setFieldValue={setFieldValue} />
+              <div key={i}>
+                {item.type === "switcher" ? (
+                  <Switcher
+                    id={item.id}
+                    label={item.label}
+                    checked={values[item.id as keyof InitialStateType] as boolean}
+                    onChange={checked => setFieldValue(item.id as keyof InitialStateType, checked)}
+                  />
+                ) : (
+                  <FormField item={item} errors={errors} setFieldValue={setFieldValue} />
+                )}
+              </div>
             ))}
-            <ImageUploadCloudinary
-              setFieldValue={setFieldValue}
-              values={values.src}
-              errors={errors}
-            />
+            <div className="relative z-0">
+              <ImageUploadCloudinary
+                setFieldValue={setFieldValue}
+                values={values.src}
+                errors={errors}
+              />
+            </div>
+
             <CustomButton label={"Зберегти"} />
           </Form>
         )}

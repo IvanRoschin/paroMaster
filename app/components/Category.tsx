@@ -2,15 +2,14 @@ import Image from "next/image"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useCallback } from "react"
-import { useScreenSize } from "../hooks"
+import { useMediaQuery } from "../hooks"
 
 interface CategoryPage {
   categories: { src: string; title: string }[]
 }
 
 const Category: React.FC<CategoryPage> = ({ categories }) => {
-  const { width } = useScreenSize()
-  const isMobile = width <= 767
+  const isMobile = useMediaQuery("(max-width: 767px)")
 
   const searchParams = useSearchParams()
 
@@ -28,12 +27,12 @@ const Category: React.FC<CategoryPage> = ({ categories }) => {
   )
 
   return (
-    <div className="pt-0 mr-4 text-sm w-full md:w-[250px] mb-4">
-      <h2 className="subtitle-main">Категорії товарів</h2>
+    <div className="max-w-6xl mx-auto px-4 py-3 container md:w-[250px]">
+      <h2 className="subtitle mb-4">Категорії товарів</h2>
 
       {/* Conditional rendering based on isMobile */}
       <ul
-        className={`bg-secondaryBackground p-4 rounded-lg ${
+        className={`bg-secondaryBackground p-4 rounded-lg text-sm ${
           isMobile ? "grid grid-cols-2 gap-3" : ""
         }`}
       >

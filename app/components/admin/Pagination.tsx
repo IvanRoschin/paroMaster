@@ -15,6 +15,7 @@ const Pagination = ({ count, pageNumbers }: Props) => {
   const params = new URLSearchParams(searchParams.toString())
   const page = parseInt(searchParams.get("page") || "1")
   const ITEM_PER_PAGE = 4
+  params.set("limit", ITEM_PER_PAGE.toString())
 
   const hasPrev = ITEM_PER_PAGE * (page - 1) > 0
   const hasNext = ITEM_PER_PAGE * (page - 1) + ITEM_PER_PAGE < count
