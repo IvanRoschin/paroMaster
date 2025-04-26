@@ -1,4 +1,5 @@
 import { getAllGoods } from "@/actions/goods"
+import Breadcrumbs from "@/components/Breadcrumbs"
 import InfiniteScrollGoods from "@/components/InfiniteScrollGoods"
 import { IGood } from "@/types/index"
 import { ISearchParams } from "@/types/searchParams"
@@ -26,6 +27,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: ISea
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="max-w-6xl mx-auto py-3 container">
+        <Breadcrumbs />
         <h2 className="subtitle text-center">Каталог товарів</h2>
         <div key={Math.random()}>
           <InfiniteScrollGoods initialGoods={goods} searchParams={searchParams} />

@@ -10,6 +10,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
 import { FaPen, FaSortAlphaDown, FaSortAlphaUp, FaTrash } from "react-icons/fa"
+import Breadcrumbs from "../Breadcrumbs"
 import ErrorMessage from "../ui/Error"
 export default function Categories({ searchParams }: { searchParams: ISearchParams }) {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
@@ -66,6 +67,8 @@ export default function Categories({ searchParams }: { searchParams: ISearchPara
   })
   return (
     <div className="p-3">
+      <Breadcrumbs />
+
       <div className="flex items-center justify-between mb-8">
         {/* <Search placeholder="Знайти товар" /> */}{" "}
         <p className=" text-lg">

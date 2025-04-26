@@ -4,7 +4,7 @@ import { getGoodById } from "@/actions/goods"
 import ShoppingCart from "@/components/Cart/ShoppingCart"
 import { storageKeys } from "@/helpers/storageKeys"
 import { CartItem } from "@/types/cart/ICartItem"
-import { createContext, useContext, useEffect, useMemo, useState } from "react"
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 
 type ShoppingCartProviderProps = {
@@ -57,9 +57,12 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
     )
   }
 
-  const getItemQuantity = (id: string) => {
-    return cart.find(item => item.good._id === id)?.quantity || 0
-  }
+  const getItemQuantity = useCallback(
+    (id: string) => {
+      return cart.find(item => item.good._id === id)?.quantity || 0
+    },
+    [cart]
+  )
   const increaseCartQuantity = (id: string) => {
     getGoodById(id)
       .then(newGood => {
@@ -125,7 +128,7 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
       setCart,
       cartQuantity
     }),
-    [cart, cartQuantity]
+    [cart, cartQuantity, getItemQuantity]
   )
 
   return (

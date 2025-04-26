@@ -12,6 +12,7 @@ import { useEffect, useState } from "react"
 import { FaPen, FaRegStar, FaStar, FaStarHalfAlt, FaTrash } from "react-icons/fa"
 
 import { deleteTestimonial, getGoodTestimonials } from "@/actions/testimonials"
+import Breadcrumbs from "@/components/Breadcrumbs"
 import DeleteConfirmation from "@/components/DeleteConfirmation"
 import TestimonialForm from "@/components/forms/TestimonialForm"
 import { ItemsList } from "@/components/index"
@@ -76,10 +77,10 @@ export default function Item({ params }: { params: any }) {
 
   const quantity = getItemQuantity(data._id)
 
-  console.log("data.compatibleGoods", data.compatibleGoods)
-
   return (
     <div className="m-6">
+      <Breadcrumbs />
+
       <div className="flex flex-col justify-evenly lg:flex-row mb-4 lg:mb-0">
         <ImagesBlock item={data} />
         <div className="pt-10 relative">

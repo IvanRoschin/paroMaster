@@ -114,6 +114,7 @@ const AddSlideForm: React.FC<SliderFormProps> = ({ slide, title, action }) => {
                 setFieldValue={setFieldValue}
                 values={values.src}
                 errors={errors}
+                uploadPreset="preset_slide"
               />
             </div>
 

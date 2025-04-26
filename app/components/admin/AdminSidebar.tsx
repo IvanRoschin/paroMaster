@@ -4,7 +4,6 @@ import Image from "next/image"
 import Link from "next/link"
 import {
   MdDashboard,
-  MdLogout,
   MdProductionQuantityLimits,
   MdShoppingBag,
   MdSupervisedUserCircle,
@@ -51,7 +50,7 @@ const menuItems = [
     icon: <SiTestinglibrary />
   },
   {
-    title: "Слайдер",
+    title: "Слайди",
     path: "/admin/slider",
     icon: <TfiLayoutSlider />
   }

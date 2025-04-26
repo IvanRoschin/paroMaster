@@ -98,12 +98,14 @@ interface ImageUploadProps {
   setFieldValue: (field: string, value: string[], shouldValidate?: boolean) => void
   values?: string[] | string
   errors?: { [key: string]: string | string[] | FormikErrors<any> | FormikErrors<any>[] }
+  uploadPreset: string
 }
 
 const ImageUploadCloudinary: React.FC<ImageUploadProps> = ({
   setFieldValue,
   values = [],
-  errors
+  errors,
+  uploadPreset
 }) => {
   const [localImages, setLocalImages] = useState<string[]>([])
   const isArray = Array.isArray(values)
@@ -126,8 +128,8 @@ const ImageUploadCloudinary: React.FC<ImageUploadProps> = ({
   return (
     <CldUploadWidget
       options={{ maxFiles: 3 }}
-      uploadPreset="preset_slide"
       onSuccess={handleSuccess}
+      uploadPreset={uploadPreset}
     >
       {({ open }) => (
         <div

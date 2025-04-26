@@ -1,3 +1,4 @@
+import Breadcrumbs from "@/components/Breadcrumbs"
 import Logo from "@/components/Logo"
 import Link from "next/link"
 
@@ -7,6 +8,8 @@ const PrivacyPolicy = () => {
 
   return (
     <div className="bg-white text-black p-6">
+      <Breadcrumbs />
+
       <h1 className="text-center text-2xl font-bold mb-8">
         ПОЛІТИКА КОНФІДЕНЦІЙНОСТІ ІНТЕРНЕТ-МАГАЗИНУ
       </h1>

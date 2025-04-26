@@ -1,3 +1,4 @@
+import Breadcrumbs from "@/components/Breadcrumbs"
 import Image from "next/image"
 
 const works = [
@@ -30,6 +31,8 @@ const works = [
 const OurWorkPage = () => {
   return (
     <section className="max-w-6xl mx-auto py-3 container">
+      <Breadcrumbs />
+
       <h1 className="subtitle mb-4 text-center">Наші роботи</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {works.map(work => (

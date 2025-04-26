@@ -19,6 +19,7 @@ import { useShoppingCart } from "app/context/ShoppingCartContext"
 import debounce from "debounce"
 import { FormField } from "../components"
 import OrderGood from "./orderGood"
+import Breadcrumbs from "@/components/Breadcrumbs"
 
 const OrderPage = () => {
   const [isLoading, setIsLoading] = useState(false)
@@ -164,6 +165,8 @@ const OrderPage = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
+      <Breadcrumbs />
+
       <div className="flex flex-col p-6 bg-white rounded-lg shadow-lg space-y-8">
         <h2 className="text-3xl font-semibold text-primary mb-4">Оформлення замовлення</h2>
         <div className="flex justify-between gap-8">

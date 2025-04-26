@@ -11,6 +11,7 @@ import { useSearchParams } from "next/navigation"
 import { useState } from "react"
 import { FaPen, FaTrash } from "react-icons/fa"
 import { toast } from "sonner"
+import Breadcrumbs from "../Breadcrumbs"
 import ErrorMessage from "../ui/Error"
 
 export default function Testimonials() {
@@ -76,6 +77,8 @@ export default function Testimonials() {
   }
   return (
     <div className="p-3">
+      <Breadcrumbs />
+
       <div className="flex items-center justify-between mb-8">
         <p className=" text-lg">
           {" "}

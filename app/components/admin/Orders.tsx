@@ -10,6 +10,7 @@ import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useState } from "react"
 import { FaPen, FaTrash } from "react-icons/fa"
+import Breadcrumbs from "../Breadcrumbs"
 import ErrorMessage from "../ui/Error"
 
 export default function Orders() {
@@ -68,6 +69,8 @@ export default function Orders() {
 
   return (
     <div className="p-3">
+      <Breadcrumbs />
+
       <div className="flex items-center justify-between mb-8">
         {/* <Search placeholder="Знайти товар" /> */}{" "}
         <p className=" text-lg">

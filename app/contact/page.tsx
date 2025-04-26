@@ -1,6 +1,7 @@
 "use client"
 
 import { addNewLid } from "@/actions/lids"
+import Breadcrumbs from "@/components/Breadcrumbs"
 import AddLidForm from "@/components/forms/LidForm"
 import Logo from "@/components/Logo"
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api"
@@ -21,6 +22,8 @@ const center = {
 const ContactPage = () => {
   return (
     <div className="max-w-6xl mx-auto py-3 container">
+      <Breadcrumbs />
+
       <h2 className="subtitle mb-4 text-center">Контакти</h2>
 
       {/* Google Maps */}
@@ -30,9 +33,7 @@ const ContactPage = () => {
             <FaMapMarkerAlt className="inline-block mr-1 subtitle" />
             <Logo />
           </div>
-          <p>
-            <h3 className="subtitle mb-4 flex justify-center items-center">на Google карті</h3>
-          </p>
+          <h3 className="subtitle mb-4 flex justify-center items-center">на Google карті</h3>
         </div>
         <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
           <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={15}>

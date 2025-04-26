@@ -123,13 +123,13 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, action, title, goods }) =>
       }, 500)
 
       return () => clearTimeout(delayDebounceFn)
-    }, [city, order?.customer.city])
+    }, [])
 
     useEffect(() => {
       if (warehouses.length > 0) {
         setFieldValue("customer.warehouse", warehouses[0].Description)
       }
-    }, [warehouses])
+    }, [setFieldValue])
 
     useEffect(() => {
       if (values.totalPrice !== totalPrice && totalPrice !== prevTotalPrice) {

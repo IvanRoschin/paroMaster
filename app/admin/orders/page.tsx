@@ -1,5 +1,6 @@
 import { getAllOrders } from "@/actions/orders"
 import Orders from "@/components/admin/Orders"
+import Breadcrumbs from "@/components/Breadcrumbs"
 import { ISearchParams } from "@/types/searchParams"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 
