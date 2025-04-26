@@ -79,7 +79,7 @@ const Slider: React.FC<SliderProps> = ({
               />
             ) : (
               <Image
-                src={slide.src}
+                src={slide.src[0]}
                 alt={slide.title}
                 width={400}
                 height={400}

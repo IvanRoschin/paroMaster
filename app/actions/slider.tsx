@@ -13,15 +13,32 @@ export interface IGetAllSlides {
   count: number
 }
 
-export async function addSlide(formData: FormData) {
-  const values = Object.fromEntries(formData.entries())
+export async function addSlide(values: Partial<ISlider>) {
+  if (!values.title) {
+    throw new Error("Title is required.")
+  }
+  if (!values.desc || typeof values.desc !== "string") {
+    throw new Error("Desc is required and must be a string")
+  }
+  if (values.isActive === undefined) {
+    throw new Error("isActive field is required.")
+  }
   try {
     await connectToDB()
+
+    const existingSlide = await Slider.findOne({
+      title: values.title,
+      desc: values.desc
+    })
+
+    if (existingSlide) {
+      throw new Error("This slide already exists")
+    }
 
     await Slider.create(values)
     return {
       success: true,
-      message: "Slide added successfully"
+      message: "Слайд успішно доданий"
     }
   } catch (error) {
     if (error instanceof Error) {
@@ -31,8 +48,6 @@ export async function addSlide(formData: FormData) {
       console.error("Unknown error:", error)
       throw new Error("Failed to add category: Unknown error")
     }
-  } finally {
-    revalidatePath("/admin/slider")
   }
 }
 
