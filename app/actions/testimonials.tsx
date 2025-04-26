@@ -46,29 +46,8 @@ export async function addTestimonial(values: Partial<ITestimonial>) {
 
     const newTestimonial = await Testimonial.create(testimonialData)
 
-    if (values.product) {
-      const testimonials = await Testimonial.find({
-        product: values.product,
-        isActive: true,
-        rating: { $gt: 0 }
-      })
-
-      const ratingSum = testimonials.reduce((acc, t) => acc + t.rating, 0)
-      const ratingCount = testimonials.length
-      const averageRating = ratingCount ? ratingSum / ratingCount : null
-
-      const updatedGood = await Good.findByIdAndUpdate(
-        values.product,
-        {
-          averageRating,
-          ratingCount
-        },
-        { new: true }
-      )
-
-      if (!updatedGood) {
-        throw new Error("Product not found")
-      }
+    if (newTestimonial) {
+      await recalculateRating(newTestimonial.product)
     }
 
     return {
@@ -146,7 +125,10 @@ export async function deleteTestimonial(testimonialId: string) {
   }
   try {
     await connectToDB()
-    await Testimonial.findByIdAndDelete(testimonialId)
+    const deletedTestimonial = await Testimonial.findByIdAndDelete(testimonialId)
+    if (deletedTestimonial?.product) {
+      await recalculateRating(deletedTestimonial.product)
+    }
     // return {
     //   success: true,
     //   message: "Відгук видалено"
@@ -163,6 +145,8 @@ export async function deleteTestimonial(testimonialId: string) {
 }
 
 export async function updateTestimonial(values: any) {
+  const fieldsToRecalculate = ["rating", "product", "isActive"]
+
   const updateFields = Object.fromEntries(
     Object.entries(values).filter(([key, value]) => key !== "_id" && value !== undefined)
   )
@@ -172,6 +156,9 @@ export async function updateTestimonial(values: any) {
       message: "No valid fields to update."
     }
   }
+  const shouldRecalculate = Object.keys(updateFields).some(field =>
+    fieldsToRecalculate.includes(field)
+  )
   try {
     await connectToDB()
 
@@ -180,8 +167,9 @@ export async function updateTestimonial(values: any) {
       { $set: updateFields },
       { new: true }
     )
-
-    if (!updatedTestimonial) {
+    if (updatedTestimonial && shouldRecalculate) {
+      await recalculateRating(updatedTestimonial.product)
+    } else {
       return {
         success: false,
         message: "Testimonial not found."
@@ -212,6 +200,24 @@ export async function getGoodTestimonials(productId: string) {
       success: false,
       message: error instanceof Error ? error.message : "Unknown error occurred"
     }
-  } finally {
   }
+}
+
+export async function recalculateRating(productId?: string) {
+  if (!productId) return
+
+  const testimonials = await Testimonial.find({
+    product: productId,
+    isActive: true,
+    rating: { $gt: 0 }
+  })
+
+  const ratingSum = testimonials.reduce((acc, t) => acc + t.rating, 0)
+  const ratingCount = testimonials.length
+  const averageRating = ratingCount ? ratingSum / ratingCount : null
+
+  await Good.findByIdAndUpdate(productId, {
+    averageRating,
+    ratingCount
+  })
 }
