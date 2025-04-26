@@ -1,8 +1,12 @@
+import Breadcrumbs from "@/components/Breadcrumbs"
+
 type Props = {}
 
 const DeliveryPage = (props: Props) => {
   return (
     <div className="max-w-6xl mx-auto py-3 container">
+      <Breadcrumbs />
+
       <h2 className="subtitle mb-4 text-center">Оплата та Доставка</h2>
       <section className="mb-8">
         <h3 className="subtitle">Оплата</h3>

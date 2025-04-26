@@ -13,6 +13,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { FaPen, FaTrash } from "react-icons/fa"
 import { toast } from "sonner"
+import Breadcrumbs from "../Breadcrumbs"
 import Switcher from "../Switcher"
 import ErrorMessage from "../ui/Error"
 
@@ -68,6 +69,8 @@ export default function Slides({ searchParams }: { searchParams: ISearchParams }
 
   return (
     <div className="p-3">
+      <Breadcrumbs />
+
       <div className="flex items-center justify-between mb-8">
         {/* <Search placeholder="Знайти слайд" /> */}
         <p className=" text-lg">

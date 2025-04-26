@@ -4,6 +4,7 @@ import { IGood } from "@/types/index"
 import { ISearchParams } from "@/types/searchParams"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 import { EmptyState } from "../components"
+import Breadcrumbs from "@/components/Breadcrumbs"
 
 interface GoodsData {
   goods: IGood[]
@@ -27,6 +28,8 @@ export default async function SearchPage({ searchParams }: { searchParams: ISear
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="container">
+        <Breadcrumbs />
+
         <h2 className="title mb-1">Результати пошуку:</h2>
         {goods.length > 0 ? (
           <div key={Math.random()}>

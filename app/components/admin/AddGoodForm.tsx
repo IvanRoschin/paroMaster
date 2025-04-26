@@ -154,11 +154,17 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
         ? await updateGoodMutation.mutateAsync(formData)
         : await addGoodMutation.mutateAsync(formData)
 
-      if (result.success) {
-        toast.success(
-          isUpdating ? result.message || "Товар оновлено!" : result.message || "Новий товар додано!"
-        )
-      }
+      console.log("result", result)
+      toast.success(
+        isUpdating ? result.message || "Товар оновлено!" : result.message || "Новий товар додано!"
+      )
+      // push("admin/goods")
+
+      // if (result.success) {
+      //   toast.success(
+      //     isUpdating ? result.message || "Товар оновлено!" : result.message || "Новий товар додано!"
+      //   )
+      // }
 
       resetForm({
         values: {
@@ -199,6 +205,7 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
               setFieldValue={setFieldValue}
               values={values.src}
               errors={errors}
+              uploadPreset="preset_good"
             />
             {inputs.map((item, i) => (
               <div key={i}>

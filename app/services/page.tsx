@@ -1,5 +1,6 @@
 "use client"
 
+import Breadcrumbs from "@/components/Breadcrumbs"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -72,6 +73,8 @@ const services = [
 const ServicesPage = () => {
   return (
     <section className="max-w-6xl mx-auto py-3 container">
+      <Breadcrumbs />
+
       <h1 className="subtitle mb-4 text-center">Послуги</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {services.map(service => (

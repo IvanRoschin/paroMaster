@@ -18,6 +18,7 @@ import {
   FaTrash
 } from "react-icons/fa"
 import ErrorMessage from "../ui/Error"
+import Breadcrumbs from "../Breadcrumbs"
 
 // interface Props {
 //   goods: IGood[]
@@ -107,6 +108,8 @@ export default function Goods() {
 
   return (
     <div className="p-3">
+      <Breadcrumbs />
+
       {/* <div className="flex justify-end mb-8">
         <Link href="/admin/goods/add">
           <Button type="button" label="Додати" small outline color="border-green-400" />
