@@ -34,7 +34,7 @@ const InfiniteScrollGoods = ({
     setIsFetchingMore(true)
 
     const nextPage = pagesLoaded + 1
-    const newGoods = (await getAllGoods(searchParams, nextPage)) ?? []
+    const newGoods = (await getAllGoods({ ...searchParams, page: nextPage.toString() })) ?? []
 
     if (newGoods?.goods?.length > 0) {
       setGoods(prevGoods => [...prevGoods, ...newGoods.goods])
