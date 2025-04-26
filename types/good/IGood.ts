@@ -15,6 +15,8 @@ export interface IGood {
   isCompatible: boolean
   compatibility: string[]
   quantity?: number
+  averageRating?: number
+  ratingCount?: number
 }
 
 export interface SGood {

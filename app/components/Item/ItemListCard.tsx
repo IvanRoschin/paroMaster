@@ -47,6 +47,15 @@ const ItemListCard: React.FC<ItemListCardProps> = ({ item }) => {
               className="self-center mb-[30px]"
             />
           </div>
+          {/* Рейтинг і кількість відгуків */}
+          <div className="flex items-center gap-2 mb-2">
+            <div className="flex text-yellow-400">
+              {Array.from({ length: 5 }, (_, index) => (
+                <span key={index}>{index < Math.round(item.averageRating || 0) ? "★" : "☆"}</span>
+              ))}
+            </div>
+            <span className="text-sm text-gray-600">({item.ratingCount || 0} відгуків)</span>
+          </div>
           <h2 className="font-semibold mb-[20px]">{item.title}</h2>
           <div>
             <p className={`mb-[20px] ${item.isAvailable ? "text-green-600" : "text-red-600"}`}>
