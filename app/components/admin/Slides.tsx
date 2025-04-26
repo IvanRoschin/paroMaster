@@ -4,9 +4,9 @@ import { deleteSlide, getAllSlides, updateSlide } from "@/actions/slider"
 import Pagination from "@/components/admin/Pagination"
 import EmptyState from "@/components/EmptyState"
 import Loader from "@/components/Loader"
-import Search from "@/components/Search"
 import Button from "@/components/ui/Button"
 import { useDeleteData, useFetchData } from "@/hooks/index"
+import { ISlider } from "@/types/index"
 import { ISearchParams } from "@/types/searchParams"
 import Image from "next/image"
 import Link from "next/link"
@@ -15,7 +15,6 @@ import { FaPen, FaTrash } from "react-icons/fa"
 import { toast } from "sonner"
 import Switcher from "../Switcher"
 import ErrorMessage from "../ui/Error"
-import { ISlider } from "@/types/index"
 
 export default function Slides({ searchParams }: { searchParams: ISearchParams }) {
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
@@ -70,7 +69,11 @@ export default function Slides({ searchParams }: { searchParams: ISearchParams }
   return (
     <div className="p-3">
       <div className="flex items-center justify-between mb-8">
-        <Search placeholder="Знайти слайд" />
+        {/* <Search placeholder="Знайти слайд" /> */}
+        <p className=" text-lg">
+          {" "}
+          Всього в базі <span className="subtitle text-lg">{slidesCount}</span> слайди(-ів)
+        </p>
         <div className="flex items-center gap-4">
           <select
             value={statusFilter || ""}
@@ -104,7 +107,7 @@ export default function Slides({ searchParams }: { searchParams: ISearchParams }
               <td className="p-2 border-r-2 text-start">{slide.desc}</td>
               <td className="p-2 border-r-2">
                 <div className="flex justify-center">
-                  <Image src={slide.src} alt={slide.title} width={100} height={100} priority />
+                  <Image src={slide.src[0]} alt={slide.title} width={100} height={100} priority />
                 </div>
               </td>
               <td className="p-2 border-r-2 text-center">

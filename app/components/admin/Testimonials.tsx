@@ -79,7 +79,7 @@ export default function Testimonials() {
       <div className="flex items-center justify-between mb-8">
         <p className=" text-lg">
           {" "}
-          Всього в базі <span className="subtitle text-lg">{testimonialsCount}</span> відгуків
+          Всього в базі <span className="subtitle text-lg">{testimonialsCount}</span> відгуки (-ів)
         </p>
         <div className="flex items-center">
           <select

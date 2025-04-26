@@ -13,8 +13,9 @@ const sliderSchema = new Schema(
       required: true
     },
     src: {
-      type: String,
-      required: true
+      type: [String],
+      required: true,
+      validate: [(arr: string[]) => arr.length > 0, "Щонайменше одне зображення обовʼязкове"]
     },
     isActive: {
       type: Boolean,

@@ -4,7 +4,7 @@ import { useAddData } from "@/hooks/useAddData"
 import { useUpdateData } from "@/hooks/useUpdateData"
 import { ISlider } from "@/types/index"
 import { Form, Formik, FormikState } from "formik"
-import React, { useState } from "react"
+import React from "react"
 import { toast } from "sonner"
 import ImageUploadCloudinary from "../ImageUploadCloudinary"
 import FormField from "../input/FormField"
@@ -32,11 +32,11 @@ const AddSlideForm: React.FC<SliderFormProps> = ({ slide, title, action }) => {
   const updateSlideMutation = useUpdateData(action, ["slides"])
 
   const isUpdating = Boolean(slide?._id)
-  const [images, setImages] = useState<File[]>([])
-  const [isUploaded, setIsUploaded] = useState<boolean>(false)
+  // const [images, setImages] = useState<File[]>([])
+  // const [isUploaded, setIsUploaded] = useState<boolean>(false)
 
   const initialValues: InitialStateType = {
-    src: slide?.src || "",
+    src: Array.isArray(slide?.src) ? slide.src : [slide?.src || ""],
     title: slide?.title || "",
     desc: slide?.desc || "",
     isActive: slide?.isActive || false
