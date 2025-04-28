@@ -43,41 +43,6 @@ export async function getAllOrders(searchParams: ISearchParams): Promise<IGetAll
   }
 }
 
-export async function addOrder(values: IOrder) {
-  try {
-    await connectToDB()
-
-    const orderData = {
-      number: values.number,
-      customer: values.customer,
-      orderedGoods: values.orderedGoods.map(item => ({
-        title: item.good.title,
-        brand: item.good.brand,
-        model: item.good.model,
-        vendor: item.good.vendor,
-        price: item.good.price,
-        quantity: item.quantity,
-        src: item.good.src
-      })),
-      totalPrice: values.totalPrice,
-      status: values.status
-    }
-    // console.log('orderData', orderData)
-
-    await Order.create(orderData)
-    revalidatePath("/")
-    return { success: true, data: orderData }
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error adding order:", error)
-      throw new Error("Failed to add order: " + error.message)
-    } else {
-      console.error("Unknown error:", error)
-      throw new Error("Failed to add order: Unknown error")
-    }
-  }
-}
-
 export const deleteGoodsFromOrder = async (orderId: string, goodsId: string) => {
   try {
     const order = await Order.findById(orderId)
@@ -115,16 +80,12 @@ export const deleteGoodsFromOrder = async (orderId: string, goodsId: string) => 
 }
 
 export async function addOrderAction(values: IOrder) {
+  if (!values.number) {
+    const generatedNumber = `ORD-${Date.now()}` // приклад генерації номера (можеш змінити
+    values.number = generatedNumber
+  }
   try {
     await connectToDB()
-
-    // const orderData = {
-    // 	number: values.number,
-    // 	customer: values.customer,
-    // 	orderedGoods: values.orderedGoods,
-    // 	totalPrice: values.totalPrice,
-    // 	status: values.status || 'Новий',
-    // }
     await Order.create(values)
     revalidatePath("/")
     return { success: true, message: "The New Order Successfully Added" }
@@ -132,7 +93,6 @@ export async function addOrderAction(values: IOrder) {
     if (error instanceof Error) {
       console.error("Error adding order:", error)
       return { success: false, message: "Failed to add order: " + error.message }
-
       // throw new Error('Failed to add order: ' + error.message)
     } else {
       console.error("Unknown error:", error)

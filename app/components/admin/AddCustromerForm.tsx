@@ -1,10 +1,10 @@
 "use client"
 
-import { getData } from "@/actions/nova"
 import { customerFormSchema } from "@/helpers/index"
 import { useAddData, useUpdateData } from "@/hooks/index"
 import { ICustomer } from "@/types/customer/ICustomer"
 import { PaymentMethod } from "@/types/paymentMethod"
+import { getData } from "app/lib/novaPoshta"
 import { FormikProvider, useFormik } from "formik"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
