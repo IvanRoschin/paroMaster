@@ -122,17 +122,6 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
     compatibility: good?.compatibility || []
   }
 
-  // const normalizeToArray = (value: unknown): string[] => {
-  //   if (typeof value === "string") {
-  //     return value
-  //       .split(",")
-  //       .map(item => item.trim())
-  //       .filter(Boolean)
-  //   }
-  //   if (Array.isArray(value)) return value
-  //   return []
-  // }
-
   const handleSubmit = async (values: InitialStateType, { resetForm }: ResetFormProps) => {
     try {
       setIsLoading(true)
@@ -141,24 +130,27 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
       Object.keys(values).forEach(key => {
         const value = (values as Record<string, any>)[key]
         if (Array.isArray(value)) {
-          value.forEach(val => formData.append(key, val))
+          value.forEach(val => formData.append(`${key}[]`, val))
         } else {
           formData.append(key, value)
         }
       })
-      if (isUpdating && good) {
-        formData.append("id", good._id as string)
+      if (good?._id) {
+        formData.append("id", good._id)
       }
 
-      const result = isUpdating
-        ? await updateGoodMutation.mutateAsync(formData)
-        : await addGoodMutation.mutateAsync(formData)
+      const mutation = isUpdating ? updateGoodMutation : addGoodMutation
+      const result = await mutation.mutateAsync(formData)
+
+      // const result = isUpdating
+      //   ? await updateGoodMutation.mutateAsync(formData)
+      //   : await addGoodMutation.mutateAsync(formData)
 
       console.log("result", result)
       toast.success(
         isUpdating ? result.message || "Товар оновлено!" : result.message || "Новий товар додано!"
       )
-      // push("admin/goods")
+      push("/admin/goods")
 
       // if (result.success) {
       //   toast.success(

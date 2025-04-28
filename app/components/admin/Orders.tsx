@@ -25,7 +25,8 @@ export default function Orders() {
   const { data, isLoading, isError, error } = useFetchData(getAllOrders, ["orders"], {
     limit,
     page,
-    status: statusFilter
+    status: statusFilter,
+    sort: "-createdAt"
   })
 
   if (!data || isLoading) {

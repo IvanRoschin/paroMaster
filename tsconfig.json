@@ -28,7 +28,8 @@
       "@/models/*": ["models/*"],
       "@/helpers/*": ["app/helpers/*"],
       "@/hooks/*": ["app/hooks/*"],
-      "@/config/*": ["config/*"]
+      "@/config/*": ["config/*"],
+      "@/lib/*": ["lib/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "auth.tjs", "auth.js"],
