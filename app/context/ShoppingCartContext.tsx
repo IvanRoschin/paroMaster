@@ -33,7 +33,7 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
   const [cart, setCart] = useState<CartItem[]>([])
 
   useEffect(() => {
-    const storedCartData = sessionStorage.getItem(storageKeys.cart)
+    const storedCartData = localStorage.getItem(storageKeys.cart)
     if (storedCartData) {
       try {
         const cartData = JSON.parse(storedCartData)
@@ -44,11 +44,19 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
     }
   }, [])
 
+  useEffect(() => {
+    if (cart.length > 0) {
+      localStorage.setItem(storageKeys.cart, JSON.stringify(cart))
+    } else {
+      localStorage.removeItem(storageKeys.cart)
+    }
+  }, [cart])
+
   const cartQuantity = cart.reduce((quantity, item) => item.quantity + quantity, 0)
 
   const resetCart = () => {
     setCart([])
-    sessionStorage.removeItem(storageKeys.cart)
+    localStorage.removeItem(storageKeys.cart)
   }
 
   const setCartQuantity = (id: string, quantity: number) => {
@@ -72,11 +80,22 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
             toast.success(`Товар "${newGood.title}" додано до корзини`, {
               id: `add-${id}` // унікальний ID для нотифікації
             })
-            return [...currItems, { good: newGood, quantity: 1 }]
+            // Ensure that the new item adheres to the CartItem type
+            return [
+              ...currItems,
+              {
+                good: newGood,
+                quantity: 1,
+                title: newGood.title,
+                price: newGood.price,
+                src: newGood.src
+              }
+            ]
           } else {
             toast.info(`Кількість товару "${existingItem.good.title}" збільшено`, {
               id: `update-${id}` // унікальний ID для нотифікації
             })
+            // Update the quantity for the existing item
             return currItems.map(item =>
               item.good._id === id ? { ...item, quantity: item.quantity + 1 } : item
             )
@@ -128,7 +147,7 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
       setCart,
       cartQuantity
     }),
-    [cart, cartQuantity, getItemQuantity]
+    [cart, setCart, cartQuantity, getItemQuantity]
   )
 
   return (

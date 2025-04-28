@@ -5,13 +5,13 @@ export type CartItem = {
   quantity: number
   _id?: string
   category?: string
-  src?: string[]
+  src: string[]
   brand?: string
   model?: string
   vendor?: string
-  title?: string
+  title: string
   description?: string
-  price?: number
+  price: number
   isAvailable?: boolean
   isCompatible?: boolean
   compatibility?: string
