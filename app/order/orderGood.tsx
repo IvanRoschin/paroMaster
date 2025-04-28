@@ -1,14 +1,18 @@
-import { IGood } from "@/types/index"
+import { CartItem } from "@/types/cart/ICartItem"
 import Image from "next/image"
 import React from "react"
 
 type CartItemProps = {
-  good: IGood
+  good: CartItem
   quantity: number
 }
 
 const OrderGood: React.FC<CartItemProps> = ({ good, quantity }) => {
+  if (!good) {
+    return
+  }
   const { _id, title, price, src } = good
+
   const totalPrice = price * quantity
 
   return (

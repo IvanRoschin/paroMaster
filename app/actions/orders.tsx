@@ -79,7 +79,7 @@ export const deleteGoodsFromOrder = async (orderId: string, goodsId: string) => 
   }
 }
 
-export async function addOrderAction(values: IOrder) {
+export async function addOrder(values: IOrder) {
   if (!values.number) {
     const generatedNumber = `ORD-${Date.now()}` // приклад генерації номера (можеш змінити
     values.number = generatedNumber

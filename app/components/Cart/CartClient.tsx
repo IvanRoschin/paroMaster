@@ -19,7 +19,7 @@ export const CartClient = ({
 
   useEffect(() => {
     const retrievedAmounts = cart.map(item => {
-      const storedAmount = sessionStorage.getItem(`amount-${item.good._id}`)
+      const storedAmount = localStorage.getItem(`amount-${item.good._id}`)
       return storedAmount ? JSON.parse(storedAmount) : 0
     })
     setAmounts(retrievedAmounts)

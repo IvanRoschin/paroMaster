@@ -23,7 +23,8 @@ const customNames: Record<string, string> = {
   users: "Адміни",
   сategories: "Категорії",
   testimonials: "Відгуки",
-  slider: "Слайди"
+  slider: "Слайди",
+  order: "Оформлення замовлення"
 }
 
 const Breadcrumbs = () => {
