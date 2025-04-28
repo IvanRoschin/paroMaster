@@ -2,7 +2,7 @@
 
 import { storageKeys } from "@/helpers/storageKeys"
 import { useShoppingCart } from "app/context/ShoppingCartContext"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo } from "react"
 import Button from "../ui/Button"
 import CartItem from "./CartItem"
 
@@ -15,21 +15,27 @@ export const CartClient = ({
   title?: string
 }) => {
   const { cart } = useShoppingCart()
-  const [amounts, setAmounts] = useState<number[]>([])
+
+  const totalPrice = useMemo(
+    () => cart.reduce((acc, item) => acc + (item.good.price || 0) * (item.quantity || 1), 0),
+    [cart]
+  )
+
+  // const [amounts, setAmounts] = useState<number[]>([])
+
+  // useEffect(() => {
+  //   const retrievedAmounts = cart.map(({ good }) => {
+  //     const storedAmount = localStorage.getItem(`amount-${good._id}`)
+  //     return storedAmount ? JSON.parse(storedAmount) : 0
+  //   })
+  //   setAmounts(retrievedAmounts)
+  // }, [cart])
+
+  // const totalAmount = amounts.reduce((total, amount) => total + amount, 0)
 
   useEffect(() => {
-    const retrievedAmounts = cart.map(({ good }) => {
-      const storedAmount = localStorage.getItem(`amount-${good._id}`)
-      return storedAmount ? JSON.parse(storedAmount) : 0
-    })
-    setAmounts(retrievedAmounts)
-  }, [cart])
-
-  const totalAmount = amounts.reduce((total, amount) => total + amount, 0)
-
-  useEffect(() => {
-    sessionStorage.setItem(storageKeys.totalPrice, JSON.stringify(totalAmount))
-  }, [totalAmount])
+    sessionStorage.setItem(storageKeys.totalPrice, JSON.stringify(totalPrice))
+  }, [totalPrice])
 
   return (
     <div className="bg-white rounded-2xl shadow-md p-6 space-y-6">
@@ -43,10 +49,10 @@ export const CartClient = ({
 
       <div className="border-t pt-6 space-y-2 text-right text-gray-700">
         <p className="text-lg">
-          Всього за замовленням: <span className="font-bold text-gray-900">{totalAmount} грн</span>
+          Всього за замовленням: <span className="font-bold text-gray-900">{totalPrice} грн</span>
         </p>
         <p className="text-sm italic">
-          {totalAmount >= 1000
+          {totalPrice >= 1000
             ? "🚚 Доставка безкоштовна"
             : "🚚 Вартість доставки: за тарифами перевізника"}
         </p>

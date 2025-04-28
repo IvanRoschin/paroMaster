@@ -1,15 +1,14 @@
-import { ISearchParams } from "@/types/searchParams"
-import { QueryClient } from "@tanstack/react-query"
+import { QueryClient, QueryKey } from "@tanstack/react-query"
 
 export async function usePrefetchData<T>(
-  action: (params: ISearchParams) => Promise<T>,
-  key: string,
-  params: ISearchParams
+  action: (params?: any) => Promise<T>,
+  key: QueryKey,
+  params?: any
 ) {
   const queryClient = new QueryClient()
 
   await queryClient.prefetchQuery({
-    queryKey: [key],
+    queryKey: [key, params],
     queryFn: () => action(params)
   })
   return queryClient

@@ -6,7 +6,7 @@ import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query
 
 export default async function TestimonialsPage({ searchParams }: { searchParams: ISearchParams }) {
   const queryClient = new QueryClient()
-  await usePrefetchData(getAllTestimonials, "testimonials", searchParams)
+  await usePrefetchData(getAllTestimonials, ["testimonials"], searchParams)
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
