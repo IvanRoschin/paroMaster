@@ -1,23 +1,13 @@
 import { getAllGoods } from "@/actions/goods"
 import Goods from "@/components/admin/Goods"
-import { IGood } from "@/types/index"
+import { usePrefetchData } from "@/hooks/usePrefetchData"
 import { ISearchParams } from "@/types/searchParams"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 
-interface GoodsData {
-  goods: IGood[]
-}
-
 export default async function ProductsPage({ searchParams }: { searchParams: ISearchParams }) {
   const queryClient = new QueryClient()
-  const goodsKey = ["goods", searchParams]
 
-  await queryClient.prefetchQuery({
-    queryKey: goodsKey,
-    queryFn: () => getAllGoods(searchParams)
-  })
-
-  const goods = (queryClient.getQueryData(goodsKey) as GoodsData)?.goods || []
+  await usePrefetchData(getAllGoods, ["goods"], searchParams)
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
