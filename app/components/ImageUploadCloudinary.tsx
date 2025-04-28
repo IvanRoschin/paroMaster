@@ -98,7 +98,7 @@ interface ImageUploadProps {
   setFieldValue: (field: string, value: string[], shouldValidate?: boolean) => void
   values?: string[] | string
   errors?: { [key: string]: string | string[] | FormikErrors<any> | FormikErrors<any>[] }
-  uploadPreset: string
+  uploadPreset?: string
 }
 
 const ImageUploadCloudinary: React.FC<ImageUploadProps> = ({

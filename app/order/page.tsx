@@ -188,19 +188,17 @@ const OrderPage = () => {
             <h3 className="text-2xl font-semibold mb-4">Ваші товари</h3>
             {cart.length > 0 ? (
               cart.map((item: CartItem, i) => (
-                <>
-                  <OrderGood key={item.good._id || i} good={item.good} quantity={item.quantity} />
-                  <p className="text-sm italic">
-                    {totalPrice >= 1000
-                      ? "🚚 Доставка безкоштовна"
-                      : "🚚 Вартість доставки: за тарифами перевізника"}
-                  </p>{" "}
-                </>
+                <OrderGood key={item.good._id || i} good={item.good} quantity={item.quantity} />
               ))
             ) : (
               <div>Кошик порожній...</div>
             )}
             <div className="text-xl font-bold mt-4">Загальна сума: {totalPrice} грн</div>
+            <p className="text-sm italic">
+              {totalPrice >= 1000
+                ? "🚚 Доставка безкоштовна"
+                : "🚚 Вартість доставки: за тарифами перевізника"}
+            </p>{" "}
           </div>
         </div>
       </div>

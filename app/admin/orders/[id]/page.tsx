@@ -1,5 +1,5 @@
 import { getAllGoods } from "@/actions/goods"
-import { getOrderById, updateOrder } from "@/actions/orders"
+import { getOrderById } from "@/actions/orders"
 import { AddOrderForm } from "@/components/index"
 import { IGood } from "@/types/index"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
@@ -32,7 +32,6 @@ const SingleOrderPage = async ({ params }: { params: Params }) => {
         <AddOrderForm
           order={order}
           title={`Редагувати дані ордера ${order.number}`}
-          action={updateOrder}
           goods={goods}
         />
       </div>
