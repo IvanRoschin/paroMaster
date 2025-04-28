@@ -1,9 +1,9 @@
-import { CartItem } from "@/types/cart/ICartItem"
+import { IGood } from "@/types/index"
 import Image from "next/image"
 import React from "react"
 
 type CartItemProps = {
-  good: CartItem
+  good: IGood
   quantity: number
 }
 

@@ -1,7 +1,6 @@
 "use server"
 import Order from "@/models/Order"
-import { ISearchParams } from "@/types/index"
-import { IAdminOrder, IOrder } from "@/types/order/IOrder"
+import { IOrder, ISearchParams } from "@/types/index"
 import { connectToDB } from "@/utils/dbConnect"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
@@ -9,7 +8,7 @@ import { buildPagination, buildSort } from "../helpers"
 
 interface IGetAllOrdesResponse {
   success: boolean
-  orders: IOrder[] | IAdminOrder[]
+  orders: IOrder[]
   count: number
 }
 export async function getAllOrders(searchParams: ISearchParams): Promise<IGetAllOrdesResponse> {
@@ -24,7 +23,6 @@ export async function getAllOrders(searchParams: ISearchParams): Promise<IGetAll
   if (status && status !== "all") {
     filter.status = status
   }
-
   try {
     await connectToDB()
 

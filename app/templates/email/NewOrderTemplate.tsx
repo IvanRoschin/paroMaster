@@ -1,4 +1,4 @@
-import { CartItem } from "@/types/cart/ICartItem"
+import { IOrder } from "@/types/index"
 
 enum PaymentMethod {
   CashOnDelivery = "Оплата після отримання",
@@ -6,42 +6,32 @@ enum PaymentMethod {
   InvoiceForSPD = "Рахунок для СПД"
 }
 
-export interface NewOrderTemplateProps {
-  name: string
-  surname: string
-  email: string
-  phone: string
-  payment: PaymentMethod
-  city: string
-  warehouse: string
-  orderedGoods: CartItem[]
-  orderNumber: string
-  totalPrice: number
-}
-
-export function generateEmailContent({
-  name,
-  surname,
-  email,
-  phone,
-  payment,
-  city,
-  warehouse,
-  orderedGoods,
-  orderNumber,
-  totalPrice
-}: NewOrderTemplateProps): string {
-  const itemsContent = orderedGoods
+export function generateEmailContent(data: IOrder) {
+  if (
+    !data.number ||
+    !data.customer.name ||
+    !data.customer.email ||
+    !data.customer.phone ||
+    !data.customer.city ||
+    !data.customer.warehouse ||
+    !data.customer.payment ||
+    !Array.isArray(data.orderedGoods) ||
+    data.orderedGoods.length === 0 ||
+    data.totalPrice <= 0
+  ) {
+    return { success: false, error: "Validation Error: Missing or invalid required data." }
+  }
+  const itemsContent = data.orderedGoods
     .map(
-      ({ good, quantity }, index) => `
-        <tr key="${good._id}">
+      ({ _id, title, brand, model, vendor, quantity, price }, index) => `
+        <tr key="${_id}">
           <td>${index + 1}.</td>
-          <td>${good.title}</td>
-          <td style="text-align: center">${good.brand}</td>
-          <td style="text-align: center">${good.model}</td>
-					<td style="text-align: center">${good.vendor}</td>
+          <td>${title}</td>
+          <td style="text-align: center">${brand}</td>
+          <td style="text-align: center">${model}</td>
+					<td style="text-align: center">${vendor}</td>
           <td style="text-align: center">${quantity}</td>
-          <td style="text-align: center">${good.price}</td>
+          <td style="text-align: center">${price}</td>
         </tr>
       `
     )
@@ -49,18 +39,18 @@ export function generateEmailContent({
 
   return `
     <div>
-      <h1>Замовлення # ${orderNumber}
+      <h1>Замовлення # ${data.number}
 			з сайту ParoMaster</h1>
       <br />
       <br />
       <h3>
-        <p>Від користувача: ${name} ${surname}</p>
-        <p>Телефон:${phone}</p>
-        <p>Вказаний e-mail: ${email}</p>
-        <p>Вказаний спосіб оплати: ${payment}</p>
+        <p>Від користувача: ${data.customer.name} ${data.customer.surname}</p>
+        <p>Телефон:${data.customer.phone}</p>
+        <p>Вказаний e-mail: ${data.customer.email}</p>
+        <p>Вказаний спосіб оплати: ${data.customer.payment}</p>
         <p>Доставка за адресою:</p>
-        <p>місто: ${city}</p>
-        <p>відділення НП: ${warehouse}</p>
+        <p>місто: ${data.customer.city}</p>
+        <p>відділення НП: ${data.customer.warehouse}</p>
       </h3>
       <br />
       <br />
@@ -83,7 +73,7 @@ export function generateEmailContent({
           ${itemsContent}
         </tbody>
       </table>
-      <h2 style="text-align: center; color: #333;">Всього за замовленням: ${totalPrice} грн.</br>
+      <h2 style="text-align: center; color: #333;">Всього за замовленням: ${data.totalPrice} грн.</br>
       </h2>
     </div>
   `
