@@ -32,6 +32,10 @@ const links = [
   {
     title: "Політика Конфіденційності",
     link: "privacypolicy"
+  },
+  {
+    title: "Публічна Оферта",
+    link: "publicoffer"
   }
 ]
 

@@ -107,7 +107,21 @@ const TestimonialForm = ({ productId }: TestimonialFormProps) => {
                       }
                     />
                   ) : (
-                    <FormField item={item} errors={errors} setFieldValue={setFieldValue} />
+                    <>
+                      <FormField item={item} errors={errors} setFieldValue={setFieldValue} />
+
+                      {item.id === "text" && (
+                        <div
+                          className={`text-xs mt-1 ${
+                            values.text.length < 20 ? "text-red-500" : "text-green-500"
+                          }`}
+                        >
+                          {values.text.length < 20
+                            ? `Ще потрібно ${20 - values.text.length} символів... ✍️`
+                            : "Достатньо символів! 🚀"}
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               ))}

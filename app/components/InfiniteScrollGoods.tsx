@@ -5,8 +5,8 @@ import { IGood } from "@/types/good/IGood"
 import { ISearchParams } from "@/types/searchParams"
 import { useCallback, useEffect, useState } from "react"
 import { useInView } from "react-intersection-observer"
+import { TailSpin } from "react-loader-spinner"
 import ItemsList from "./Item/ItemsList"
-import Button from "./ui/Button"
 const InfiniteScrollGoods = ({
   initialGoods,
   searchParams
@@ -61,12 +61,16 @@ const InfiniteScrollGoods = ({
         {allGoodsLoaded ? (
           <p className="subtitle mb-4 text-center">Це всі 🤷‍♂️ наявні Товари 🛒</p>
         ) : (
-          <>
-            <div ref={ref}></div>
-            <Button onClick={loadMoreGoods} disabled={isFetchingMore}>
-              {isFetchingMore ? "Завантаження..." : "Показати ще"}
-            </Button>
-          </>
+          <div ref={ref} className="flex items-center justify-center py-10">
+            <TailSpin
+              visible={true}
+              height="40"
+              width="40"
+              color="#ea580c"
+              ariaLabel="tail-spin-loading"
+              radius="1"
+            />
+          </div>
         )}
       </section>
     </>

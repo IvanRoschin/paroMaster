@@ -79,7 +79,7 @@ export const mockGoods = [
 ]
 
 export const menu = [
-  { menuItemName: "Наші роботи", menuItemLink: "/ourWorks" },
+  { menuItemName: "Наші роботи", menuItemLink: "/ourworks" },
   { menuItemName: "Послуги", menuItemLink: "/services" },
   { menuItemName: "Доставка", menuItemLink: "/delivery" },
   { menuItemName: "Гарантія", menuItemLink: "/guarantee" },

@@ -1,4 +1,5 @@
 export const storageKeys = {
   cart: "cart",
-  totalPrice: "totalPrice"
+  totalPrice: "totalPrice",
+  orderFormData: "orderFormData"
 }

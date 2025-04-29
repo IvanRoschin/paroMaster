@@ -6,7 +6,7 @@ import { useCities } from "@/hooks/useCities"
 import { useWarehouses } from "@/hooks/useWarehouses"
 import { IGood, IOrder } from "@/types/index"
 import { PaymentMethod } from "@/types/paymentMethod"
-import { Field, FieldArray, Form, Formik, useFormikContext } from "formik"
+import { ErrorMessage, Field, FieldArray, Form, Formik, useFormikContext } from "formik"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
@@ -15,6 +15,7 @@ import FormField from "../input/FormField"
 import Button from "../ui/Button"
 
 interface InitialStateType extends Omit<IOrder, "_id"> {}
+
 interface OrderFormProps {
   order?: IOrder
   title?: string
@@ -36,6 +37,7 @@ const OrderForm = ({ order, title, goods }: OrderFormProps) => {
   const isUpdating = Boolean(order?._id)
 
   const [name = "", surname = ""] = (order?.customer.name || "").split(" ")
+
   const initialValues: InitialStateType = {
     number: order?.number || "",
     customer: {
@@ -88,7 +90,7 @@ const OrderForm = ({ order, title, goods }: OrderFormProps) => {
         validationSchema={orderFormSchema}
         validateOnMount
       >
-        {({ values, setFieldValue }) => (
+        {({ values, setFieldValue, errors, touched }) => (
           <Form>
             <FormEffects />
             <FormField
@@ -101,7 +103,7 @@ const OrderForm = ({ order, title, goods }: OrderFormProps) => {
               }}
               setFieldValue={setFieldValue}
             />
-            <CustomerFields city={values.customer.city} />
+            <CustomerFields city={values.customer.city} errors={errors} touched={touched} />
             <GoodsFields goods={goods} showSelect={showSelect} setShowSelect={setShowSelect} />
 
             <div className="my-4">
@@ -188,9 +190,11 @@ const useCitySelection = (
   return { filteredCities, searchQuery, setSearchQuery, handleSelectCity }
 }
 
-const CustomerFields = ({ city }: { city: string }) => {
+const CustomerFields = ({ city, touched, errors }: { city: string; touched: any; errors: any }) => {
   const { values, setFieldValue } = useFormikContext<InitialStateType>()
   const { warehouses, isWarehousesLoading } = useWarehouses(city)
+  const [showDropdown, setShowDropdown] = useState(false)
+
   const { filteredCities, searchQuery, setSearchQuery, handleSelectCity } = useCitySelection(
     values.customer.city,
     setFieldValue
@@ -212,6 +216,18 @@ const CustomerFields = ({ city }: { city: string }) => {
     }
   ]
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+    const value = e.target.value
+    setSearchQuery(value)
+    setFieldValue(field.name, value)
+    setShowDropdown(true)
+  }
+
+  const handleCityClick = (city: string) => {
+    handleSelectCity(city)
+    setShowDropdown(false)
+  }
+
   return (
     <>
       <h3 className="text-xl font-semibold">Замовник</h3>
@@ -225,23 +241,33 @@ const CustomerFields = ({ city }: { city: string }) => {
             <input
               {...field}
               value={searchQuery}
-              onChange={e => {
-                const value = e.target.value
-                setSearchQuery(value)
-                setFieldValue(field.name, value)
-              }}
-              placeholder="Введіть назву міста"
-              className="w-full p-4 border-2 rounded-md mb-4"
+              onChange={e => handleChange(e, field)}
+              placeholder=" "
+              className={`text-primaryTextColor peer w-full p-4 pt-6 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
+        ${errors.customer?.city && touched.customer?.city ? "border-rose-500" : "border-neutral-300"}
+        ${errors.customer?.city && touched.customer?.city ? "focus:border-rose-500" : "focus:border-green-500"}
+        `}
             />
           )}
         </Field>
+        <label
+          className="text-primaryTextColor absolute text-md duration-150 left-3 top-5 z-10 origin-[0] transform -translate-y-3
+        peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
+        >
+          Введіть назву міста
+        </label>
+        {touched.customer?.city && errors.customer?.city && (
+          <div className="text-rose-500 text-sm mt-1">
+            <ErrorMessage name="customer.city" />
+          </div>
+        )}
 
-        {filteredCities.length > 0 && (
+        {showDropdown && filteredCities.length > 0 && (
           <div className="absolute z-10 w-full bg-white border rounded-md max-h-60 overflow-y-auto">
             {filteredCities.map(city => (
               <div
                 key={city}
-                onClick={() => handleSelectCity(city)}
+                onClick={() => handleCityClick(city)}
                 className="p-2 hover:bg-gray-200 cursor-pointer"
               >
                 {city}
@@ -250,19 +276,34 @@ const CustomerFields = ({ city }: { city: string }) => {
           </div>
         )}
       </div>
-
-      <Field
-        name="customer.warehouse"
-        as="select"
-        disabled={isWarehousesLoading}
-        className="w-full p-4 border-2 rounded-md mb-4"
-      >
-        {warehouses.map((wh, i) => (
-          <option key={i} value={wh.Description}>
-            {wh.Description}
-          </option>
-        ))}
-      </Field>
+      <div className="relative w-full mb-4">
+        <Field
+          name="customer.warehouse"
+          as="select"
+          disabled={isWarehousesLoading}
+          className={`text-primaryTextColor peer w-full p-4 pt-6 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
+        ${errors.customer?.warehouse && touched.customer?.warehouse ? "border-rose-500" : "border-neutral-300"}
+        ${errors.customer?.warehouse && touched.customer?.warehouse ? "focus:border-rose-500" : "focus:border-green-500"}`}
+        >
+          {warehouses.map((wh, i) => (
+            <option key={i} value={wh.Description}>
+              {wh.Description}
+            </option>
+          ))}
+        </Field>
+        <label
+          htmlFor="customer.warehouse"
+          className="text-primaryTextColor absolute text-md duration-150 left-3 top-3 z-9 origin-[0] transform -translate-y-3
+            peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
+        >
+          Оберіть відділення
+        </label>
+        {touched.customer?.warehouse && errors.customer?.warehouse && (
+          <div className="text-rose-500 text-sm mt-1">
+            <ErrorMessage name="city" />
+          </div>
+        )}
+      </div>
     </>
   )
 }
