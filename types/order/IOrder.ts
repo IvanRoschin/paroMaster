@@ -5,16 +5,15 @@ export interface IOrder {
   number: string
   customer: {
     name: string
-    surname?: string
-    phone: string
+    surname: string
     email: string
+    phone: string
     city: string
     warehouse: string
     payment: string
-    [key: string]: any
   }
   warehouse?: string
   orderedGoods: IGood[]
   totalPrice: number
-  status: string
+  status: "Новий" | "Опрацьовується" | "Оплачений" | "На відправку" | "Закритий"
 }

@@ -12,7 +12,7 @@ const customNames: Record<string, string> = {
   catalog: "Каталог",
   category: "Категорії",
   services: "Послуги",
-  ourWorks: "Наші роботи",
+  ourworks: "Наші роботи",
   delivery: "Доставка",
   guarantee: "Гарантія",
   contact: "Контакти",
@@ -24,7 +24,9 @@ const customNames: Record<string, string> = {
   сategories: "Категорії",
   testimonials: "Відгуки",
   slider: "Слайди",
-  order: "Оформлення замовлення"
+  checkout: "Оформлення Замовлення",
+  privacypolicy: "Політика Конфіденційності",
+  publicoffer: "Публічна Оферта"
 }
 
 const Breadcrumbs = () => {

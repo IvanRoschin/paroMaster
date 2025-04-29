@@ -9,7 +9,7 @@ export function ShoppingCart() {
 
   const onConfirm = () => {
     cartModal.onClose()
-    push("/order")
+    push("/checkout")
   }
 
   return (

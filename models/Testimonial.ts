@@ -29,7 +29,7 @@ const testimonialsSchema = new Schema(
     },
     isActive: {
       type: Boolean,
-      default: false
+      default: true
     }
   },
   { versionKey: false, timestamps: true }

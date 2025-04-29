@@ -1,6 +1,7 @@
 import { getAllGoods } from "@/actions/goods"
 import Breadcrumbs from "@/components/Breadcrumbs"
 import InfiniteScrollGoods from "@/components/InfiniteScrollGoods"
+import { usePrefetchData } from "@/hooks/usePrefetchData"
 import { IGood } from "@/types/index"
 import { ISearchParams } from "@/types/searchParams"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
@@ -14,12 +15,9 @@ export const dynamic = "force-dynamic"
 export default async function CatalogPage({ searchParams }: { searchParams: ISearchParams }) {
   const queryClient = new QueryClient()
 
-  const goodsKey = ["goods", searchParams]
+  await usePrefetchData(getAllGoods, ["goods"], { ...searchParams, limit: 8 })
 
-  await queryClient.prefetchQuery({
-    queryKey: goodsKey,
-    queryFn: () => getAllGoods(searchParams)
-  })
+  const goodsKey = ["goods", searchParams]
 
   const queryState = queryClient.getQueryState(goodsKey)
   const goods = (queryState?.data as GoodsData)?.goods || []
