@@ -19,10 +19,18 @@ import { IOrder } from "@/types/index"
 import { PaymentMethod } from "@/types/paymentMethod"
 import { useShoppingCart } from "app/context/ShoppingCartContext"
 import PublicOfferSummary from "app/publicoffer/PublicOfferSummary"
-import { orderFormSchema } from "../helpers"
+import { customerFormSchema } from "../helpers"
 import OrderGood from "./orderGood"
 
-interface InitialStateType extends Omit<IOrder, "_id"> {}
+interface FormikCustomerValues {
+  name: string
+  surname: string
+  phone: string
+  email: string
+  city: string
+  warehouse: string
+  payment: string
+}
 
 const OrderPage = () => {
   const [isLoading, setIsLoading] = useState(false)
@@ -37,11 +45,11 @@ const OrderPage = () => {
       cart.reduce((acc, item: CartItem) => acc + (item.good.price || 0) * (item.quantity || 1), 0),
     [cart]
   )
-  const getSavedFormData = (): InitialStateType | null => {
+  const getSavedFormData = (): FormikCustomerValues | null => {
     try {
-      const savedData = sessionStorage.getItem(storageKeys.orderFormData)
+      const savedData = sessionStorage.getItem(storageKeys.customer)
       if (savedData) {
-        return JSON.parse(savedData) as InitialStateType
+        return JSON.parse(savedData) as FormikCustomerValues
       }
       return null
     } catch (error) {
@@ -52,44 +60,45 @@ const OrderPage = () => {
 
   const savedFormData = getSavedFormData()
 
+  console.log("savedFormData", savedFormData)
+
   const initialValues = savedFormData || {
-    number: "",
-    customer: {
-      name: "",
-      surname: "",
-      email: "",
-      phone: "",
-      city: "",
-      warehouse: "",
-      payment: PaymentMethod.CashOnDelivery
-    },
-    orderedGoods: [],
-    totalPrice: 0,
-    status: "Новий"
+    name: "",
+    surname: "",
+    email: "",
+    phone: "",
+    city: "",
+    warehouse: "",
+    payment: PaymentMethod.CashOnDelivery
   }
 
-  const handleSubmit = async (values: IOrder) => {
-    if (!values.customer.city || !values.customer.warehouse) {
-      toast.error("Будь ласка, виберіть місто та відділення")
-      return
-    }
-
+  const handleSubmit = async (customerValues: IOrder["customer"]) => {
     if (!isCheckboxChecked) {
       toast.error("Будь ласка, погодьтесь із публічною офертою")
       return
     }
+    if (!customerValues.city || !customerValues.warehouse) {
+      toast.error("Будь ласка, виберіть місто та відділення")
+      return
+    }
+    const orderedGoods = cart.map((item: CartItem) => ({
+      ...item.good,
+      quantity: item.quantity
+    }))
+
+    if (orderedGoods.length === 0) {
+      toast.error("Кошик порожній. Додайте товари перед оформленням замовлення.")
+      return
+    }
+
+    const totalPrice = orderedGoods.reduce(
+      (acc, item) => acc + (item.price || 0) * (item.quantity || 1),
+      0
+    )
 
     const orderData: IOrder = {
       number: generatedNumber,
-      customer: {
-        name: values.customer.name,
-        surname: values.customer.surname,
-        email: values.customer.email,
-        phone: values.customer.phone,
-        city: values.customer.city,
-        warehouse: values.customer.warehouse,
-        payment: values.customer.payment
-      },
+      customer: customerValues,
       orderedGoods: cart.map((item: CartItem) => ({
         ...item.good,
         quantity: item.quantity
@@ -98,6 +107,8 @@ const OrderPage = () => {
       status: "Новий"
     }
 
+    console.log("orderData", orderData)
+
     try {
       setIsLoading(true)
 
@@ -105,7 +116,7 @@ const OrderPage = () => {
         sendAdminEmail(orderData),
         sendCustomerEmail(orderData),
         addOrder(orderData),
-        addCustomer(values.customer)
+        addCustomer(orderData.customer)
       ])
 
       if (
@@ -144,12 +155,12 @@ const OrderPage = () => {
               enableReinitialize
               initialValues={initialValues}
               onSubmit={handleSubmit}
-              validationSchema={orderFormSchema}
+              validationSchema={customerFormSchema}
             >
               {({ values, setFieldValue, errors, touched }) => (
                 <Form className="flex flex-col space-y-6">
                   <FormEffects />
-                  <CustomerFields city={values.customer.city} errors={errors} touched={touched} />
+                  <CustomerFields city={values.city} errors={errors} touched={touched} />
                   <div className="flex items-center">
                     <input
                       id="termsCheckbox"
@@ -163,11 +174,7 @@ const OrderPage = () => {
                       <PublicOfferSummary />
                     </label>
                   </div>
-                  <Button
-                    type="submit"
-                    label="Відправити"
-                    disabled={!isCheckboxChecked || isLoading}
-                  />
+                  <Button type="submit" label="Відправити" disabled={isLoading} />
                 </Form>
               )}
             </Formik>
@@ -238,9 +245,9 @@ const useCitySelection = (
 }
 
 const FormEffects = () => {
-  const { values, setFieldValue } = useFormikContext<InitialStateType>()
+  const { values, setFieldValue } = useFormikContext<FormikCustomerValues>()
 
-  const { warehouses } = useWarehouses(values?.customer.city)
+  const { warehouses } = useWarehouses(values?.city)
 
   useEffect(() => {
     if (warehouses.length && !values?.warehouse) {
@@ -249,27 +256,27 @@ const FormEffects = () => {
   }, [warehouses, setFieldValue, values?.warehouse])
 
   useEffect(() => {
-    sessionStorage.setItem(storageKeys.orderFormData, JSON.stringify(values))
+    sessionStorage.setItem(storageKeys.customer, JSON.stringify(values))
   }, [values])
 
   return null
 }
 
 const CustomerFields = ({ city, touched, errors }: { city: string; touched: any; errors: any }) => {
-  const { values, setFieldValue } = useFormikContext<InitialStateType>()
+  const { values, setFieldValue } = useFormikContext<FormikCustomerValues>()
   const { warehouses, isWarehousesLoading } = useWarehouses(city)
   const [showDropdown, setShowDropdown] = useState(false)
 
   const { filteredCities, searchQuery, setSearchQuery, handleSelectCity } = useCitySelection(
-    values?.customer.city,
+    values?.city,
     setFieldValue
   )
 
   const customerInputs = [
-    { name: "customer.name", type: "text", id: "customer.name", label: "Ім'я" },
-    { name: "customer.surname", type: "text", id: "customer.surname", label: "Прізвище" },
-    { name: "customer.email", type: "email", id: "customer.email", label: "Email" },
-    { name: "customer.phone", type: "tel", id: "customer.phone", label: "Телефон" },
+    { name: "name", type: "text", id: "name", label: "Ім'я" },
+    { name: "surname", type: "text", id: "surname", label: "Прізвище" },
+    { name: "email", type: "email", id: "email", label: "Email" },
+    { name: "phone", type: "tel", id: "phone", label: "Телефон" },
     {
       id: "customer.payment",
       label: "Оберіть спосіб оплати",
@@ -369,6 +376,9 @@ const CustomerFields = ({ city, touched, errors }: { city: string; touched: any;
           </div>
         )}
       </div>
+      {Object.keys(errors).length > 0 && (
+        <pre className="text-red-500">{JSON.stringify(errors, null, 2)}</pre>
+      )}
     </>
   )
 }

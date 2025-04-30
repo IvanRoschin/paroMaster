@@ -10,14 +10,14 @@ const customerFormSchema = Yup.object().shape({
     .max(20)
     .min(3)
     .matches(nameRegex, {
-      message: "Тільки українські букви від 3 до 20 символів"
+      message: "Тільки українські букви від 3 до 20 символів без пробілів"
     })
     .required(`Обов'язкове поле`),
   surname: Yup.string()
     .max(20)
     .min(3)
     .matches(nameRegex, {
-      message: "Тільки українські букви від 3 до 20 символів"
+      message: "Тільки українські букви від 3 до 20 символів без пробілів"
     })
     .required(`Обов'язкове поле`),
   phone: Yup.string()
