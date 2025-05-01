@@ -1,17 +1,15 @@
 "use client"
-import { testimonialFormSchema } from "@/helpers/index"
-// import { useMutateAddTestimonial } from "@/hooks/useQueryTestimonials"
-import { addTestimonial } from "@/actions/testimonials"
-import { useAddData, useTestimonialModal } from "@/hooks/index"
-import { ITestimonial } from "@/types/index"
 import { Form, Formik, FormikState } from "formik"
 import { useSession } from "next-auth/react"
 import { useState } from "react"
 import ReactStars from "react-stars"
 import { toast } from "sonner"
-import FormField from "../input/FormField"
-import Switcher from "../Switcher"
-import Button from "../ui/Button"
+
+import { addTestimonial } from "@/actions/testimonials"
+import { Button, FormField, Switcher } from "@/components/index"
+import { testimonialFormSchema } from "@/helpers/index"
+import { useAddData, useTestimonialModal } from "@/hooks/index"
+import { ITestimonial } from "@/types/index"
 
 interface InitialStateType extends Omit<ITestimonial, "_id"> {}
 
@@ -107,7 +105,21 @@ const TestimonialForm = ({ productId }: TestimonialFormProps) => {
                       }
                     />
                   ) : (
-                    <FormField item={item} errors={errors} setFieldValue={setFieldValue} />
+                    <>
+                      <FormField item={item} errors={errors} setFieldValue={setFieldValue} />
+
+                      {item.id === "text" && (
+                        <div
+                          className={`text-xs mt-1 ${
+                            values.text.length < 20 ? "text-red-500" : "text-green-500"
+                          }`}
+                        >
+                          {values.text.length < 20
+                            ? `Ще потрібно ${20 - values.text.length} символів... ✍️`
+                            : "Достатньо символів! 🚀"}
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               ))}

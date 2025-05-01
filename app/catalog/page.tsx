@@ -1,7 +1,7 @@
 import { getAllGoods } from "@/actions/goods"
-import InfiniteScrollGoods from "@/components/InfiniteScrollGoods"
-import { IGood } from "@/types/index"
-import { ISearchParams } from "@/types/searchParams"
+import { Breadcrumbs, InfiniteScroll } from "@/components/index"
+import { usePrefetchData } from "@/hooks/index"
+import { IGood, ISearchParams } from "@/types/index"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 
 interface GoodsData {
@@ -13,22 +13,20 @@ export const dynamic = "force-dynamic"
 export default async function CatalogPage({ searchParams }: { searchParams: ISearchParams }) {
   const queryClient = new QueryClient()
 
-  const goodsKey = ["goods", searchParams]
+  await usePrefetchData(getAllGoods, ["goods"], { ...searchParams, limit: 8 })
 
-  await queryClient.prefetchQuery({
-    queryKey: goodsKey,
-    queryFn: () => getAllGoods(searchParams)
-  })
+  const goodsKey = ["goods", searchParams]
 
   const queryState = queryClient.getQueryState(goodsKey)
   const goods = (queryState?.data as GoodsData)?.goods || []
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <div className="container">
-        <h2 className="title mb-1">Каталог товарів</h2>
+      <div className="max-w-6xl mx-auto py-3 container">
+        <Breadcrumbs />
+        <h2 className="subtitle text-center">Каталог товарів</h2>
         <div key={Math.random()}>
-          <InfiniteScrollGoods initialGoods={goods} searchParams={searchParams} />
+          <InfiniteScroll initialGoods={goods} searchParams={searchParams} />
         </div>
       </div>
     </HydrationBoundary>

@@ -4,14 +4,14 @@ type UpdateAction = (
   updatedDataItem: any
 ) => Promise<{ success: boolean; message: string; data?: { [key: string]: FormDataEntryValue } }>
 
-export const useUpdateData = (action: UpdateAction, key: QueryKey) => {
+const useUpdateData = (action: UpdateAction, key: QueryKey) => {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async (updatedDataItem: any) => action(updatedDataItem),
     onSuccess: async data => {
       if (data?.success) {
-        await queryClient.invalidateQueries({ queryKey: key })
+        await queryClient.invalidateQueries({ queryKey: [key] })
       }
     },
     onError: () => {
@@ -19,3 +19,5 @@ export const useUpdateData = (action: UpdateAction, key: QueryKey) => {
     }
   })
 }
+
+export default useUpdateData

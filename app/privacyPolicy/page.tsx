@@ -1,4 +1,5 @@
-import Logo from "@/components/Logo"
+import Breadcrumbs from "@/components/common/Breadcrumbs"
+import Logo from "@/components/common/Logo"
 import Link from "next/link"
 
 const PrivacyPolicy = () => {
@@ -7,10 +8,11 @@ const PrivacyPolicy = () => {
 
   return (
     <div className="bg-white text-black p-6">
-      <h1 className="text-center text-2xl font-bold mb-8">
-        ПОЛІТИКА КОНФІДЕНЦІЙНОСТІ ІНТЕРНЕТ-МАГАЗИНУ
-      </h1>
+      <Breadcrumbs />
+
+      <h1 className="text-center text-2xl font-bold mb-8">ПОЛІТИКА КОНФІДЕНЦІЙНОСТІ</h1>
       <div className="text-center mb-8">
+        ІНТЕРНЕТ-МАГАЗИНУ
         <Logo />
       </div>
 
@@ -22,7 +24,7 @@ const PrivacyPolicy = () => {
           {process.env.NEXT_PUBLIC_ADMIN_REGON}.
         </p>
         <p className="mb-2">
-          <strong>Юридична адреса:</strong> {process.env.ADMIN_ADDRESS}
+          <strong>Юридична адреса:</strong> {process.env.NEXT_PUBLIC_ADMIN_ADDRESS}
         </p>
         <p className="mb-2">
           <strong>Електронна пошта:</strong>{" "}

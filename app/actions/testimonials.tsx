@@ -2,10 +2,10 @@
 
 import Good from "@/models/Good"
 import Testimonial from "@/models/Testimonial"
-
 import { ISearchParams, ITestimonial } from "@/types/index"
 import { connectToDB } from "@/utils/dbConnect"
-import { buildFilter, buildPagination, buildSort } from "../helpers"
+
+import { buildPagination, buildSort } from "../helpers"
 
 export interface IGetAllTestimonials {
   success: boolean
@@ -46,29 +46,8 @@ export async function addTestimonial(values: Partial<ITestimonial>) {
 
     const newTestimonial = await Testimonial.create(testimonialData)
 
-    if (values.product) {
-      const testimonials = await Testimonial.find({
-        product: values.product,
-        isActive: true,
-        rating: { $gt: 0 }
-      })
-
-      const ratingSum = testimonials.reduce((acc, t) => acc + t.rating, 0)
-      const ratingCount = testimonials.length
-      const averageRating = ratingCount ? ratingSum / ratingCount : null
-
-      const updatedGood = await Good.findByIdAndUpdate(
-        values.product,
-        {
-          averageRating,
-          ratingCount
-        },
-        { new: true }
-      )
-
-      if (!updatedGood) {
-        throw new Error("Product not found")
-      }
+    if (newTestimonial) {
+      await recalculateRating(newTestimonial.product)
     }
 
     return {
@@ -88,22 +67,21 @@ export async function addTestimonial(values: Partial<ITestimonial>) {
 }
 
 export async function getAllTestimonials(
-  searchParams: ISearchParams,
-  currentPage = 1
+  searchParams: ISearchParams
 ): Promise<IGetAllTestimonials> {
+  const currentPage = Number(searchParams.page) || 1
   const { skip, limit } = buildPagination(searchParams, currentPage)
-  const filter = buildFilter(searchParams)
   const sortOption = buildSort(searchParams)
+
+  const filter: any = {}
+  if (searchParams.status === "Опублікований") {
+    filter.isActive = true
+  } else if (searchParams.status === "Не публікується") {
+    filter.isActive = false
+  }
 
   try {
     await connectToDB()
-
-    // const filter: any = {}
-    // if (statusFilter === "Опублікований") {
-    //   filter.isActive = true
-    // } else if (statusFilter === "Не публікується") {
-    //   filter.isActive = false
-    // }
 
     const count = await Testimonial.countDocuments()
 
@@ -147,7 +125,10 @@ export async function deleteTestimonial(testimonialId: string) {
   }
   try {
     await connectToDB()
-    await Testimonial.findByIdAndDelete(testimonialId)
+    const deletedTestimonial = await Testimonial.findByIdAndDelete(testimonialId)
+    if (deletedTestimonial?.product) {
+      await recalculateRating(deletedTestimonial.product)
+    }
     // return {
     //   success: true,
     //   message: "Відгук видалено"
@@ -164,27 +145,31 @@ export async function deleteTestimonial(testimonialId: string) {
 }
 
 export async function updateTestimonial(values: any) {
+  const fieldsToRecalculate = ["rating", "product", "isActive"]
+
+  const updateFields = Object.fromEntries(
+    Object.entries(values).filter(([key, value]) => key !== "_id" && value !== undefined)
+  )
+  if (Object.keys(updateFields).length === 0) {
+    return {
+      success: false,
+      message: "No valid fields to update."
+    }
+  }
+  const shouldRecalculate = Object.keys(updateFields).some(field =>
+    fieldsToRecalculate.includes(field)
+  )
   try {
     await connectToDB()
-
-    const updateFields = Object.fromEntries(
-      Object.entries(values).filter(([key, value]) => key !== "_id" && value !== undefined)
-    )
-
-    if (Object.keys(updateFields).length === 0) {
-      return {
-        success: false,
-        message: "No valid fields to update."
-      }
-    }
 
     const updatedTestimonial = await Testimonial.findByIdAndUpdate(
       values._id,
       { $set: updateFields },
       { new: true }
     )
-
-    if (!updatedTestimonial) {
+    if (updatedTestimonial && shouldRecalculate) {
+      await recalculateRating(updatedTestimonial.product)
+    } else {
       return {
         success: false,
         message: "Testimonial not found."
@@ -215,6 +200,24 @@ export async function getGoodTestimonials(productId: string) {
       success: false,
       message: error instanceof Error ? error.message : "Unknown error occurred"
     }
-  } finally {
   }
+}
+
+export async function recalculateRating(productId?: string) {
+  if (!productId) return
+
+  const testimonials = await Testimonial.find({
+    product: productId,
+    isActive: true,
+    rating: { $gt: 0 }
+  })
+
+  const ratingSum = testimonials.reduce((acc, t) => acc + t.rating, 0)
+  const ratingCount = testimonials.length
+  const averageRating = ratingCount ? ratingSum / ratingCount : null
+
+  await Good.findByIdAndUpdate(productId, {
+    averageRating,
+    ratingCount
+  })
 }

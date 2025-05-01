@@ -1,8 +1,9 @@
 "use server"
 
+import { revalidatePath } from "next/cache"
+
 import Lid from "@/models/Lid"
 import { connectToDB } from "@/utils/dbConnect"
-import { revalidatePath } from "next/cache"
 
 export async function addNewLid(formData: FormData) {
   try {

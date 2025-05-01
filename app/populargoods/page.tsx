@@ -1,20 +1,14 @@
 "use client"
 
 import { getMostPopularGoods } from "@/actions/goods"
-import InfiniteScrollGoods from "@/components/InfiniteScrollGoods"
-import ErrorMessage from "@/components/ui/Error"
+import { Breadcrumbs, ErrorMessage, InfiniteScroll, Loader } from "@/components/index"
+import { useFetchData } from "@/hooks/index"
 import { IGood, ISearchParams } from "@/types/index"
-import { Loader } from "../components"
-import { useFetchData } from "../hooks"
 
 interface GoodsData {
   goods: IGood[]
 }
-export default async function MostPopularGoodsPage({
-  searchParams
-}: {
-  searchParams: ISearchParams
-}) {
+export default function MostPopularGoodsPage({ searchParams }: { searchParams: ISearchParams }) {
   const { data, error, isError, isLoading, refetch } = useFetchData(
     getMostPopularGoods,
     ["populargoods"],
@@ -25,15 +19,16 @@ export default async function MostPopularGoodsPage({
     return <Loader />
   }
 
-  if (error) {
+  if (isError) {
     return <ErrorMessage error={error} />
   }
 
   return (
-    <div className="container">
-      <h2 className="title mb-1">Популярні товари</h2>
+    <div className="max-w-6xl mx-auto py-3 container">
+      <Breadcrumbs />
+      <h2 className="subtitle text-center">Популярні товари</h2>
       <div key={Math.random()}>
-        <InfiniteScrollGoods initialGoods={data.goods} searchParams={searchParams} />
+        <InfiniteScroll initialGoods={data.goods} searchParams={searchParams} />
       </div>
     </div>
   )

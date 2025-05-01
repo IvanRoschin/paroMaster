@@ -1,10 +1,10 @@
 "use client"
 
-import { addNewLid } from "@/actions/lids"
-import AddLidForm from "@/components/forms/LidForm"
-import Logo from "@/components/Logo"
-import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api"
 import { FaCalendarAlt, FaMapMarkerAlt } from "react-icons/fa"
+
+import { addNewLid } from "@/actions/lids"
+import { Breadcrumbs, LidForm, Logo } from "@/components/index"
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api"
 
 const containerStyle = {
   width: "100%",
@@ -20,8 +20,10 @@ const center = {
 
 const ContactPage = () => {
   return (
-    <div className="container mx-auto p-8">
-      <h2 className="text-4xl font-bold mb-8 text-center text-primaryAccentColor">Контакти</h2>
+    <div className="max-w-6xl mx-auto py-3 container">
+      <Breadcrumbs />
+
+      <h2 className="subtitle mb-4 text-center">Контакти</h2>
 
       {/* Google Maps */}
       <section className="mb-8">
@@ -30,9 +32,7 @@ const ContactPage = () => {
             <FaMapMarkerAlt className="inline-block mr-1 subtitle" />
             <Logo />
           </div>
-          <p>
-            <h3 className="subtitle mb-4 flex justify-center items-center">на Google карті</h3>
-          </p>
+          <h3 className="subtitle mb-4 flex justify-center items-center">на Google карті</h3>
         </div>
         <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
           <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={15}>
@@ -59,7 +59,7 @@ const ContactPage = () => {
         </section>
         {/* Contact Form */}
         <section>
-          <AddLidForm action={addNewLid} title="Замовити зворотній дзвінок" subtitle />
+          <LidForm action={addNewLid} title="Замовити зворотній дзвінок" subtitle />
         </section>
       </div>
     </div>

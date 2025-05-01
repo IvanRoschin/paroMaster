@@ -1,15 +1,11 @@
 "use server"
 
-import { CartItem } from "@/types/cart/ICartItem"
-import { IGood } from "@/types/index"
-import sendgrid from "@sendgrid/mail"
-import {
-  generateCustomerEmailContent,
-  NewCustomerTemplateProps
-} from "app/templates/email/NewCustomerTemplate"
 import { generateLidEmailContent, NewLidTemplateProps } from "app/templates/email/NewLidTemplate"
-import { generateEmailContent, NewOrderTemplateProps } from "app/templates/email/NewOrderTemplate"
+import { generateEmailContent } from "app/templates/email/NewOrderTemplate"
 import { FieldValues } from "react-hook-form"
+
+import { IOrder } from "@/types/index"
+import sendgrid from "@sendgrid/mail"
 
 if (!process.env.NEXT_PUBLIC_SENDGRID_API_KEY || !process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
   throw new Error("SENDGRID_API_KEY or ADMIN_EMAIL is not defined in the environment variables")
@@ -18,144 +14,84 @@ if (!process.env.NEXT_PUBLIC_SENDGRID_API_KEY || !process.env.NEXT_PUBLIC_ADMIN_
 sendgrid.setApiKey(process.env.NEXT_PUBLIC_SENDGRID_API_KEY)
 const fromEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
 
-interface IGetSendData {
-  name: string
-  surname?: string
-  email: string
-  phone: string
-  city: string
-  warehouse: string
-  payment: string
-  orderNumber: string
-  orderedGoods: CartItem[]
-  totalPrice: number
-}
-
-export async function sendAdminEmail(data: IGetSendData) {
-  const {
-    name,
-    surname,
-    email,
-    phone,
-    city,
-    warehouse,
-    payment,
-    orderNumber,
-    orderedGoods,
-    totalPrice
-  } = data
-
-  // Validate input data
+function validateOrderData(data: IOrder) {
   if (
-    !name ||
-    !surname ||
-    !email ||
-    !phone ||
-    !city ||
-    !warehouse ||
-    !payment ||
-    !orderNumber ||
-    !orderedGoods ||
-    !totalPrice ||
-    !Array.isArray(orderedGoods) ||
-    orderedGoods.length === 0 ||
-    totalPrice <= 0
+    !data.number ||
+    !data.customer.name ||
+    !data.customer.email ||
+    !data.customer.phone ||
+    !data.customer.city ||
+    !data.customer.warehouse ||
+    !data.customer.payment ||
+    !Array.isArray(data.orderedGoods) ||
+    data.orderedGoods.length === 0 ||
+    data.totalPrice <= 0
   ) {
-    return { success: false, error: "Validation Error: Missing or invalid data." }
+    return { success: false, error: "Validation Error: Missing or invalid required data." }
   }
 
+  return { success: true }
+}
+
+export async function sendAdminEmail(data: IOrder) {
+  const validation = validateOrderData(data)
+  if (!validation.success) return validation
+
   try {
-    const emailContent = generateEmailContent({
-      email,
-      name,
-      surname,
-      phone,
-      city,
-      warehouse,
-      payment,
-      orderedGoods,
-      orderNumber,
-      totalPrice
-    } as NewOrderTemplateProps)
+    // Prepare email content
+    const emailContent = generateEmailContent(data)
 
-    if (!fromEmail) return
+    if (typeof emailContent !== "string") {
+      console.error("Помилка генерації контенту листа:", emailContent.error)
+      return { success: false, error: emailContent.error }
+    }
 
-    // Send email
+    if (!fromEmail) {
+      return { success: false, error: "Configuration Error: Missing sender email address." }
+    }
+
     await sendgrid.send({
       from: fromEmail,
       to: fromEmail,
-      subject: `Нове замовлення на сайті від ${name} ${surname}, контактний email: ${email}`,
-      text: `Замовлення від: ${name} ${surname}, Телефон: ${phone}`,
+      subject: `Нове замовлення №${data.number} від ${data.customer.name}${data.customer.surname ? ` ${data.customer.surname}` : ""}`,
+      text: `Замовлення №${data.number} від: ${data.customer.name}${data.customer.surname ? ` ${data.customer.surname}` : ""}, Телефон: ${data.customer.phone}, Email: ${data.customer.email}`,
       html: emailContent
     })
 
     console.log("Admin email successfully sent.")
     return { success: true }
   } catch (error: any) {
-    const errorMessage = error.response?.body?.errors || error.message || "Unknown error occurred."
-    console.error("Error sending email:", errorMessage)
+    const errorMessage =
+      error.response?.body?.errors?.[0]?.message || error.message || "Unknown error occurred."
+    console.error("Error sending admin email:", errorMessage)
     return { success: false, error: errorMessage }
   }
 }
 
-export async function sendCustomerEmail(data: IGetSendData) {
-  const {
-    email,
-    name,
-    surname,
-    phone,
-    city,
-    warehouse,
-    payment,
-    orderNumber,
-    orderedGoods,
-    totalPrice
-  } = data
-
-  if (
-    !email ||
-    !name ||
-    !surname ||
-    !phone ||
-    !city ||
-    !warehouse ||
-    !payment ||
-    !orderedGoods ||
-    !orderNumber ||
-    !totalPrice
-  ) {
-    throw new Error("Error not all data passed")
-  }
+export async function sendCustomerEmail(data: IOrder) {
+  const validation = validateOrderData(data)
+  if (!validation.success) return validation
 
   try {
-    const emailContent = generateCustomerEmailContent({
-      email,
-      name,
-      surname,
-      phone,
-      city,
-      warehouse,
-      payment,
-      orderedGoods,
-      orderNumber,
-      totalPrice
-    } as NewCustomerTemplateProps)
+    const emailContent = generateEmailContent(data)
 
-    if (!fromEmail || !email) return
+    if (typeof emailContent !== "string") {
+      console.error("Помилка генерації контенту листа:", emailContent.error)
+      return { success: false, error: emailContent.error }
+    }
+    if (!fromEmail || !data.customer.email) {
+      return {
+        success: false,
+        error: "Configuration Error: Missing sender && reciver email address."
+      }
+    }
 
     await sendgrid.send({
       from: fromEmail,
-      to: [`${email}`],
+      to: [`${data.customer.email}`],
       subject: `Ваше замовлення на сайті ParoMaster`,
       html: emailContent
     })
-
-    // const { data: responseData, error } = await resend.emails.send({
-    //   from: `Acme <onboarding@resend.dev>`,
-    //   to: [`${email}`],
-    //   subject: `Ваше замовлення на сайті ParoMaster`,
-    //   html: emailContent
-    // })
 
     console.log("Customer Email sent successfully")
     return { success: true }
@@ -192,7 +128,7 @@ export async function sendEmailToLid(data: FieldValues) {
       html: emailContent
     })
 
-    console.log("Email sent successfully")
+    console.log("Lid email sent successfully")
     return { success: true }
   } catch (error) {
     if (error instanceof Error) {

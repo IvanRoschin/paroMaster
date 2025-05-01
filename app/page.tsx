@@ -1,8 +1,9 @@
 import { getAllGoods } from "@/actions/goods"
 import { getAllTestimonials, IGetAllTestimonials } from "@/actions/testimonials"
-import { Advantages, Description, ItemsList, Slider, TestimonialsList } from "@/components/index"
+import { Advantages, Description, ProductList, Slider, TestimonialsList } from "@/components/index"
 import { IGood, ISearchParams, ITestimonial } from "@/types/index"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
+
 import { getAllSlides, IGetAllSlides } from "./actions/slider"
 
 interface GoodsData {
@@ -18,12 +19,12 @@ export default async function Home({ searchParams }: { searchParams: ISearchPara
       queryFn: () => getAllSlides(searchParams)
     })
     await queryClient.prefetchQuery({
-      queryKey: ["allTestimonials"],
+      queryKey: ["testimonials"],
       queryFn: () => getAllTestimonials(searchParams)
     })
     await queryClient.prefetchQuery({
       queryKey: ["goods"],
-      queryFn: () => getAllGoods({ searchParams: { limit: 4 } })
+      queryFn: () => getAllGoods({ limit: String(4) })
     })
   } catch (error) {
     console.error("Error prefetching data:", error)
@@ -47,7 +48,7 @@ export default async function Home({ searchParams }: { searchParams: ISearchPara
           />
         </section>
         <section>
-          <ItemsList goods={goods} title="Пропозиції дня" />
+          <ProductList goods={goods} title="Пропозиції дня" />
         </section>
         <section>
           <div className="flex flex-col">

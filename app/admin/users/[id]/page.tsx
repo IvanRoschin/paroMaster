@@ -1,5 +1,5 @@
 import { getUserById, updateUser } from "@/actions/users"
-import AddUserForm from "@/components/admin/AddUserForm"
+import { UserForm } from "@/admin/components"
 
 interface Params {
   id: string
@@ -11,7 +11,7 @@ const SingleUserPage = async ({ params }: { params: Params }) => {
 
   return (
     <div className="mb-20">
-      <AddUserForm user={user} title={"Редагувати дані про користувача"} action={updateUser} />
+      <UserForm user={user} title={"Редагувати дані про користувача"} action={updateUser} />
     </div>
   )
 }

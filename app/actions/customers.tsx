@@ -1,12 +1,12 @@
 "use server"
 
-import Customer from "@/models/Customer"
-import { ICustomer } from "@/types/customer/ICustomer"
-import { ISearchParams } from "@/types/index"
-import { connectToDB } from "@/utils/dbConnect"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { buildPagination } from "../helpers"
+
+import { buildPagination } from "@/helpers/index"
+import Customer from "@/models/Customer"
+import { ICustomer, ISearchParams } from "@/types/index"
+import { connectToDB } from "@/utils/dbConnect"
 
 interface IGetAllCostomers {
   success: boolean
@@ -14,10 +14,8 @@ interface IGetAllCostomers {
   count: number
 }
 
-export async function getAllCustomers(
-  searchParams: ISearchParams,
-  currentPage = 1
-): Promise<IGetAllCostomers> {
+export async function getAllCustomers(searchParams: ISearchParams): Promise<IGetAllCostomers> {
+  const currentPage = Number(searchParams.page) || 1
   const { skip, limit } = buildPagination(searchParams, currentPage)
 
   try {

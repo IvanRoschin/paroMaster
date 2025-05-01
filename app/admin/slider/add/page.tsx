@@ -1,10 +1,10 @@
 import { addSlide } from "@/actions/slider"
-import { AddSlideForm } from "@/components/index"
+import { SlideForm } from "@/admin/components"
 
 const AddSlidePage = () => {
   return (
     <div className="mb-20">
-      <AddSlideForm title="Додати новий слайд" action={addSlide} />
+      <SlideForm title="Додати новий слайд" action={addSlide} />
     </div>
   )
 }

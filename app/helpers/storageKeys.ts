@@ -1,4 +1,7 @@
-export const storageKeys = {
+const storageKeys = {
   cart: "cart",
-  totalPrice: "totalPrice"
+  totalPrice: "totalPrice",
+  customer: "customer"
 }
+
+export default storageKeys
