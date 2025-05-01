@@ -1,12 +1,12 @@
 "use client"
 
 import { getMostPopularGoods } from "@/actions/goods"
-import Breadcrumbs from "@/components/Breadcrumbs"
-import InfiniteScrollGoods from "@/components/InfiniteScrollGoods"
-import ErrorMessage from "@/components/ui/Error"
+import Breadcrumbs from "@/components/common/Breadcrumbs"
+import InfiniteScrollGoods from "@/components/common/InfiniteScroll"
+import ErrorMessage from "@/components/ui/ErrorMessage"
 import { IGood, ISearchParams } from "@/types/index"
 import { Loader } from "../components"
-import { useFetchData } from "../hooks"
+import { useFetchData } from "../hooks/index.ts"
 
 interface GoodsData {
   goods: IGood[]

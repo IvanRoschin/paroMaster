@@ -1,6 +1,6 @@
 import { getAllOrders } from "@/actions/orders"
-import Orders from "@/components/admin/Orders"
-import { usePrefetchData } from "@/hooks/usePrefetchData"
+import { Orders } from "@/admin/components/index"
+import { usePrefetchData } from "@/hooks/index"
 import { ISearchParams } from "@/types/searchParams"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 

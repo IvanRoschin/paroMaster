@@ -1,5 +1,7 @@
 "use client"
 
+import { useShoppingCart } from "app/context/ShoppingCartContext"
+import PublicOfferSummary from "app/publicoffer/PublicOfferSummary"
 import { ErrorMessage, Field, Form, Formik, useFormikContext } from "formik"
 import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
@@ -8,18 +10,13 @@ import { toast } from "sonner"
 import { addCustomer } from "@/actions/customers"
 import { addOrder } from "@/actions/orders"
 import { sendAdminEmail, sendCustomerEmail } from "@/actions/sendGridEmail"
-import Breadcrumbs from "@/components/Breadcrumbs"
-import FormField from "@/components/input/FormField"
-import Button from "@/components/ui/Button"
-import { storageKeys } from "@/helpers/storageKeys"
-import { useCities } from "@/hooks/useCities"
-import { useWarehouses } from "@/hooks/useWarehouses"
-import { CartItem } from "@/types/cart/ICartItem"
+import { Breadcrumbs, Button, FormField } from "@/components/index"
+import { customerFormSchema, storageKeys } from "@/helpers/index"
+import { useCities, useWarehouses } from "@/hooks/index"
+import { ICartItem } from "@/types/cart/ICartItem"
 import { IOrder } from "@/types/index"
 import { PaymentMethod } from "@/types/paymentMethod"
-import { useShoppingCart } from "app/context/ShoppingCartContext"
-import PublicOfferSummary from "app/publicoffer/PublicOfferSummary"
-import { customerFormSchema } from "../helpers"
+
 import OrderGood from "./orderGood"
 
 interface FormikCustomerValues {
@@ -42,7 +39,7 @@ const OrderPage = () => {
 
   const totalPrice = useMemo(
     () =>
-      cart.reduce((acc, item: CartItem) => acc + (item.good.price || 0) * (item.quantity || 1), 0),
+      cart.reduce((acc, item: ICartItem) => acc + (item.good.price || 0) * (item.quantity || 1), 0),
     [cart]
   )
   const getSavedFormData = (): FormikCustomerValues | null => {
@@ -59,8 +56,6 @@ const OrderPage = () => {
   }
 
   const savedFormData = getSavedFormData()
-
-  console.log("savedFormData", savedFormData)
 
   const initialValues = savedFormData || {
     name: "",
@@ -81,7 +76,7 @@ const OrderPage = () => {
       toast.error("Будь ласка, виберіть місто та відділення")
       return
     }
-    const orderedGoods = cart.map((item: CartItem) => ({
+    const orderedGoods = cart.map((item: ICartItem) => ({
       ...item.good,
       quantity: item.quantity
     }))
@@ -99,7 +94,7 @@ const OrderPage = () => {
     const orderData: IOrder = {
       number: generatedNumber,
       customer: customerValues,
-      orderedGoods: cart.map((item: CartItem) => ({
+      orderedGoods: cart.map((item: ICartItem) => ({
         ...item.good,
         quantity: item.quantity
       })),
@@ -184,7 +179,7 @@ const OrderPage = () => {
           <div className="w-full lg:w-1/3 flex flex-col gap-4">
             <h3 className="text-2xl font-semibold mb-4">Ваші товари</h3>
             {cart.length > 0 ? (
-              cart.map((item: CartItem, i) => (
+              cart.map((item: ICartItem, i) => (
                 <OrderGood key={item.good._id || i} good={item.good} quantity={item.quantity} />
               ))
             ) : (

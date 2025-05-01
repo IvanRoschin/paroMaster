@@ -1,6 +1,6 @@
 import { ISearchParams } from "@/types/searchParams"
 
-export const buildFilter = (searchParams: ISearchParams): any => {
+const buildFilter = (searchParams: ISearchParams): any => {
   const filter: any = {}
   const andConditions = []
 
@@ -39,3 +39,5 @@ export const buildFilter = (searchParams: ISearchParams): any => {
 
   return filter
 }
+
+export default buildFilter

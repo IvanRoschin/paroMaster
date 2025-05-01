@@ -5,7 +5,7 @@ import { toast } from "sonner"
 
 type DeleteAction = (id: string) => Promise<void>
 
-export const useDeleteData = (action: DeleteAction, key: QueryKey) => {
+const useDeleteData = (action: DeleteAction, key: QueryKey) => {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -19,3 +19,5 @@ export const useDeleteData = (action: DeleteAction, key: QueryKey) => {
     }
   })
 }
+
+export default useDeleteData

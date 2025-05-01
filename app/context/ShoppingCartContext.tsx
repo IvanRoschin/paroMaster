@@ -1,11 +1,12 @@
 "use client"
 
-import { getGoodById } from "@/actions/goods"
-import ShoppingCart from "@/components/Cart/ShoppingCart"
-import { storageKeys } from "@/helpers/storageKeys"
-import { CartItem } from "@/types/cart/ICartItem"
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
+
+import { getGoodById } from "@/actions/goods"
+import { ShoppingCart } from "@/components/index"
+import { storageKeys } from "@/helpers/index"
+import { ICartItem } from "@/types/cart/ICartItem"
 
 type ShoppingCartProviderProps = {
   children: React.ReactNode
@@ -19,8 +20,8 @@ type ShoppingCartContextProps = {
   removeFromCart: (id: string) => void
   setCartQuantity: (id: string, quantity: number) => void
   cartQuantity: number
-  cart: CartItem[]
-  setCart: React.Dispatch<React.SetStateAction<CartItem[]>>
+  cart: ICartItem[]
+  setCart: React.Dispatch<React.SetStateAction<ICartItem[]>>
 }
 
 const ShoppingCartContext = createContext({} as ShoppingCartContextProps)
@@ -30,13 +31,13 @@ export function useShoppingCart() {
 }
 
 export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
-  const [cart, setCart] = useState<CartItem[]>([])
+  const [cart, setCart] = useState<ICartItem[]>([])
 
   useEffect(() => {
     const storedCartData = localStorage.getItem(storageKeys.cart)
     if (storedCartData) {
       try {
-        const cartData: CartItem[] = JSON.parse(storedCartData)
+        const cartData: ICartItem[] = JSON.parse(storedCartData)
         setCart(cartData)
       } catch (error) {
         console.error("Error parsing JSON from localStorage:", error)

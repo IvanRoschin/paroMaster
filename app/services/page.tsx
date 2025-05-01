@@ -1,6 +1,6 @@
 "use client"
 
-import Breadcrumbs from "@/components/Breadcrumbs"
+import Breadcrumbs from "@/components/common/Breadcrumbs"
 import Image from "next/image"
 import Link from "next/link"
 

@@ -1,5 +1,5 @@
 import { addUser } from "@/actions/users"
-import AddUserForm from "@/components/admin/AddUserForm"
+import AddUserForm from "app/admin/components/AddUserForm"
 
 type Props = {}
 

@@ -1,6 +1,6 @@
 import { getAllUsers } from "@/actions/users"
-import Users from "@/components/admin/Users"
-import { usePrefetchData } from "@/hooks/usePrefetchData"
+import Users from "@/admin/components/sections/Users"
+import { usePrefetchData } from "@/hooks/index"
 import { ISearchParams } from "@/types/searchParams"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 

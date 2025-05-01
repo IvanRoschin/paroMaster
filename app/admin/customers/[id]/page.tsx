@@ -1,5 +1,5 @@
 import { getCustomerById, updateCustomer } from "@/actions/customers"
-import { AddCustomerForm } from "@/components/index"
+import { CustomerForm } from "@/admin/components/index"
 
 interface Params {
   id: string
@@ -10,8 +10,8 @@ const SingleCustomerPage = async ({ params }: { params: Params }) => {
   const customer = await getCustomerById(id)
   return (
     <div className="mb-20">
-      <AddCustomerForm
-        title={"Редагувати дані про товар"}
+      <CustomerForm
+        title={"Редагувати дані про замовника"}
         customer={customer}
         action={updateCustomer}
       />

@@ -1,27 +1,34 @@
 "use client"
 
-import { getGoodById } from "@/actions/goods"
-import ImagesBlock from "@/components/ImagesBlock"
-import Button from "@/components/ui/Button"
-import { useFetchDataById } from "@/hooks/useFetchDataById"
-import { IGood, ITestimonial } from "@/types/index"
 import { useShoppingCart } from "app/context/ShoppingCartContext"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { FaPen, FaRegStar, FaStar, FaStarHalfAlt, FaTrash } from "react-icons/fa"
 
+import { getGoodById } from "@/actions/goods"
 import { deleteTestimonial, getGoodTestimonials } from "@/actions/testimonials"
-import Breadcrumbs from "@/components/Breadcrumbs"
-import DeleteConfirmation from "@/components/DeleteConfirmation"
-import TestimonialForm from "@/components/forms/TestimonialForm"
-import { ItemsList } from "@/components/index"
-import Loader from "@/components/Loader"
-import Modal from "@/components/modals/Modal"
-import ErrorMessage from "@/components/ui/Error"
-import { useDeleteData, useDeleteModal, useFetchData, useTestimonialModal } from "@/hooks/index"
+import DeleteConfirmation from "@/components/common/DeleteConfirmation"
+import {
+  Breadcrumbs,
+  ErrorMessage,
+  Loader,
+  Modal,
+  ProductList,
+  TestimonialForm
+} from "@/components/index"
+import ImagesBlock from "@/components/sections/ImagesBlock"
+import Button from "@/components/ui/Button"
+import {
+  useDeleteData,
+  useDeleteModal,
+  useFetchData,
+  useFetchDataById,
+  useTestimonialModal
+} from "@/hooks/index"
+import { IGood, ITestimonial } from "@/types/index"
 
-export default function Item({ params }: { params: any }) {
+export default function GoodPage({ params }: { params: any }) {
   const { data: session } = useSession()
   const isAdmin = session?.user
   const [, setAmount] = useState(0)
@@ -226,7 +233,7 @@ export default function Item({ params }: { params: any }) {
       {data.compatibleGoods.length > 0 && (
         <div className="mt-10">
           <h3 className="subtitle">Сумісні товари</h3>
-          <ItemsList goods={data.compatibleGoods} />
+          <ProductList goods={data.compatibleGoods} />
         </div>
       )}
 

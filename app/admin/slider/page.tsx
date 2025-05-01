@@ -1,6 +1,6 @@
 import { getAllSlides } from "@/actions/slider"
-import Slides from "@/components/admin/Slides"
-import { usePrefetchData } from "@/hooks/usePrefetchData"
+import { Slides } from "@/admin/components"
+import { usePrefetchData } from "@/hooks/index"
 import { ISearchParams } from "@/types/searchParams"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 

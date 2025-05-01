@@ -1,0 +1,20 @@
+{
+  "importStringConfiguration": {
+    "maximumNumberOfImportLines": 1
+  },
+  "sortConfiguration": {
+    "customOrderingRules": [
+      "^react$",
+      "^next",
+      "<THIRD_PARTY_MODULES>",
+      "^@/types",
+      "^@/components",
+      "^@/hooks",
+      "^@/utils",
+      "^@/app",
+      "^@/",
+      "^[./]"
+    ],
+    "separateGroups": true
+  }
+}

@@ -1,3 +1,9 @@
+import { IconType } from "react-icons"
+import { FaShoppingCart, FaUser } from "react-icons/fa"
+import { FiPackage } from "react-icons/fi"
+import { RiAdminLine } from "react-icons/ri"
+import { SiTestinglibrary } from "react-icons/si"
+
 import { getAllCategories } from "@/actions/categories"
 import { getAllCustomers } from "@/actions/customers"
 import { getAllGoods } from "@/actions/goods"
@@ -5,14 +11,9 @@ import { getAllOrders } from "@/actions/orders"
 import { getAllSlides } from "@/actions/slider"
 import { getAllTestimonials } from "@/actions/testimonials"
 import { getAllUsers } from "@/actions/users"
-import Card from "@/components/admin/Card"
+import { Card } from "@/admin/components"
 import { ISearchParams } from "@/types/searchParams"
 import { QueryClient } from "@tanstack/react-query"
-import { IconType } from "react-icons"
-import { FaShoppingCart, FaUser } from "react-icons/fa"
-import { FiPackage } from "react-icons/fi"
-import { RiAdminLine } from "react-icons/ri"
-import { SiTestinglibrary } from "react-icons/si"
 
 interface DataCount {
   count: number
