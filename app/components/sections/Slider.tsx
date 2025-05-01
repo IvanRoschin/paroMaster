@@ -5,7 +5,7 @@ import { IoIosArrowDropleft, IoIosArrowDropright } from "react-icons/io"
 import { IGetAllSlides } from "@/actions/slider"
 import { IGetAllTestimonials } from "@/actions/testimonials"
 import { EmptyState, Loader } from "@/components/common"
-import { Testimonial } from "@/components/sections"
+import { Testimonial } from "@/components/index"
 
 interface SliderProps {
   DescriptionComponent?: any

@@ -1,7 +1,6 @@
 import { IGetAllCategories } from "@/actions/categories"
 import { IGetAllBrands } from "@/actions/goods"
-
-import { BrandFilter, Category, PriceFilter, Sort } from "@/components/sections"
+import { BrandFilter, Category, PriceFilter, Sort } from "@/components/index"
 
 interface SidebarProps {
   categoriesData: IGetAllCategories

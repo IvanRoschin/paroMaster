@@ -7,7 +7,7 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { FaPen } from "react-icons/fa"
 
-import { Button } from "@/components/ui"
+import { Button } from "@/components/index"
 import { IGood } from "@/types/IGood"
 
 interface IProductCardProps {

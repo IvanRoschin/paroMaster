@@ -1,8 +1,9 @@
 "use client"
 
+import { useShoppingCart } from "app/context/ShoppingCartContext"
+
 import { Icon } from "@/components/ui"
 import { useCartModal } from "@/hooks/index"
-import { useShoppingCart } from "app/context/ShoppingCartContext"
 
 type Props = {}
 

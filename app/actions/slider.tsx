@@ -1,11 +1,11 @@
 "use server"
 
-import Slider from "@/models/Slider"
-import { ISlider } from "@/types/index"
-import { ISearchParams } from "@/types/searchParams"
-import { connectToDB } from "@/utils/dbConnect"
 import { revalidatePath } from "next/cache"
-import { buildPagination } from "../helpers"
+
+import { buildPagination } from "@/helpers/index"
+import Slider from "@/models/Slider"
+import { ISearchParams, ISlider } from "@/types/index"
+import { connectToDB } from "@/utils/dbConnect"
 
 export interface IGetAllSlides {
   success: boolean

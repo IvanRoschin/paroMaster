@@ -1,8 +1,9 @@
-import { Button, Icon } from "@/components/ui"
 import { menu } from "app/config/constants"
 import { signOut } from "next-auth/react"
 import Link from "next/link"
 import { MdLogout } from "react-icons/md"
+
+import { Button, Icon } from "@/components/ui"
 
 interface MenuProps {
   session?: any

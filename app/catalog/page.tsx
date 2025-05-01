@@ -1,9 +1,7 @@
 import { getAllGoods } from "@/actions/goods"
-import Breadcrumbs from "@/components/common/Breadcrumbs"
-import InfiniteScrollGoods from "@/components/common/InfiniteScroll"
-import { usePrefetchData } from "@/hooks/usePrefetchData"
-import { IGood } from "@/types/index"
-import { ISearchParams } from "@/types/searchParams"
+import { Breadcrumbs, InfiniteScroll } from "@/components/index"
+import { usePrefetchData } from "@/hooks/index"
+import { IGood, ISearchParams } from "@/types/index"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 
 interface GoodsData {
@@ -28,7 +26,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: ISea
         <Breadcrumbs />
         <h2 className="subtitle text-center">Каталог товарів</h2>
         <div key={Math.random()}>
-          <InfiniteScrollGoods initialGoods={goods} searchParams={searchParams} />
+          <InfiniteScroll initialGoods={goods} searchParams={searchParams} />
         </div>
       </div>
     </HydrationBoundary>

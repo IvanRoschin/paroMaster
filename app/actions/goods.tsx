@@ -5,8 +5,7 @@ import { revalidatePath } from "next/cache"
 import { buildFilter, buildPagination, buildSort } from "@/helpers/index"
 import Good from "@/models/Good"
 import Testimonial from "@/models/Testimonial"
-import { IGood } from "@/types/IGood"
-import { ISearchParams } from "@/types/searchParams"
+import { IGood, ISearchParams } from "@/types/index"
 import { connectToDB } from "@/utils/dbConnect"
 
 export interface IGetAllGoods {

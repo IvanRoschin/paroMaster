@@ -2,7 +2,8 @@ import Image from "next/image"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useCallback } from "react"
-import { useMediaQuery } from "../../hooks/index.ts"
+
+import { useMediaQuery } from "@/hooks/index"
 
 interface CategoryPage {
   categories: { src: string; title: string }[]

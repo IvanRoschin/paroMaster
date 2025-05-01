@@ -1,10 +1,11 @@
 "use server"
 
-import { IOrder } from "@/types/index"
-import sendgrid from "@sendgrid/mail"
 import { generateLidEmailContent, NewLidTemplateProps } from "app/templates/email/NewLidTemplate"
 import { generateEmailContent } from "app/templates/email/NewOrderTemplate"
 import { FieldValues } from "react-hook-form"
+
+import { IOrder } from "@/types/index"
+import sendgrid from "@sendgrid/mail"
 
 if (!process.env.NEXT_PUBLIC_SENDGRID_API_KEY || !process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
   throw new Error("SENDGRID_API_KEY or ADMIN_EMAIL is not defined in the environment variables")

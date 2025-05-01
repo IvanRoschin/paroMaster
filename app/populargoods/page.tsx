@@ -1,12 +1,9 @@
 "use client"
 
 import { getMostPopularGoods } from "@/actions/goods"
-import Breadcrumbs from "@/components/common/Breadcrumbs"
-import InfiniteScrollGoods from "@/components/common/InfiniteScroll"
-import ErrorMessage from "@/components/ui/ErrorMessage"
+import { Breadcrumbs, ErrorMessage, InfiniteScroll, Loader } from "@/components/index"
+import { useFetchData } from "@/hooks/index"
 import { IGood, ISearchParams } from "@/types/index"
-import { Loader } from "../components"
-import { useFetchData } from "../hooks/index.ts"
 
 interface GoodsData {
   goods: IGood[]
@@ -22,7 +19,7 @@ export default function MostPopularGoodsPage({ searchParams }: { searchParams: I
     return <Loader />
   }
 
-  if (error) {
+  if (isError) {
     return <ErrorMessage error={error} />
   }
 
@@ -31,7 +28,7 @@ export default function MostPopularGoodsPage({ searchParams }: { searchParams: I
       <Breadcrumbs />
       <h2 className="subtitle text-center">Популярні товари</h2>
       <div key={Math.random()}>
-        <InfiniteScrollGoods initialGoods={data.goods} searchParams={searchParams} />
+        <InfiniteScroll initialGoods={data.goods} searchParams={searchParams} />
       </div>
     </div>
   )

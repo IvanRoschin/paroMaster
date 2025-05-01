@@ -1,11 +1,11 @@
 import { getTestimonialById, updateTestimonial } from "@/actions/testimonials"
-import { TestimonialForm } from "@/components/index"
+import { TestimonialForm } from "@/admin/components"
 
 interface Params {
   id: string
 }
 
-const SingleTestimonailPage = async ({ params }: { params: Params }) => {
+const SingleTestimonialPage = async ({ params }: { params: Params }) => {
   const { id } = params
   const testimonial = await getTestimonialById(id)
 
@@ -20,4 +20,4 @@ const SingleTestimonailPage = async ({ params }: { params: Params }) => {
   )
 }
 
-export default SingleTestimonailPage
+export default SingleTestimonialPage

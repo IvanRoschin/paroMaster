@@ -1,7 +1,8 @@
-import Button from "@/components/ui/Button" // або свій компонент кнопки
-import { ITestimonial } from "@/types/index"
 import Link from "next/link"
 import { FaPen, FaRegStar, FaStar, FaStarHalfAlt, FaTrash } from "react-icons/fa"
+
+import Button from "@/components/ui/Button" // або свій компонент кнопки
+import { ITestimonial } from "@/types/index"
 
 type StarProps = {
   rating?: number

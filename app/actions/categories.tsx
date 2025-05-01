@@ -3,12 +3,10 @@
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
+import { buildPagination } from "@/helpers/index"
 import Category from "@/models/Category"
-import { ICategory } from "@/types/ICategory"
-import { ISearchParams } from "@/types/index"
+import { ICategory, ISearchParams } from "@/types/index"
 import { connectToDB } from "@/utils/dbConnect"
-
-import { buildPagination } from "../helpers"
 
 export interface IGetAllCategories {
   success: boolean

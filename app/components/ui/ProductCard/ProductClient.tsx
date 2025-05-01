@@ -3,9 +3,7 @@
 import { useShoppingCart } from "app/context/ShoppingCartContext"
 
 import { getGoodById } from "@/actions/goods"
-import { Loader } from "@/components/common"
-import { ImagesBlock } from "@/components/sections"
-import { Icon } from "@/components/ui"
+import { Icon, ImagesBlock, Loader } from "@/components/index"
 import { useFetchDataById } from "@/hooks/index"
 import { SGood } from "@/types/IGood"
 
