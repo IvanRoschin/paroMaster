@@ -1,6 +1,7 @@
-import { CartClient, Modal } from "@/components/ui"
-import useCartModal from "@/hooks/useCartModal"
 import { useRouter } from "next/navigation"
+
+import { CartClient, Modal } from "@/components/index"
+import { useCartModal } from "@/hooks/index"
 
 export function ShoppingCart() {
   const cartModal = useCartModal()

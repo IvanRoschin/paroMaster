@@ -3,12 +3,10 @@
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
+import { buildFilter, buildPagination, buildSort } from "@/helpers/index"
 import User from "@/models/User"
-import { ISearchParams } from "@/types/index"
-import { IUser } from "@/types/IUser"
+import { ISearchParams, IUser } from "@/types/index"
 import { connectToDB } from "@/utils/dbConnect"
-
-import { buildFilter, buildPagination, buildSort } from "../helpers"
 
 export async function addUser(values: any): Promise<{ success: boolean; message: string }> {
   try {

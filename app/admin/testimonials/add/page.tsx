@@ -1,5 +1,5 @@
 import { addTestimonial } from "@/actions/testimonials"
-import { TestimonialForm } from "@/components/index"
+import { TestimonialForm } from "@/admin/components"
 
 const AddTestimonialPage = () => {
   return (

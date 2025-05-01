@@ -1,8 +1,6 @@
 "use client"
 
-import { Logo, Search, Socials } from "@/components/common"
-import { Menu, MobileMenu } from "@/components/sections"
-import { CartButton } from "@/components/ui"
+import { CartButton, Logo, Menu, MobileMenu, Search, Socials } from "@/components/index"
 import { useMediaQuery } from "@/hooks/index"
 
 interface HeaderProps {

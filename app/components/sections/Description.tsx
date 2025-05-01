@@ -4,7 +4,7 @@ import Link from "next/link"
 import { ReactNode } from "react"
 import { FaPen } from "react-icons/fa"
 
-import { Button } from "@/components/ui"
+import { Button } from "@/components/index"
 import { ISlider } from "@/types/index"
 
 type Props = {

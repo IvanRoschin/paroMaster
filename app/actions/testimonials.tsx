@@ -2,9 +2,9 @@
 
 import Good from "@/models/Good"
 import Testimonial from "@/models/Testimonial"
-
 import { ISearchParams, ITestimonial } from "@/types/index"
 import { connectToDB } from "@/utils/dbConnect"
+
 import { buildPagination, buildSort } from "../helpers"
 
 export interface IGetAllTestimonials {

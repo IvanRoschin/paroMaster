@@ -1,7 +1,7 @@
 "use client"
 
-import { ProductCard } from "@/components/ui/ProductCard"
-import { IGood } from "@/types/IGood"
+import { ProductCard } from "@/components/index"
+import { IGood } from "@/types/index"
 
 const ProductList = ({ goods, title }: { goods: IGood[]; title?: string }) => {
   return (

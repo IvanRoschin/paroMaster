@@ -4,7 +4,7 @@ import { useEffect, useMemo } from "react"
 
 import { Button, CartItem } from "@/components/index"
 import { storageKeys } from "@/helpers/index"
-import { ICartItem } from "@/types/cart/ICartItem"
+import { ICartItem } from "@/types/index"
 
 export const CartClient = ({
   onConfirm,

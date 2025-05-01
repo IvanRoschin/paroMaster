@@ -1,12 +1,12 @@
 "use client"
 
-import { Icon, SingOutButton } from "@/components/ui"
+import { menu } from "app/config/constants"
 import Link from "next/link"
 import { useState } from "react"
 import { MdMenu, MdMenuOpen } from "react-icons/md"
 
-import { Socials } from "@/components/common"
-import { menu } from "app/config/constants"
+import { Socials } from "@/components/index"
+import { Icon, SingOutButton } from "@/components/ui"
 
 interface MenuProps {
   session?: any

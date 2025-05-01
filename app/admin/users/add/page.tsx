@@ -1,12 +1,12 @@
 import { addUser } from "@/actions/users"
-import AddUserForm from "app/admin/components/AddUserForm"
+import { UserForm } from "@/admin/components"
 
 type Props = {}
 
 const AddUserPage = (props: Props) => {
   return (
     <div>
-      <AddUserForm title="Додати нового користувача" action={addUser} />
+      <UserForm title="Додати нового користувача" action={addUser} />
     </div>
   )
 }

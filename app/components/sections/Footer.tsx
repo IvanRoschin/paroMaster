@@ -1,15 +1,15 @@
 "use client"
 
-import { addNewLid } from "@/actions/lids"
-import { ICategory } from "@/types/index"
 import Image from "next/image"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useCallback } from "react"
 
-import { EmptyState, Logo, Socials } from "@/components/common"
+import { addNewLid } from "@/actions/lids"
 import { LidForm } from "@/components/forms"
+import { EmptyState, Logo, Socials } from "@/components/index"
 import { useMediaQuery } from "@/hooks/index"
+import { ICategory } from "@/types/index"
 
 const links = [
   {

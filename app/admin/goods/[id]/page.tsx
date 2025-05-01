@@ -1,5 +1,5 @@
 import { getGoodById, updateGood } from "@/actions/goods"
-import { GoodForm } from "@/components/index"
+import { GoodForm } from "@/admin/components"
 
 interface Params {
   id: string
