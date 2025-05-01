@@ -1,10 +1,10 @@
 import { addGood } from "@/actions/goods"
-import { AddGoodForm } from "@/components/index"
+import { GoodForm } from "@/admin/components"
 
 const AddGoodPage = () => {
   return (
     <div className="mb-20">
-      <AddGoodForm title="Додати новий товар" action={addGood} />
+      <GoodForm title="Додати новий товар" action={addGood} />
     </div>
   )
 }

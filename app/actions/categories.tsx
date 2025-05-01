@@ -1,12 +1,12 @@
 "use server"
 
-import Category from "@/models/Category"
-import { ICategory } from "@/types/category/ICategory"
-import { ISearchParams } from "@/types/index"
-import { connectToDB } from "@/utils/dbConnect"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { buildPagination } from "../helpers"
+
+import { buildPagination } from "@/helpers/index"
+import Category from "@/models/Category"
+import { ICategory, ISearchParams } from "@/types/index"
+import { connectToDB } from "@/utils/dbConnect"
 
 export interface IGetAllCategories {
   success: boolean
@@ -53,10 +53,8 @@ export async function addCategory(formData: FormData) {
   }
 }
 
-export async function getAllCategories(
-  searchParams: ISearchParams,
-  currentPage = 1
-): Promise<IGetAllCategories> {
+export async function getAllCategories(searchParams: ISearchParams): Promise<IGetAllCategories> {
+  const currentPage = Number(searchParams.page) || 1
   const { skip, limit } = buildPagination(searchParams, currentPage)
 
   try {

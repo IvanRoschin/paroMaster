@@ -1,59 +1,101 @@
 "use client"
 
-import AddCategoryForm from "@/components/admin/AddCategoryForm"
-import AddCustomerForm from "@/components/admin/AddCustromerForm"
-import AddGoodForm from "@/components/admin/AddGoodForm"
-import AddOrderForm from "@/components/admin/AddOrderForm"
-import AddSlideForm from "@/components/admin/AddSlideForm"
-import TestimonialForm from "@/components/admin/AddTestimonialForm"
-import AdminMenu from "@/components/admin/Navbar"
-import Advantages from "@/components/Advantages"
-import Cart from "@/components/Cart/CartButton"
-import Description from "@/components/Description"
-import EmptyState from "@/components/EmptyState"
-import Footer from "@/components/Footer"
-import Header from "@/components/Header"
-import ImagesBlock from "@/components/ImagesBlock"
-import ImagesUpload from "@/components/ImagesUpload"
-import ImageUploadCloudinary from "@/components/ImageUploadCloudinary"
-import FormField from "@/components/input/FormField"
-import ItemListCard from "@/components/Item/ItemListCard"
-import ItemsList from "@/components/Item/ItemsList"
-import Loader from "@/components/Loader"
-import Search from "@/components/Search"
-import Sidebar from "@/components/Sidebar"
-import Slider from "@/components/Slider"
-import TestimonialsList from "@/components/TestimonialsList"
-// import { slides } from './Slides'
-import CustomButton from "@/components/admin/CustomFormikButton"
-import Switcher from "@/components/Switcher"
+import {
+  Breadcrumbs,
+  DeleteConfirmation,
+  EmptyState,
+  FormField,
+  InfiniteScroll,
+  Loader,
+  Logo,
+  Pagination,
+  Search,
+  Socials
+} from "@/components/common"
+import { LidForm, LoginForm, TestimonialForm } from "@/components/forms"
+import {
+  Advantages,
+  BrandFilter,
+  Category,
+  Description,
+  Footer,
+  Header,
+  Heading,
+  ImagesBlock,
+  ImageUploadCloudinary,
+  Menu,
+  MobileMenu,
+  PriceFilter,
+  ReviewList,
+  Sidebar,
+  Slider,
+  Sort,
+  Testimonial,
+  TestimonialsList
+} from "@/components/sections"
+import {
+  Button,
+  CartButton,
+  CartClient,
+  CartItem,
+  CustomButton,
+  ErrorMessage,
+  Icon,
+  Modal,
+  ProductCard,
+  ProductClient,
+  ProductList,
+  Rating,
+  ShoppingCart,
+  SingOutButton,
+  Switcher
+} from "@/components/ui"
 
 export {
-  AddCategoryForm,
-  AddCustomerForm,
-  AddGoodForm,
-  AddOrderForm,
-  AddSlideForm,
-  AdminMenu,
   Advantages,
-  Cart,
+  BrandFilter,
+  Breadcrumbs,
+  Button,
+  CartButton,
+  CartClient,
+  CartItem,
+  Category,
   CustomButton,
+  DeleteConfirmation,
   Description,
   EmptyState,
+  ErrorMessage,
   Footer,
   FormField,
   Header,
+  Heading,
+  Icon,
   ImagesBlock,
-  ImagesUpload,
   ImageUploadCloudinary,
-  ItemListCard,
-  ItemsList,
+  InfiniteScroll,
+  LidForm,
   Loader,
+  LoginForm,
+  Logo,
+  Menu,
+  MobileMenu,
+  Modal,
+  Pagination,
+  PriceFilter,
+  ProductCard,
+  ProductClient,
+  ProductList,
+  Rating,
+  ReviewList,
   Search,
+  ShoppingCart,
   Sidebar,
+  SingOutButton,
   Slider,
-  // slides,
+  Socials,
+  Sort,
   Switcher,
+  Testimonial,
   TestimonialForm,
   TestimonialsList
 }

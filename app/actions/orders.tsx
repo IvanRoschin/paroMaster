@@ -1,32 +1,31 @@
 "use server"
-import Order from "@/models/Order"
-import { ISearchParams } from "@/types/index"
-import { IAdminOrder, IOrder } from "@/types/order/IOrder"
-import { connectToDB } from "@/utils/dbConnect"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { buildFilter, buildPagination, buildSort } from "../helpers"
+
+import { buildPagination, buildSort } from "@/helpers/index"
+import Order from "@/models/Order"
+import { IOrder, ISearchParams } from "@/types/index"
+import { connectToDB } from "@/utils/dbConnect"
 
 interface IGetAllOrdesResponse {
   success: boolean
-  orders: IOrder[] | IAdminOrder[]
+  orders: IOrder[]
   count: number
 }
-export async function getAllOrders(
-  searchParams: ISearchParams,
-  currentPage = 1
-): Promise<IGetAllOrdesResponse> {
+export async function getAllOrders(searchParams: ISearchParams): Promise<IGetAllOrdesResponse> {
+  const currentPage = Number(searchParams.page) || 1
   const { skip, limit } = buildPagination(searchParams, currentPage)
-  const filter = buildFilter(searchParams)
+  // const filter = buildFilter(searchParams)
   const sortOption = buildSort(searchParams)
 
+  const status = searchParams.status
+  const filter: any = {}
+
+  if (status && status !== "all") {
+    filter.status = status
+  }
   try {
     await connectToDB()
-
-    // let query = {}
-    // if (status !== "all") {
-    //   query = { status }
-    // }
 
     const count = await Order.countDocuments()
 
@@ -40,41 +39,6 @@ export async function getAllOrders(
   } catch (error) {
     console.log(error)
     return { success: false, orders: [], count: 0 }
-  }
-}
-
-export async function addOrder(values: IOrder) {
-  try {
-    await connectToDB()
-
-    const orderData = {
-      number: values.number,
-      customer: values.customer,
-      orderedGoods: values.orderedGoods.map(item => ({
-        title: item.good.title,
-        brand: item.good.brand,
-        model: item.good.model,
-        vendor: item.good.vendor,
-        price: item.good.price,
-        quantity: item.quantity,
-        src: item.good.src
-      })),
-      totalPrice: values.totalPrice,
-      status: values.status
-    }
-    // console.log('orderData', orderData)
-
-    await Order.create(orderData)
-    revalidatePath("/")
-    return { success: true, data: orderData }
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error adding order:", error)
-      throw new Error("Failed to add order: " + error.message)
-    } else {
-      console.error("Unknown error:", error)
-      throw new Error("Failed to add order: Unknown error")
-    }
   }
 }
 
@@ -114,17 +78,13 @@ export const deleteGoodsFromOrder = async (orderId: string, goodsId: string) => 
   }
 }
 
-export async function addOrderAction(values: IOrder) {
+export async function addOrder(values: IOrder) {
+  if (!values.number) {
+    const generatedNumber = `ORD-${Date.now()}` // приклад генерації номера (можеш змінити
+    values.number = generatedNumber
+  }
   try {
     await connectToDB()
-
-    // const orderData = {
-    // 	number: values.number,
-    // 	customer: values.customer,
-    // 	orderedGoods: values.orderedGoods,
-    // 	totalPrice: values.totalPrice,
-    // 	status: values.status || 'Новий',
-    // }
     await Order.create(values)
     revalidatePath("/")
     return { success: true, message: "The New Order Successfully Added" }
@@ -132,7 +92,6 @@ export async function addOrderAction(values: IOrder) {
     if (error instanceof Error) {
       console.error("Error adding order:", error)
       return { success: false, message: "Failed to add order: " + error.message }
-
       // throw new Error('Failed to add order: ' + error.message)
     } else {
       console.error("Unknown error:", error)

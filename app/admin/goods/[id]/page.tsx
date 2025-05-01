@@ -1,5 +1,5 @@
 import { getGoodById, updateGood } from "@/actions/goods"
-import { AddGoodForm } from "@/components/index"
+import { GoodForm } from "@/admin/components"
 
 interface Params {
   id: string
@@ -10,7 +10,7 @@ const SingleGoodPage = async ({ params }: { params: Params }) => {
 
   return (
     <div className="mb-20">
-      <AddGoodForm title={"Редагувати дані про товар"} good={good} action={updateGood} />
+      <GoodForm title={"Редагувати дані про товар"} good={good} action={updateGood} />
     </div>
   )
 }

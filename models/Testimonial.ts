@@ -19,10 +19,9 @@ const testimonialsSchema = new Schema(
     rating: {
       type: Number,
       required: false,
-      default: null, // Set default to null if no rating is provided
+      default: null,
       validate: {
         validator: function (v: null | number) {
-          // Allow null or numbers between 1 and 5
           return v === null || (v >= 1 && v <= 5)
         },
         message: "Rating must be between 1 and 5, or null"
@@ -30,7 +29,7 @@ const testimonialsSchema = new Schema(
     },
     isActive: {
       type: Boolean,
-      default: false
+      default: true
     }
   },
   { versionKey: false, timestamps: true }

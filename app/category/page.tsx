@@ -1,5 +1,6 @@
 import { getAllGoods } from "@/actions/goods"
-import InfiniteScrollGoods from "@/components/InfiniteScrollGoods"
+import Breadcrumbs from "@/components/common/Breadcrumbs"
+import InfiniteScrollGoods from "@/components/common/InfiniteScroll"
 import { IGood } from "@/types/index"
 import { ISearchParams } from "@/types/searchParams"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
@@ -25,8 +26,9 @@ export default async function categoryPage({ searchParams }: { searchParams: ISe
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <div>
-        <h2 className="text-4xl mb-4">{searchParams?.category}</h2>
+      <div className="max-w-6xl mx-auto px-4 pt-3 container">
+        <Breadcrumbs />
+        <h2 className="subtitle mb-1 text-center">{searchParams?.category}</h2>
         <div key={Math.random()}>
           <InfiniteScrollGoods initialGoods={goods} searchParams={searchParams} />
         </div>

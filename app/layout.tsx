@@ -1,19 +1,21 @@
-import { IGetAllCategories } from "@/actions/categories"
-import { IGetAllBrands, IGetPrices } from "@/actions/goods"
-import AdminSidebar from "@/components/admin/AdminSidebar"
-import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
-import type { Metadata } from "next"
+import "./globals.css"
+
+import AdminSidebar from "app/admin/components/AdminSidebar"
 import { getServerSession } from "next-auth"
 import { Inter } from "next/font/google"
+
+import { getAllCategories, IGetAllCategories } from "@/actions/categories"
+import { getMinMaxPrice, IGetAllBrands, IGetPrices, uniqueBrands } from "@/actions/goods"
+import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
+
+import { ISearchParams } from "../types"
 import { Footer, Header, Sidebar } from "./components"
-import ErrorMessage from "./components/ui/Error"
+import ErrorMessage from "./components/ui/ErrorMessage"
 import { authOptions } from "./config/authOptions"
-import "./globals.css"
-import { brandsOptions } from "./prefetchOptions/brandsOptions"
-import { categoriesOptions } from "./prefetchOptions/categoriesOptions"
-import { pricesOptions } from "./prefetchOptions/pricesOptions"
+import { usePrefetchData } from "./hooks"
 import { Providers } from "./providers/providers"
 
+import type { Metadata } from "next"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
@@ -36,10 +38,38 @@ export default async function RootLayout({
 
   const queryClient = new QueryClient()
 
+  const preFetchPrices = async () => {
+    const response = await getMinMaxPrice()
+    return { success: true, minPrice: response.minPrice, maxPrice: response.maxPrice }
+  }
+
+  const preFetchCategories = async () => {
+    const response = await getAllCategories({} as ISearchParams)
+    return { success: true, categories: response.categories }
+  }
+
+  const preFetchBrands = async () => {
+    const response = await uniqueBrands()
+    return { success: true, brands: response.brands }
+  }
+
+  const queries = [
+    { key: "prices", fetchFn: preFetchPrices },
+    { key: "categories", fetchFn: preFetchCategories },
+    { key: "brands", fetchFn: preFetchBrands }
+  ]
+
   try {
-    await queryClient.prefetchQuery(pricesOptions)
-    await queryClient.prefetchQuery(categoriesOptions)
-    await queryClient.prefetchQuery(brandsOptions)
+    await usePrefetchData(getMinMaxPrice, ["prices"])
+
+    await Promise.all(
+      queries.map(({ key, fetchFn }) =>
+        queryClient.prefetchQuery({
+          queryKey: [key],
+          queryFn: fetchFn as () => Promise<unknown>
+        })
+      )
+    )
   } catch (error) {
     console.error("Error prefetching data:", error)
   }

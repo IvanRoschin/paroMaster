@@ -1,12 +1,12 @@
 "use server"
 
+import { revalidatePath } from "next/cache"
+
 import { buildFilter, buildPagination, buildSort } from "@/helpers/index"
 import Good from "@/models/Good"
 import Testimonial from "@/models/Testimonial"
-import { IGood } from "@/types/good/IGood"
-import { ISearchParams } from "@/types/searchParams"
+import { IGood, ISearchParams } from "@/types/index"
 import { connectToDB } from "@/utils/dbConnect"
-import { revalidatePath } from "next/cache"
 
 export interface IGetAllGoods {
   success: boolean
@@ -24,16 +24,13 @@ export interface IGetPrices {
   minPrice: number
   maxPrice: number
 }
-export async function getAllGoods(
-  searchParams: ISearchParams,
-  currentPage = 1
-): Promise<IGetAllGoods> {
+export async function getAllGoods(searchParams: ISearchParams): Promise<IGetAllGoods> {
+  const filter = buildFilter(searchParams)
+  const sortOption = buildSort(searchParams)
+  const currentPage = Number(searchParams.page) || 1
+  const { skip, limit } = buildPagination(searchParams, currentPage)
   try {
     await connectToDB()
-
-    const filter = buildFilter(searchParams)
-    const sortOption = buildSort(searchParams)
-    const { skip, limit } = buildPagination(searchParams, currentPage)
 
     const count = await Good.countDocuments(filter)
 

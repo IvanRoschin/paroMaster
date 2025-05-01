@@ -1,6 +1,6 @@
 import { getAllGoods } from "@/actions/goods"
-import { getOrderById, updateOrder } from "@/actions/orders"
-import { AddOrderForm } from "@/components/index"
+import { getOrderById } from "@/actions/orders"
+import { OrderForm } from "@/admin/components/index"
 import { IGood } from "@/types/index"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 
@@ -29,12 +29,7 @@ const SingleOrderPage = async ({ params }: { params: Params }) => {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="mb-20">
-        <AddOrderForm
-          order={order}
-          title={`Редагувати дані ордера ${order.number}`}
-          action={updateOrder}
-          goods={goods}
-        />
+        <OrderForm order={order} title={`Редагувати дані ордера ${order.number}`} goods={goods} />
       </div>
     </HydrationBoundary>
   )

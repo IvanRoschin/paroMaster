@@ -12,23 +12,21 @@ const baseSchema = Yup.object().shape({
   })
 })
 
-// const fullSchema = baseSchema.shape({
-// 	orderedGoods: Yup.array().of(
-// 		Yup.object().shape({
-// 			_id: Yup.string().required(`Обов'язкове поле`),
-// 			price: Yup.number()
-// 				.positive()
-// 				.required(`Обов'язкове поле`),
-// 			// другие поля...
-// 		}),
-// 	),
-// 	totalPrice: Yup.number()
-// 		.positive()
-// 		.required(`Обов'язкове поле`),
-// })
+// Схема для одного товару в замовленні:
+const orderedGoodSchema = Yup.object().shape({
+  _id: Yup.string().required(`Обов'язкове поле`),
+  title: Yup.string().required(`Обов'язкове поле`),
+  price: Yup.number().positive("Ціна має бути більше 0").required(`Обов'язкове поле`),
+  quantity: Yup.number()
+    .positive("Кількість має бути більше 0")
+    .integer("Має бути цілим числом")
+    .required(`Обов'язкове поле`),
+  src: Yup.array().of(Yup.string().url("Некоректне посилання")).notRequired(), // на всякий, якщо тобі потрібна src
+  brand: Yup.string().notRequired(),
+  model: Yup.string().notRequired()
+})
 
 const orderFormSchema = Yup.object().shape({
-  number: Yup.string().required(`Обов'язкове поле`),
   customer: Yup.object().shape({
     name: Yup.string()
       .min(2, "Мінімум 2 символи")
@@ -54,7 +52,10 @@ const orderFormSchema = Yup.object().shape({
     warehouse: Yup.string().required(`Обов'язкове поле`),
     payment: Yup.string().oneOf(Object.values(PaymentMethod)).required(`Обов'язкове поле`)
   }),
-
+  orderedGoods: Yup.array()
+    .of(orderedGoodSchema)
+    .min(1, "Додайте хоча б один товар у замовлення")
+    .required("Товари обов'язкові"),
   totalPrice: Yup.number().positive(),
   status: Yup.string()
     .oneOf(["Новий", "Опрацьовується", "Оплачений", "На відправку", "Закритий"])

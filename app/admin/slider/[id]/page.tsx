@@ -1,5 +1,5 @@
 import { getSlideById, updateSlide } from "@/actions/slider"
-import { AddSlideForm } from "@/components/index"
+import { SlideForm } from "@/admin/components"
 
 interface Params {
   id: string
@@ -9,7 +9,7 @@ const SingleSlidePage = async ({ params }: { params: Params }) => {
   const slide = await getSlideById(id)
   return (
     <div className="mb-20">
-      <AddSlideForm title={"Редагувати слайд"} slide={slide} action={updateSlide} />
+      <SlideForm title={"Редагувати слайд"} slide={slide} action={updateSlide} />
     </div>
   )
 }

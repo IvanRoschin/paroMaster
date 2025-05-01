@@ -1,12 +1,12 @@
 "use server"
 
-import User from "@/models/User"
-import { ISearchParams } from "@/types/index"
-import { IUser } from "@/types/user/IUser"
-import { connectToDB } from "@/utils/dbConnect"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { buildFilter, buildPagination, buildSort } from "../helpers"
+
+import { buildFilter, buildPagination, buildSort } from "@/helpers/index"
+import User from "@/models/User"
+import { ISearchParams, IUser } from "@/types/index"
+import { connectToDB } from "@/utils/dbConnect"
 
 export async function addUser(values: any): Promise<{ success: boolean; message: string }> {
   try {
@@ -54,7 +54,9 @@ export async function addUser(values: any): Promise<{ success: boolean; message:
   }
 }
 
-export async function getAllUsers(searchParams: ISearchParams, currentPage = 1) {
+export async function getAllUsers(searchParams: ISearchParams) {
+  const currentPage = Number(searchParams.page) || 1
+
   const { skip, limit } = buildPagination(searchParams, currentPage)
   const filter = buildFilter(searchParams)
   const sortOption = buildSort(searchParams)

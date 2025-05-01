@@ -1,10 +1,10 @@
 import { addCustomer } from "@/actions/customers"
-import { AddCustomerForm } from "@/components/index"
+import { CustomerForm } from "@/admin/components"
 
 const AddCustomerPage = () => {
   return (
     <div className="mb-20">
-      <AddCustomerForm title="Додати нового клієнта" action={addCustomer} />
+      <CustomerForm title="Додати нового клієнта" action={addCustomer} />
     </div>
   )
 }

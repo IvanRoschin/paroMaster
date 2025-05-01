@@ -1,6 +1,5 @@
 import { getAllGoods } from "@/actions/goods"
-import { addOrderAction } from "@/actions/orders"
-import { AddOrderForm } from "@/components/index"
+import { OrderForm } from "@/admin/components"
 import { IGood } from "@/types/index"
 import { ISearchParams } from "@/types/searchParams"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
@@ -26,7 +25,7 @@ const AddOrderPage = async ({ searchParams }: { searchParams: ISearchParams }) =
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="mb-20">
-        <AddOrderForm title="Додати новий ордер" action={addOrderAction} goods={goods} />
+        <OrderForm title="Додати новий ордер" goods={goods} />
       </div>
     </HydrationBoundary>
   )
