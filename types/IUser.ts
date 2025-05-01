@@ -1,5 +1,4 @@
 export interface IUser {
-  createdAt: string | number | Date
   _id?: string
   name: string
   phone: string
@@ -7,4 +6,5 @@ export interface IUser {
   password: string
   isAdmin: boolean
   isActive: boolean
+  createdAt: string | number | Date
 }

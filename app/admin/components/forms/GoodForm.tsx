@@ -8,7 +8,7 @@ import { toast } from "sonner"
 import { CustomButton, FormField, ImageUploadCloudinary, Switcher } from "@/components/index"
 import { goodFormSchema } from "@/helpers/index"
 import { useAddData, useCategoriesEnum, useUpdateData } from "@/hooks/index"
-import { IGood } from "@/types/good/IGood"
+import { IGood } from "@/types/IGood"
 import { ICategory } from "@/types/index"
 
 interface InitialStateType extends Omit<IGood, "_id"> {}

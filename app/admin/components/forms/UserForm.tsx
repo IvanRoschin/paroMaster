@@ -5,7 +5,7 @@ import { toast } from "sonner"
 
 import { CustomButton, FormField } from "@/components/index"
 import { userFormSchema } from "@/helpers/index"
-import { IUser } from "@/types/user/IUser"
+import { IUser } from "@/types/IUser"
 
 interface InitialStateType extends Omit<IUser, "_id"> {}
 

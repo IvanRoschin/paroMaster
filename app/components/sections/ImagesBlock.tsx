@@ -1,8 +1,9 @@
 "use client"
 
-import { IGood } from "@/types/good/IGood"
 import Image from "next/image"
 import { useState } from "react"
+
+import { IGood } from "@/types/IGood"
 
 interface ImagesBlockProps {
   item?: IGood

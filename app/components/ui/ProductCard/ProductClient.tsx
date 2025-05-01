@@ -7,7 +7,7 @@ import { Loader } from "@/components/common"
 import { ImagesBlock } from "@/components/sections"
 import { Icon } from "@/components/ui"
 import { useFetchDataById } from "@/hooks/index"
-import { SGood } from "@/types/good/IGood"
+import { SGood } from "@/types/IGood"
 
 const ProductClient = ({ id }: { id: string }) => {
   const { getItemQuantity, increaseCartQuantity, decreaseCartQuantity, removeFromCart } =

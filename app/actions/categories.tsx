@@ -1,11 +1,13 @@
 "use server"
 
-import Category from "@/models/Category"
-import { ICategory } from "@/types/category/ICategory"
-import { ISearchParams } from "@/types/index"
-import { connectToDB } from "@/utils/dbConnect"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+
+import Category from "@/models/Category"
+import { ICategory } from "@/types/ICategory"
+import { ISearchParams } from "@/types/index"
+import { connectToDB } from "@/utils/dbConnect"
+
 import { buildPagination } from "../helpers"
 
 export interface IGetAllCategories {

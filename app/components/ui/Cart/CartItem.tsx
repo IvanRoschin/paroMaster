@@ -1,10 +1,11 @@
 "use client"
 
-import { Button, Icon } from "@/components/ui"
-import { IGood } from "@/types/good/IGood"
 import { useShoppingCart } from "app/context/ShoppingCartContext"
 import Image from "next/image"
 import { useEffect, useState } from "react"
+
+import { Button, Icon } from "@/components/ui"
+import { IGood } from "@/types/IGood"
 
 type CartItemProps = {
   good: IGood

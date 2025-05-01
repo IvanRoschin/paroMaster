@@ -1,12 +1,14 @@
 "use client"
 
-import { getAllGoods } from "@/actions/goods"
-import { ProductList } from "@/components/ui"
-import { IGood } from "@/types/good/IGood"
-import { ISearchParams } from "@/types/searchParams"
 import { useCallback, useEffect, useState } from "react"
 import { useInView } from "react-intersection-observer"
 import { TailSpin } from "react-loader-spinner"
+
+import { getAllGoods } from "@/actions/goods"
+import { ProductList } from "@/components/ui"
+import { IGood } from "@/types/IGood"
+import { ISearchParams } from "@/types/searchParams"
+
 const InfiniteScroll = ({
   initialGoods,
   searchParams
