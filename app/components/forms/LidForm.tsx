@@ -7,7 +7,7 @@ import { sendEmailToLid } from "@/actions/sendGridEmail"
 import FormField from "@/components/common/FormField"
 import CustomButton from "@/components/ui/CustomFormikButton"
 import { contactFormSchema } from "@/helpers/index"
-import { ILid } from "@/types/lid/ILid"
+import { ILid } from "@/types/ILid"
 
 interface InitialStateType extends Omit<ILid, "_id"> {}
 

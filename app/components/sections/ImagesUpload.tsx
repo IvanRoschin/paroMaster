@@ -1,9 +1,11 @@
 "use client"
 
-import { IGood } from "@/types/good/IGood"
-import { uploadCloudinary } from "@/utils/uploadCloudinary"
 import { FormikErrors } from "formik"
 import { ChangeEvent, useState } from "react"
+
+import { IGood } from "@/types/IGood"
+import { uploadCloudinary } from "@/utils/uploadCloudinary"
+
 import ImagesBlock from "./sections/ImagesBlock"
 
 interface FormikProps {

@@ -1,4 +1,4 @@
-import { IOrder } from "../order/IOrder"
+import { IOrder } from "@/types/IOrder"
 
 export interface ICustomer {
   _id?: string

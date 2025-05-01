@@ -1,12 +1,13 @@
 "use server"
 
+import { revalidatePath } from "next/cache"
+
 import { buildFilter, buildPagination, buildSort } from "@/helpers/index"
 import Good from "@/models/Good"
 import Testimonial from "@/models/Testimonial"
-import { IGood } from "@/types/good/IGood"
+import { IGood } from "@/types/IGood"
 import { ISearchParams } from "@/types/searchParams"
 import { connectToDB } from "@/utils/dbConnect"
-import { revalidatePath } from "next/cache"
 
 export interface IGetAllGoods {
   success: boolean

@@ -1,14 +1,16 @@
-import { ICategory } from "./category/ICategory"
-import { ICustomer } from "./customer/ICustomer"
-import { IGood } from "./good/IGood"
-import { ILid } from "./lid/ILid"
-import { IOrder } from "./order/IOrder"
-import { ISearchParams } from "./searchParams"
-import { ISlider } from "./slider/ISlider"
-import { ITestimonial } from "./testimonial/ITestimonial"
-import { IUser } from "./user/IUser"
+import { ICartItem } from "@/types/ICartItem"
+import { ICategory } from "@/types/ICategory"
+import { ICustomer } from "@/types/ICustomer"
+import { IGood } from "@/types/IGood"
+import { ILid } from "@/types/ILid"
+import { IOrder } from "@/types/IOrder"
+import { ISlider } from "@/types/ISlider"
+import { ITestimonial } from "@/types/ITestimonial"
+import { IUser } from "@/types/IUser"
+import { ISearchParams } from "@/types/searchParams"
 
 export type {
+  ICartItem,
   ICategory,
   ICustomer,
   IGood,

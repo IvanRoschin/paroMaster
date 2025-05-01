@@ -7,7 +7,7 @@ import { toast } from "sonner"
 
 import { CustomButton, ImageUploadCloudinary } from "@/components/index"
 import { useAddData, useUpdateData } from "@/hooks/index"
-import { ICategory } from "@/types/category/ICategory"
+import { ICategory } from "@/types/ICategory"
 
 interface InitialStateType extends Omit<ICategory, "_id"> {}
 

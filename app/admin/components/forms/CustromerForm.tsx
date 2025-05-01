@@ -8,8 +8,7 @@ import { toast } from "sonner"
 import { Breadcrumbs, Button, ErrorMessage, FormField } from "@/components/index"
 import { customerFormSchema, storageKeys } from "@/helpers/index"
 import { useAddData, useCities, useUpdateData, useWarehouses } from "@/hooks/index"
-import { ICustomer } from "@/types/customer/ICustomer"
-import { IOrder } from "@/types/index"
+import { ICustomer, IOrder } from "@/types/index"
 import { PaymentMethod } from "@/types/paymentMethod"
 
 interface FormikCustomerValues {

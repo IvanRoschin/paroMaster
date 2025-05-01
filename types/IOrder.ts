@@ -1,4 +1,4 @@
-import { IGood } from "../good/IGood"
+import { IGood } from "@/types/IGood"
 
 export interface IOrder {
   _id?: string
