@@ -1,6 +1,6 @@
 import { getAllTestimonials } from "@/actions/testimonials"
-import Testimonials from "@/components/admin/Testimonials"
-import { usePrefetchData } from "@/hooks/usePrefetchData"
+import Testimonials from "@/admin/components/sections/Testimonials"
+import { usePrefetchData } from "@/hooks/index"
 import { ISearchParams } from "@/types/searchParams"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 

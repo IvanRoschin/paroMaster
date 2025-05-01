@@ -1,6 +1,6 @@
 import { getAllGoods } from "@/actions/goods"
-import Breadcrumbs from "@/components/Breadcrumbs"
-import InfiniteScrollGoods from "@/components/InfiniteScrollGoods"
+import Breadcrumbs from "@/components/common/Breadcrumbs"
+import InfiniteScrollGoods from "@/components/common/InfiniteScroll"
 import { usePrefetchData } from "@/hooks/usePrefetchData"
 import { IGood } from "@/types/index"
 import { ISearchParams } from "@/types/searchParams"

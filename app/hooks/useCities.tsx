@@ -1,7 +1,9 @@
+"use client"
+
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
-export const useCities = (cityQuery: string) => {
+const useCities = (cityQuery: string) => {
   const [allCities, setCities] = useState<{ Ref: string; Description: string }[]>([])
   const [isCitiesLoading, setIsCitiesLoading] = useState(false)
 
@@ -41,3 +43,5 @@ export const useCities = (cityQuery: string) => {
 
   return { allCities, isCitiesLoading }
 }
+
+export default useCities

@@ -1,7 +1,9 @@
+"use client"
+
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
-export const useWarehouses = (city: string) => {
+const useWarehouses = (city: string) => {
   const [warehouses, setWarehouses] = useState<{ Ref: string; Description: string }[]>([])
   const [isWarehousesLoading, setIsWarehousesLoading] = useState(false)
 
@@ -36,3 +38,5 @@ export const useWarehouses = (city: string) => {
 
   return { warehouses, isWarehousesLoading }
 }
+
+export default useWarehouses

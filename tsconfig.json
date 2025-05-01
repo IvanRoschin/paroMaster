@@ -15,6 +15,9 @@
     "target": "ES6",
     "plugins": [
       {
+        "organize imports": "prettier-plugin-organize-imports"
+      },
+      {
         "name": "next"
       }
     ],
@@ -29,7 +32,8 @@
       "@/helpers/*": ["app/helpers/*"],
       "@/hooks/*": ["app/hooks/*"],
       "@/config/*": ["config/*"],
-      "@/lib/*": ["lib/*"]
+      "@/lib/*": ["lib/*"],
+      "@/admin/*": ["app/admin/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "auth.tjs", "auth.js"],

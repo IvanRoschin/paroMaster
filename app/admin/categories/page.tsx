@@ -1,7 +1,6 @@
 import { getAllCategories } from "@/actions/categories"
-import Categories from "@/components/admin/Categories"
-import { usePrefetchData } from "@/hooks/usePrefetchData"
-
+import Categories from "@/admin/components/sections/Categories"
+import { usePrefetchData } from "@/hooks/index"
 import { ISearchParams } from "@/types/index"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 

@@ -1,4 +1,4 @@
-import Breadcrumbs from "@/components/Breadcrumbs"
+import Breadcrumbs from "@/components/common/Breadcrumbs"
 
 type Props = {}
 

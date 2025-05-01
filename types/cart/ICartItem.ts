@@ -1,6 +1,6 @@
 import { IGood } from "../good/IGood"
 
-export type CartItem = {
+export type ICartItem = {
   good: IGood
   quantity: number
 }

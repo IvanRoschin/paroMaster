@@ -1,11 +1,10 @@
 "use client"
 
-import { addNewLid } from "@/actions/lids"
-import Breadcrumbs from "@/components/Breadcrumbs"
-import AddLidForm from "@/components/forms/LidForm"
-import Logo from "@/components/Logo"
-import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api"
 import { FaCalendarAlt, FaMapMarkerAlt } from "react-icons/fa"
+
+import { addNewLid } from "@/actions/lids"
+import { Breadcrumbs, LidForm, Logo } from "@/components/index"
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api"
 
 const containerStyle = {
   width: "100%",
@@ -60,7 +59,7 @@ const ContactPage = () => {
         </section>
         {/* Contact Form */}
         <section>
-          <AddLidForm action={addNewLid} title="Замовити зворотній дзвінок" subtitle />
+          <LidForm action={addNewLid} title="Замовити зворотній дзвінок" subtitle />
         </section>
       </div>
     </div>

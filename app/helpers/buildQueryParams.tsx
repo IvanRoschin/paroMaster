@@ -1,6 +1,6 @@
 import { ISearchParams } from "@/types/searchParams"
 
-export const buildQueryParams = (searchParams: ISearchParams): string => {
+const buildQueryParams = (searchParams: ISearchParams): string => {
   const params = new URLSearchParams()
 
   Object.entries(searchParams).forEach(([key, value]) => {
@@ -16,3 +16,5 @@ export const buildQueryParams = (searchParams: ISearchParams): string => {
   const queryString = params.toString()
   return queryString ? `?${queryString}` : ""
 }
+
+export default buildQueryParams

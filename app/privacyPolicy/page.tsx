@@ -1,5 +1,5 @@
-import Breadcrumbs from "@/components/Breadcrumbs"
-import Logo from "@/components/Logo"
+import Breadcrumbs from "@/components/common/Breadcrumbs"
+import Logo from "@/components/common/Logo"
 import Link from "next/link"
 
 const PrivacyPolicy = () => {

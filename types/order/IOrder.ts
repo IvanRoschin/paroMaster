@@ -12,8 +12,9 @@ export interface IOrder {
     warehouse: string
     payment: string
   }
-  warehouse?: string
   orderedGoods: IGood[]
   totalPrice: number
   status: "Новий" | "Опрацьовується" | "Оплачений" | "На відправку" | "Закритий"
+  createdAt?: string
+  updatedAt?: string
 }

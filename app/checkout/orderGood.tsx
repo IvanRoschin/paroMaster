@@ -1,6 +1,7 @@
-import { IGood } from "@/types/index"
 import Image from "next/image"
 import React from "react"
+
+import { IGood } from "@/types/index"
 
 type CartItemProps = {
   good: IGood
