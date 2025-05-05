@@ -3,7 +3,6 @@ import { getData } from "app/lib/novaPoshta"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function POST(request: NextRequest) {
-  console.log("POST /api/warehouses called")
   try {
     const { city } = await request.json()
     if (!city) {
@@ -19,8 +18,6 @@ export async function POST(request: NextRequest) {
 
     if (!response.success) {
       console.error("Failed to fetch warehouses")
-
-      // throw new Error(response.error || "Failed to fetch warehouses")
     }
 
     return NextResponse.json({ success: true, data: response.data.data })

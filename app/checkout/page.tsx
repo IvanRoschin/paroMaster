@@ -1,6 +1,7 @@
 "use client"
 
 import { useShoppingCart } from "app/context/ShoppingCartContext"
+import { createWayForPayInvoice } from "app/lib/wayforpay"
 import PublicOfferSummary from "app/publicoffer/PublicOfferSummary"
 import { ErrorMessage, Field, Form, Formik, useFormikContext } from "formik"
 import { useRouter } from "next/navigation"
@@ -10,8 +11,9 @@ import { toast } from "sonner"
 import { addCustomer } from "@/actions/customers"
 import { addOrder } from "@/actions/orders"
 import { sendAdminEmail, sendCustomerEmail } from "@/actions/sendGridEmail"
+// import WayForPayForm from "@/components/forms/WayForPayForm"
 import { Breadcrumbs, Button, FormField } from "@/components/index"
-import { customerFormSchema, storageKeys } from "@/helpers/index"
+import { storageKeys } from "@/helpers/index"
 import { useCities, useWarehouses } from "@/hooks/index"
 import { ICartItem, IOrder } from "@/types/index"
 import { PaymentMethod } from "@/types/paymentMethod"
@@ -101,11 +103,39 @@ const OrderPage = () => {
       status: "Новий"
     }
 
-    console.log("orderData", orderData)
+    // const mokbody = {
+    //   merchantAccount: "test_merch_n1",
+    //   merchantDomainName: "www.market.ua",
+    //   merchantTransactionSecureType: "AUTO",
+    //   merchantSignature: "2437af4f0c0c6130fc20611f0241e476",
+    //   orderReference: "DH1746466948",
+    //   orderDate: "1415379863",
+    //   amount: "1547.36",
+    //   currency: "UAH",
+    //   productName: ["Процесор Intel Core i5-4670 3.4GHz", "Kingston DDR3-1600 4096MB PC3-12800"],
+    //   productPrice: ["1000", "547.36"],
+    //   productCount: ["1", "1"],
+    //   clientFirstName: "Василь",
+    //   clientLastName: "Пібаренко",
+    //   clientAddress: "пр. Науки, 12",
+    //   clientCity: "Дніпро",
+    //   clientEmail: "some@mail.com",
+    //   defaultPaymentSystem: "card"
+    // }
 
-    try {
-      setIsLoading(true)
-
+    if (orderData.customer.payment === PaymentMethod.WayForPay) {
+      try {
+        const result = await createWayForPayInvoice(orderData)
+        if (result.url) {
+          window.location.href = result.url
+        } else {
+          toast.error("Не вдалося створити рахунок. Спробуйте ще раз.")
+        }
+      } catch (error) {
+        console.error("WayForPay error:", error)
+        toast.error("Помилка при створенні платежу")
+      }
+    } else {
       const [adminEmail, customerEmail, orderResult, customerResult] = await Promise.all([
         sendAdminEmail(orderData),
         sendCustomerEmail(orderData),
@@ -124,14 +154,7 @@ const OrderPage = () => {
         sessionStorage.clear()
         localStorage.clear()
         push("/")
-      } else {
-        throw new Error("Помилка під час створення замовлення")
       }
-    } catch (error) {
-      console.error("Помилка оформлення:", error)
-      toast.error(error instanceof Error ? error.message : "Невідома помилка")
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -149,12 +172,12 @@ const OrderPage = () => {
               enableReinitialize
               initialValues={initialValues}
               onSubmit={handleSubmit}
-              validationSchema={customerFormSchema}
+              // validationSchema={customerFormSchema}
             >
-              {({ values, setFieldValue, errors, touched }) => (
+              {({ values, errors, touched }) => (
                 <Form className="flex flex-col space-y-6">
                   <FormEffects />
-                  <CustomerFields city={values.city} errors={errors} touched={touched} />
+                  <CustomerFields errors={errors} touched={touched} />
                   <div className="flex items-center">
                     <input
                       id="termsCheckbox"
@@ -256,9 +279,9 @@ const FormEffects = () => {
   return null
 }
 
-const CustomerFields = ({ city, touched, errors }: { city: string; touched: any; errors: any }) => {
+const CustomerFields = ({ touched, errors }: { touched: any; errors: any }) => {
   const { values, setFieldValue } = useFormikContext<FormikCustomerValues>()
-  const { warehouses, isWarehousesLoading } = useWarehouses(city)
+  const { warehouses, isWarehousesLoading } = useWarehouses(values.city)
   const [showDropdown, setShowDropdown] = useState(false)
 
   const { filteredCities, searchQuery, setSearchQuery, handleSelectCity } = useCitySelection(
@@ -272,7 +295,7 @@ const CustomerFields = ({ city, touched, errors }: { city: string; touched: any;
     { name: "email", type: "email", id: "email", label: "Email" },
     { name: "phone", type: "tel", id: "phone", label: "Телефон" },
     {
-      id: "customer.payment",
+      id: "payment",
       label: "Оберіть спосіб оплати",
       options: Object.values(PaymentMethod).map(method => ({
         value: method,
@@ -302,7 +325,7 @@ const CustomerFields = ({ city, touched, errors }: { city: string; touched: any;
       ))}
 
       <div className="relative mb-4">
-        <Field name="customer.city">
+        <Field name="city">
           {({ field }: any) => (
             <input
               {...field}
@@ -310,8 +333,8 @@ const CustomerFields = ({ city, touched, errors }: { city: string; touched: any;
               onChange={e => handleChange(e, field)}
               placeholder=" "
               className={`text-primaryTextColor peer w-full p-4 pt-6 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
-        ${errors.customer?.city && touched.customer?.city ? "border-rose-500" : "border-neutral-300"}
-        ${errors.customer?.city && touched.customer?.city ? "focus:border-rose-500" : "focus:border-green-500"}
+        ${errors?.city && touched?.city ? "border-rose-500" : "border-neutral-300"}
+        ${errors?.city && touched?.city ? "focus:border-rose-500" : "focus:border-green-500"}
         `}
             />
           )}
@@ -322,9 +345,9 @@ const CustomerFields = ({ city, touched, errors }: { city: string; touched: any;
         >
           Введіть назву міста
         </label>
-        {touched.customer?.city && errors.customer?.city && (
+        {touched?.city && errors?.city && (
           <div className="text-rose-500 text-sm mt-1">
-            <ErrorMessage name="customer.city" />
+            <ErrorMessage name="city" />
           </div>
         )}
 
@@ -344,12 +367,12 @@ const CustomerFields = ({ city, touched, errors }: { city: string; touched: any;
       </div>
       <div className="relative w-full mb-4">
         <Field
-          name="customer.warehouse"
+          name="warehouse"
           as="select"
           disabled={isWarehousesLoading}
           className={`text-primaryTextColor peer w-full p-4 pt-6 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
-        ${errors.customer?.warehouse && touched.customer?.warehouse ? "border-rose-500" : "border-neutral-300"}
-        ${errors.customer?.warehouse && touched.customer?.warehouse ? "focus:border-rose-500" : "focus:border-green-500"}`}
+        ${errors?.warehouse && touched?.warehouse ? "border-rose-500" : "border-neutral-300"}
+        ${errors?.warehouse && touched?.warehouse ? "focus:border-rose-500" : "focus:border-green-500"}`}
         >
           {warehouses.map((wh, i) => (
             <option key={i} value={wh.Description}>
@@ -358,13 +381,13 @@ const CustomerFields = ({ city, touched, errors }: { city: string; touched: any;
           ))}
         </Field>
         <label
-          htmlFor="customer.warehouse"
+          htmlFor="warehouse"
           className="text-primaryTextColor absolute text-md duration-150 left-3 top-3 z-9 origin-[0] transform -translate-y-3
             peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
         >
           Оберіть відділення
         </label>
-        {touched.customer?.warehouse && errors.customer?.warehouse && (
+        {touched?.warehouse && errors?.warehouse && (
           <div className="text-rose-500 text-sm mt-1">
             <ErrorMessage name="customer.warehouse" />
           </div>

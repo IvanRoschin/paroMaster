@@ -8,10 +8,8 @@ const novaPoshtaApi = axios.create({
 })
 
 export async function getData(body: any) {
-  console.log("getData called with body:", body)
   try {
     const { data, status, config } = await novaPoshtaApi.post("", body)
-    console.log("getData request URL:", config.url)
     if (status !== 200) {
       throw new Error(`Failed to fetch data: ${status}`)
     }
