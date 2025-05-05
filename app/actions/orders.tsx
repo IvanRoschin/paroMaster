@@ -85,9 +85,14 @@ export async function addOrder(values: IOrder) {
   }
   try {
     await connectToDB()
-    await Order.create(values)
+    const order = await Order.create(values)
     revalidatePath("/")
-    return { success: true, message: "The New Order Successfully Added" }
+
+    return {
+      order,
+      success: true,
+      message: "New Order created successfully"
+    }
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error adding order:", error)
@@ -120,13 +125,14 @@ export async function deleteOrder(id: string) {
   }
 }
 
-export async function getOrderById(id: string) {
+export async function getOrderById(id: string): Promise<IOrder | null> {
   try {
     await connectToDB()
-    const order = await Order.findById({ _id: id })
-    return JSON.parse(JSON.stringify(order))
+    const order = await Order.findById({ _id: id }).lean()
+    return order ? (JSON.parse(JSON.stringify(order)) as IOrder) : null
   } catch (error) {
     console.log(error)
+    return null
   }
 }
 

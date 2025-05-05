@@ -1,5 +1,4 @@
-import { getAllGoods } from "@/actions/goods"
-import { getOrderById } from "@/actions/orders"
+import { getAllOrders, getOrderById } from "@/actions/orders"
 import { OrderForm } from "@/admin/components/index"
 import { IGood } from "@/types/index"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
@@ -17,14 +16,18 @@ const SingleOrderPage = async ({ params }: { params: Params }) => {
   const queryClient = new QueryClient()
   try {
     await queryClient.prefetchQuery({
-      queryKey: ["goods"],
-      queryFn: () => getAllGoods(params)
+      queryKey: ["orders"],
+      queryFn: () => getAllOrders(params)
     })
   } catch (error) {
     console.error("Error prefetching data:", error)
   }
   const queryState = queryClient.getQueryState(["goods"])
   const goods = (queryState?.data as GoodsData)?.goods || []
+
+  if (!order) {
+    return
+  }
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

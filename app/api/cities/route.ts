@@ -3,7 +3,6 @@ import { getData } from "app/lib/novaPoshta"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function POST(request: NextRequest) {
-  console.log("POST /api/cities called")
   try {
     const { city = "Київ" } = await request.json()
 
@@ -26,15 +25,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log("response", response)
-
     const mappedCities = response.data.data.map((item: any) => ({
       description: item.Description,
       descriptionRu: item.DescriptionRu,
       ref: item.Ref
     }))
-
-    console.log("Fetched cities:", mappedCities)
 
     return NextResponse.json({ success: true, data: mappedCities })
   } catch (error) {
