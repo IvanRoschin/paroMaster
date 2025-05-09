@@ -52,7 +52,7 @@ const goodsLinks = [
 const Footer = ({ categories }: { categories: ICategory[] }) => {
   const isMobile = useMediaQuery("(max-width: 767px)")
 
-  const baseUrl = process.env.PUBLIC_URL || ""
+  const baseUrl = typeof window !== "undefined" ? "" : process.env.NEXT_PUBLIC_BASE_URL || ""
 
   const searchParams = useSearchParams()
 

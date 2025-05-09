@@ -4,6 +4,7 @@ import { ICustomer } from "@/types/ICustomer"
 import { IGood } from "@/types/IGood"
 import { ILid } from "@/types/ILid"
 import { IOrder } from "@/types/IOrder"
+import { ISimplifiedOrder } from "@/types/ISimplifiedOrder"
 import { ISlider } from "@/types/ISlider"
 import { ITestimonial } from "@/types/ITestimonial"
 import { IUser } from "@/types/IUser"
@@ -17,6 +18,7 @@ export type {
   ILid,
   IOrder,
   ISearchParams,
+  ISimplifiedOrder,
   ISlider,
   ITestimonial,
   IUser

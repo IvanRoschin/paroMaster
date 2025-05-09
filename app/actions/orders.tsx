@@ -80,16 +80,16 @@ export const deleteGoodsFromOrder = async (orderId: string, goodsId: string) => 
 
 export async function addOrder(values: IOrder) {
   if (!values.number) {
-    const generatedNumber = `ORD-${Date.now()}` // приклад генерації номера (можеш змінити
+    const generatedNumber = `ORD-${Date.now()}`
     values.number = generatedNumber
   }
+
   try {
     await connectToDB()
+    console.log("Перед створенням замовлення")
     const order = await Order.create(values)
-    revalidatePath("/")
-
+    console.log("Замовлення створено")
     return {
-      order,
       success: true,
       message: "New Order created successfully"
     }
@@ -97,7 +97,6 @@ export async function addOrder(values: IOrder) {
     if (error instanceof Error) {
       console.error("Error adding order:", error)
       return { success: false, message: "Failed to add order: " + error.message }
-      // throw new Error('Failed to add order: ' + error.message)
     } else {
       console.error("Unknown error:", error)
       throw new Error("Failed to add order: Unknown error")
