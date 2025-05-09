@@ -16,7 +16,7 @@ import { TfiLayoutSlider } from "react-icons/tfi"
 const menuItems = [
   {
     title: "Панель керування",
-    path: "/admin/dashboard",
+    path: "/admin/",
     icon: <MdDashboard />
   },
   {

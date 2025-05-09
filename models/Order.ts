@@ -1,4 +1,5 @@
 import mongoose from "mongoose"
+
 const { Schema } = mongoose
 
 const orderSchema = new Schema(
@@ -30,14 +31,14 @@ const orderSchema = new Schema(
       },
       payment: {
         type: String,
-        enum: ["Оплата після отримання", "Оплата на карту", "Рахунок для СПД"],
         required: true
       }
     },
     orderedGoods: [
       {
-        id: {
-          type: String
+        _id: {
+          type: String,
+          ref: "Good"
         },
         title: {
           type: String,

@@ -27,7 +27,7 @@ function prepareFields(order: IOrder) {
 
   return {
     merchantAccount: account,
-    merchantDomainName: "paro-master", // ❗ реальний домен без https
+    merchantDomainName: "paro-master",
     merchantTransactionSecureType: "AUTO",
     orderReference: number,
     orderDate: Date.now(),

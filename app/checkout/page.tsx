@@ -1,11 +1,10 @@
 "use client"
-
 import { useShoppingCart } from "app/context/ShoppingCartContext"
 import { createWayForPayInvoice } from "app/lib/wayforpay"
 import PublicOfferSummary from "app/publicoffer/PublicOfferSummary"
 import { ErrorMessage, Field, Form, Formik, useFormikContext } from "formik"
 import { useRouter } from "next/navigation"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 
 import { addCustomer } from "@/actions/customers"
@@ -13,7 +12,7 @@ import { addOrder } from "@/actions/orders"
 import { sendAdminEmail, sendCustomerEmail } from "@/actions/sendGridEmail"
 // import WayForPayForm from "@/components/forms/WayForPayForm"
 import { Breadcrumbs, Button, FormField } from "@/components/index"
-import { storageKeys } from "@/helpers/index"
+import { customerFormSchema, storageKeys } from "@/helpers/index"
 import { useCities, useWarehouses } from "@/hooks/index"
 import { ICartItem, IOrder } from "@/types/index"
 import { PaymentMethod } from "@/types/paymentMethod"
@@ -73,11 +72,13 @@ const OrderPage = () => {
       toast.error("Будь ласка, погодьтесь із публічною офертою")
       return
     }
+
     if (!customerValues.city || !customerValues.warehouse) {
       toast.error("Будь ласка, виберіть місто та відділення")
       return
     }
-    const orderedGoods = cart.map((item: ICartItem) => ({
+
+    const orderedGoods = cart.map(item => ({
       ...item.good,
       quantity: item.quantity
     }))
@@ -95,66 +96,59 @@ const OrderPage = () => {
     const orderData: IOrder = {
       number: generatedNumber,
       customer: customerValues,
-      orderedGoods: cart.map((item: ICartItem) => ({
-        ...item.good,
-        quantity: item.quantity
-      })),
+      orderedGoods,
       totalPrice,
       status: "Новий"
     }
 
-    // const mokbody = {
-    //   merchantAccount: "test_merch_n1",
-    //   merchantDomainName: "www.market.ua",
-    //   merchantTransactionSecureType: "AUTO",
-    //   merchantSignature: "2437af4f0c0c6130fc20611f0241e476",
-    //   orderReference: "DH1746466948",
-    //   orderDate: "1415379863",
-    //   amount: "1547.36",
-    //   currency: "UAH",
-    //   productName: ["Процесор Intel Core i5-4670 3.4GHz", "Kingston DDR3-1600 4096MB PC3-12800"],
-    //   productPrice: ["1000", "547.36"],
-    //   productCount: ["1", "1"],
-    //   clientFirstName: "Василь",
-    //   clientLastName: "Пібаренко",
-    //   clientAddress: "пр. Науки, 12",
-    //   clientCity: "Дніпро",
-    //   clientEmail: "some@mail.com",
-    //   defaultPaymentSystem: "card"
-    // }
+    try {
+      // Виконуємо збереження на бекенді
+      const [customerResult, orderResult, adminEmailResult, customerEmailResult] =
+        await Promise.all([
+          addCustomer(orderData.customer),
+          addOrder(orderData),
+          sendAdminEmail(orderData),
+          sendCustomerEmail(orderData)
+        ])
 
-    if (orderData.customer.payment === PaymentMethod.WayForPay) {
-      try {
-        const result = await createWayForPayInvoice(orderData)
-        if (result.url) {
-          window.location.href = result.url
-        } else {
-          toast.error("Не вдалося створити рахунок. Спробуйте ще раз.")
-        }
-      } catch (error) {
-        console.error("WayForPay error:", error)
-        toast.error("Помилка при створенні платежу")
-      }
-    } else {
-      const [adminEmail, customerEmail, orderResult, customerResult] = await Promise.all([
-        sendAdminEmail(orderData),
-        sendCustomerEmail(orderData),
-        addOrder(orderData),
-        addCustomer(orderData.customer)
-      ])
-
-      if (
-        adminEmail?.success &&
-        customerEmail?.success &&
+      const allSuccessful =
+        customerResult?.success &&
         orderResult?.success &&
-        customerResult?.success
-      ) {
-        toast.success("Замовлення успішно створено! 🚀", { duration: 3000 })
-        resetCart()
-        sessionStorage.clear()
-        localStorage.clear()
+        orderResult?.success &&
+        adminEmailResult?.success &&
+        customerEmailResult?.success
+
+      if (!allSuccessful) {
+        toast.error("Помилка при створенні замовлення. Спробуйте ще раз.")
+        return
+      }
+
+      toast.success("Замовлення успішно створено! 🚀", { duration: 3000 })
+
+      // Очищення форми та сховищ
+      resetCart()
+      sessionStorage.removeItem(storageKeys.customer)
+      localStorage.clear()
+
+      // WayForPay — редірект на інвойс
+      if (orderData.customer.payment === PaymentMethod.WayForPay) {
+        try {
+          const result = await createWayForPayInvoice(orderData)
+          if (result.url) {
+            window.location.href = result.url
+          } else {
+            toast.error("Не вдалося створити рахунок. Спробуйте ще раз.")
+          }
+        } catch (error) {
+          console.error("WayForPay error:", error)
+          toast.error("Помилка при створенні платежу")
+        }
+      } else {
         push("/")
       }
+    } catch (error) {
+      console.error("🔁 Загальна помилка в сабміті:", error)
+      toast.error("Сталася помилка. Спробуйте ще раз.")
     }
   }
 
@@ -169,10 +163,9 @@ const OrderPage = () => {
           {/* Форма оформлення */}
           <div className="w-full lg:w-2/3">
             <Formik
-              enableReinitialize
               initialValues={initialValues}
               onSubmit={handleSubmit}
-              // validationSchema={customerFormSchema}
+              validationSchema={customerFormSchema}
             >
               {({ values, errors, touched }) => (
                 <Form className="flex flex-col space-y-6">
@@ -262,18 +255,40 @@ const useCitySelection = (
 }
 
 const FormEffects = () => {
-  const { values, setFieldValue } = useFormikContext<FormikCustomerValues>()
-
+  const { values, setValues } = useFormikContext<FormikCustomerValues>()
   const { warehouses } = useWarehouses(values?.city)
+  const prevWarehouseRef = useRef<string | null>(null)
 
   useEffect(() => {
-    if (warehouses.length && !values?.warehouse) {
-      setFieldValue("warehouse", warehouses[0].Description)
+    const firstDescription = warehouses[0]?.Description
+
+    if (!values.city && values.warehouse) {
+      setValues({ ...values, warehouse: "" })
+      prevWarehouseRef.current = ""
+      return
     }
-  }, [warehouses, setFieldValue, values?.warehouse])
+
+    if (
+      values.city &&
+      firstDescription &&
+      values.warehouse !== firstDescription &&
+      prevWarehouseRef.current !== firstDescription
+    ) {
+      setValues({ ...values, warehouse: firstDescription })
+      prevWarehouseRef.current = firstDescription
+    }
+  }, [values.city, values.warehouse, warehouses])
 
   useEffect(() => {
-    sessionStorage.setItem(storageKeys.customer, JSON.stringify(values))
+    const timeoutId = setTimeout(() => {
+      try {
+        sessionStorage.setItem(storageKeys.customer, JSON.stringify(values))
+      } catch (error) {
+        console.error("Error saving form data to sessionStorage:", error)
+      }
+    }, 300)
+
+    return () => clearTimeout(timeoutId)
   }, [values])
 
   return null
@@ -281,7 +296,7 @@ const FormEffects = () => {
 
 const CustomerFields = ({ touched, errors }: { touched: any; errors: any }) => {
   const { values, setFieldValue } = useFormikContext<FormikCustomerValues>()
-  const { warehouses, isWarehousesLoading } = useWarehouses(values.city)
+  const { warehouses, isWarehousesLoading } = useWarehouses(values?.city)
   const [showDropdown, setShowDropdown] = useState(false)
 
   const { filteredCities, searchQuery, setSearchQuery, handleSelectCity } = useCitySelection(
@@ -389,7 +404,7 @@ const CustomerFields = ({ touched, errors }: { touched: any; errors: any }) => {
         </label>
         {touched?.warehouse && errors?.warehouse && (
           <div className="text-rose-500 text-sm mt-1">
-            <ErrorMessage name="customer.warehouse" />
+            <ErrorMessage name="warehouse" />
           </div>
         )}
       </div>
@@ -401,3 +416,18 @@ const CustomerFields = ({ touched, errors }: { touched: any; errors: any }) => {
 }
 
 export default OrderPage
+
+function sanitizeObject(obj: any) {
+  const result: any = {}
+  for (const key in obj) {
+    const value = obj[key]
+    if (
+      typeof value !== "object" ||
+      value === null ||
+      (Array.isArray(value) && value.every(v => typeof v !== "object"))
+    ) {
+      result[key] = value
+    }
+  }
+  return result
+}

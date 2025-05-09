@@ -26,7 +26,6 @@ const customerSchema = new Schema(
     },
     payment: {
       type: String,
-      enum: ["Оплата після отримання", "Оплата на карту", "Рахунок для СПД"],
       required: true
     },
     orders: [{ type: Schema.Types.ObjectId, ref: "orders" }]
