@@ -5,7 +5,6 @@ import { ChangeEvent, useState } from "react"
 
 import { ImagesBlock } from "@/components/index"
 import { IGood } from "@/types/IGood"
-import { uploadCloudinary } from "@/utils/uploadCloudinary"
 
 interface FormikProps {
   setFieldValue: (field: string, value: string[], shouldValidate?: boolean) => void
