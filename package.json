@@ -8,8 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "prepare": "husky",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,md,mdx,css,yaml,yml}\"",
-    "check": "prettier --check \"**/*.{ts,tsx,js,jsx,md,mdx,css,yaml,yml}\""
+    "format": "npx prettier --write . \"**/*.{ts,tsx,js,jsx,md,mdx,css,yaml,yml}\"",
+    "check": "npx prettier --check . \"**/*.{ts,tsx,js,jsx,md,mdx,css,yaml,yml}\""
   },
   "dependencies": {
     "@react-google-maps/api": "^2.19.3",
@@ -46,6 +46,7 @@
     "sonner": "^1.4.41",
     "swiper": "^11.1.0",
     "swr": "^2.2.5",
+    "tailwind-merge": "^3.3.1",
     "use-debounce": "^10.0.1",
     "uuid": "^11.1.0",
     "yarn": "^1.22.22",
