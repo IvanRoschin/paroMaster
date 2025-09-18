@@ -1,8 +1,7 @@
-import { generateSignature } from "app/lib/orders"
-
 import { getOrderById } from "@/actions/orders"
 import { ErrorMessage, Loader } from "@/components/index"
 import { useFetchDataById } from "@/hooks/index"
+import { generateSignature } from "../../../lib/generateSignature"
 
 // app/order/[id]/pay/page.tsx
 

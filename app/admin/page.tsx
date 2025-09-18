@@ -130,6 +130,12 @@ export default async function Admin() {
       count: getCount("testimonials"),
       link: "admin/testimonials",
       icon: SiTestinglibrary
+    },
+    {
+      title: "Платежі",
+      count: 4,
+      link: "admin/payments",
+      icon: SiTestinglibrary
     }
   ]
 

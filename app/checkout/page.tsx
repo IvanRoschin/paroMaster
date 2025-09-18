@@ -9,7 +9,7 @@ import { toast } from "sonner"
 
 import { addCustomer } from "@/actions/customers"
 import { addOrder } from "@/actions/orders"
-import { sendAdminEmail, sendCustomerEmail } from "@/actions/sendGridEmail"
+import { sendAdminEmail, sendCustomerEmail } from "@/actions/sendNodeMailer"
 // import WayForPayForm from "@/components/forms/WayForPayForm"
 import { Breadcrumbs, Button, FormField } from "@/components/index"
 import { customerFormSchema, storageKeys } from "@/helpers/index"

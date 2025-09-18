@@ -1,4 +1,5 @@
 "use server"
+import { sendTelegramMessage } from "app/lib/telegram"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
@@ -87,8 +88,10 @@ export async function addOrder(values: IOrder) {
   try {
     await connectToDB()
     console.log("Перед створенням замовлення")
-    const order = await Order.create(values)
+    await Order.create(values)
     console.log("Замовлення створено")
+    const msg = `✅ <b>Створено нове замовлення!</b>\n🧾 Замовлення: ${values.number} \n Від замовника ${values.customer.name}  ${values.customer.surname}\n💰 На суму: ${values.totalPrice}  \n Телефон замовника ${values.customer.phone}`
+    await sendTelegramMessage(msg)
     return {
       success: true,
       message: "New Order created successfully"

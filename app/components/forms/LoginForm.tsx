@@ -77,7 +77,7 @@ const LoginForm = () => {
             {inputs.map((item, i) => (
               <FormField item={item} key={i} errors={errors} />
             ))}
-            <Button type={"submit"} label="Увійти" />
+            <Button type={"submit"} label={isLoading ? "Завантаження..." : "Увійти"} />
           </Form>
         )}
       </Formik>

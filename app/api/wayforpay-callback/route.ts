@@ -1,5 +1,6 @@
 // app/api/wfp-callback/route.ts
 
+import { sendTelegramMessage } from "app/lib/telegram"
 import crypto from "crypto"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -42,6 +43,8 @@ export async function POST(req: NextRequest) {
       .digest("hex")
 
     if (generatedSignature !== merchantSignature) {
+      const msg = `🚨 <b>WFP Callback:</b> Невірний підпис!\nOrder: ${orderReference}\nStatus: ${transactionStatus}\nReason: ${reason}`
+      await sendTelegramMessage(msg)
       return NextResponse.json({ status: "refused", reason: "Invalid signature" }, { status: 403 })
     }
 
@@ -56,6 +59,8 @@ export async function POST(req: NextRequest) {
     if (transactionStatus === "Approved") {
       order.status = "Оплачено"
       await order.save()
+      const msg = `✅ <b>Оплата пройшла успішно!</b>\n🧾 Order: ${orderReference}\n💰 Status: ${transactionStatus}`
+      await sendTelegramMessage(msg)
     }
 
     // ✅ 3. Повернення відповіді у форматі WayForPay

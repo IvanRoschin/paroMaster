@@ -3,7 +3,7 @@
 import { Form, Formik, FormikState } from "formik"
 import { toast } from "sonner"
 
-import { sendEmailToLid } from "@/actions/sendGridEmail"
+import { sendEmailToLid } from "@/actions/sendNodeMailer"
 import FormField from "@/components/common/FormField"
 import CustomButton from "@/components/ui/CustomFormikButton"
 import { contactFormSchema } from "@/helpers/index"
