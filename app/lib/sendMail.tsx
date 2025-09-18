@@ -6,9 +6,6 @@ if (!SMTP_EMAIL || !SMTP_PASSWORD) {
   throw new Error("SMTP_EMAIL and SMTP_PASSWORD must be set in environment variables")
 }
 
-console.log("SMTP_PASSWORD", SMTP_PASSWORD)
-console.log("SMTP_EMAIL", SMTP_EMAIL)
-
 const transporter = nodemailer.createTransport({
   service: "Gmail",
   auth: {
