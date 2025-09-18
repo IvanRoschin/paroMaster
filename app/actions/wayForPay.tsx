@@ -5,7 +5,7 @@ import crypto from "crypto"
 
 const account = process.env.WAYFORPAY_MERCHANT_ACCOUNT!
 const secret = process.env.WAYFORPAY_SECRET_KEY!
-const apiUrl = process.env.WAYFORPAY_URL! // https://api.wayforpay.com/api
+const apiUrl = "https://api.wayforpay.com/api" // https://api.wayforpay.com/api
 
 if (!account || !secret || !apiUrl) {
   throw new Error("WayForPay config variables are missing")
