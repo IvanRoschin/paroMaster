@@ -1,7 +1,5 @@
 "use server"
 
-import { revalidatePath } from "next/cache"
-
 import { buildPagination } from "@/helpers/index"
 import Slider from "@/models/Slider"
 import { ISearchParams, ISlider } from "@/types/index"
@@ -90,25 +88,10 @@ export async function getSlideById(id: string) {
   }
 }
 
-export async function deleteSlide(id: string) {
-  if (!id) {
-    console.error("No ID provided")
-    return
-  }
-  try {
-    await connectToDB()
-    await Slider.findByIdAndDelete(id)
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error delete Slide:", error)
-      throw new Error("Failed to delete Slide: " + error.message)
-    } else {
-      console.error("Unknown error:", error)
-      throw new Error("Failed to delete category: Unknown error")
-    }
-  } finally {
-    revalidatePath("/admin/slider")
-  }
+export async function deleteSlide(id: string): Promise<void> {
+  if (!id) return
+  await connectToDB()
+  await Slider.findByIdAndDelete(id)
 }
 
 export async function updateSlide(values: any) {

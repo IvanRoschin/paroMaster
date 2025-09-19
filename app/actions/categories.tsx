@@ -91,25 +91,10 @@ export async function getCategoryById(id: string) {
   }
 }
 
-export async function deleteCategory(id: string) {
-  if (!id) {
-    console.error("No ID provided")
-    return
-  }
-  try {
-    await connectToDB()
-    await Category.findByIdAndDelete(id)
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error delete category:", error)
-      throw new Error("Failed to delete category: " + error.message)
-    } else {
-      console.error("Unknown error:", error)
-      throw new Error("Failed to delete category: Unknown error")
-    }
-  } finally {
-    revalidatePath("/admin/categories")
-  }
+export async function deleteCategory(id: string): Promise<void> {
+  if (!id) return
+  await connectToDB()
+  await Category.findByIdAndDelete(id)
 }
 
 export async function updateCategory(formData: FormData) {
