@@ -1,0 +1,87 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+  SSH_HOST: ${{ secrets.SSH_HOST }}
+  NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+  DATABASE_URL: ${{ secrets.MONGODB_URI }}
+  SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
+  SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+  NOVA_API: ${{ secrets.NOVA_API }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout репозиторій
+        uses: actions/checkout@v3
+
+      - name: ⎔ Встановлення Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: 📥 Встановлення залежностей
+        run: npm install
+
+      - name: 🔬 Лінтинг
+        run: npm run lint
+
+      - name: 💅 Prettier check
+        run: npm run format:check
+
+      - name: 🏗 Збірка Next.js
+        run: npm run build
+
+      - name: 🐳 Docker Login (опціонально)
+        if: env.DOCKER_USER
+        run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ env.DOCKER_USER }}" --password-stdin
+
+      - name: 📦 Docker Build & Push
+        if: env.DOCKER_USER
+        run: |
+          IMAGE_NAME=${{ env.DOCKER_USER }}/paroMaster
+
+          echo "🧹 Зупинка та видалення старого контейнера (якщо є)"
+          docker rm -f paroMaster || true
+
+          echo "🧼 Видалення старого образу (якщо є)"
+          docker rmi -f $IMAGE_NAME:latest || true
+
+          echo "🔨 Збірка нового образу"
+          docker build -t $IMAGE_NAME:latest .
+
+          echo "🏷️ Тегування комітом"
+          docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ github.sha }}
+
+          echo "🚀 Пуш у DockerHub"
+          docker push $IMAGE_NAME:latest
+          docker push $IMAGE_NAME:${{ github.sha }}
+
+      - name: 🐳 Запуск нового контейнера
+        run: |
+          IMAGE_NAME=${{ env.DOCKER_USER }}/paroMaster
+
+          echo "🌀 Старт нового контейнера"
+          docker run -d --name paroMaster \
+            -p 3030:3000 \
+            -e NODE_ENV=production \
+            $IMAGE_NAME:latest \
+            sh -c "next start -H 0.0.0.0 -p 3000"
+
+          echo "⏳ Очікування запуску контейнера..."
+          sleep 10
+
+          echo "📡 Перевірка доступності"
+          curl -I http://localhost:3030 || echo "❌ Не вдалося отримати доступ"
+
+          echo "📦 Логи контейнера:"
+          docker logs paroMaster

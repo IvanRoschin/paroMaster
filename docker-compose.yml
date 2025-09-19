@@ -1,0 +1,13 @@
+version: '3.9'
+
+services:
+  frontend:
+    container_name: paroMaster
+    build: .
+    ports:
+      - '3030:3000'
+    environment:
+      NODE_ENV: production
+    restart: unless-stopped
+    command: >
+      sh -c "next start -H 0.0.0.0 -p 3000"

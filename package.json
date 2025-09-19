@@ -7,9 +7,18 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "prepare": "husky",
-    "format": "npx prettier --write . \"**/*.{ts,tsx,js,jsx,md,mdx,css,yaml,yml}\"",
-    "check": "npx prettier --check . \"**/*.{ts,tsx,js,jsx,md,mdx,css,yaml,yml}\""
+    "prepare": "husky install",
+    "format": "prettier --write . \"**/*.{ts,tsx,js,jsx,md,mdx,css,yaml,yml}\"",
+    "check": "prettier --check . \"**/*.{ts,tsx,js,jsx,md,mdx,css,yaml,yml}\""
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css,scss,html}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@react-google-maps/api": "^2.19.3",
