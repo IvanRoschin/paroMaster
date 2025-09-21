@@ -1,8 +1,9 @@
+import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
+
 import { getAllGoods } from "@/actions/goods"
 import { OrderForm } from "@/admin/components"
 import { IGood } from "@/types/index"
 import { ISearchParams } from "@/types/searchParams"
-import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 
 interface GoodsData {
   goods: IGood[]
@@ -10,14 +11,15 @@ interface GoodsData {
 
 export const dynamic = "force-dynamic"
 
-const AddOrderPage = async ({ searchParams }: { searchParams: ISearchParams }) => {
+const AddOrderPage = async ({ searchParams }: { searchParams: Promise<ISearchParams> }) => {
+  const params = await searchParams
   const queryClient = new QueryClient()
 
-  const goodsKey = ["goods", searchParams]
+  const goodsKey = ["goods", params]
 
   await queryClient.prefetchQuery({
     queryKey: goodsKey,
-    queryFn: () => getAllGoods(searchParams)
+    queryFn: () => getAllGoods(params)
   })
 
   const goods = (queryClient.getQueryData(goodsKey) as GoodsData)?.goods || []

@@ -1,12 +1,15 @@
 "use client"
 
+import dynamic from "next/dynamic"
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 
 import { getGoodById } from "@/actions/goods"
-import { ShoppingCart } from "@/components/index"
 import { storageKeys } from "@/helpers/index"
 import { ICartItem } from "@/types/index"
+
+// Динамический импорт компонента корзины без SSR
+const ShoppingCart = dynamic(() => import("../components/ui/Cart/ShoppingCart"), { ssr: false })
 
 type ShoppingCartProviderProps = {
   children: React.ReactNode
@@ -24,28 +27,25 @@ type ShoppingCartContextProps = {
   setCart: React.Dispatch<React.SetStateAction<ICartItem[]>>
 }
 
-const ShoppingCartContext = createContext({} as ShoppingCartContextProps)
+const ShoppingCartContext = createContext<ShoppingCartContextProps | undefined>(undefined)
 
 export function useShoppingCart() {
-  return useContext(ShoppingCartContext)
+  const context = useContext(ShoppingCartContext)
+  if (!context) throw new Error("useShoppingCart must be used within ShoppingCartProvider")
+  return context
 }
 
 export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
-  const [cart, setCart] = useState<ICartItem[]>([])
+  // Инициализация с localStorage, только на клиенте
+  const [cart, setCart] = useState<ICartItem[]>(() => {
+    if (typeof window === "undefined") return []
+    const storedCart = localStorage.getItem(storageKeys.cart)
+    return storedCart ? JSON.parse(storedCart) : []
+  })
 
+  // Сохраняем изменения в localStorage
   useEffect(() => {
-    const storedCartData = localStorage.getItem(storageKeys.cart)
-    if (storedCartData) {
-      try {
-        const cartData: ICartItem[] = JSON.parse(storedCartData)
-        setCart(cartData)
-      } catch (error) {
-        console.error("Error parsing JSON from localStorage:", error)
-      }
-    }
-  }, [])
-
-  useEffect(() => {
+    if (typeof window === "undefined") return
     if (cart.length > 0) {
       localStorage.setItem(storageKeys.cart, JSON.stringify(cart))
     } else {
@@ -53,75 +53,68 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
     }
   }, [cart])
 
-  const cartQuantity = useMemo(
-    () => cart.reduce((quantity, item) => quantity + item.quantity, 0),
+  // Количество всех товаров в корзине
+  const cartQuantity = useMemo(() => cart.reduce((sum, item) => sum + item.quantity, 0), [cart])
+
+  // Сброс корзины
+  const resetCart = useCallback(() => {
+    setCart([])
+    if (typeof window !== "undefined") localStorage.removeItem(storageKeys.cart)
+  }, [])
+
+  // Получаем количество конкретного товара
+  const getItemQuantity = useCallback(
+    (id: string) => cart.find(item => item.good._id === id)?.quantity || 0,
     [cart]
   )
 
-  const resetCart = useCallback(() => {
-    setCart([])
-    localStorage.removeItem(storageKeys.cart)
-  }, [])
-
+  // Установка конкретного количества товара
   const setCartQuantity = useCallback((id: string, quantity: number) => {
     setCart(currItems =>
       currItems.map(item => (item.good._id === id ? { ...item, quantity } : item))
     )
   }, [])
 
-  const getItemQuantity = useCallback(
-    (id: string) => {
-      return cart.find(item => item.good._id === id)?.quantity || 0
-    },
-    [cart]
-  )
-
+  // Добавление товара с оптимистичным апдейтом
   const increaseCartQuantity = useCallback((id: string) => {
     getGoodById(id)
       .then(newGood => {
         setCart(currItems => {
-          const existingItem = currItems.find(item => item.good._id === id)
-          if (!existingItem) {
+          const existing = currItems.find(item => item.good._id === id)
+          if (!existing) {
             toast.success(`Товар "${newGood.title}" додано до корзини`, { id: `add-${id}` })
-            return [...currItems, { good: newGood, quantity: 1 }]
-          } else {
-            toast.info(`Кількість товару "${existingItem.good.title}" збільшено`, {
-              id: `update-${id}`
-            })
-            return currItems.map(item =>
-              item.good._id === id ? { ...item, quantity: item.quantity + 1 } : item
-            )
+            return [...currItems, { good: newGood, quantity: 1 }] // корректный тип
           }
+          toast.info(`Кількість товару "${existing.good.title}" збільшено`, { id: `update-${id}` })
+          return currItems.map(item =>
+            item.good._id === id ? { ...item, quantity: item.quantity + 1 } : item
+          )
         })
       })
-      .catch(error => {
-        console.error("Error fetching good:", error)
+      .catch(() => {
         toast.error("Не вдалося додати товар до корзини")
       })
   }, [])
 
+  // Уменьшение количества товара
   const decreaseCartQuantity = useCallback((id: string) => {
     setCart(currItems => {
-      const existingItem = currItems.find(item => item.good._id === id)
+      const existing = currItems.find(item => item.good._id === id)
+      if (!existing) return currItems
 
-      if (!existingItem) return currItems
-
-      if (existingItem.quantity === 1) {
-        toast.warning(`Товар "${existingItem.good.title}" видалено з корзини`, {
-          id: `remove-${id}`
-        })
+      if (existing.quantity === 1) {
+        toast.warning(`Товар "${existing.good.title}" видалено з корзини`, { id: `remove-${id}` })
         return currItems.filter(item => item.good._id !== id)
-      } else {
-        toast.info(`Кількість товару "${existingItem.good.title}" зменшено`, {
-          id: `decrease-${id}`
-        })
-        return currItems.map(item =>
-          item.good._id === id ? { ...item, quantity: item.quantity - 1 } : item
-        )
       }
+
+      toast.info(`Кількість товару "${existing.good.title}" зменшено`, { id: `decrease-${id}` })
+      return currItems.map(item =>
+        item.good._id === id ? { ...item, quantity: item.quantity - 1 } : item
+      )
     })
   }, [])
 
+  // Полное удаление товара
   const removeFromCart = useCallback((id: string) => {
     setCart(currItems => currItems.filter(item => item.good._id !== id))
     toast.info("Товар видалено з корзини", { id: `delete-${id}` })
@@ -139,7 +132,16 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
       setCart,
       cartQuantity
     }),
-    [cart, cartQuantity, getItemQuantity]
+    [
+      cart,
+      cartQuantity,
+      resetCart,
+      increaseCartQuantity,
+      decreaseCartQuantity,
+      removeFromCart,
+      setCartQuantity,
+      getItemQuantity
+    ]
   )
 
   return (

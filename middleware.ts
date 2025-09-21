@@ -1,29 +1,43 @@
 import { withAuth } from "next-auth/middleware"
-import { NextResponse } from "next/server"
+import { NextFetchEvent, NextRequest, NextResponse } from "next/server"
 
-export default withAuth(
-  function middleware(req) {
-    const { pathname } = req.nextUrl
+// Список публичных страниц
+const publicPages = [
+  "/",
+  "/catalog",
+  "/good/[productId]",
+  "/ourworks",
+  "/services",
+  "/delivery",
+  "/guarantee",
+  "/contact",
+  "/login",
+  "/404"
+]
 
-    // Проверяем только авторизованных на login → редирект на admin
-    if (pathname.startsWith("/login") && req.nextauth?.token) {
-      return NextResponse.redirect(new URL("/admin", req.url))
-    }
-  },
-  {
-    callbacks: {
-      authorized: ({ token, req }) => {
-        // Авторизация только для /admin
-        return req.nextUrl.pathname.startsWith("/admin") ? !!token : true // для /login всегда true (чтобы не было редиректа)
-      }
-    }
+// Настраиваем authMiddleware
+const authMiddleware = withAuth({
+  callbacks: {
+    authorized: ({ token }) => !!token
   }
-)
+})
 
-export const config = {
-  matcher: ["/admin/:path*", "/login"]
+// Обёртка для middleware, чтобы корректно обрабатывать публичные страницы
+export function middleware(req: NextRequest, ev: NextFetchEvent) {
+  const isPublic = publicPages.some(path => {
+    const regexPath = path.replace(/\[([^\]]+)\]/g, "[^/]+")
+    const regex = new RegExp(`^${regexPath}/?$`, "i")
+    return regex.test(req.nextUrl.pathname)
+  })
+
+  if (isPublic) {
+    return NextResponse.next()
+  }
+
+  // Принудительно кастуем req к NextRequestWithAuth
+  return authMiddleware(req as any, ev)
 }
+
 export { default } from "next-auth/middleware"
 
 export const config = { matcher: ["/admin", "/protected/:path"] }
-

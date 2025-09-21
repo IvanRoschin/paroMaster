@@ -273,8 +273,6 @@ export async function uniqueBrands(): Promise<IGetAllBrands> {
   } catch (error) {
     console.log(error)
     return { success: false, brands: [] }
-  } finally {
-    revalidatePath("/")
   }
 }
 

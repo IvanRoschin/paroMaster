@@ -1,33 +1,37 @@
+// actions/wayForPay.ts
 "use server"
 
 import axios from "axios"
 import crypto from "crypto"
 
-const account = process.env.WAYFORPAY_MERCHANT_ACCOUNT!
-const secret = process.env.WAYFORPAY_SECRET_KEY!
-const apiUrl = "https://api.wayforpay.com/api" // https://api.wayforpay.com/api
-
-if (!account || !secret || !apiUrl) {
-  throw new Error("WayForPay config variables are missing")
-}
+const apiUrl = "https://api.wayforpay.com/api"
 
 function createTransactionListSignature(
   merchantAccount: string,
   dateBegin: number,
-  dateEnd: number
+  dateEnd: number,
+  secret: string
 ): string {
   const str = `${merchantAccount};${dateBegin};${dateEnd}`
   return crypto.createHmac("md5", secret).update(str).digest("hex")
 }
 
 export async function getTransactionList(dateBegin: number, dateEnd: number) {
-  const merchantSignature = createTransactionListSignature(account, dateBegin, dateEnd)
+  const account = process.env.WAYFORPAY_MERCHANT_ACCOUNT
+  const secret = process.env.WAYFORPAY_SECRET_KEY
+
+  if (!account || !secret) {
+    console.error("WayForPay config variables are missing")
+    throw new Error("WayForPay config variables are missing")
+  }
+
+  const merchantSignature = createTransactionListSignature(account, dateBegin, dateEnd, secret)
 
   const payload = {
     transactionType: "TRANSACTION_LIST",
     merchantAccount: account,
     merchantSignature,
-    apiVersion: 1, // або 2, якщо хочеш додаткову інформацію у відповіді
+    apiVersion: 1,
     dateBegin,
     dateEnd
   }

@@ -1,8 +1,5 @@
 import React from "react"
 
-interface CustomFormikButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-import { useFormikContext } from "formik"
-
 interface CustomFormikButtonProps {
   label: string
   disabled?: boolean

@@ -1,10 +1,10 @@
 import { getCategoryById, updateCategory } from "@/actions/categories"
 import { CategoryForm } from "@/admin/components"
+import { ISearchParams } from "@/types/searchParams"
 
-interface Params {
-  id: string
-}
-const SingleCategoryPage = async ({ params }: { params: Params }) => {
+const SingleCategoryPage = async ({ searchParams }: { searchParams: Promise<ISearchParams> }) => {
+  const params = await searchParams
+
   const { id } = params
   const category = await getCategoryById(id)
   return (

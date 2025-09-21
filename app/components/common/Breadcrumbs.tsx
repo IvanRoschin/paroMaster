@@ -28,7 +28,8 @@ const customNames: Record<string, string> = {
   checkout: "Оформлення Замовлення",
   privacypolicy: "Політика Конфіденційності",
   publicoffer: "Публічна Оферта",
-  customers: "Замовник"
+  customers: "Замовник",
+  search: "Пошук"
 }
 
 const Breadcrumbs = () => {

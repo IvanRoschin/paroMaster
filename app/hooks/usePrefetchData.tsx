@@ -1,17 +1,16 @@
 import { QueryClient, QueryKey } from "@tanstack/react-query"
 
-const usePrefetchData = async <T,>(
+const prefetchData = async <T,>(
+  queryClient: QueryClient,
   action: (params?: any) => Promise<T>,
-  key: QueryKey,
+  queryKey: QueryKey,
   params?: any
 ) => {
-  const queryClient = new QueryClient()
-
   await queryClient.prefetchQuery({
-    queryKey: [key, JSON.stringify(params)],
+    queryKey,
     queryFn: () => action(params)
   })
   return queryClient
 }
 
-export default usePrefetchData
+export default prefetchData

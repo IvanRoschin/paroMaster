@@ -277,7 +277,7 @@ const FormEffects = () => {
       setValues({ ...values, warehouse: firstDescription })
       prevWarehouseRef.current = firstDescription
     }
-  }, [values.city, values.warehouse, warehouses])
+  }, [values.city, values, setValues, warehouses])
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
