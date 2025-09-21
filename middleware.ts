@@ -1,37 +1,43 @@
 import { withAuth } from "next-auth/middleware"
-import { NextResponse } from "next/server"
+import { NextFetchEvent, NextRequest, NextResponse } from "next/server"
 
-export default withAuth(
-  function middleware(req) {
-    const { pathname } = req.nextUrl
+// Список публичных страниц
+const publicPages = [
+  "/",
+  "/catalog",
+  "/good/[productId]",
+  "/ourworks",
+  "/services",
+  "/delivery",
+  "/guarantee",
+  "/contact",
+  "/login",
+  "/404"
+]
 
-    // Если пользователь авторизован и заходит на /login → редирект на /admin
-    if (pathname.startsWith("/login") && req.nextauth?.token) {
-      return NextResponse.redirect(new URL("/admin", req.url))
-    }
-
-    // Если пользователь не авторизован и пытается зайти на /admin → редирект на /login
-    if (pathname.startsWith("/admin") && !req.nextauth?.token) {
-      return NextResponse.redirect(new URL("/login", req.url))
-    }
-
-    // Для остальных маршрутов — пропускаем
-    return NextResponse.next()
-  },
-  {
-    callbacks: {
-      // Контролируем доступ только для /admin
-      authorized: ({ token, req }) => {
-        if (req.nextUrl.pathname.startsWith("/admin")) {
-          return !!token // true только если есть токен
-        }
-        return true // для остальных маршрутов доступ разрешён
-      }
-    }
+// Настраиваем authMiddleware
+const authMiddleware = withAuth({
+  callbacks: {
+    authorized: ({ token }) => !!token
   }
-)
+})
 
-// Настраиваем middleware на маршруты
+// Обёртка для middleware, чтобы корректно обрабатывать публичные страницы
+export function middleware(req: NextRequest, ev: NextFetchEvent) {
+  const isPublic = publicPages.some(path => {
+    const regexPath = path.replace(/\[([^\]]+)\]/g, "[^/]+")
+    const regex = new RegExp(`^${regexPath}/?$`, "i")
+    return regex.test(req.nextUrl.pathname)
+  })
+
+  if (isPublic) {
+    return NextResponse.next()
+  }
+
+  // Принудительно кастуем req к NextRequestWithAuth
+  return authMiddleware(req as any, ev)
+}
+
 export const config = {
-  matcher: ["/admin/:path*", "/login"]
+  matcher: ["/((?!api|_next|.*\\..*).*)"]
 }
