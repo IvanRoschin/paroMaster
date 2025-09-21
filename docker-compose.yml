@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   frontend:
-    container_name: paroMaster
+    container_name: paro-master
     build: .
     ports:
       - '3030:3000'
