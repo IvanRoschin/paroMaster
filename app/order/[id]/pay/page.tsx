@@ -1,37 +1,31 @@
 import { getOrderById } from "@/actions/orders"
-import { ErrorMessage, Loader } from "@/components/index"
-import { useFetchDataById } from "@/hooks/index"
+import { ISearchParams } from "@/types/searchParams"
+
 import { generateSignature } from "../../../lib/generateSignature"
 
-// app/order/[id]/pay/page.tsx
+export const dynamic = "force-dynamic" // чтобы не кэшировалось
 
-export default async function OrderPayPage({ params }: { params: { id: string } }) {
-  const {
-    data: order,
-    isLoading,
-    isError,
-    error
-  } = useFetchDataById(getOrderById, ["orderById"], params.id)
+export default async function OrderPayPage({
+  searchParams
+}: {
+  searchParams: Promise<ISearchParams>
+}) {
+  const params = await searchParams
 
-  if (isLoading || !order) {
-    return <Loader />
-  }
+  const order = await getOrderById(params.id)
 
-  if (isError) {
-    return <ErrorMessage error={error} />
-  }
+  if (!order) return <div>Замовлення не знайдено</div>
 
   const signature = generateSignature(order)
-
-  const orderDate = Math.floor(new Date(order.createdAt as string).getTime() / 1000)
+  const orderDate = Math.floor(new Date(order.createdAt ?? Date.now()).getTime() / 1000)
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", marginTop: "100px" }}>
+    <div className="flex justify-center mt-24">
       <form
         method="POST"
         action="https://secure.wayforpay.com/pay"
         acceptCharset="utf-8"
-        style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+        className="flex flex-col gap-2"
       >
         <input
           type="hidden"
@@ -51,7 +45,7 @@ export default async function OrderPayPage({ params }: { params: { id: string } 
         <input type="hidden" name="orderTimeout" value="49000" />
         <input type="hidden" name="defaultPaymentSystem" value="card" />
 
-        {order.orderedGoods.map((item, index) => (
+        {order.orderedGoods.map((item: any, index: number) => (
           <div key={index}>
             <input type="hidden" name="productName[]" value={item.title} />
             <input type="hidden" name="productPrice[]" value={item.price.toString()} />
@@ -66,7 +60,12 @@ export default async function OrderPayPage({ params }: { params: { id: string } 
         <input type="hidden" name="clientAddress" value={order.customer.warehouse} />
         <input type="hidden" name="merchantSignature" value={signature} />
 
-        <button type="submit">Оплатити</button>
+        <button
+          type="submit"
+          className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition"
+        >
+          Оплатити
+        </button>
       </form>
     </div>
   )
