@@ -23,50 +23,51 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: ⬇️ Checkout репозиторій
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+        name: Checkout repository
 
-      - name: ⎔ Встановлення Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/setup-node@v3
+        name: Setup Node.js
         with:
           node-version: 18
           cache: npm
 
-      - name: 📥 Встановлення залежностей
-        run: npm install
+      - run: npm install
+        name: Install dependencies
 
-      - name: 💄 Prettier format
-        run: npm run format
+      - run: npm run format
+        name: Prettier format
 
-      - name: 🔬 Лінтинг
-        run: npm run lint
+      - run: npm run lint
+        name: Linting
 
-      - name: 💅 Prettier check
-        run: npm run check
+      - run: npm run check
+        name: Prettier check
 
-      - name: 🏗 Збірка Next.js
-        run: npm run build
+      - run: npm run build
+        name: Build Next.js
 
-      # ----------------- Docker -----------------
-      - name: 🐳 Docker Login
-        if: ${{ env.DOCKER_USER != '' && secrets.DOCKERHUB_PASSWORD != '' }}
-        run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u ${{ env.DOCKER_USER }} --password-stdin
-
-      - name: 📦 Docker Build & Push
-        if: ${{ env.DOCKER_USER != '' && secrets.DOCKERHUB_PASSWORD != '' }}
+      - name: Docker Login
         run: |
-          IMAGE_NAME=${{ env.DOCKER_USER }}/paro-master
-          docker rm -f paro-master || true
-          docker rmi -f $IMAGE_NAME:latest || true
-          docker build -t $IMAGE_NAME:latest .
-          docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ github.sha }}
-          docker push $IMAGE_NAME:latest
-          docker push $IMAGE_NAME:${{ github.sha }}
+          if [ -n "${DOCKER_USER}" ] && [ -n "${{ secrets.DOCKERHUB_PASSWORD }}" ]; then
+            echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u $DOCKER_USER --password-stdin
+          fi
 
-      - name: 🐳 Запуск нового контейнера
-        if: ${{ env.DOCKER_USER != '' }}
+      - name: Docker Build & Push
         run: |
-          IMAGE_NAME=${{ env.DOCKER_USER:-ivaros }}/paro-master
+          if [ -n "${DOCKER_USER}" ] && [ -n "${{ secrets.DOCKERHUB_PASSWORD }}" ]; then
+            IMAGE_NAME=${DOCKER_USER}/paro-master
+            docker rm -f paro-master || true
+            docker rmi -f $IMAGE_NAME:latest || true
+            docker build -t $IMAGE_NAME:latest .
+            docker tag $IMAGE_NAME:latest $IMAGE_NAME:${GITHUB_SHA}
+            docker push $IMAGE_NAME:latest
+            docker push $IMAGE_NAME:${GITHUB_SHA}
+          fi
+
+      - name: Run Docker Container
+        run: |
+          IMAGE_NAME=${DOCKER_USER:-ivaros}/paro-master
           CONTAINER_NAME=paro-master
           docker rm -f $CONTAINER_NAME || true
           docker run -d --rm --name $CONTAINER_NAME \
@@ -75,21 +76,16 @@ jobs:
             $IMAGE_NAME:latest \
             sh -c "next start -H 0.0.0.0 -p 3000"
 
-      # ----------------- Health Check -----------------
-      - name: 🩺 Post-deploy Health Check
-        id: healthcheck
+      - id: healthcheck
         run: |
-          echo "⏳ Проверка доступности приложения..."
+          echo "Checking application..."
           if curl -sf http://localhost:3030; then
             echo "status=success" >> $GITHUB_OUTPUT
-            echo "✅ Приложение доступно"
           else
             echo "status=failure" >> $GITHUB_OUTPUT
-            echo "❌ Приложение недоступно"
             exit 1
 
-      # ----------------- Notifications -----------------
-      - name: ✉️ Отправка email уведомления
+      - name: Send Email Notification
         if: always()
         uses: dawidd6/action-send-mail@v3
         with:
@@ -105,8 +101,8 @@ jobs:
           to: ivan.roschin@86gmail.com
           from: "CI/CD Bot <${{ secrets.SMTP_EMAIL }}>"
 
-      - name: 📲 Send Telegram notification
-        if: always() && ${{ secrets.TELEGRAM_CHAT_ID != '' && secrets.TELEGRAM_BOT_TOKEN != '' }}
+      - name: Send Telegram Notification
+        if: always()
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
