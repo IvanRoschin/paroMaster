@@ -1,5 +1,7 @@
 "use server"
 
+import { revalidatePath } from "next/cache"
+
 import { buildPagination } from "@/helpers/index"
 import Slider from "@/models/Slider"
 import { ISearchParams, ISlider } from "@/types/index"
@@ -92,6 +94,7 @@ export async function deleteSlide(id: string): Promise<void> {
   if (!id) return
   await connectToDB()
   await Slider.findByIdAndDelete(id)
+
 }
 
 export async function updateSlide(values: any) {

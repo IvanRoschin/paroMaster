@@ -111,6 +111,7 @@ export async function deleteOrder(id: string): Promise<void> {
   if (!id) return
   await connectToDB()
   await Order.findByIdAndDelete(id)
+
 }
 
 export async function getOrderById(id: string): Promise<IOrder | null> {

@@ -1,10 +1,14 @@
 import React from "react"
 
 interface CustomFormikButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+import { useFormikContext } from "formik"
+
+interface CustomFormikButtonProps {
   label: string
   disabled?: boolean
   outline?: boolean
   small?: boolean
+  type?: "submit" | "reset" | "button" | undefined
 }
 
 const CustomButton: React.FC<CustomFormikButtonProps> = ({
@@ -24,6 +28,7 @@ const CustomButton: React.FC<CustomFormikButtonProps> = ({
         border-orange-600
         ${small ? "py-1 text-md font-light border-[1px] min-w-[40px]" : "py-3 text-md font-semibold border-2 w-full"}
       `}
+
       {...props}
     >
       {label}

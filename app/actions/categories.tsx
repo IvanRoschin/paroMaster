@@ -95,6 +95,7 @@ export async function deleteCategory(id: string): Promise<void> {
   if (!id) return
   await connectToDB()
   await Category.findByIdAndDelete(id)
+
 }
 
 export async function updateCategory(formData: FormData) {
