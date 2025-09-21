@@ -73,12 +73,16 @@ jobs:
           docker push $IMAGE_NAME:latest
           docker push $IMAGE_NAME:${{ github.sha }}
 
-      - name: 🐳 Запуск нового контейнера
+           - name: 🐳 Запуск нового контейнера
         run: |
           IMAGE_NAME=${{ env.DOCKER_USER:-ivaros }}/paro-master
+          CONTAINER_NAME=paro-master
+
+          echo "🧹 Удаление старого контейнера (если есть)"
+          docker rm -f $CONTAINER_NAME || true
 
           echo "🌀 Старт нового контейнера"
-          docker run -d --name paro-master \
+          docker run -d --rm --name $CONTAINER_NAME \
             -p 3030:3000 \
             -e NODE_ENV=production \
             $IMAGE_NAME:latest \
@@ -91,7 +95,7 @@ jobs:
           curl -I http://localhost:3030 || echo "❌ Не вдалося отримати доступ"
 
           echo "📦 Логи контейнера:"
-          docker logs paroMaster
+          docker logs $CONTAINER_NAME
 
       - name: ✉️ Отправка email уведомления
         if: always() # <-- выполнится даже если билд упал
@@ -110,6 +114,7 @@ jobs:
           from: "CI/CD Bot <${{ secrets.SMTP_EMAIL }}>"
 
       - name: 📲 Send Telegram notification
+        if: always()
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
