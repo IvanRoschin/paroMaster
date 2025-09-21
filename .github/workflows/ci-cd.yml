@@ -53,8 +53,10 @@ jobs:
 
       # ----------------- Docker Login -----------------
       - name: 🐳 Docker Login
+        run: echo "${{ secrets.DOCKERHUB_USERNAME }}"
+        run: echo "${{ secrets.DOCKERHUB_PASSWORD }}"
         if: env.DOCKER_USER
-        run: echo "${{ env.DOCKERHUB_PASSWORD }}" | docker login -u "${{ env.DOCKER_USER }}" --password-stdin
+        run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ env.DOCKER_USER }}" --password-stdin
 
       # ----------------- Docker Build & Push -----------------
       - name: 📦 Docker Build & Push
