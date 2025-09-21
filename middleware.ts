@@ -23,3 +23,7 @@ export default withAuth(
 export const config = {
   matcher: ["/admin/:path*", "/login"]
 }
+export { default } from "next-auth/middleware"
+
+export const config = { matcher: ["/admin", "/protected/:path"] }
+

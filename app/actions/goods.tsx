@@ -172,6 +172,7 @@ export async function deleteGood(id: string): Promise<void> {
     console.log("Відгуків не було знайдено для видалення")
   }
   await Good.findByIdAndDelete(id)
+
 }
 
 export async function updateGood(formData: FormData) {

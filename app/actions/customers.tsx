@@ -80,6 +80,7 @@ export async function deleteCustomer(id: string): Promise<void> {
   if (!id) return
   await connectToDB()
   await Customer.findByIdAndDelete(id)
+
 }
 
 export async function getCustomerById(id: string) {
