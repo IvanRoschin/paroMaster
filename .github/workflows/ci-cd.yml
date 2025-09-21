@@ -14,6 +14,8 @@ env:
   SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
   SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
   NOVA_API: ${{ secrets.NOVA_API }}
+  WAYFORPAY_MERCHANT_ACCOUNT: ${{ secrets.WAYFORPAY_MERCHANT_ACCOUNT }}
+  WAYFORPAY_SECRET_KEY: ${{ secrets.WAYFORPAY_SECRET_KEY }}
 
 jobs:
   build:
