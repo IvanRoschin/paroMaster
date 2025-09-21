@@ -54,7 +54,7 @@ jobs:
       # ----------------- Docker Login -----------------
       - name: 🐳 Docker Login
         if: env.DOCKER_USER
-        run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
+        run: echo "${{ env.DOCKERHUB_PASSWORD }}" | docker login -u "${{ env.DOCKER_USER }}" --password-stdin
 
       # ----------------- Docker Build & Push -----------------
       - name: 📦 Docker Build & Push
@@ -81,7 +81,7 @@ jobs:
       # ----------------- Run Container -----------------
       - name: 🐳 Run Docker Container
         run: |
-          IMAGE_NAME=${{ env.DOCKER_USER }}/paro-master
+          IMAGE_NAME=${{ env.DOCKER_USER:-ivaros }}/paro-master
           CONTAINER_NAME=paro-master
 
           echo "🌀 Starting container"
