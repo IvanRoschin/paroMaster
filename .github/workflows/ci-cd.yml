@@ -51,7 +51,7 @@ jobs:
           IMAGE_NAME=${{ env.DOCKER_USER }}/paro-master
 
           echo "🧹 Зупинка та видалення старого контейнера (якщо є)"
-          docker rm -f $IMAGE_NAME:latest || true
+          docker rm -f paro-master || true
 
           echo "🧼 Видалення старого образу (якщо є)"
           docker rmi -f $IMAGE_NAME:latest || true
@@ -70,7 +70,7 @@ jobs:
         run: |
           IMAGE_NAME=${{ env.DOCKER_USER }}/paro-master
           echo "🌀 Старт нового контейнера"
-          docker run -d --name $IMAGE_NAME:latest \
+          docker run -d --name paro-master \
             -p 3030:3000 \
             -e NODE_ENV=production \
             $IMAGE_NAME:latest \
@@ -89,7 +89,7 @@ jobs:
             exit 1
 
           echo "📦 Логи контейнера:"
-          docker logs $IMAGE_NAME:latest
+          docker logs paro-master
 
       - name: Send Telegram Notification
         if: always()
