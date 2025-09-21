@@ -54,8 +54,7 @@ jobs:
       # ----------------- Docker Login -----------------
       - name: 🐳 Docker Login
         if: env.DOCKER_USER
-        run: |
-          echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ env.DOCKER_USER }}" --password-stdin
+        run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
 
       # ----------------- Docker Build & Push -----------------
       - name: 📦 Docker Build & Push
@@ -73,11 +72,11 @@ jobs:
           docker build -t $IMAGE_NAME:latest .
 
           echo "🏷️ Tagging Docker image"
-          docker tag $IMAGE_NAME:latest $IMAGE_NAME:${GITHUB_SHA}
+          docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ github.sha }}
 
           echo "🚀 Pushing Docker image"
           docker push $IMAGE_NAME:latest
-          docker push $IMAGE_NAME:${GITHUB_SHA}
+          docker push $IMAGE_NAME:${{ github.sha }}
 
       # ----------------- Run Container -----------------
       - name: 🐳 Run Docker Container
