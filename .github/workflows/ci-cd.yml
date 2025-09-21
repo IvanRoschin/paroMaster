@@ -16,6 +16,8 @@ env:
   NOVA_API: ${{ secrets.NOVA_API }}
   WAYFORPAY_MERCHANT_ACCOUNT: ${{ secrets.WAYFORPAY_MERCHANT_ACCOUNT }}
   WAYFORPAY_SECRET_KEY: ${{ secrets.WAYFORPAY_SECRET_KEY }}
+  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
 
 jobs:
   build:
@@ -73,7 +75,7 @@ jobs:
 
       - name: 🐳 Запуск нового контейнера
         run: |
-          IMAGE_NAME=${{ env.DOCKER_USER }}/paro-master
+          IMAGE_NAME=${{ env.DOCKER_USER:-ivaros }}/paro-master
 
           echo "🌀 Старт нового контейнера"
           docker run -d --name paro-master \
@@ -90,6 +92,7 @@ jobs:
 
           echo "📦 Логи контейнера:"
           docker logs paroMaster
+
       - name: ✉️ Отправка email уведомления
         if: always() # <-- выполнится даже если билд упал
         uses: dawidd6/action-send-mail@v3
@@ -105,3 +108,13 @@ jobs:
             Репозиторий: ${{ github.repository }}
           to: "ivan.roschin@86gmail.com"
           from: "CI/CD Bot <${{ secrets.SMTP_EMAIL }}>"
+
+      - name: 📲 Send Telegram notification
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message: |
+            ✅ CI/CD завершен!
+            📦 Образ: ${{ github.sha }}
+            🔗 Репозиторий: ${{ github.repository }}
