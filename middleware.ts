@@ -10,22 +10,28 @@ export default withAuth(
       return NextResponse.redirect(new URL("/admin", req.url))
     }
 
-    // Для /admin проверяем авторизацию
+    // Если пользователь не авторизован и пытается зайти на /admin → редирект на /login
     if (pathname.startsWith("/admin") && !req.nextauth?.token) {
       return NextResponse.redirect(new URL("/login", req.url))
     }
+
+    // Для остальных маршрутов — пропускаем
+    return NextResponse.next()
   },
   {
     callbacks: {
+      // Контролируем доступ только для /admin
       authorized: ({ token, req }) => {
-        // Разрешаем доступ только авторизованным к /admin
-        return req.nextUrl.pathname.startsWith("/admin") ? !!token : true
+        if (req.nextUrl.pathname.startsWith("/admin")) {
+          return !!token // true только если есть токен
+        }
+        return true // для остальных маршрутов доступ разрешён
       }
     }
   }
 )
 
-// Указываем маршруты, где применяется middleware
+// Настраиваем middleware на маршруты
 export const config = {
   matcher: ["/admin/:path*", "/login"]
 }
