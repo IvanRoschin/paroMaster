@@ -1,6 +1,7 @@
 "use client"
 
 import { useShoppingCart } from "app/context/ShoppingCartContext"
+import dynamic from "next/dynamic"
 
 import { Icon } from "@/components/ui"
 import { useCartModal } from "@/hooks/index"
@@ -39,4 +40,4 @@ const CartButton = (props: Props) => {
   )
 }
 
-export default CartButton
+export default dynamic(() => Promise.resolve(CartButton), { ssr: false })

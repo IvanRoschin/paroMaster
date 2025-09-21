@@ -21,6 +21,7 @@
         "name": "next"
       }
     ],
+    "types": ["node"],
     "baseUrl": ".",
     "paths": {
       "@/components/*": ["app/components/*"],
@@ -36,6 +37,6 @@
       "@/admin/*": ["app/admin/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "auth.tjs", "auth.js"],
+  "include": ["**/*.ts", "**/*.tsx", "auth.js", "auth.tjs", "next-env.d.ts", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }

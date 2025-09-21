@@ -1,8 +1,9 @@
 "use client"
 
+import "./PriceFilter.css"
+
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
-import "./PriceFilter.css"
 
 interface PriceFilterProps {
   currencySymbol?: string

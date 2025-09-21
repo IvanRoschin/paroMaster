@@ -1,17 +1,28 @@
 "use client"
 
-import PreloadedResourses from "@/utils/preloadedResourses"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { ShoppingCartProvider } from "app/context/ShoppingCartContext"
 import { SessionProvider } from "next-auth/react"
-import { Suspense } from "react"
+import { Suspense, useState } from "react"
 import { Toaster } from "sonner"
+
+import PreloadedResourses from "@/utils/preloadedResourses"
+import {
+  DehydratedState,
+  HydrationBoundary,
+  QueryClient,
+  QueryClientProvider
+} from "@tanstack/react-query"
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
+
 import { Loader } from "../components"
 
-export function Providers({ children }: { children: React.ReactNode }) {
-  // const [queryClient] = useState(() => new QueryClient())
-  const queryClient = new QueryClient()
+interface ProvidersProps {
+  children: React.ReactNode
+  dehydratedState?: DehydratedState
+}
+
+export function Providers({ children, dehydratedState }: ProvidersProps) {
+  const [queryClient] = useState(() => new QueryClient())
 
   return (
     <SessionProvider>
@@ -19,7 +30,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <Suspense fallback={<Loader />}>
           <PreloadedResourses />
           <QueryClientProvider client={queryClient}>
-            {children}
+            <HydrationBoundary state={dehydratedState}>{children}</HydrationBoundary>
             <ReactQueryDevtools initialIsOpen={false} />
           </QueryClientProvider>
           <Toaster position="top-right" richColors />

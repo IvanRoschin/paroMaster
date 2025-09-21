@@ -1,5 +1,4 @@
 "use client"
-
 import { useShoppingCart } from "app/context/ShoppingCartContext"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
@@ -16,21 +15,30 @@ interface IProductCardProps {
 
 const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
   const { data: session } = useSession()
-
   const isAdmin = session?.user
-
-  const [amount, setAmount] = useState(0)
 
   const { getItemQuantity, increaseCartQuantity, decreaseCartQuantity, removeFromCart } =
     useShoppingCart()
 
-  const quantity = getItemQuantity(good._id!)
+  const [quantity, setQuantity] = useState(0)
+  const [amount, setAmount] = useState(0)
 
+  // Клиентская инициализация количества
   useEffect(() => {
-    const newAmount = good.price * quantity
-    setAmount(newAmount)
-    localStorage.setItem(`amount-${good._id}`, JSON.stringify(newAmount))
-  }, [good.price, good._id, quantity])
+    if (typeof window !== "undefined") {
+      const q = getItemQuantity(good._id!)
+      setQuantity(q)
+    }
+  }, [getItemQuantity, good._id])
+
+  // Рассчитываем amount и сохраняем в localStorage только на клиенте
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const newAmount = good.price * quantity
+      setAmount(newAmount)
+      localStorage.setItem(`amount-${good._id}`, JSON.stringify(newAmount))
+    }
+  }, [quantity, good.price, good._id])
 
   return (
     <li className="flex flex-col justify-between border border-gray-300 rounded-md p-4 hover:shadow-[10px_10px_15px_-3px_rgba(0,0,0,0.3)] transition-all">
@@ -39,7 +47,7 @@ const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
           <div className="w-[200px] h-[200px]">
             <div className="absolute top-2 left-2 bg-primaryAccentColor text-white text-xs font-semibold px-2 py-1 rounded">
               {good.isCondition ? "НОВИЙ" : "Б/У"}
-            </div>{" "}
+            </div>
             <Image
               src={good.src[0]}
               alt="item_photo"
@@ -48,7 +56,6 @@ const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
               className="self-center mb-[30px]"
             />
           </div>
-          {/* Рейтинг і кількість відгуків */}
           <div className="flex items-center gap-2 mb-2">
             <div className="flex text-yellow-400">
               {Array.from({ length: 5 }, (_, index) => (
@@ -86,12 +93,11 @@ const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
         decreaseCartQuantity={decreaseCartQuantity}
         removeFromCart={removeFromCart}
       />
-
-      {/* <ItemDetails item={item} /> */}
     </li>
   )
 }
 
+// CartActions и ItemDetails оставляем без изменений
 interface CartActionsProps {
   isAvailable: boolean
   itemId: string
