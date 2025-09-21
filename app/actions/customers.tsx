@@ -76,20 +76,11 @@ export async function addCustomer(values: ICustomer) {
   }
 }
 
-export async function deleteCustomer(id: string) {
-  if (!id) {
-    console.error("No ID provided")
-    return
-  }
-  try {
-    await connectToDB()
-    await Customer.findByIdAndDelete(id)
-  } catch (error) {
-    console.error("Failed to delete the good:", error)
-  } finally {
-    revalidatePath("/admin/customers")
-    redirect("/admin/customers")
-  }
+export async function deleteCustomer(id: string): Promise<void> {
+  if (!id) return
+  await connectToDB()
+  await Customer.findByIdAndDelete(id)
+
 }
 
 export async function getCustomerById(id: string) {

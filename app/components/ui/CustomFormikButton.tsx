@@ -1,3 +1,6 @@
+import React from "react"
+
+interface CustomFormikButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 import { useFormikContext } from "formik"
 
 interface CustomFormikButtonProps {
@@ -13,27 +16,19 @@ const CustomButton: React.FC<CustomFormikButtonProps> = ({
   disabled,
   outline,
   small,
-  type,
+  type = "submit", // пусть кнопка по умолчанию будет submit
   ...props
 }) => {
-  const { submitForm } = useFormikContext()
-
   return (
     <button
       type={type}
-      onClick={submitForm}
       disabled={disabled}
-      className={`relative disabled:opacity-70 disabled:cursor-not-allowed rounded-lg hover:opacity-80 transition  ${
-        outline ? "bg-white" : "bg-orange-600"
-      } 
-      ${outline ? "border-orange-600" : "border-orange-600"} 
-      ${outline ? "border-orange-600" : "text-white"} 
-      ${small ? "py-1" : "py-3"} 
-      ${small ? "text-md" : "text-md"} 
-      ${small ? "font-light" : "font-semibold"} 
-      ${small ? "border-[1px]" : "border-2"}
-      ${small ? "w-[40px]" : "w-full"}
-        `}
+      className={`relative disabled:opacity-70 disabled:cursor-not-allowed rounded-lg hover:opacity-80 transition  
+        ${outline ? "bg-white text-orange-600" : "bg-orange-600 text-white"} 
+        border-orange-600
+        ${small ? "py-1 text-md font-light border-[1px] min-w-[40px]" : "py-3 text-md font-semibold border-2 w-full"}
+      `}
+
       {...props}
     >
       {label}

@@ -162,24 +162,17 @@ export async function addGood(formData: FormData) {
   }
 }
 
-export async function deleteGood(id: string) {
-  if (!id) {
-    console.error("No ID provided")
-    return
+export async function deleteGood(id: string): Promise<void> {
+  if (!id) return
+  await connectToDB()
+  const deletedReviews = await Testimonial.deleteMany({ product: id })
+  if (deletedReviews.deletedCount > 0) {
+    console.log(`Видалено ${deletedReviews.deletedCount} відгуків для товару з ID: ${id}`)
+  } else {
+    console.log("Відгуків не було знайдено для видалення")
   }
-  try {
-    await connectToDB()
-    const deletedReviews = await Testimonial.deleteMany({ product: id })
+  await Good.findByIdAndDelete(id)
 
-    if (deletedReviews.deletedCount > 0) {
-      console.log(`Видалено ${deletedReviews.deletedCount} відгуків для товару з ID: ${id}`)
-    } else {
-      console.log("Відгуків не було знайдено для видалення")
-    }
-    await Good.findByIdAndDelete(id)
-  } catch (error) {
-    console.error("Failed to delete the good:", error)
-  }
 }
 
 export async function updateGood(formData: FormData) {

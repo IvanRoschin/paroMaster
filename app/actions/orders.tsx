@@ -107,24 +107,11 @@ export async function addOrder(values: IOrder) {
   }
 }
 
-export async function deleteOrder(id: string) {
-  console.log(`🔹 Начало удаления заказа с ID: ${id}`)
+export async function deleteOrder(id: string): Promise<void> {
+  if (!id) return
+  await connectToDB()
+  await Order.findByIdAndDelete(id)
 
-  if (!id) {
-    console.error("❌ Ошибка: Не передан ID для удаления")
-    return
-  }
-  try {
-    await connectToDB()
-    const deletedOrder = await Order.findByIdAndDelete(id)
-    if (!deletedOrder) {
-      console.warn(`⚠️ Заказ с ID: ${id} не найден`)
-      return
-    }
-  } catch (error) {
-  } finally {
-    redirect("/admin/orders")
-  }
 }
 
 export async function getOrderById(id: string): Promise<IOrder | null> {

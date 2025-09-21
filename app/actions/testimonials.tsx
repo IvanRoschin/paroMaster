@@ -118,29 +118,12 @@ export async function getTestimonialById(id: string) {
   }
 }
 
-export async function deleteTestimonial(testimonialId: string) {
-  if (!testimonialId) {
-    console.error("No ID provided")
-    return
-  }
-  try {
-    await connectToDB()
-    const deletedTestimonial = await Testimonial.findByIdAndDelete(testimonialId)
-    if (deletedTestimonial?.product) {
-      await recalculateRating(deletedTestimonial.product)
-    }
-    // return {
-    //   success: true,
-    //   message: "Відгук видалено"
-    // }
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error delete category:", error)
-      throw new Error("Failed to delete category: " + error.message)
-    } else {
-      console.error("Unknown error:", error)
-      throw new Error("Failed to delete category: Unknown error")
-    }
+export async function deleteTestimonial(id: string): Promise<void> {
+  if (!id) return
+  await connectToDB()
+  const deletedTestimonial = await Testimonial.findByIdAndDelete(id)
+  if (deletedTestimonial?.product) {
+    await recalculateRating(deletedTestimonial.product)
   }
 }
 
