@@ -1,17 +1,24 @@
-import { getAllUsers } from "@/actions/users"
-import { Users } from "@/admin/components"
-import { usePrefetchData } from "@/hooks/index"
-import { ISearchParams } from "@/types/searchParams"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 
-export default async function UsersPage({ searchParams }: { searchParams: ISearchParams }) {
+import { getAllUsers } from "@/actions/users"
+import { Users } from "@/admin/components"
+import prefetchData from "@/hooks/usePrefetchData"
+import { ISearchParams } from "@/types/searchParams"
+
+export default async function UsersPage({
+  searchParams
+}: {
+  searchParams: Promise<ISearchParams>
+}) {
+  const params = await searchParams
+
   const queryClinet = new QueryClient()
 
-  await usePrefetchData(getAllUsers, ["users"], searchParams)
+  await prefetchData(queryClinet, getAllUsers, ["users"], params)
 
   return (
     <HydrationBoundary state={dehydrate(queryClinet)}>
-      <Users searchParams={searchParams} />
+      <Users searchParams={params} />
     </HydrationBoundary>
   )
 }

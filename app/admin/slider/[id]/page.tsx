@@ -1,10 +1,9 @@
 import { getSlideById, updateSlide } from "@/actions/slider"
 import { SlideForm } from "@/admin/components"
+import { ISearchParams } from "@/types/searchParams"
 
-interface Params {
-  id: string
-}
-const SingleSlidePage = async ({ params }: { params: Params }) => {
+const SingleSlidePage = async ({ searchParams }: { searchParams: Promise<ISearchParams> }) => {
+  const params = await searchParams
   const { id } = params
   const slide = await getSlideById(id)
   return (

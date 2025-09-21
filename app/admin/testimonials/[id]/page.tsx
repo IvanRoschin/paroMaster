@@ -1,11 +1,14 @@
 import { getTestimonialById, updateTestimonial } from "@/actions/testimonials"
 import { TestimonialForm } from "@/admin/components"
+import { ISearchParams } from "@/types/searchParams"
 
-interface Params {
-  id: string
-}
+const SingleTestimonialPage = async ({
+  searchParams
+}: {
+  searchParams: Promise<ISearchParams>
+}) => {
+  const params = await searchParams
 
-const SingleTestimonialPage = async ({ params }: { params: Params }) => {
   const { id } = params
   const testimonial = await getTestimonialById(id)
 

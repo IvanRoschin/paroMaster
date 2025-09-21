@@ -1,17 +1,24 @@
-import { getAllCustomers } from "@/actions/customers"
-import { Customers } from "@/admin/components"
-import { usePrefetchData } from "@/hooks/index"
-import { ISearchParams } from "@/types/searchParams"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 
-export default async function CustomersPage({ searchParams }: { searchParams: ISearchParams }) {
-  const queryClinet = new QueryClient()
+import { getAllCustomers } from "@/actions/customers"
+import { Customers } from "@/admin/components"
+import prefetchData from "@/hooks/usePrefetchData"
+import { ISearchParams } from "@/types/searchParams"
 
-  await usePrefetchData(getAllCustomers, ["customers"], searchParams)
+export default async function CustomersPage({
+  searchParams
+}: {
+  searchParams: Promise<ISearchParams>
+}) {
+  const params = await searchParams
+
+  const queryClient = new QueryClient()
+
+  await prefetchData(queryClient, getAllCustomers, ["customers"], params)
 
   return (
-    <HydrationBoundary state={dehydrate(queryClinet)}>
-      <Customers params={searchParams} />
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <Customers params={params} />
     </HydrationBoundary>
   )
 }

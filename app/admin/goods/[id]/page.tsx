@@ -1,10 +1,10 @@
 import { getGoodById, updateGood } from "@/actions/goods"
 import { GoodForm } from "@/admin/components"
+import { ISearchParams } from "@/types/searchParams"
 
-interface Params {
-  id: string
-}
-const SingleGoodPage = async ({ params }: { params: Params }) => {
+const SingleGoodPage = async ({ searchParams }: { searchParams: Promise<ISearchParams> }) => {
+  const params = await searchParams
+
   const { id } = params
   const good = await getGoodById(id)
 

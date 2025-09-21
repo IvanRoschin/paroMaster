@@ -1,41 +1,45 @@
-import { getAllGoods } from "@/actions/goods"
-import { getAllTestimonials, IGetAllTestimonials } from "@/actions/testimonials"
-import { Advantages, Description, ProductList, Slider, TestimonialsList } from "@/components/index"
-import { IGood, ISearchParams, ITestimonial } from "@/types/index"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 
+import { IGood, ISearchParams, ITestimonial } from "@/types/index"
+import { getAllGoods } from "./actions/goods"
 import { getAllSlides, IGetAllSlides } from "./actions/slider"
+import { getAllTestimonials, IGetAllTestimonials } from "./actions/testimonials"
+import { Advantages, Description, ProductList, Slider, TestimonialsList } from "./components"
 
 interface GoodsData {
   goods: IGood[]
 }
 
-export default async function Home({ searchParams }: { searchParams: ISearchParams }) {
+export default async function Home({ searchParams }: { searchParams: Promise<ISearchParams> }) {
+  const params = await searchParams
+
   const queryClient = new QueryClient()
 
   try {
-    await queryClient.prefetchQuery({
-      queryKey: ["slides"],
-      queryFn: () => getAllSlides(searchParams)
-    })
-    await queryClient.prefetchQuery({
-      queryKey: ["testimonials"],
-      queryFn: () => getAllTestimonials(searchParams)
-    })
-    await queryClient.prefetchQuery({
-      queryKey: ["goods"],
-      queryFn: () => getAllGoods({ limit: String(4) })
-    })
+    await Promise.all([
+      queryClient.prefetchQuery({
+        queryKey: ["slides", params],
+        queryFn: () => getAllSlides(params)
+      }),
+      queryClient.prefetchQuery({
+        queryKey: ["testimonials", params],
+        queryFn: () => getAllTestimonials(params)
+      }),
+      queryClient.prefetchQuery({
+        queryKey: ["goods", { limit: 4 }],
+        queryFn: () => getAllGoods({ limit: "4" })
+      })
+    ])
   } catch (error) {
     console.error("Error prefetching data:", error)
   }
 
-  const queryState = queryClient.getQueryState(["goods"])
+  // Достаём данные из кеша
+  const goodsData = queryClient.getQueryData<GoodsData>(["goods", { limit: 4 }])
+  const goods = goodsData?.goods ?? []
 
-  const goods = (queryState?.data as GoodsData)?.goods || []
-
-  const slidesData = queryClient.getQueryData<IGetAllSlides>(["slides"])
-  const testimonialsData = queryClient.getQueryData<IGetAllTestimonials>(["allTestimonials"])
+  const slidesData = queryClient.getQueryData<IGetAllSlides>(["slides", params])
+  const testimonialsData = queryClient.getQueryData<IGetAllTestimonials>(["testimonials", params])
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

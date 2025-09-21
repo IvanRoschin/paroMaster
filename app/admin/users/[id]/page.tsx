@@ -1,3 +1,4 @@
+import { ISearchParams } from "@/types/searchParams"
 import { getUserById, updateUser } from "@/actions/users"
 import { UserForm } from "@/admin/components"
 
@@ -5,7 +6,9 @@ interface Params {
   id: string
 }
 
-const SingleUserPage = async ({ params }: { params: Params }) => {
+const SingleUserPage = async ({ searchParams }: { searchParams: Promise<ISearchParams> }) => {
+  const params = await searchParams
+
   const { id } = params
   const user = await getUserById(id)
 

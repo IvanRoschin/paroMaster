@@ -1,16 +1,15 @@
-import { getAllOrders, getOrderById } from "@/actions/orders"
-import { OrderForm } from "@/admin/components/index"
-import { IGood } from "@/types/index"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 
-interface Params {
-  id: string
-}
+import { getAllOrders, getOrderById } from "@/actions/orders"
+import { OrderForm } from "@/admin/components/index"
+import { IGood, ISearchParams } from "@/types/index"
+
 interface GoodsData {
   goods: IGood[]
 }
 
-const SingleOrderPage = async ({ params }: { params: Params }) => {
+const SingleOrderPage = async ({ searchParams }: { searchParams: Promise<ISearchParams> }) => {
+  const params = await searchParams
   const { id } = params
   const order = await getOrderById(id)
   const queryClient = new QueryClient()
