@@ -53,10 +53,11 @@ jobs:
 
       # ----------------- Docker Login -----------------
       - name: 🐳 Docker Login
-        run: echo "${{ secrets.DOCKERHUB_USERNAME }}"
-        run: echo "${{ secrets.DOCKERHUB_PASSWORD }}"
         if: env.DOCKER_USER
-        run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ env.DOCKER_USER }}" --password-stdin
+        run: |
+          echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ env.DOCKER_USER }}" --password-stdin
+          echo "✅ Docker login successful"
+          docker info | grep "Username"
 
       # ----------------- Docker Build & Push -----------------
       - name: 📦 Docker Build & Push
@@ -83,12 +84,12 @@ jobs:
       # ----------------- Run Container -----------------
       - name: 🐳 Run Docker Container
         run: |
-          IMAGE_NAME=${{ env.DOCKER_USER:-ivaros }}/paro-master
+          IMAGE_NAME=${{ env.DOCKER_USER }}/paro-master
           CONTAINER_NAME=paro-master
 
           echo "🌀 Starting container"
           docker rm -f $CONTAINER_NAME || true
-          docker run -d --rm --name $CONTAINER_NAME \
+          docker run -d --name $CONTAINER_NAME \
             -p 3030:3000 \
             -e NODE_ENV=production \
             -e DATABASE_URL=${{ secrets.MONGODB_URI }} \
@@ -103,14 +104,16 @@ jobs:
       - name: 📡 Healthcheck
         id: healthcheck
         run: |
+          echo "📦 Container logs:"
+          docker logs paro-master || true
+
           if curl -sf http://localhost:3030; then
             echo "status=success" >> $GITHUB_OUTPUT
+            echo "✅ Application is healthy"
           else
             echo "status=failure" >> $GITHUB_OUTPUT
+            echo "❌ Application is not reachable"
             exit 1
-
-          echo "📦 Container logs:"
-          docker logs paro-master
 
       # ----------------- Telegram Notification -----------------
       - name: 📲 Send Telegram Notification
