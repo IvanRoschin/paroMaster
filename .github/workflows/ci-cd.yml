@@ -90,3 +90,18 @@ jobs:
 
           echo "📦 Логи контейнера:"
           docker logs paroMaster
+      - name: ✉️ Отправка email уведомления
+        if: always() # <-- выполнится даже если билд упал
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.SMTP_EMAIL }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "CI/CD: ${{ job.status }} для paroMaster"
+          body: |
+            Результат пайплайна: ${{ job.status }}
+            Коммит: ${{ github.sha }}
+            Репозиторий: ${{ github.repository }}
+          to: "ivan.roschin@86gmail.com"
+          from: "CI/CD Bot <${{ secrets.SMTP_EMAIL }}>"
