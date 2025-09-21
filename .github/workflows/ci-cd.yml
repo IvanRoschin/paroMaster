@@ -32,11 +32,14 @@ jobs:
       - name: 📥 Встановлення залежностей
         run: npm install
 
+      - name: 💄 Prettier format
+        run: npm run format
+        
       - name: 🔬 Лінтинг
         run: npm run lint
 
       - name: 💅 Prettier check
-        run: npm run format:check
+        run: npm run check
 
       - name: 🏗 Збірка Next.js
         run: npm run build
