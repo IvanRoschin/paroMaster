@@ -41,3 +41,7 @@ export function middleware(req: NextRequest, ev: NextFetchEvent) {
 export const config = {
   matcher: ["/((?!api|_next|.*\\..*).*)"]
 }
+export { default } from "next-auth/middleware"
+
+export const config = { matcher: ["/admin", "/protected/:path"] }
+
