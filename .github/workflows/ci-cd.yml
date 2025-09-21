@@ -80,8 +80,8 @@ jobs:
           sleep 10
 
       - name: 📡 Healthcheck
+        id: healthcheck
         run: |
-          echo "Checking application..."
           if curl -sf http://localhost:3030; then
             echo "status=success" >> $GITHUB_OUTPUT
           else
