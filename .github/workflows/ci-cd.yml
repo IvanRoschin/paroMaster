@@ -42,9 +42,9 @@ jobs:
       - run: npm run check
         name: 🧾 Prettier check
 
-      # ----------------- Build Next.js (Optional local build) -----------------
+      # ----------------- Build Next.js locally -----------------
       - run: npm run build
-        name: 🏗 Build Next.js (local check)
+        name: 🏗 Build Next.js
         env:
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
@@ -61,7 +61,7 @@ jobs:
       - name: ⚡ Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-# ----------------- Docker Build & Push -----------------
+      # ----------------- Docker Build & Push -----------------
       - name: 📦 Docker Build & Push
         run: |
           IMAGE_NAME=${{ env.DOCKER_USER }}/paro-master
@@ -72,36 +72,19 @@ jobs:
           echo "🧼 Removing old image if exists"
           docker rmi -f $IMAGE_NAME:latest || true
 
-          echo "🔨 Building Docker image with Buildx"
+          echo "🔨 Building Docker image with Buildx and cache"
           docker buildx build \
             --build-arg MONGODB_URI=${{ secrets.MONGODB_URI }} \
-            -t $IMAGE_NAME:latest \
-            -t $IMAGE_NAME:${{ github.sha }} \
             --platform linux/amd64 \
+            --tag $IMAGE_NAME:latest \
+            --cache-from=type=registry,ref=$IMAGE_NAME:latest \
             --push .
 
-          echo "✅ Docker images pushed successfully"
-              run: |
-                IMAGE_NAME=${{ env.DOCKER_USER }}/paro-master
-                CONTAINER_NAME=paro-master
-
-                echo "🧹 Removing old container if exists"
-                docker rm -f $CONTAINER_NAME || true
-
-                echo "🧼 Removing old image if exists"
-                docker rmi -f $IMAGE_NAME:latest || true
-
-                echo "🔨 Building Docker image with buildx and cache"
-                docker buildx build \
-                  --build-arg MONGODB_URI=${{ secrets.MONGODB_URI }} \
-                  --platform linux/amd64 \
-                  --tag $IMAGE_NAME:latest \
-                  --cache-from=type=registry,ref=$IMAGE_NAME:latest \
-                  --push .
-
-                echo "🏷️ Tagging Docker image with commit SHA"
-                docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ github.sha }}
-                docker push $IMAGE_NAME:${{ github.sha }}
+      - name: 🏷️ Tag & Push Commit SHA
+        run: |
+          IMAGE_NAME=${{ env.DOCKER_USER }}/paro-master
+          docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ github.sha }}
+          docker push $IMAGE_NAME:${{ github.sha }}
 
       # ----------------- Run Docker Container -----------------
       - name: 🐳 Run Docker Container
