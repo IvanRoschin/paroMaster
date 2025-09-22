@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 env:
-  DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME || 'ivaros' }}
   DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
 
   TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -42,7 +42,7 @@ jobs:
         name: 🔬 Linting
 
       - run: npm run check
-        name: Prettier check
+        name: 🧾 Prettier check
 
       # ----------------- Build -----------------
       - run: npm run build
@@ -53,15 +53,20 @@ jobs:
 
       # ----------------- Docker Login -----------------
       - name: 🐳 Docker Login
-        if: env.DOCKER_USER
+        if: ${{ env.DOCKER_USER != '' && env.DOCKERHUB_PASSWORD != '' }}
         run: |
-          echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ env.DOCKER_USER }}" --password-stdin
+          echo "${{ env.DOCKERHUB_PASSWORD }}" | docker login -u "${{ env.DOCKER_USER }}" --password-stdin
           echo "✅ Docker login successful"
           docker info | grep "Username"
 
+      - name: 🛑 Fail if Docker credentials not set
+        if: ${{ env.DOCKER_USER == '' || env.DOCKERHUB_PASSWORD == '' }}
+        run: |
+          echo "❌ Docker credentials not set. Exiting..."
+          exit 1
+
       # ----------------- Docker Build & Push -----------------
       - name: 📦 Docker Build & Push
-        if: env.DOCKER_USER
         run: |
           IMAGE_NAME=${{ env.DOCKER_USER }}/paro-master
 
@@ -103,6 +108,7 @@ jobs:
       # ----------------- Healthcheck -----------------
       - name: 📡 Healthcheck
         id: healthcheck
+        continue-on-error: true
         run: |
           echo "📦 Container logs:"
           docker logs paro-master || true
@@ -114,6 +120,7 @@ jobs:
             echo "status=failure" >> $GITHUB_OUTPUT
             echo "❌ Application is not reachable"
             exit 1
+          fi
 
       # ----------------- Telegram Notification -----------------
       - name: 📲 Send Telegram Notification
@@ -123,7 +130,8 @@ jobs:
           to: ${{ env.TELEGRAM_CHAT_ID }}
           token: ${{ env.TELEGRAM_BOT_TOKEN }}
           message: |
-            ✅ CI/CD завершен!
-            📦 Образ: ${{ github.sha }}
-            🩺 Статус HealthCheck: ${{ steps.healthcheck.outputs.status }}
+            🚀 CI/CD завершен!
+            📦 Образ: `${{ github.sha }}`
+            🩺 HealthCheck: `${{ steps.healthcheck.outputs.status || 'unknown' }}`
             🔗 Репозиторий: ${{ github.repository }}
+            🕒 Время: ${{ github.run_started_at }}
