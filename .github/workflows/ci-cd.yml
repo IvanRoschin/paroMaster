@@ -9,10 +9,8 @@ on:
 env:
   DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME || 'ivaros' }}
   DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
-
   TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-
   NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
   MONGODB_URI: ${{ secrets.MONGODB_URI }}
 
@@ -31,8 +29,8 @@ jobs:
           node-version: 22
           cache: 'npm'
 
-      # ----------------- Dependencies -----------------
-      - run: npm install
+      # ----------------- Install dependencies -----------------
+      - run: npm ci
         name: 📥 Install dependencies
 
       - run: npm run format
@@ -44,9 +42,9 @@ jobs:
       - run: npm run check
         name: 🧾 Prettier check
 
-      # ----------------- Build -----------------
+      # ----------------- Build Next.js (Optional local build) -----------------
       - run: npm run build
-        name: 🏗 Build Next.js
+        name: 🏗 Build Next.js (local check)
         env:
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
@@ -59,34 +57,35 @@ jobs:
           echo "✅ Docker login successful"
           docker info | grep "Username"
 
-      - name: 🛑 Fail if Docker credentials not set
-        if: ${{ env.DOCKER_USER == '' || env.DOCKERHUB_PASSWORD == '' }}
-        run: |
-          echo "❌ Docker credentials not set. Exiting..."
-          exit 1
+      # ----------------- Docker Buildx Setup -----------------
+      - name: ⚡ Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      # ----------------- Docker Build & Push -----------------
+      # ----------------- Docker Build & Push with Cache -----------------
       - name: 📦 Docker Build & Push
         run: |
           IMAGE_NAME=${{ env.DOCKER_USER }}/paro-master
+          CONTAINER_NAME=paro-master
 
           echo "🧹 Removing old container if exists"
-          docker rm -f paro-master || true
+          docker rm -f $CONTAINER_NAME || true
 
           echo "🧼 Removing old image if exists"
           docker rmi -f $IMAGE_NAME:latest || true
 
-          echo "🔨 Building Docker image"
-          docker build -t $IMAGE_NAME:latest .
+          echo "🔨 Building Docker image with buildx and cache"
+          docker buildx build \
+            --build-arg MONGODB_URI=${{ secrets.MONGODB_URI }} \
+            --platform linux/amd64 \
+            --tag $IMAGE_NAME:latest \
+            --cache-from=type=registry,ref=$IMAGE_NAME:latest \
+            --push .
 
-          echo "🏷️ Tagging Docker image"
+          echo "🏷️ Tagging Docker image with commit SHA"
           docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ github.sha }}
-
-          echo "🚀 Pushing Docker image"
-          docker push $IMAGE_NAME:latest
           docker push $IMAGE_NAME:${{ github.sha }}
 
-      # ----------------- Run Container -----------------
+      # ----------------- Run Docker Container -----------------
       - name: 🐳 Run Docker Container
         run: |
           IMAGE_NAME=${{ env.DOCKER_USER }}/paro-master
@@ -100,10 +99,10 @@ jobs:
             -e MONGODB_URI=${{ secrets.MONGODB_URI }} \
             -e NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }} \
             $IMAGE_NAME:latest \
-            sh -c "next start -H 0.0.0.0 -p 3000"
+            node_modules/.bin/next start -H 0.0.0.0 -p 3000
 
           echo "⏳ Waiting for container to start..."
-          sleep 10
+          sleep 15
 
       # ----------------- Healthcheck -----------------
       - name: 📡 Healthcheck
@@ -120,7 +119,6 @@ jobs:
             echo "status=failure" >> $GITHUB_OUTPUT
             echo "❌ Application is not reachable"
             exit 1
-          fi
 
       # ----------------- Telegram Notification -----------------
       - name: 📲 Send Telegram Notification
@@ -131,7 +129,7 @@ jobs:
           token: ${{ env.TELEGRAM_BOT_TOKEN }}
           message: |
             🚀 CI/CD завершен!
-            📦 Образ: `${{ github.sha }}`
-            🩺 HealthCheck: `${{ steps.healthcheck.outputs.status || 'unknown' }}`
+            📦 Образ: ${{ github.sha }}
+            🩺 HealthCheck: ${{ steps.healthcheck.outputs.status || 'unknown' }}
             🔗 Репозиторий: ${{ github.repository }}
             🕒 Время: ${{ github.run_started_at }}
