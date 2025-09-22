@@ -110,13 +110,25 @@ jobs:
           echo "📦 Container logs:"
           docker logs paro-master || true
 
-          if curl -sf http://localhost:3030; then
-            echo "status=success" >> $GITHUB_OUTPUT
+          STATUS="failure"
+          for i in {1..5}; do
+            if curl -sf http://localhost:3030; then
+              STATUS="success"
+              break
+            else
+              echo "⏳ Waiting for app to be ready... attempt $i"
+              sleep 5
+            fi
+          done
+
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+
+          if [ "$STATUS" = "success" ]; then
             echo "✅ Application is healthy"
           else
-            echo "status=failure" >> $GITHUB_OUTPUT
             echo "❌ Application is not reachable"
             exit 1
+          fi
 
       # ----------------- Telegram Notification -----------------
       - name: 📲 Send Telegram Notification
