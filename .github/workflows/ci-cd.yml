@@ -77,14 +77,11 @@ jobs:
             --build-arg MONGODB_URI=${{ secrets.MONGODB_URI }} \
             --platform linux/amd64 \
             --tag $IMAGE_NAME:latest \
+            --tag $IMAGE_NAME:${{ github.sha }} \
             --cache-from=type=registry,ref=$IMAGE_NAME:latest \
             --push .
 
-      - name: 🏷️ Tag & Push Commit SHA
-        run: |
-          IMAGE_NAME=${{ env.DOCKER_USER }}/paro-master
-          docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ github.sha }}
-          docker push $IMAGE_NAME:${{ github.sha }}
+          echo "✅ Docker images pushed successfully"
 
       # ----------------- Run Docker Container -----------------
       - name: 🐳 Run Docker Container
