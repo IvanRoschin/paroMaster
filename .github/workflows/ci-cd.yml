@@ -139,8 +139,7 @@ jobs:
           to: ${{ env.TELEGRAM_CHAT_ID }}
           token: ${{ env.TELEGRAM_BOT_TOKEN }}
           message: |
-            🚀 CI/CD завершен!
-            📦 Образ: ${{ github.sha }}
-            🩺 HealthCheck: ${{ steps.healthcheck.outputs.status || 'unknown' }}
-            🔗 Репозиторий: ${{ github.repository }}
-            🕒 Время: ${{ github.run_started_at }}
+            🚀 ${{ github.repository }}
+            📦 ${{ github.sha }}
+            🩺 ${{ steps.healthcheck.outputs.status || 'unknown' }}
+            🔗 ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
