@@ -14,7 +14,7 @@ env:
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
 
   NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-  DATABASE_URL: ${{ secrets.MONGODB_URI }}
+  MONGODB_URI: ${{ secrets.MONGODB_URI }}
 
 jobs:
   build:
@@ -48,7 +48,7 @@ jobs:
       - run: npm run build
         name: 🏗 Build Next.js
         env:
-          DATABASE_URL: ${{ secrets.MONGODB_URI }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
 
       # ----------------- Docker Login -----------------
@@ -97,7 +97,7 @@ jobs:
           docker run -d --name $CONTAINER_NAME \
             -p 3030:3000 \
             -e NODE_ENV=production \
-            -e DATABASE_URL=${{ secrets.MONGODB_URI }} \
+            -e MONGODB_URI=${{ secrets.MONGODB_URI }} \
             -e NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }} \
             $IMAGE_NAME:latest \
             sh -c "next start -H 0.0.0.0 -p 3000"
