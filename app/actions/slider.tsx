@@ -94,7 +94,6 @@ export async function deleteSlide(id: string): Promise<void> {
   if (!id) return
   await connectToDB()
   await Slider.findByIdAndDelete(id)
-
 }
 
 export async function updateSlide(values: any) {

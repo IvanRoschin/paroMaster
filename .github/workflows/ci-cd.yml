@@ -27,7 +27,7 @@ jobs:
         name: ⎔ Setup Node.js
         with:
           node-version: 20
-          cache: 'npm'
+          cache: "npm"
 
       # ----------------- Install dependencies -----------------
       - run: npm ci
@@ -148,4 +148,4 @@ jobs:
             🩺 HealthCheck: ${{ steps.healthcheck.outputs.status || 'unknown' }}
             🔗 Репозиторий: ${{ github.repository }}
             🕒 Время: ${{ env.START_TIME }}
-
+            ${{ job.status == 'success' && '✅ Всё прошло успешно!' || '❌ Ошибка в пайплайне!' }}
