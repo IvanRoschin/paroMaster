@@ -1,12 +1,15 @@
+import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 import { notFound } from "next/navigation"
 
 import { getGoodById } from "@/actions/goods"
-
+import { getGoodTestimonials } from "@/actions/testimonials"
+import prefetchData from "@/hooks/usePrefetchData"
 import GoodPageClient from "./GoodPageClient"
 
 interface GoodPageProps {
-  params: { id: string } | Promise<{ id: string }>
+  params: Promise<{ id: string }>
 }
+
 export async function generateMetadata({ params }: GoodPageProps) {
   const resolvedParams = await params
 
@@ -41,5 +44,12 @@ export default async function GoodPage({ params }: GoodPageProps) {
 
   if (!good) notFound()
 
-  return <GoodPageClient initialGood={good} />
+  const queryClient = new QueryClient()
+  await prefetchData(queryClient, getGoodTestimonials, ["testimonials", good.id], good.id)
+
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <GoodPageClient initialGood={good} />
+    </HydrationBoundary>
+  )
 }

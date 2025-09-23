@@ -173,11 +173,9 @@ export async function updateTestimonial(values: any) {
 }
 
 export async function getGoodTestimonials(productId: string): Promise<ITestimonial[]> {
-  console.log("productId", productId)
   try {
     await connectToDB()
     const testimonials = await Testimonial.find({ product: productId }).sort({ createdAt: -1 })
-    console.log("testimonials", testimonials)
     return JSON.parse(JSON.stringify(testimonials))
   } catch (error) {
     console.error("Error getting testimonials:", error)

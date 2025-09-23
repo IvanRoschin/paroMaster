@@ -1,10 +1,14 @@
+// hooks/useFetchData.ts
 import { QueryKey, useQuery } from "@tanstack/react-query"
 
-const useFetchData = <T,>(action: (params?: any) => Promise<T>, key: QueryKey, params?: any) => {
-  const { data, isLoading, error, isError, refetch } = useQuery<T, Error>({
-    queryKey: [key, JSON.stringify(params)],
+export const useFetchData = <T,>(
+  action: (params?: any) => Promise<T>,
+  key: QueryKey,
+  params?: any
+) => {
+  const { data, error, isError, isLoading, refetch } = useQuery<T, Error>({
     queryFn: () => action(params),
-    enabled: !!params // запрос не выполняется, пока params нет
+    queryKey: [key, JSON.stringify(params)]
   })
 
   return { data, error, isError, isLoading, refetch }

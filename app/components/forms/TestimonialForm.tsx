@@ -78,7 +78,7 @@ const TestimonialForm = ({ productId }: TestimonialFormProps) => {
     surname: "",
     text: "",
     rating: null,
-    isActive: false,
+    isActive: true,
     product: productId,
     createdAt: ""
   }

@@ -34,15 +34,15 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
   const { getItemQuantity, increaseCartQuantity, decreaseCartQuantity, removeFromCart } =
     useShoppingCart()
 
-  const goodId = initialGood?._id
+  const productId = initialGood?._id
 
   const {
     data: testimonials,
     isLoading: isTestimonialsLoading,
     isError: isTestimonialsError,
     error: testimonialsError
-  } = useFetchData((id: string) => getGoodTestimonials(id), ["testimonials", goodId], goodId)
-  console.log("testimonials", testimonials)
+  } = useFetchData(getGoodTestimonials, ["testimonials", productId], productId)
+
   const { mutate: deleteTestimonialById } = useDeleteData(deleteTestimonial, ["testimonials"])
 
   const testimonialModal = useTestimonialModal()
