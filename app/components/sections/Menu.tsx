@@ -1,9 +1,9 @@
+import { menu } from 'app/config/constants';
 import { signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { MdLogout } from 'react-icons/md';
 
 import { Button, Icon } from '@/components/ui';
-import { menu } from 'app/config/constants';
 
 interface MenuProps {
   session?: any;
@@ -17,8 +17,6 @@ const Menu = ({ session }: MenuProps) => {
         Каталог
       </Link>
       <ul className="flex items-center space-x-2 lg:space-x-4 lg:mr-6">
-        <Link href="/ourworks">Наші роботи</Link>
-
         {menu.map((item, index) => (
           <li key={index} className="nav whitespace-nowrap">
             <Link
