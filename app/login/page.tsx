@@ -1,9 +1,9 @@
-import { LoginForm } from "@/components/index"
+import { LoginForm } from '@/components/index';
 
-type Props = {}
+type Props = {};
 
 const LoginPage = (props: Props) => {
-  return <LoginForm />
-}
+  return <LoginForm />;
+};
 
-export default LoginPage
+export default LoginPage;

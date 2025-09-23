@@ -1,4 +1,4 @@
-import Logo from "@/components/common/Logo"
+import Logo from '@/components/common/Logo';
 
 const PublicOfferPrint = () => {
   return (
@@ -20,7 +20,9 @@ const PublicOfferPrint = () => {
         {`Продавець зобов'язується передати у власність Покупця товари, представлені на сайті, а Покупець — прийняти їх і оплатити.`}
       </p>
 
-      <h2 className="font-semibold mt-6 mb-2">2. Умови оформлення замовлення</h2>
+      <h2 className="font-semibold mt-6 mb-2">
+        2. Умови оформлення замовлення
+      </h2>
       <p>
         {`Замовлення оформлюються через сайт шляхом заповнення форми із зазначенням особистих даних.`}
       </p>
@@ -30,7 +32,9 @@ const PublicOfferPrint = () => {
         {`Ціни вказані у національній валюті. Оплата — готівкою або онлайн через сервіси оплати.`}
       </p>
 
-      <h2 className="font-semibold mt-6 mb-2">4. Доставка і повернення товару</h2>
+      <h2 className="font-semibold mt-6 mb-2">
+        4. Доставка і повернення товару
+      </h2>
       <p>
         {`Доставка здійснюється транспортними компаніями. Повернення можливе протягом 14 днів.`}
       </p>
@@ -48,7 +52,7 @@ const PublicOfferPrint = () => {
         {`Дякуємо за довіру! Ваші покупки — наша гордість! ❤️`}
       </p>
     </div>
-  )
-}
+  );
+};
 
-export default PublicOfferPrint
+export default PublicOfferPrint;

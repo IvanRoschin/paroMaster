@@ -1,31 +1,31 @@
-import Image from "next/image"
-import Link from "next/link"
-import { useSearchParams } from "next/navigation"
-import { useCallback } from "react"
+import Image from 'next/image';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { useCallback } from 'react';
 
-import { useMediaQuery } from "@/hooks/index"
+import { useMediaQuery } from '@/hooks/index';
 
 interface CategoryPage {
-  categories: { src: string; title: string }[]
+  categories: { src: string; title: string }[];
 }
 
 const Category: React.FC<CategoryPage> = ({ categories }) => {
-  const isMobile = useMediaQuery("(max-width: 767px)")
+  const isMobile = useMediaQuery('(max-width: 767px)');
 
-  const searchParams = useSearchParams()
+  const searchParams = useSearchParams();
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString())
+      const params = new URLSearchParams(searchParams.toString());
       if (value) {
-        params.set(name, value)
+        params.set(name, value);
       } else {
-        params.delete(name)
+        params.delete(name);
       }
-      return params.toString()
+      return params.toString();
     },
     [searchParams]
-  )
+  );
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-3 container md:w-[250px]">
@@ -34,13 +34,13 @@ const Category: React.FC<CategoryPage> = ({ categories }) => {
       {/* Conditional rendering based on isMobile */}
       <ul
         className={`bg-secondaryBackground p-4 rounded-lg text-sm ${
-          isMobile ? "grid grid-cols-2 gap-3" : ""
+          isMobile ? 'grid grid-cols-2 gap-3' : ''
         }`}
       >
         {categories.map(({ src, title }, index) => (
           <li key={index} className="mb-3 nav">
             <Link
-              href={`/category/?${createQueryString("category", title)}`}
+              href={`/category/?${createQueryString('category', title)}`}
               className="flex justify-start items-start group"
             >
               <Image
@@ -57,7 +57,7 @@ const Category: React.FC<CategoryPage> = ({ categories }) => {
         ))}
       </ul>
     </div>
-  )
-}
+  );
+};
 
-export default Category
+export default Category;

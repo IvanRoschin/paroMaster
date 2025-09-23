@@ -1,77 +1,78 @@
-"use client"
+'use client';
 
-import Image from "next/image"
-import Link from "next/link"
-import { useSearchParams } from "next/navigation"
-import { useCallback } from "react"
+import Image from 'next/image';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { useCallback } from 'react';
 
-import { addNewLid } from "@/actions/lids"
-import { LidForm } from "@/components/forms"
-import { EmptyState, Logo, Socials } from "@/components/index"
-import { useMediaQuery } from "@/hooks/index"
-import { ICategory } from "@/types/index"
+import { addNewLid } from '@/actions/lids';
+import { LidForm } from '@/components/forms';
+import { EmptyState, Logo, Socials } from '@/components/index';
+import { useMediaQuery } from '@/hooks/index';
+import { ICategory } from '@/types/index';
 
 const links = [
   {
-    title: "Оплата та доставка",
-    link: "delivery"
+    title: 'Оплата та доставка',
+    link: 'delivery',
   },
   {
-    title: "Послуги та сервіси",
-    link: "services"
+    title: 'Послуги та сервіси',
+    link: 'services',
   },
   {
-    title: "Гарантія",
-    link: "guarantee"
+    title: 'Гарантія',
+    link: 'guarantee',
   },
   {
-    title: "Контакти",
-    link: "contact"
+    title: 'Контакти',
+    link: 'contact',
   },
   {
-    title: "Політика Конфіденційності",
-    link: "privacypolicy"
+    title: 'Політика Конфіденційності',
+    link: 'privacypolicy',
   },
   {
-    title: "Публічна Оферта",
-    link: "publicoffer"
-  }
-]
+    title: 'Публічна Оферта',
+    link: 'publicoffer',
+  },
+];
 
 const goodsLinks = [
   {
-    title: "Популярні товари",
-    link: "populargoods"
+    title: 'Популярні товари',
+    link: 'populargoods',
   },
   {
-    title: "Акції та знижки",
-    link: "/"
-  }
-]
+    title: 'Акції та знижки',
+    link: '/',
+  },
+];
 
 const Footer = ({ categories }: { categories: ICategory[] }) => {
-  const isMobile = useMediaQuery("(max-width: 767px)")
+  const isMobile = useMediaQuery('(max-width: 767px)');
 
-  const baseUrl = typeof window !== "undefined" ? "" : process.env.NEXT_PUBLIC_BASE_URL || ""
+  const baseUrl =
+    typeof window !== 'undefined' ? '' : process.env.NEXT_PUBLIC_BASE_URL || '';
 
-  const searchParams = useSearchParams()
+  const searchParams = useSearchParams();
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString())
+      const params = new URLSearchParams(searchParams.toString());
       if (value) {
-        params.set(name, value)
+        params.set(name, value);
       } else {
-        params.delete(name)
+        params.delete(name);
       }
-      return params.toString()
+      return params.toString();
     },
     [searchParams]
-  )
+  );
 
   // Handle errors
   if (!categories?.length) {
-    return <EmptyState showReset />
+    return <EmptyState showReset />;
   }
 
   return (
@@ -140,7 +141,9 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
                         key={index}
                         className="nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200"
                       >
-                        <Link href={`/${item.link.toLowerCase().replace(/ /g, "-")}`}>
+                        <Link
+                          href={`/${item.link.toLowerCase().replace(/ /g, '-')}`}
+                        >
                           {item.title}
                         </Link>
                       </li>
@@ -156,7 +159,9 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
                         key={index}
                         className="nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200"
                       >
-                        <Link href={`/${item.link.toLowerCase().replace(/ /g, "-")}`}>
+                        <Link
+                          href={`/${item.link.toLowerCase().replace(/ /g, '-')}`}
+                        >
                           {item.title}
                         </Link>
                       </li>
@@ -171,7 +176,7 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
                   {categories?.map(({ src, title }, index) => (
                     <li key={index} className="mb-3 nav">
                       <Link
-                        href={`/category/?${createQueryString("category", title)}`}
+                        href={`/category/?${createQueryString('category', title)}`}
                         className="flex justify-start items-start group"
                       >
                         <Image
@@ -200,7 +205,9 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
                       key={index}
                       className="nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200"
                     >
-                      <Link href={`/${item.link.toLowerCase().replace(/ /g, "-")}`}>
+                      <Link
+                        href={`/${item.link.toLowerCase().replace(/ /g, '-')}`}
+                      >
                         {item.title}
                       </Link>
                     </li>
@@ -216,7 +223,9 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
                       key={index}
                       className="nav mb-2 hover:transform hover:translate-x-2 transition-transform duration-200"
                     >
-                      <Link href={`/${item.link.toLowerCase().replace(/ /g, "-")}`}>
+                      <Link
+                        href={`/${item.link.toLowerCase().replace(/ /g, '-')}`}
+                      >
                         {item.title}
                       </Link>
                     </li>
@@ -230,7 +239,7 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
                   {categories?.map(({ src, title }, index) => (
                     <li key={index} className="mb-3 nav">
                       <Link
-                        href={`/category/?${createQueryString("category", title)}`}
+                        href={`/category/?${createQueryString('category', title)}`}
                         className="flex justify-start items-start group"
                       >
                         <Image
@@ -249,14 +258,15 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
             </div>
           )}
         </div>
-        <div id="contactForm" className={`${isMobile ? "mb-4" : "mb-0"}`}>
+        <div id="contactForm" className={`${isMobile ? 'mb-4' : 'mb-0'}`}>
           <LidForm action={addNewLid} title="Замовити зворотній дзвінок" />
         </div>
       </div>
       {!isMobile && <div className="border-b border-primaryAccentColor mb-5" />}
       <div className="mb-5">
         <p className="text-center">
-          &copy; 2024 Paro<span className="text-primaryAccentColor">Master</span>. Усі права
+          &copy; 2024 Paro
+          <span className="text-primaryAccentColor">Master</span>. Усі права
           захищено. Створено з ❤️ та інноваціями.
           <br />
           <br />
@@ -264,7 +274,7 @@ const Footer = ({ categories }: { categories: ICategory[] }) => {
         </p>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Footer
+export default Footer;

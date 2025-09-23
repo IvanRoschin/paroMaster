@@ -1,124 +1,153 @@
-"use client"
+'use client';
 
-import dynamic from "next/dynamic"
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
-import { toast } from "sonner"
+import dynamic from 'next/dynamic';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import { toast } from 'sonner';
 
-import { getGoodById } from "@/actions/goods"
-import { storageKeys } from "@/helpers/index"
-import { ICartItem } from "@/types/index"
+import { getGoodById } from '@/actions/goods';
+import { storageKeys } from '@/helpers/index';
+import { ICartItem } from '@/types/index';
 
 // Динамический импорт компонента корзины без SSR
-const ShoppingCart = dynamic(() => import("../components/ui/Cart/ShoppingCart"), { ssr: false })
+const ShoppingCart = dynamic(
+  () => import('../components/ui/Cart/ShoppingCart'),
+  { ssr: false }
+);
 
 type ShoppingCartProviderProps = {
-  children: React.ReactNode
-}
+  children: React.ReactNode;
+};
 
 type ShoppingCartContextProps = {
-  resetCart: () => void
-  getItemQuantity: (id: string) => number
-  increaseCartQuantity: (id: string) => void
-  decreaseCartQuantity: (id: string) => void
-  removeFromCart: (id: string) => void
-  setCartQuantity: (id: string, quantity: number) => void
-  cartQuantity: number
-  cart: ICartItem[]
-  setCart: React.Dispatch<React.SetStateAction<ICartItem[]>>
-}
+  resetCart: () => void;
+  getItemQuantity: (id: string) => number;
+  increaseCartQuantity: (id: string) => void;
+  decreaseCartQuantity: (id: string) => void;
+  removeFromCart: (id: string) => void;
+  setCartQuantity: (id: string, quantity: number) => void;
+  cartQuantity: number;
+  cart: ICartItem[];
+  setCart: React.Dispatch<React.SetStateAction<ICartItem[]>>;
+};
 
-const ShoppingCartContext = createContext<ShoppingCartContextProps | undefined>(undefined)
+const ShoppingCartContext = createContext<ShoppingCartContextProps | undefined>(
+  undefined
+);
 
 export function useShoppingCart() {
-  const context = useContext(ShoppingCartContext)
-  if (!context) throw new Error("useShoppingCart must be used within ShoppingCartProvider")
-  return context
+  const context = useContext(ShoppingCartContext);
+  if (!context)
+    throw new Error('useShoppingCart must be used within ShoppingCartProvider');
+  return context;
 }
 
 export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
   // Инициализация с localStorage, только на клиенте
   const [cart, setCart] = useState<ICartItem[]>(() => {
-    if (typeof window === "undefined") return []
-    const storedCart = localStorage.getItem(storageKeys.cart)
-    return storedCart ? JSON.parse(storedCart) : []
-  })
+    if (typeof window === 'undefined') return [];
+    const storedCart = localStorage.getItem(storageKeys.cart);
+    return storedCart ? JSON.parse(storedCart) : [];
+  });
 
   // Сохраняем изменения в localStorage
   useEffect(() => {
-    if (typeof window === "undefined") return
+    if (typeof window === 'undefined') return;
     if (cart.length > 0) {
-      localStorage.setItem(storageKeys.cart, JSON.stringify(cart))
+      localStorage.setItem(storageKeys.cart, JSON.stringify(cart));
     } else {
-      localStorage.removeItem(storageKeys.cart)
+      localStorage.removeItem(storageKeys.cart);
     }
-  }, [cart])
+  }, [cart]);
 
   // Количество всех товаров в корзине
-  const cartQuantity = useMemo(() => cart.reduce((sum, item) => sum + item.quantity, 0), [cart])
+  const cartQuantity = useMemo(
+    () => cart.reduce((sum, item) => sum + item.quantity, 0),
+    [cart]
+  );
 
   // Сброс корзины
   const resetCart = useCallback(() => {
-    setCart([])
-    if (typeof window !== "undefined") localStorage.removeItem(storageKeys.cart)
-  }, [])
+    setCart([]);
+    if (typeof window !== 'undefined')
+      localStorage.removeItem(storageKeys.cart);
+  }, []);
 
   // Получаем количество конкретного товара
   const getItemQuantity = useCallback(
     (id: string) => cart.find(item => item.good._id === id)?.quantity || 0,
     [cart]
-  )
+  );
 
   // Установка конкретного количества товара
   const setCartQuantity = useCallback((id: string, quantity: number) => {
     setCart(currItems =>
-      currItems.map(item => (item.good._id === id ? { ...item, quantity } : item))
-    )
-  }, [])
+      currItems.map(item =>
+        item.good._id === id ? { ...item, quantity } : item
+      )
+    );
+  }, []);
 
   // Добавление товара с оптимистичным апдейтом
   const increaseCartQuantity = useCallback((id: string) => {
     getGoodById(id)
       .then(newGood => {
         setCart(currItems => {
-          const existing = currItems.find(item => item.good._id === id)
+          const existing = currItems.find(item => item.good._id === id);
           if (!existing) {
-            toast.success(`Товар "${newGood.title}" додано до корзини`, { id: `add-${id}` })
-            return [...currItems, { good: newGood, quantity: 1 }] // корректный тип
+            toast.success(`Товар "${newGood.title}" додано до корзини`, {
+              id: `add-${id}`,
+            });
+            return [...currItems, { good: newGood, quantity: 1 }]; // корректный тип
           }
-          toast.info(`Кількість товару "${existing.good.title}" збільшено`, { id: `update-${id}` })
+          toast.info(`Кількість товару "${existing.good.title}" збільшено`, {
+            id: `update-${id}`,
+          });
           return currItems.map(item =>
-            item.good._id === id ? { ...item, quantity: item.quantity + 1 } : item
-          )
-        })
+            item.good._id === id
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          );
+        });
       })
       .catch(() => {
-        toast.error("Не вдалося додати товар до корзини")
-      })
-  }, [])
+        toast.error('Не вдалося додати товар до корзини');
+      });
+  }, []);
 
   // Уменьшение количества товара
   const decreaseCartQuantity = useCallback((id: string) => {
     setCart(currItems => {
-      const existing = currItems.find(item => item.good._id === id)
-      if (!existing) return currItems
+      const existing = currItems.find(item => item.good._id === id);
+      if (!existing) return currItems;
 
       if (existing.quantity === 1) {
-        toast.warning(`Товар "${existing.good.title}" видалено з корзини`, { id: `remove-${id}` })
-        return currItems.filter(item => item.good._id !== id)
+        toast.warning(`Товар "${existing.good.title}" видалено з корзини`, {
+          id: `remove-${id}`,
+        });
+        return currItems.filter(item => item.good._id !== id);
       }
 
-      toast.info(`Кількість товару "${existing.good.title}" зменшено`, { id: `decrease-${id}` })
+      toast.info(`Кількість товару "${existing.good.title}" зменшено`, {
+        id: `decrease-${id}`,
+      });
       return currItems.map(item =>
         item.good._id === id ? { ...item, quantity: item.quantity - 1 } : item
-      )
-    })
-  }, [])
+      );
+    });
+  }, []);
 
   // Полное удаление товара
   const removeFromCart = useCallback((id: string) => {
-    setCart(currItems => currItems.filter(item => item.good._id !== id))
-    toast.info("Товар видалено з корзини", { id: `delete-${id}` })
-  }, [])
+    setCart(currItems => currItems.filter(item => item.good._id !== id));
+    toast.info('Товар видалено з корзини', { id: `delete-${id}` });
+  }, []);
 
   const contextValue = useMemo(
     () => ({
@@ -130,7 +159,7 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
       setCartQuantity,
       cart,
       setCart,
-      cartQuantity
+      cartQuantity,
     }),
     [
       cart,
@@ -140,14 +169,14 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
       decreaseCartQuantity,
       removeFromCart,
       setCartQuantity,
-      getItemQuantity
+      getItemQuantity,
     ]
-  )
+  );
 
   return (
     <ShoppingCartContext.Provider value={contextValue}>
       {children}
       <ShoppingCart />
     </ShoppingCartContext.Provider>
-  )
+  );
 }

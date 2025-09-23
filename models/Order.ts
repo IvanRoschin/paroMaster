@@ -1,86 +1,86 @@
-import mongoose from "mongoose"
+import mongoose from 'mongoose';
 
-const { Schema } = mongoose
+const { Schema } = mongoose;
 
 const orderSchema = new Schema(
   {
     number: {
       type: String,
-      required: true
+      required: true,
     },
     customer: {
       name: {
         type: String,
-        required: true
+        required: true,
       },
       phone: {
         type: String,
-        required: true
+        required: true,
       },
       email: {
         type: String,
-        required: true
+        required: true,
       },
       city: {
         type: String,
-        required: true
+        required: true,
       },
       warehouse: {
         type: String,
-        required: true
+        required: true,
       },
       payment: {
         type: String,
-        required: true
-      }
+        required: true,
+      },
     },
     orderedGoods: [
       {
         _id: {
           type: String,
-          ref: "Good"
+          ref: 'Good',
         },
         title: {
           type: String,
-          required: true
+          required: true,
         },
         brand: {
           type: String,
-          required: true
+          required: true,
         },
         model: {
           type: String,
-          required: true
+          required: true,
         },
         vendor: {
           type: String,
-          required: true
+          required: true,
         },
         quantity: {
-          type: Number
+          type: Number,
         },
         src: {
-          type: [String]
+          type: [String],
         },
         price: {
           type: Number,
-          required: true
-        }
-      }
+          required: true,
+        },
+      },
     ],
     totalPrice: {
       type: Number,
-      required: true
+      required: true,
     },
     status: {
       type: String,
-      enum: ["Новий", "Опрацьовується", "Оплачено", "На відправку", "Закритий"],
-      required: true
-    }
+      enum: ['Новий', 'Опрацьовується', 'Оплачено', 'На відправку', 'Закритий'],
+      required: true,
+    },
   },
   { versionKey: false, timestamps: true }
-)
+);
 
-orderSchema.index({ "$**": "text" })
+orderSchema.index({ '$**': 'text' });
 
-export default mongoose.models.Order || mongoose.model("Order", orderSchema)
+export default mongoose.models.Order || mongoose.model('Order', orderSchema);

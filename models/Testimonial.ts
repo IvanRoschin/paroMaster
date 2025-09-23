@@ -1,20 +1,20 @@
-import mongoose from "mongoose"
-const { Schema } = mongoose
+import mongoose from 'mongoose';
+const { Schema } = mongoose;
 
 const testimonialsSchema = new Schema(
   {
     product: {
       type: Schema.Types.ObjectId,
-      ref: "Good",
-      required: false
+      ref: 'Good',
+      required: false,
     },
     name: {
       type: String,
-      required: true
+      required: true,
     },
     text: {
       type: String,
-      required: true
+      required: true,
     },
     rating: {
       type: Number,
@@ -22,19 +22,20 @@ const testimonialsSchema = new Schema(
       default: null,
       validate: {
         validator: function (v: null | number) {
-          return v === null || (v >= 1 && v <= 5)
+          return v === null || (v >= 1 && v <= 5);
         },
-        message: "Rating must be between 1 and 5, or null"
-      }
+        message: 'Rating must be between 1 and 5, or null',
+      },
     },
     isActive: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
   { versionKey: false, timestamps: true }
-)
+);
 
-testimonialsSchema.index({ "$**": "text" })
+testimonialsSchema.index({ '$**': 'text' });
 
-export default mongoose.models.Testimonial || mongoose.model("Testimonial", testimonialsSchema)
+export default mongoose.models.Testimonial ||
+  mongoose.model('Testimonial', testimonialsSchema);

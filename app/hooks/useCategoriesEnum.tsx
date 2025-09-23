@@ -1,21 +1,26 @@
-import { getAllCategories } from "@/actions/categories"
-import { useFetchData } from "@/hooks/index"
-import { ICategory } from "@/types/index"
+import { getAllCategories } from '@/actions/categories';
+import { useFetchData } from '@/hooks/index';
+import { ICategory } from '@/types/index';
 
 const useCategoriesEnum = () => {
-  const { data, isLoading, isError } = useFetchData(getAllCategories, ["categories"], {
-    limit: 100,
-    page: 1
-  })
+  const { data, isLoading, isError } = useFetchData(
+    getAllCategories,
+    ['categories'],
+    {
+      limit: 100,
+      page: 1,
+    }
+  );
 
-  const allowedCategories = data?.categories?.map((cat: ICategory) => cat.title) ?? []
+  const allowedCategories =
+    data?.categories?.map((cat: ICategory) => cat.title) ?? [];
 
   return {
     categories: data?.categories ?? [],
     allowedCategories,
     isLoading,
-    isError
-  }
-}
+    isError,
+  };
+};
 
-export default useCategoriesEnum
+export default useCategoriesEnum;

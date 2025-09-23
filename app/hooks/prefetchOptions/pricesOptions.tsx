@@ -1,13 +1,13 @@
-import { getMinMaxPrice } from "@/actions/goods"
-import { queryOptions } from "@tanstack/react-query"
+import { getMinMaxPrice } from '@/actions/goods';
+import { queryOptions } from '@tanstack/react-query';
 
 const pricesOptions = queryOptions({
-  queryKey: ["prices"],
+  queryKey: ['prices'],
   queryFn: async () => {
-    const response = await getMinMaxPrice()
+    const response = await getMinMaxPrice();
 
-    return response
-  }
-})
+    return response;
+  },
+});
 
-export default pricesOptions
+export default pricesOptions;

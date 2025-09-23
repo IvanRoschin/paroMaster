@@ -1,16 +1,23 @@
-"use client"
+'use client';
 
-import { CartButton, Logo, Menu, MobileMenu, Search, Socials } from "@/components/index"
-import { useMediaQuery } from "@/hooks/index"
+import {
+  CartButton,
+  Logo,
+  Menu,
+  MobileMenu,
+  Search,
+  Socials,
+} from '@/components/index';
+import { useMediaQuery } from '@/hooks/index';
 
 interface HeaderProps {
-  session?: any
+  session?: any;
 }
 
 const Header = ({ session }: HeaderProps) => {
-  const isMobile = useMediaQuery("(max-width: 767px)")
-  const isTablet = useMediaQuery("(min-width: 768px) and (max-width: 1024px)")
-  const isDesktop = useMediaQuery("(min-width: 1025px)")
+  const isMobile = useMediaQuery('(max-width: 767px)');
+  const isTablet = useMediaQuery('(min-width: 768px) and (max-width: 1024px)');
+  const isDesktop = useMediaQuery('(min-width: 1025px)');
 
   return (
     <div className="">
@@ -31,7 +38,7 @@ const Header = ({ session }: HeaderProps) => {
         <CartButton />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

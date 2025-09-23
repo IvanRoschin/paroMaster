@@ -1,26 +1,26 @@
-import mongoose from "mongoose"
+import mongoose from 'mongoose';
 
-const { Schema } = mongoose
+const { Schema } = mongoose;
 
 const lidSchema = new Schema(
   {
     name: {
       type: String,
-      required: true
+      required: true,
     },
     phone: {
       type: String,
-      required: true
+      required: true,
     },
     email: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
 
   { versionKey: false, timestamps: true }
-)
+);
 
-lidSchema.index({ "$**": "text" })
+lidSchema.index({ '$**': 'text' });
 
-export default mongoose.models.Lid || mongoose.model("Lid", lidSchema)
+export default mongoose.models.Lid || mongoose.model('Lid', lidSchema);

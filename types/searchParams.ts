@@ -1,27 +1,27 @@
 export interface FilterParams {
-  q?: string
-  status?: string | null
-  brand?: string
-  category?: string
-  low?: string
-  high?: string
-  page?: string
-  sort?: "asc" | "desc"
-  limit?: string
-  [key: string]: any
+  q?: string;
+  status?: string | null;
+  brand?: string;
+  category?: string;
+  low?: string;
+  high?: string;
+  page?: string;
+  sort?: 'asc' | 'desc';
+  limit?: string;
+  [key: string]: any;
 }
 
 export interface ISearchParams {
-  q?: string
-  status?: string | null
-  brand?: string
-  category?: string
-  low?: string
-  high?: string
-  page?: string
-  sort?: "asc" | "desc"
-  limit?: string
-  [key: string]: any
+  q?: string;
+  status?: string | null;
+  brand?: string;
+  category?: string;
+  low?: string;
+  high?: string;
+  page?: string;
+  sort?: 'asc' | 'desc';
+  limit?: string;
+  [key: string]: any;
 }
 
 // export interface ISearchParams {

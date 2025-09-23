@@ -1,74 +1,84 @@
-"use client"
+'use client';
 
-import "./PriceFilter.css"
+import './PriceFilter.css';
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useEffect, useState } from "react"
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 
 interface PriceFilterProps {
-  currencySymbol?: string
-  minPrice: number
-  maxPrice: number
+  currencySymbol?: string;
+  minPrice: number;
+  maxPrice: number;
 }
 
-const PriceFilter: React.FC<PriceFilterProps> = ({ currencySymbol = "₴", minPrice, maxPrice }) => {
+const PriceFilter: React.FC<PriceFilterProps> = ({
+  currencySymbol = '₴',
+  minPrice,
+  maxPrice,
+}) => {
   const [values, setValues] = useState<string[]>([
-    minPrice.toString() || "0",
-    maxPrice.toString() || "100"
-  ])
+    minPrice.toString() || '0',
+    maxPrice.toString() || '100',
+  ]);
 
-  const searchParams = useSearchParams()
-  const pathname = usePathname()
-  const { push } = useRouter()
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { push } = useRouter();
 
   const createQueryString = useCallback(
     (low: string, high: string) => {
-      const params = new URLSearchParams(searchParams.toString())
+      const params = new URLSearchParams(searchParams.toString());
       if (low) {
-        params.set("low", low)
+        params.set('low', low);
       } else {
-        params.delete("low")
+        params.delete('low');
       }
       if (high) {
-        params.set("high", high)
+        params.set('high', high);
       } else {
-        params.delete("high")
+        params.delete('high');
       }
-      return params.toString()
+      return params.toString();
     },
     [searchParams]
-  )
+  );
 
-  const handleRangeChange = (type: "min" | "max", value: string) => {
-    const newValue = parseInt(value.replace(/\D/g, ""), 10) || 0
-    if (type === "min") {
-      setValues([Math.min(newValue, parseInt(values[1])).toString(), values[1]])
+  const handleRangeChange = (type: 'min' | 'max', value: string) => {
+    const newValue = parseInt(value.replace(/\D/g, ''), 10) || 0;
+    if (type === 'min') {
+      setValues([
+        Math.min(newValue, parseInt(values[1])).toString(),
+        values[1],
+      ]);
     } else {
-      setValues([values[0], Math.max(parseInt(values[0]), newValue).toString()])
+      setValues([
+        values[0],
+        Math.max(parseInt(values[0]), newValue).toString(),
+      ]);
     }
-  }
+  };
 
   useEffect(() => {
     if (minPrice !== null && maxPrice !== null) {
-      setValues([minPrice.toString(), maxPrice.toString()])
+      setValues([minPrice.toString(), maxPrice.toString()]);
     }
-  }, [minPrice, maxPrice])
+  }, [minPrice, maxPrice]);
 
   // Когда значение в "до" меняется, обновляем "от" автоматически
   const handleMaxChange = (value: string) => {
-    const newMax = parseInt(value.replace(/\D/g, ""), 10) || 0
-    setValues([values[0], newMax.toString()])
-  }
+    const newMax = parseInt(value.replace(/\D/g, ''), 10) || 0;
+    setValues([values[0], newMax.toString()]);
+  };
 
   useEffect(() => {
     if (values) {
       const handleClick = (low: string, high: string) => {
-        const queryString = createQueryString(low, high)
-        push(pathname + "?" + queryString, { scroll: false })
-      }
-      handleClick(values[0], values[1])
+        const queryString = createQueryString(low, high);
+        push(pathname + '?' + queryString, { scroll: false });
+      };
+      handleClick(values[0], values[1]);
     }
-  }, [values, createQueryString, pathname, push])
+  }, [values, createQueryString, pathname, push]);
 
   return (
     <div className="double-slider-box">
@@ -82,7 +92,7 @@ const PriceFilter: React.FC<PriceFilterProps> = ({ currencySymbol = "₴", minPr
           min={minPrice || 0}
           max={maxPrice || 100}
           value={values[0]}
-          onChange={e => handleRangeChange("min", e.target.value)}
+          onChange={e => handleRangeChange('min', e.target.value)}
         />
         <input
           type="range"
@@ -91,7 +101,7 @@ const PriceFilter: React.FC<PriceFilterProps> = ({ currencySymbol = "₴", minPr
           min={minPrice || 0}
           max={maxPrice || 100}
           value={values[1]}
-          onChange={e => handleRangeChange("max", e.target.value)}
+          onChange={e => handleRangeChange('max', e.target.value)}
         />
         <div className="tooltip min-tooltip">
           {values[0]} {currencySymbol}
@@ -109,7 +119,7 @@ const PriceFilter: React.FC<PriceFilterProps> = ({ currencySymbol = "₴", minPr
               name="min_input"
               className="input-field"
               value={values[0]}
-              onChange={e => handleRangeChange("min", e.target.value)}
+              onChange={e => handleRangeChange('min', e.target.value)}
             />
           </div>
         </div>
@@ -127,7 +137,7 @@ const PriceFilter: React.FC<PriceFilterProps> = ({ currencySymbol = "₴", minPr
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default PriceFilter
+export default PriceFilter;

@@ -1,30 +1,31 @@
-"use client"
+'use client';
 
-import { useShoppingCart } from "app/context/ShoppingCartContext"
-import Image from "next/image"
-import { useEffect, useState } from "react"
+import { useShoppingCart } from 'app/context/ShoppingCartContext';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
 
-import { Button, Icon } from "@/components/index"
-import { IGood } from "@/types/index"
+import { Button, Icon } from '@/components/index';
+import { IGood } from '@/types/index';
 
 type CartItemProps = {
-  good: IGood
-  quantity: number
-}
+  good: IGood;
+  quantity: number;
+};
 
 const CartItem: React.FC<CartItemProps> = ({ good, quantity }) => {
-  const { increaseCartQuantity, decreaseCartQuantity, removeFromCart } = useShoppingCart()
-  const [amount, setAmount] = useState(0)
+  const { increaseCartQuantity, decreaseCartQuantity, removeFromCart } =
+    useShoppingCart();
+  const [amount, setAmount] = useState(0);
 
   useEffect(() => {
     if (good) {
-      const newAmount = good.price * quantity
-      setAmount(newAmount)
-      sessionStorage.setItem(`amount-${good._id}`, JSON.stringify(newAmount))
+      const newAmount = good.price * quantity;
+      setAmount(newAmount);
+      sessionStorage.setItem(`amount-${good._id}`, JSON.stringify(newAmount));
     }
-  }, [good, quantity])
+  }, [good, quantity]);
 
-  const { _id, title, price, src } = good
+  const { _id, title, price, src } = good;
 
   return (
     <div>
@@ -48,9 +49,19 @@ const CartItem: React.FC<CartItemProps> = ({ good, quantity }) => {
           {/* Quantity Controls */}
           <div className="flex items-center gap-5">
             <div className="flex items-center gap-2">
-              <Button label="-" onClick={() => _id && decreaseCartQuantity(_id)} small outline />
+              <Button
+                label="-"
+                onClick={() => _id && decreaseCartQuantity(_id)}
+                small
+                outline
+              />
               <span className="text-xl">{quantity}</span>
-              <Button label="+" onClick={() => _id && increaseCartQuantity(_id)} small outline />
+              <Button
+                label="+"
+                onClick={() => _id && increaseCartQuantity(_id)}
+                small
+                outline
+              />
             </div>
             x <p>{price}</p>
           </div>
@@ -62,16 +73,19 @@ const CartItem: React.FC<CartItemProps> = ({ good, quantity }) => {
           {/* Remove Item Button */}
           <button
             onClick={() => {
-              _id && removeFromCart(_id)
-              _id && sessionStorage.removeItem(`amount-${_id}`)
+              _id && removeFromCart(_id);
+              _id && sessionStorage.removeItem(`amount-${_id}`);
             }}
           >
-            <Icon name="icon_trash" className="w-5 h-5 hover:text-primaryAccentColor" />
+            <Icon
+              name="icon_trash"
+              className="w-5 h-5 hover:text-primaryAccentColor"
+            />
           </button>
         </div>
       </li>
     </div>
-  )
-}
+  );
+};
 
-export default CartItem
+export default CartItem;

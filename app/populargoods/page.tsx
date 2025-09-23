@@ -1,27 +1,32 @@
-import { getMostPopularGoods } from "@/actions/goods"
-import { Breadcrumbs, ErrorMessage, InfiniteScroll, Loader } from "@/components/index"
-import { IGood, ISearchParams } from "@/types/index"
+import { getMostPopularGoods } from '@/actions/goods';
+import {
+  Breadcrumbs,
+  ErrorMessage,
+  InfiniteScroll,
+  Loader,
+} from '@/components/index';
+import { IGood, ISearchParams } from '@/types/index';
 
 interface GoodsData {
-  goods: IGood[]
+  goods: IGood[];
 }
 
-export const dynamic = "force-dynamic"
+export const dynamic = 'force-dynamic';
 
 export default async function MostPopularGoodsPage({
-  searchParams
+  searchParams,
 }: {
-  searchParams: Promise<ISearchParams>
+  searchParams: Promise<ISearchParams>;
 }) {
-  const params = await searchParams
-  let data: GoodsData | null = null
+  const params = await searchParams;
+  let data: GoodsData | null = null;
   try {
-    data = await getMostPopularGoods()
+    data = await getMostPopularGoods();
   } catch (err) {
-    return <ErrorMessage error={(err as Error).message} />
+    return <ErrorMessage error={(err as Error).message} />;
   }
 
-  if (!data) return <Loader />
+  if (!data) return <Loader />;
 
   return (
     <div className="max-w-6xl mx-auto py-3 container">
@@ -31,5 +36,5 @@ export default async function MostPopularGoodsPage({
         <InfiniteScroll initialGoods={data.goods} searchParams={params} />
       </div>
     </div>
-  )
+  );
 }

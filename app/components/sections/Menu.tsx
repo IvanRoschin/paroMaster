@@ -1,12 +1,12 @@
-import { menu } from "app/config/constants"
-import { signOut } from "next-auth/react"
-import Link from "next/link"
-import { MdLogout } from "react-icons/md"
+import { menu } from 'app/config/constants';
+import { signOut } from 'next-auth/react';
+import Link from 'next/link';
+import { MdLogout } from 'react-icons/md';
 
-import { Button, Icon } from "@/components/ui"
+import { Button, Icon } from '@/components/ui';
 
 interface MenuProps {
-  session?: any
+  session?: any;
 }
 
 const Menu = ({ session }: MenuProps) => {
@@ -31,13 +31,13 @@ const Menu = ({ session }: MenuProps) => {
         ))}
       </ul>
       {session && (
-        <Button small onClick={() => signOut({ callbackUrl: "/" })}>
+        <Button small onClick={() => signOut({ callbackUrl: '/' })}>
           <MdLogout />
           Вихід
         </Button>
       )}
     </nav>
-  )
-}
+  );
+};
 
-export default Menu
+export default Menu;

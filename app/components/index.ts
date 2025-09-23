@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import {
   Breadcrumbs,
@@ -10,9 +10,9 @@ import {
   Logo,
   Pagination,
   Search,
-  Socials
-} from "@/components/common"
-import { LidForm, LoginForm, TestimonialForm } from "@/components/forms"
+  Socials,
+} from '@/components/common';
+import { LidForm, LoginForm, TestimonialForm } from '@/components/forms';
 import {
   Advantages,
   BrandFilter,
@@ -31,8 +31,8 @@ import {
   Slider,
   Sort,
   Testimonial,
-  TestimonialsList
-} from "@/components/sections"
+  TestimonialsList,
+} from '@/components/sections';
 import {
   Button,
   CartButton,
@@ -48,8 +48,8 @@ import {
   Rating,
   ShoppingCart,
   SingOutButton,
-  Switcher
-} from "@/components/ui"
+  Switcher,
+} from '@/components/ui';
 
 export {
   Advantages,
@@ -97,5 +97,5 @@ export {
   Switcher,
   Testimonial,
   TestimonialForm,
-  TestimonialsList
-}
+  TestimonialsList,
+};

@@ -1,17 +1,17 @@
-import { URLSearchParams } from "url"
+import { URLSearchParams } from 'url';
 
-import { getAllCategories } from "@/actions/categories"
-import { queryOptions } from "@tanstack/react-query"
+import { getAllCategories } from '@/actions/categories';
+import { queryOptions } from '@tanstack/react-query';
 
-const params = new URLSearchParams()
+const params = new URLSearchParams();
 
 const categoriesOptions = queryOptions({
-  queryKey: ["categories"],
+  queryKey: ['categories'],
   queryFn: async () => {
-    const response = await getAllCategories({ searchParams: params })
+    const response = await getAllCategories({ searchParams: params });
 
-    return response
-  }
-})
+    return response;
+  },
+});
 
-export default categoriesOptions
+export default categoriesOptions;

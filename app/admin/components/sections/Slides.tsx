@@ -1,12 +1,12 @@
-"use client"
+'use client';
 
-import Image from "next/image"
-import Link from "next/link"
-import { useState } from "react"
-import { FaPen, FaTrash } from "react-icons/fa"
-import { toast } from "sonner"
+import Image from 'next/image';
+import Link from 'next/link';
+import { useState } from 'react';
+import { FaPen, FaTrash } from 'react-icons/fa';
+import { toast } from 'sonner';
 
-import { deleteSlide, getAllSlides, updateSlide } from "@/actions/slider"
+import { deleteSlide, getAllSlides, updateSlide } from '@/actions/slider';
 import {
   Breadcrumbs,
   Button,
@@ -14,60 +14,71 @@ import {
   ErrorMessage,
   Loader,
   Pagination,
-  Switcher
-} from "@/components/index"
-import { useDeleteData, useFetchData } from "@/hooks/index"
-import { ISlider } from "@/types/index"
-import { ISearchParams } from "@/types/searchParams"
+  Switcher,
+} from '@/components/index';
+import { useDeleteData, useFetchData } from '@/hooks/index';
+import { ISlider } from '@/types/index';
+import { ISearchParams } from '@/types/searchParams';
 
-export default function Slides({ searchParams }: { searchParams: ISearchParams }) {
-  const [statusFilter, setStatusFilter] = useState<string | null>(null)
+export default function Slides({
+  searchParams,
+}: {
+  searchParams: ISearchParams;
+}) {
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
-  const page = Number(searchParams.page) || 1
-  const limit = Number(searchParams.limit) || 10
+  const page = Number(searchParams.page) || 1;
+  const limit = Number(searchParams.limit) || 10;
 
-  const { data, isLoading, isError, error, refetch } = useFetchData(getAllSlides, ["slides"], {
-    ...searchParams,
-    status: statusFilter
-  })
+  const { data, isLoading, isError, error, refetch } = useFetchData(
+    getAllSlides,
+    ['slides'],
+    {
+      ...searchParams,
+      status: statusFilter,
+    }
+  );
 
-  const { mutate: deleteSliderById } = useDeleteData(deleteSlide, ["slides"])
+  const { mutate: deleteSliderById } = useDeleteData(deleteSlide, ['slides']);
 
   const handleDelete = (id: string) => {
-    deleteSliderById(id)
-  }
+    deleteSliderById(id);
+  };
 
-  const handleStatusToggle = async (_id: string | undefined, isActive: boolean) => {
-    if (!_id) return toast.error("Неправильний ID слайда.")
+  const handleStatusToggle = async (
+    _id: string | undefined,
+    isActive: boolean
+  ) => {
+    if (!_id) return toast.error('Неправильний ID слайда.');
     try {
-      const values = { _id, isActive: !isActive }
-      await updateSlide(values as Partial<ISlider> & { _id: string })
-      toast.success("Статус слайду оновлено!")
-      refetch()
+      const values = { _id, isActive: !isActive };
+      await updateSlide(values as Partial<ISlider> & { _id: string });
+      toast.success('Статус слайду оновлено!');
+      refetch();
     } catch (error) {
-      console.error("Помилка оновлення статусу слайду:", error)
-      toast.error("Помилка зміни статусу.")
+      console.error('Помилка оновлення статусу слайду:', error);
+      toast.error('Помилка зміни статусу.');
     }
-  }
+  };
 
-  if (isLoading) return <Loader />
-  if (isError) return <ErrorMessage error={error} />
+  if (isLoading) return <Loader />;
+  if (isError) return <ErrorMessage error={error} />;
   if (!data?.slides || data.slides.length === 0)
     return (
       <EmptyState
         showReset
         onReset={() => {
-          setStatusFilter(null)
+          setStatusFilter(null);
         }}
       />
-    )
+    );
 
-  const slidesCount = data.count || 0
-  const totalPages = Math.ceil(slidesCount / limit)
-  const pageNumbers = []
-  const offsetNumber = 3
+  const slidesCount = data.count || 0;
+  const totalPages = Math.ceil(slidesCount / limit);
+  const pageNumbers = [];
+  const offsetNumber = 3;
   for (let i = page - offsetNumber; i <= page + offsetNumber; i++) {
-    if (i >= 1 && i <= totalPages) pageNumbers.push(i)
+    if (i >= 1 && i <= totalPages) pageNumbers.push(i);
   }
 
   return (
@@ -77,12 +88,15 @@ export default function Slides({ searchParams }: { searchParams: ISearchParams }
       <div className="flex items-center justify-between mb-8">
         {/* <Search placeholder="Знайти слайд" /> */}
         <p className=" text-lg">
-          {" "}
-          Всього в базі <span className="subtitle text-lg">{slidesCount}</span> слайди(-ів)
+          {' '}
+          Всього в базі <span className="subtitle text-lg">
+            {slidesCount}
+          </span>{' '}
+          слайди(-ів)
         </p>
         <div className="flex items-center gap-4">
           <select
-            value={statusFilter || ""}
+            value={statusFilter || ''}
             onChange={e => setStatusFilter(e.target.value || null)}
             className="border border-gray-300 rounded p-2 text-sm"
           >
@@ -91,7 +105,13 @@ export default function Slides({ searchParams }: { searchParams: ISearchParams }
             <option value="Не публікується">Не публікується</option>
           </select>
           <Link href="/admin/slider/add">
-            <Button type="button" label="Додати" small outline color="border-green-400" />
+            <Button
+              type="button"
+              label="Додати"
+              small
+              outline
+              color="border-green-400"
+            />
           </Link>
         </div>
       </div>
@@ -113,20 +133,36 @@ export default function Slides({ searchParams }: { searchParams: ISearchParams }
               <td className="p-2 border-r-2 text-start">{slide.desc}</td>
               <td className="p-2 border-r-2">
                 <div className="flex justify-center">
-                  <Image src={slide.src[0]} alt={slide.title} width={100} height={100} priority />
+                  <Image
+                    src={slide.src[0]}
+                    alt={slide.title}
+                    width={100}
+                    height={100}
+                    priority
+                  />
                 </div>
               </td>
               <td className="p-2 border-r-2 text-center">
                 <Switcher
                   checked={slide.isActive}
                   onChange={() =>
-                    slide._id && handleStatusToggle(slide._id.toString(), slide.isActive)
+                    slide._id &&
+                    handleStatusToggle(slide._id.toString(), slide.isActive)
                   }
                 />
               </td>
               <td className="p-2 border-r-2 text-center">
-                <Link href={`/admin/slider/${slide._id}`} className="flex justify-center">
-                  <Button type="button" icon={FaPen} small outline color="border-yellow-400" />
+                <Link
+                  href={`/admin/slider/${slide._id}`}
+                  className="flex justify-center"
+                >
+                  <Button
+                    type="button"
+                    icon={FaPen}
+                    small
+                    outline
+                    color="border-yellow-400"
+                  />
                 </Link>
               </td>
               <td className="p-2 text-center">
@@ -136,7 +172,9 @@ export default function Slides({ searchParams }: { searchParams: ISearchParams }
                   small
                   outline
                   color="border-red-400"
-                  onClick={() => slide._id && handleDelete(slide._id.toString())}
+                  onClick={() =>
+                    slide._id && handleDelete(slide._id.toString())
+                  }
                 />
               </td>
             </tr>
@@ -145,5 +183,5 @@ export default function Slides({ searchParams }: { searchParams: ISearchParams }
       </table>
       <Pagination count={slidesCount} pageNumbers={pageNumbers} />
     </div>
-  )
+  );
 }

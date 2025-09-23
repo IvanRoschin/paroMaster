@@ -131,6 +131,10 @@ jobs:
             exit 1
           fi
 
+      # ----------------- CI/CD Start Time -----------------
+      - name: 🕒 Save start time
+        run: echo "START_TIME=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_ENV
+
       # ----------------- Telegram Notification -----------------
       - name: 📲 Send Telegram Notification
         if: always()
@@ -139,7 +143,9 @@ jobs:
           to: ${{ env.TELEGRAM_CHAT_ID }}
           token: ${{ env.TELEGRAM_BOT_TOKEN }}
           message: |
-            🚀 ${{ github.repository }}
-            📦 ${{ github.sha }}
-            🩺 ${{ steps.healthcheck.outputs.status || 'unknown' }}
-            🔗 ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            🚀 CI/CD завершен!
+            📦 Образ: ${{ github.sha }}
+            🩺 HealthCheck: ${{ steps.healthcheck.outputs.status || 'unknown' }}
+            🔗 Репозиторий: ${{ github.repository }}
+            🕒 Время: ${{ env.START_TIME }}
+            ${{ job.status == 'success' && '✅ Всё прошло успешно!' || '❌ Ошибка в пайплайне!' }}

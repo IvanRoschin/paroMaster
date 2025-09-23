@@ -1,48 +1,48 @@
-import bcrypt from "bcrypt"
-import mongoose from "mongoose"
+import bcrypt from 'bcrypt';
+import mongoose from 'mongoose';
 
-const { Schema } = mongoose
+const { Schema } = mongoose;
 
 const userSchema = new Schema(
   {
     name: {
       type: String,
-      required: true
+      required: true,
     },
     phone: {
       type: String,
-      required: true
+      required: true,
     },
     email: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
     },
     password: {
       type: String,
-      required: true
+      required: true,
     },
     isAdmin: {
       type: Boolean,
       required: true,
-      default: false
+      default: false,
     },
     isActive: {
       type: Boolean,
       required: true,
-      default: true
-    }
+      default: true,
+    },
   },
   { versionKey: false, timestamps: true }
-)
+);
 
-userSchema.index({ "$**": "text" })
+userSchema.index({ '$**': 'text' });
 
 userSchema.methods.setPassword = function (password: any) {
-  this.password = bcrypt.hashSync(password, bcrypt.genSaltSync(10))
-}
+  this.password = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
+};
 
 userSchema.methods.comparePassword = function (password: any) {
-  return bcrypt.compareSync(password, this.password)
-}
-export default mongoose.models.User || mongoose.model("User", userSchema)
+  return bcrypt.compareSync(password, this.password);
+};
+export default mongoose.models.User || mongoose.model('User', userSchema);

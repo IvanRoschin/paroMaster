@@ -1,66 +1,66 @@
-import mongoose from "mongoose"
-const { Schema } = mongoose
+import mongoose from 'mongoose';
+const { Schema } = mongoose;
 
 const goodSchema = new Schema(
   {
     category: {
       type: String,
-      required: true
+      required: true,
     },
     title: {
       type: String,
-      required: true
+      required: true,
     },
     description: {
       type: String,
-      required: true
+      required: true,
     },
     src: {
       type: [String],
-      required: true
+      required: true,
     },
     brand: {
       type: String,
-      required: true
+      required: true,
     },
     model: {
       type: String,
-      required: true
+      required: true,
     },
     vendor: {
       type: String,
-      required: true
+      required: true,
     },
     price: {
       type: Number,
-      required: true
+      required: true,
     },
     isCondition: {
       type: Boolean,
-      required: true
+      required: true,
     },
     isAvailable: {
       type: Boolean,
-      required: true
+      required: true,
     },
     isCompatible: {
       type: Boolean,
-      required: true
+      required: true,
     },
     compatibility: {
       type: [String],
-      default: []
+      default: [],
     },
     averageRating: {
-      type: Number
+      type: Number,
     },
     ratingCount: {
-      type: Number
-    }
+      type: Number,
+    },
   },
   { versionKey: false, timestamps: true }
-)
+);
 
-goodSchema.index({ "$**": "text" })
+goodSchema.index({ '$**': 'text' });
 
-export default mongoose.models.Good || mongoose.model("Good", goodSchema)
+export default mongoose.models.Good || mongoose.model('Good', goodSchema);

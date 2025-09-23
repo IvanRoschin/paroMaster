@@ -1,9 +1,9 @@
-import { IOrder } from "@/types/index"
+import { IOrder } from '@/types/index';
 
 enum PaymentMethod {
-  CashOnDelivery = "Оплата після отримання",
-  CreditCard = "Оплата на карту",
-  InvoiceForSPD = "Рахунок для СПД"
+  CashOnDelivery = 'Оплата після отримання',
+  CreditCard = 'Оплата на карту',
+  InvoiceForSPD = 'Рахунок для СПД',
 }
 
 export function generateEmailContent(data: IOrder) {
@@ -19,7 +19,10 @@ export function generateEmailContent(data: IOrder) {
     data.orderedGoods.length === 0 ||
     data.totalPrice <= 0
   ) {
-    return { success: false, error: "Validation Error: Missing or invalid required data." }
+    return {
+      success: false,
+      error: 'Validation Error: Missing or invalid required data.',
+    };
   }
 
   const itemsContent = data.orderedGoods
@@ -36,7 +39,7 @@ export function generateEmailContent(data: IOrder) {
         </tr>
       `
     )
-    .join("")
+    .join('');
 
   return `
     <div style="max-width: 800px; margin: 0 auto; padding: 30px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fff; border-radius: 10px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); color: #333;">
@@ -82,5 +85,5 @@ export function generateEmailContent(data: IOrder) {
         <p>Успішних продажів бажає ParoMaster 🚀</p>
       </div>
     </div>
-  `
+  `;
 }

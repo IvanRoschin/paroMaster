@@ -1,55 +1,69 @@
-"use client"
-import { useShoppingCart } from "app/context/ShoppingCartContext"
-import { useSession } from "next-auth/react"
-import Image from "next/image"
-import Link from "next/link"
-import { useEffect, useState } from "react"
-import { FaPen } from "react-icons/fa"
+'use client';
+import { useShoppingCart } from 'app/context/ShoppingCartContext';
+import { useSession } from 'next-auth/react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { FaPen } from 'react-icons/fa';
 
-import { Button } from "@/components/index"
-import { IGood } from "@/types/IGood"
+import { Button } from '@/components/index';
+import { IGood } from '@/types/IGood';
 
 interface IProductCardProps {
-  good: IGood
+  good: IGood;
 }
 
 const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
-  const { data: session } = useSession()
-  const isAdmin = session?.user
+  const { data: session } = useSession();
+  const isAdmin = session?.user;
 
-  const { getItemQuantity, increaseCartQuantity, decreaseCartQuantity, removeFromCart } =
-    useShoppingCart()
+  const getCloudinaryUrl = (img: string, width: number, height: number) => {
+    return img.replace(
+      '/upload/',
+      `/upload/c_fill,g_auto,w_${width},h_${height}/f_webp/q_auto/`
+    );
+  };
 
-  const [quantity, setQuantity] = useState(0)
-  const [amount, setAmount] = useState(0)
+  const {
+    getItemQuantity,
+    increaseCartQuantity,
+    decreaseCartQuantity,
+    removeFromCart,
+  } = useShoppingCart();
+
+  const [quantity, setQuantity] = useState(0);
+  const [amount, setAmount] = useState(0);
 
   // Клиентская инициализация количества
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const q = getItemQuantity(good._id!)
-      setQuantity(q)
+    if (typeof window !== 'undefined') {
+      const q = getItemQuantity(good._id!);
+      setQuantity(q);
     }
-  }, [getItemQuantity, good._id])
+  }, [getItemQuantity, good._id]);
 
   // Рассчитываем amount и сохраняем в localStorage только на клиенте
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const newAmount = good.price * quantity
-      setAmount(newAmount)
-      localStorage.setItem(`amount-${good._id}`, JSON.stringify(newAmount))
+    if (typeof window !== 'undefined') {
+      const newAmount = good.price * quantity;
+      setAmount(newAmount);
+      localStorage.setItem(`amount-${good._id}`, JSON.stringify(newAmount));
     }
-  }, [quantity, good.price, good._id])
+  }, [quantity, good.price, good._id]);
 
   return (
     <li className="flex flex-col justify-between border border-gray-300 rounded-md p-4 hover:shadow-[10px_10px_15px_-3px_rgba(0,0,0,0.3)] transition-all">
       <div className="relative">
-        <Link href={`/good/${good._id}`} className="flex flex-col h-full justify-between">
+        <Link
+          href={`/good/${good._id}`}
+          className="flex flex-col h-full justify-between"
+        >
           <div className="w-[200px] h-[200px]">
             <div className="absolute top-2 left-2 bg-primaryAccentColor text-white text-xs font-semibold px-2 py-1 rounded">
-              {good.isCondition ? "НОВИЙ" : "Б/У"}
+              {good.isCondition ? 'НОВИЙ' : 'Б/У'}
             </div>
             <Image
-              src={good.src[0]}
+              src={getCloudinaryUrl(good.src[0], 200, 200)}
               alt="item_photo"
               width={200}
               height={200}
@@ -59,15 +73,21 @@ const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
           <div className="flex items-center gap-2 mb-2">
             <div className="flex text-yellow-400">
               {Array.from({ length: 5 }, (_, index) => (
-                <span key={index}>{index < Math.round(good.averageRating || 0) ? "★" : "☆"}</span>
+                <span key={index}>
+                  {index < Math.round(good.averageRating || 0) ? '★' : '☆'}
+                </span>
               ))}
             </div>
-            <span className="text-sm text-gray-600">({good.ratingCount || 0} відгуків)</span>
+            <span className="text-sm text-gray-600">
+              ({good.ratingCount || 0} відгуків)
+            </span>
           </div>
           <h2 className="font-semibold mb-[20px]">{good.title}</h2>
           <div>
-            <p className={`mb-[20px] ${good.isAvailable ? "text-green-600" : "text-red-600"}`}>
-              {good.isAvailable ? "В наявності" : "Немає в наявності"}
+            <p
+              className={`mb-[20px] ${good.isAvailable ? 'text-green-600' : 'text-red-600'}`}
+            >
+              {good.isAvailable ? 'В наявності' : 'Немає в наявності'}
             </p>
             <p className="mb-[20px]">Артикул: {good.vendor}</p>
             <p className="text-2xl font-bold mb-[20px]">{good.price} грн</p>
@@ -94,17 +114,17 @@ const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
         removeFromCart={removeFromCart}
       />
     </li>
-  )
-}
+  );
+};
 
 // CartActions и ItemDetails оставляем без изменений
 interface CartActionsProps {
-  isAvailable: boolean
-  itemId: string
-  quantity: number
-  increaseCartQuantity: (id: string) => void
-  decreaseCartQuantity: (id: string) => void
-  removeFromCart: (id: string) => void
+  isAvailable: boolean;
+  itemId: string;
+  quantity: number;
+  increaseCartQuantity: (id: string) => void;
+  decreaseCartQuantity: (id: string) => void;
+  removeFromCart: (id: string) => void;
 }
 
 const CartActions: React.FC<CartActionsProps> = ({
@@ -113,7 +133,7 @@ const CartActions: React.FC<CartActionsProps> = ({
   quantity,
   increaseCartQuantity,
   decreaseCartQuantity,
-  removeFromCart
+  removeFromCart,
 }) => {
   return (
     <div>
@@ -152,31 +172,33 @@ const CartActions: React.FC<CartActionsProps> = ({
             type="button"
             label="Видалити"
             onClick={() => {
-              removeFromCart(itemId)
-              localStorage.removeItem(`amount-${itemId}`)
+              removeFromCart(itemId);
+              localStorage.removeItem(`amount-${itemId}`);
             }}
           />
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
 interface ItemDetailsProps {
-  item: IGood
+  item: IGood;
 }
 
 const ItemDetails: React.FC<ItemDetailsProps> = ({ item }) => {
   return (
     <>
       <p className="font-light text-gray-500">
-        Сумісність з брендами: {item.isCompatible ? "так" : "ні"}
+        Сумісність з брендами: {item.isCompatible ? 'так' : 'ні'}
       </p>
       <p className="font-light text-gray-500">Brand: {item.brand}</p>
       <p className="font-light text-gray-500">Model: {item.model}</p>
-      <p className="font-light text-gray-500">Сумісність з брендами: {item.compatibility}</p>
+      <p className="font-light text-gray-500">
+        Сумісність з брендами: {item.compatibility}
+      </p>
     </>
-  )
-}
+  );
+};
 
-export default ProductCard
+export default ProductCard;

@@ -1,46 +1,53 @@
-import { ErrorMessage, Field, FormikErrors, useField } from "formik"
+import { ErrorMessage, Field, FormikErrors, useField } from 'formik';
 
 interface Option {
-  value: string
-  label: string
+  value: string;
+  label: string;
 }
 
 interface FormFieldProps {
   item: {
-    as?: string
-    id: string
-    label?: string
-    type?: string
-    value?: string
-    disabled?: boolean
-    required?: boolean
-    options?: Option[]
-    style?: React.CSSProperties
-  }
-  errors?: FormikErrors<any>
-  setFieldValue?: (field: string, value: any, shouldValidate?: boolean) => void
+    as?: string;
+    id: string;
+    label?: string;
+    type?: string;
+    value?: string;
+    disabled?: boolean;
+    required?: boolean;
+    options?: Option[];
+    style?: React.CSSProperties;
+  };
+  errors?: FormikErrors<any>;
+  setFieldValue?: (field: string, value: any, shouldValidate?: boolean) => void;
 }
 
-const FormField: React.FC<FormFieldProps> = ({ item, errors, setFieldValue }) => {
-  const [, meta] = useField(item.id)
+const FormField: React.FC<FormFieldProps> = ({
+  item,
+  errors,
+  setFieldValue,
+}) => {
+  const [, meta] = useField(item.id);
 
-  if (item.id === "compatibility") {
+  if (item.id === 'compatibility') {
     return (
       <div className="relative w-full mb-4">
         <input
           type="text"
-          value={(Array.isArray(meta.value) ? meta.value.join(", ") : meta.value) || ""}
+          value={
+            (Array.isArray(meta.value) ? meta.value.join(', ') : meta.value) ||
+            ''
+          }
           onChange={e => {
-            const value = e.target.value
+            const value = e.target.value;
             const array = value
-              .split(",")
+              .split(',')
               .map(item => item.trim())
-              .filter(Boolean)
-            setFieldValue?.(item.id, array)
+              .filter(Boolean);
+            setFieldValue?.(item.id, array);
           }}
           className={`text-primaryTextColor peer w-full p-4 pt-6 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
-        ${meta.error && meta.touched ? "border-rose-500" : "border-neutral-300"}
-        ${meta.error && meta.touched ? "focus:border-rose-500" : "focus:border-green-500"}
+        ${meta.error && meta.touched ? 'border-rose-500' : 'border-neutral-300'}
+        ${meta.error && meta.touched ? 'focus:border-rose-500' : 'focus:border-green-500'}
         `}
         />
         <label
@@ -55,7 +62,7 @@ const FormField: React.FC<FormFieldProps> = ({ item, errors, setFieldValue }) =>
           </div>
         )}
       </div>
-    )
+    );
   }
 
   return (
@@ -66,11 +73,11 @@ const FormField: React.FC<FormFieldProps> = ({ item, errors, setFieldValue }) =>
             as="select"
             name={item.id}
             className={`peer w-full p-4 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
-            ${meta.error && meta.touched ? "border-rose-500" : "border-neutral-300"}
-            ${meta.error && meta.touched ? "focus:border-rose-500" : "focus:border-green-500"}
+            ${meta.error && meta.touched ? 'border-rose-500' : 'border-neutral-300'}
+            ${meta.error && meta.touched ? 'focus:border-rose-500' : 'focus:border-green-500'}
             `}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              setFieldValue && setFieldValue(item.id, e.target.value)
+              setFieldValue && setFieldValue(item.id, e.target.value);
             }}
           >
             {item.options.map((option, index) => (
@@ -86,15 +93,15 @@ const FormField: React.FC<FormFieldProps> = ({ item, errors, setFieldValue }) =>
             {item.label}
           </label>
         </>
-      ) : item.type === "textarea" ? (
+      ) : item.type === 'textarea' ? (
         <div className="relative">
           <Field
             as="textarea"
             name={item.id}
             disabled={item.disabled}
             className={`peer w-full p-4 font-light bg-white border-2 rounded-md outline-none transition
-            ${meta.error && meta.touched ? "border-rose-500" : "border-neutral-300"}
-            ${meta.error && meta.touched ? "focus:border-rose-500" : "focus:border-green-500"}
+            ${meta.error && meta.touched ? 'border-rose-500' : 'border-neutral-300'}
+            ${meta.error && meta.touched ? 'focus:border-rose-500' : 'focus:border-green-500'}
             disabled:opacity-70 disabled:cursor-not-allowed resize-none`} // Added `resize-none` to prevent resizing
             style={item.style} // Apply any additional styles from `item`
           />
@@ -113,8 +120,8 @@ const FormField: React.FC<FormFieldProps> = ({ item, errors, setFieldValue }) =>
             type={item.type}
             disabled={item.disabled}
             className={`text-primaryTextColor peer w-full p-4 pt-6 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
-            ${meta.error && meta.touched ? "border-rose-500" : "border-neutral-300"}
-            ${meta.error && meta.touched ? "focus:border-rose-500" : "focus:border-green-500"}
+            ${meta.error && meta.touched ? 'border-rose-500' : 'border-neutral-300'}
+            ${meta.error && meta.touched ? 'focus:border-rose-500' : 'focus:border-green-500'}
             `}
           />
           <label
@@ -132,7 +139,7 @@ const FormField: React.FC<FormFieldProps> = ({ item, errors, setFieldValue }) =>
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default FormField
+export default FormField;

@@ -1,20 +1,20 @@
-import Image from "next/image"
-import React from "react"
+import Image from 'next/image';
+import React from 'react';
 
-import { IGood } from "@/types/index"
+import { IGood } from '@/types/index';
 
 type CartItemProps = {
-  good: IGood
-  quantity: number
-}
+  good: IGood;
+  quantity: number;
+};
 
 const OrderGood: React.FC<CartItemProps> = ({ good, quantity }) => {
   if (!good) {
-    return
+    return;
   }
-  const { _id, title, price, src } = good
+  const { _id, title, price, src } = good;
 
-  const totalPrice = price * quantity
+  const totalPrice = price * quantity;
 
   return (
     <div>
@@ -45,7 +45,7 @@ const OrderGood: React.FC<CartItemProps> = ({ good, quantity }) => {
         </div>
       </li>
     </div>
-  )
-}
+  );
+};
 
-export default OrderGood
+export default OrderGood;

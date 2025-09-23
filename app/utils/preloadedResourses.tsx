@@ -1,9 +1,9 @@
-"use client"
-import ReactDom from "react-dom"
+'use client';
+import ReactDom from 'react-dom';
 
 export function PreloadedResourses() {
-  ReactDom.preload("/icons/sprite.svg", { as: "image" })
-  return null
+  ReactDom.preload('/icons/sprite.svg', { as: 'image' });
+  return null;
 }
 
-export default PreloadedResourses
+export default PreloadedResourses;

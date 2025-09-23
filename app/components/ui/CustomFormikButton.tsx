@@ -1,11 +1,11 @@
-import React from "react"
+import React from 'react';
 
 interface CustomFormikButtonProps {
-  label: string
-  disabled?: boolean
-  outline?: boolean
-  small?: boolean
-  type?: "submit" | "reset" | "button" | undefined
+  label: string;
+  disabled?: boolean;
+  outline?: boolean;
+  small?: boolean;
+  type?: 'submit' | 'reset' | 'button' | undefined;
 }
 
 const CustomButton: React.FC<CustomFormikButtonProps> = ({
@@ -13,7 +13,7 @@ const CustomButton: React.FC<CustomFormikButtonProps> = ({
   disabled,
   outline,
   small,
-  type = "submit", // пусть кнопка по умолчанию будет submit
+  type = 'submit', // пусть кнопка по умолчанию будет submit
   ...props
 }) => {
   return (
@@ -21,16 +21,15 @@ const CustomButton: React.FC<CustomFormikButtonProps> = ({
       type={type}
       disabled={disabled}
       className={`relative disabled:opacity-70 disabled:cursor-not-allowed rounded-lg hover:opacity-80 transition  
-        ${outline ? "bg-white text-orange-600" : "bg-orange-600 text-white"} 
+        ${outline ? 'bg-white text-orange-600' : 'bg-orange-600 text-white'} 
         border-orange-600
-        ${small ? "py-1 text-md font-light border-[1px] min-w-[40px]" : "py-3 text-md font-semibold border-2 w-full"}
+        ${small ? 'py-1 text-md font-light border-[1px] min-w-[40px]' : 'py-3 text-md font-semibold border-2 w-full'}
       `}
-
       {...props}
     >
       {label}
     </button>
-  )
-}
+  );
+};
 
-export default CustomButton
+export default CustomButton;

@@ -1,19 +1,19 @@
-import { SortOrder } from "mongoose"
+import { SortOrder } from 'mongoose';
 
-import { FilterParams } from "@/types/searchParams"
+import { FilterParams } from '@/types/searchParams';
 
 const buildSort = (searchParams: FilterParams): Record<string, SortOrder> => {
-  const rawSortParam = searchParams?.sort
+  const rawSortParam = searchParams?.sort;
 
   // Приводимо до рядка, або повертаємо порожній об'єкт
-  const sortParam = typeof rawSortParam === "string" ? rawSortParam : ""
+  const sortParam = typeof rawSortParam === 'string' ? rawSortParam : '';
 
-  if (!sortParam) return {}
+  if (!sortParam) return {};
 
-  const isDescending = sortParam.startsWith("-")
-  const field = isDescending ? sortParam.slice(1) : sortParam
+  const isDescending = sortParam.startsWith('-');
+  const field = isDescending ? sortParam.slice(1) : sortParam;
 
-  return { [field]: isDescending ? -1 : 1 }
-}
+  return { [field]: isDescending ? -1 : 1 };
+};
 
-export default buildSort
+export default buildSort;

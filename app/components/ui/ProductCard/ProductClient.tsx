@@ -1,30 +1,39 @@
-"use client"
+'use client';
 
-import { useShoppingCart } from "app/context/ShoppingCartContext"
+import { useShoppingCart } from 'app/context/ShoppingCartContext';
 
-import { getGoodById } from "@/actions/goods"
-import { Icon, ImagesBlock, Loader } from "@/components/index"
-import { useFetchDataById } from "@/hooks/index"
-import { SGood } from "@/types/IGood"
+import { getGoodById } from '@/actions/goods';
+import { Icon, ImagesBlock, Loader } from '@/components/index';
+import { useFetchDataById } from '@/hooks/index';
+import { SGood } from '@/types/IGood';
 
 const ProductClient = ({ id }: { id: string }) => {
-  const { getItemQuantity, increaseCartQuantity, decreaseCartQuantity, removeFromCart } =
-    useShoppingCart()
+  const {
+    getItemQuantity,
+    increaseCartQuantity,
+    decreaseCartQuantity,
+    removeFromCart,
+  } = useShoppingCart();
 
-  const { data, isLoading, isError, error } = useFetchDataById(getGoodById, ["goodById"], id)
+  const { data, isLoading, isError, error } = useFetchDataById(
+    getGoodById,
+    ['goodById'],
+    id
+  );
 
-  if (isLoading || !data) return <Loader />
+  if (isLoading || !data) return <Loader />;
   if (isError) {
     return (
       <div>
-        Error fetching good data: {error instanceof Error ? error.message : "Unknown error"}
+        Error fetching good data:{' '}
+        {error instanceof Error ? error.message : 'Unknown error'}
       </div>
-    )
+    );
   }
 
-  const item: SGood = JSON.parse(data)
+  const item: SGood = JSON.parse(data);
 
-  const quantity = getItemQuantity(item._id)
+  const quantity = getItemQuantity(item._id);
 
   return (
     item && (
@@ -62,7 +71,7 @@ const ProductClient = ({ id }: { id: string }) => {
                     </button>
                     <div>
                       <span className="text-2xl">{quantity}</span> в корзині
-                    </div>{" "}
+                    </div>{' '}
                     <button
                       className="w-[20px] mb-[10px] ml-[10px] bg-orange-600 hover:bg-orange-700 focus:bg-orange-700 text-white transition-all text-lg rounded-md"
                       onClick={() => increaseCartQuantity(item._id)}
@@ -86,27 +95,31 @@ const ProductClient = ({ id }: { id: string }) => {
 											text-white 
 											hover:text-primaryAccentColor"
                     />
-                    Видалити{" "}
+                    Видалити{' '}
                   </button>
                 </div>
               )}
             </div>
 
             <p className="font-light text-gray-500">
-              Сумісність з брендами: {item.isCompatible ? "так" : "ні"}
+              Сумісність з брендами: {item.isCompatible ? 'так' : 'ні'}
             </p>
             <p className="font-light text-gray-500">Brand: {item.brand}</p>
             <p className="font-light text-gray-500">Model: {item.model}</p>
-            <p className="font-light text-gray-500">Сумісність з брендами: {item.compatibility}</p>
+            <p className="font-light text-gray-500">
+              Сумісність з брендами: {item.compatibility}
+            </p>
           </div>
           <p className="font-light text-gray-500">
-            Сумісність з моделями:{" "}
-            {Array.isArray(item.compatibility) ? item.compatibility.join(", ") : item.compatibility}
+            Сумісність з моделями:{' '}
+            {Array.isArray(item.compatibility)
+              ? item.compatibility.join(', ')
+              : item.compatibility}
           </p>
         </div>
       </div>
     )
-  )
-}
+  );
+};
 
-export default ProductClient
+export default ProductClient;

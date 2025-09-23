@@ -1,67 +1,67 @@
-"use client"
+'use client';
 
-import { Form, Formik, FormikHelpers } from "formik"
-import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
-import { FcGoogle } from "react-icons/fc"
-import { toast } from "sonner"
+import { Form, Formik, FormikHelpers } from 'formik';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { FcGoogle } from 'react-icons/fc';
+import { toast } from 'sonner';
 
-import { FormField } from "@/components/common"
-import { Button } from "@/components/ui"
-import { userLoginSchema } from "@/helpers/index"
+import { FormField } from '@/components/common';
+import { Button } from '@/components/ui';
+import { userLoginSchema } from '@/helpers/index';
 
 interface InitialStateType {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
 
 const LoginForm = () => {
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const initialValues: InitialStateType = {
-    email: "",
-    password: ""
-  }
+    email: '',
+    password: '',
+  };
 
   const handleSubmit = async (
     values: InitialStateType,
     { resetForm }: FormikHelpers<InitialStateType>
   ) => {
-    setIsLoading(true)
-    signIn("credentials", {
+    setIsLoading(true);
+    signIn('credentials', {
       email: values.email.toLowerCase(),
       password: values.password,
-      redirect: false
+      redirect: false,
     }).then(callback => {
-      setIsLoading(false)
+      setIsLoading(false);
       if (callback?.ok) {
-        toast.success("Успішний вхід")
-        resetForm()
-        router.push("/admin")
-        window.location.replace("/admin")
+        toast.success('Успішний вхід');
+        resetForm();
+        router.push('/admin');
+        window.location.replace('/admin');
       }
       if (callback?.error) {
-        toast.error(callback.error || "Помилка")
+        toast.error(callback.error || 'Помилка');
       }
-    })
-  }
+    });
+  };
 
   const inputs = [
     {
-      label: "Email",
-      type: "text",
-      id: "email",
-      required: true
+      label: 'Email',
+      type: 'text',
+      id: 'email',
+      required: true,
     },
     {
-      label: "Password",
-      type: "password",
-      id: "password",
-      required: true
-    }
-  ]
+      label: 'Password',
+      type: 'password',
+      id: 'password',
+      required: true,
+    },
+  ];
 
   return (
     <div className="flex flex-col justify-center items-center ">
@@ -77,7 +77,10 @@ const LoginForm = () => {
             {inputs.map((item, i) => (
               <FormField item={item} key={i} errors={errors} />
             ))}
-            <Button type={"submit"} label={isLoading ? "Завантаження..." : "Увійти"} />
+            <Button
+              type={'submit'}
+              label={isLoading ? 'Завантаження...' : 'Увійти'}
+            />
           </Form>
         )}
       </Formik>
@@ -88,24 +91,24 @@ const LoginForm = () => {
           label="Continue with Google"
           icon={FcGoogle}
           onClick={() => {
-            setIsLoading(true)
-            signIn("google").then(callback => {
-              setIsLoading(false)
+            setIsLoading(true);
+            signIn('google').then(callback => {
+              setIsLoading(false);
               if (callback?.ok) {
-                toast.success("Успішний вхід")
-                router.push("/admin")
-                window.location.replace("/admin")
+                toast.success('Успішний вхід');
+                router.push('/admin');
+                window.location.replace('/admin');
               }
               if (callback?.error) {
-                toast.error(callback.error || "Помилка")
+                toast.error(callback.error || 'Помилка');
               }
-            })
+            });
           }}
-          type={"button"}
+          type={'button'}
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LoginForm
+export default LoginForm;

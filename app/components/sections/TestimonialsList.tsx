@@ -1,12 +1,12 @@
-import { IGetAllTestimonials } from "@/actions/testimonials"
-import { Slider } from "@/components/index"
+import { IGetAllTestimonials } from '@/actions/testimonials';
+import { Slider } from '@/components/index';
 
 const TestimonialsList = ({
   testimonialsData,
-  title
+  title,
 }: {
-  testimonialsData: IGetAllTestimonials
-  title?: string
+  testimonialsData: IGetAllTestimonials;
+  title?: string;
 }) => {
   return (
     <>
@@ -15,7 +15,7 @@ const TestimonialsList = ({
         <Slider testimonialsData={testimonialsData} testimonials />
       </div>
     </>
-  )
-}
+  );
+};
 
-export default TestimonialsList
+export default TestimonialsList;

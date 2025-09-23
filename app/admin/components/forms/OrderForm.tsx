@@ -1,87 +1,96 @@
-"use client"
+'use client';
 
-import { ErrorMessage, Field, FieldArray, Form, Formik, useFormikContext } from "formik"
-import Image from "next/image"
-import { useRouter } from "next/navigation"
-import { useEffect, useMemo, useState } from "react"
-import { toast } from "sonner"
+import {
+  ErrorMessage,
+  Field,
+  FieldArray,
+  Form,
+  Formik,
+  useFormikContext,
+} from 'formik';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
-import { addOrder, updateOrder } from "@/actions/orders"
-import { Button, FormField } from "@/components/index"
-import { orderFormSchema } from "@/helpers/index"
-import { useCities, useWarehouses } from "@/hooks/index"
-import { IGood, IOrder } from "@/types/index"
-import { PaymentMethod } from "@/types/paymentMethod"
+import { addOrder, updateOrder } from '@/actions/orders';
+import { Button, FormField } from '@/components/index';
+import { orderFormSchema } from '@/helpers/index';
+import { useCities, useWarehouses } from '@/hooks/index';
+import { IGood, IOrder } from '@/types/index';
+import { PaymentMethod } from '@/types/paymentMethod';
 
-interface InitialStateType extends Omit<IOrder, "_id"> {}
+interface InitialStateType extends Omit<IOrder, '_id'> {}
 
 interface OrderFormProps {
-  order?: IOrder
-  title?: string
-  goods?: IGood[]
+  order?: IOrder;
+  title?: string;
+  goods?: IGood[];
 }
 
 const statusList = [
-  { id: 1, title: "Новий" },
-  { id: 2, title: "Опрацьовується" },
-  { id: 3, title: "Оплачений" },
-  { id: 4, title: "На відправку" },
-  { id: 5, title: "Закритий" }
-]
+  { id: 1, title: 'Новий' },
+  { id: 2, title: 'Опрацьовується' },
+  { id: 3, title: 'Оплачений' },
+  { id: 4, title: 'На відправку' },
+  { id: 5, title: 'Закритий' },
+];
 
 const OrderForm = ({ order, title, goods }: OrderFormProps) => {
-  const [isLoading, setIsLoading] = useState(false)
-  const [showSelect, setShowSelect] = useState(false)
-  const { push } = useRouter()
-  const isUpdating = Boolean(order?._id)
+  const [isLoading, setIsLoading] = useState(false);
+  const [showSelect, setShowSelect] = useState(false);
+  const { push } = useRouter();
+  const isUpdating = Boolean(order?._id);
 
-  const [name = "", surname = ""] = (order?.customer.name || "").split(" ")
+  const [name = '', surname = ''] = (order?.customer.name || '').split(' ');
 
   const initialValues: InitialStateType = {
-    number: order?.number || "",
+    number: order?.number || '',
     customer: {
       name: name,
       surname: surname,
-      email: order?.customer.email || "",
-      phone: order?.customer.phone || "+380",
-      city: order?.customer.city || "Київ",
-      warehouse: order?.customer.warehouse || "",
-      payment: order?.customer.payment || PaymentMethod.CashOnDelivery
+      email: order?.customer.email || '',
+      phone: order?.customer.phone || '+380',
+      city: order?.customer.city || 'Київ',
+      warehouse: order?.customer.warehouse || '',
+      payment: order?.customer.payment || PaymentMethod.CashOnDelivery,
     },
     orderedGoods: order?.orderedGoods || [],
     totalPrice: order?.totalPrice || 0,
-    status: order?.status || "Новий"
-  }
+    status: order?.status || 'Новий',
+  };
 
   const handleSubmit = async (values: InitialStateType) => {
     try {
-      setIsLoading(true)
+      setIsLoading(true);
 
       const preparedOrder = {
         ...values,
         customer: {
           ...values.customer,
-          name: `${values.customer.name} ${values.customer.surname}`
-        }
-      }
+          name: `${values.customer.name} ${values.customer.surname}`,
+        },
+      };
       const result = isUpdating
         ? await updateOrder({ ...preparedOrder, _id: order?._id })
-        : await addOrder(preparedOrder)
+        : await addOrder(preparedOrder);
 
       if (result.success) {
-        toast.success(isUpdating ? "Замовлення оновлено!" : "Нове замовлення додано!")
-        push("/admin/orders")
+        toast.success(
+          isUpdating ? 'Замовлення оновлено!' : 'Нове замовлення додано!'
+        );
+        push('/admin/orders');
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Невідома помилка")
+      toast.error(error instanceof Error ? error.message : 'Невідома помилка');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="justify-center items-center p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-3xl mb-4 font-bold">{title || "Order Form"}</h2>
+      <h2 className="text-3xl mb-4 font-bold">{title || 'Order Form'}</h2>
       <Formik
         enableReinitialize
         initialValues={initialValues}
@@ -94,138 +103,175 @@ const OrderForm = ({ order, title, goods }: OrderFormProps) => {
             <FormEffects />
             <FormField
               item={{
-                id: "status",
-                label: "Статус замовлення",
-                type: "select",
+                id: 'status',
+                label: 'Статус замовлення',
+                type: 'select',
                 required: true,
-                options: statusList.map(({ title }) => ({ value: title, label: title }))
+                options: statusList.map(({ title }) => ({
+                  value: title,
+                  label: title,
+                })),
               }}
               setFieldValue={setFieldValue}
             />
-            <CustomerFields city={values.customer.city} errors={errors} touched={touched} />
-            <GoodsFields goods={goods} showSelect={showSelect} setShowSelect={setShowSelect} />
+            <CustomerFields
+              city={values.customer.city}
+              errors={errors}
+              touched={touched}
+            />
+            <GoodsFields
+              goods={goods}
+              showSelect={showSelect}
+              setShowSelect={setShowSelect}
+            />
 
             <div className="my-4">
-              <h3 className="text-xl font-semibold">Загальна ціна: {values.totalPrice} грн</h3>
+              <h3 className="text-xl font-semibold">
+                Загальна ціна: {values.totalPrice} грн
+              </h3>
             </div>
 
             <div className="flex justify-end">
               <Button
                 type="submit"
                 disabled={isLoading}
-                label={order ? "Оновити замовлення" : "Створити замовлення"}
+                label={order ? 'Оновити замовлення' : 'Створити замовлення'}
               />
             </div>
           </Form>
         )}
       </Formik>
     </div>
-  )
-}
+  );
+};
 
-export default OrderForm
+export default OrderForm;
 
 const FormEffects = () => {
-  const { values, setFieldValue } = useFormikContext<InitialStateType>()
-  const { warehouses } = useWarehouses(values.customer.city)
+  const { values, setFieldValue } = useFormikContext<InitialStateType>();
+  const { warehouses } = useWarehouses(values.customer.city);
 
   const totalPrice = useMemo(
     () =>
-      values.orderedGoods.reduce((acc, item) => acc + (item.price || 0) * (item.quantity || 1), 0),
+      values.orderedGoods.reduce(
+        (acc, item) => acc + (item.price || 0) * (item.quantity || 1),
+        0
+      ),
     [values.orderedGoods]
-  )
+  );
 
   useEffect(() => {
     if (warehouses.length && !values.customer.warehouse) {
-      setFieldValue("customer.warehouse", warehouses[0].Description)
+      setFieldValue('customer.warehouse', warehouses[0].Description);
     }
-  }, [warehouses, setFieldValue, values.customer.warehouse])
+  }, [warehouses, setFieldValue, values.customer.warehouse]);
 
   useEffect(() => {
-    setFieldValue("totalPrice", totalPrice, false)
-  }, [totalPrice, setFieldValue])
+    setFieldValue('totalPrice', totalPrice, false);
+  }, [totalPrice, setFieldValue]);
 
-  return null
-}
+  return null;
+};
 
 // Custom hook for city selection logic
 const useCitySelection = (
   fieldValue: string,
   setFieldValue: (field: string, value: any) => void
 ) => {
-  const [filteredCities, setFilteredCities] = useState<string[]>([])
-  const [searchQuery, setSearchQuery] = useState(fieldValue || "")
-  const { allCities } = useCities(searchQuery)
+  const [filteredCities, setFilteredCities] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState(fieldValue || '');
+  const { allCities } = useCities(searchQuery);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (!Array.isArray(allCities)) {
-        setFilteredCities([])
-        return
+        setFilteredCities([]);
+        return;
       }
 
-      const normalizedQuery = (searchQuery || "").trim().toLowerCase()
+      const normalizedQuery = (searchQuery || '').trim().toLowerCase();
 
       const filtered = allCities
         .filter((city: any) => {
-          const description = (city?.description || "").trim().toLowerCase()
-          return description.includes(normalizedQuery)
+          const description = (city?.description || '').trim().toLowerCase();
+          return description.includes(normalizedQuery);
         })
-        .map((city: any) => city.description || "")
+        .map((city: any) => city.description || '');
 
-      setFilteredCities(filtered)
-    }, 300)
-    return () => clearTimeout(timeoutId)
-  }, [searchQuery, allCities])
+      setFilteredCities(filtered);
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, allCities]);
 
   const handleSelectCity = (city: string) => {
-    setFieldValue("customer.city", city)
-    setSearchQuery(city)
+    setFieldValue('customer.city', city);
+    setSearchQuery(city);
     setTimeout(() => {
-      setFilteredCities([])
-    }, 0)
-  }
+      setFilteredCities([]);
+    }, 0);
+  };
 
-  return { filteredCities, searchQuery, setSearchQuery, handleSelectCity }
-}
+  return { filteredCities, searchQuery, setSearchQuery, handleSelectCity };
+};
 
-const CustomerFields = ({ city, touched, errors }: { city: string; touched: any; errors: any }) => {
-  const { values, setFieldValue } = useFormikContext<InitialStateType>()
-  const { warehouses, isWarehousesLoading } = useWarehouses(city)
-  const [showDropdown, setShowDropdown] = useState(false)
+const CustomerFields = ({
+  city,
+  touched,
+  errors,
+}: {
+  city: string;
+  touched: any;
+  errors: any;
+}) => {
+  const { values, setFieldValue } = useFormikContext<InitialStateType>();
+  const { warehouses, isWarehousesLoading } = useWarehouses(city);
+  const [showDropdown, setShowDropdown] = useState(false);
 
-  const { filteredCities, searchQuery, setSearchQuery, handleSelectCity } = useCitySelection(
-    values.customer.city,
-    setFieldValue
-  )
+  const { filteredCities, searchQuery, setSearchQuery, handleSelectCity } =
+    useCitySelection(values.customer.city, setFieldValue);
 
   const customerInputs = [
-    { name: "customer.name", type: "text", id: "customer.name", label: "Ім'я" },
-    { name: "customer.surname", type: "text", id: "customer.surname", label: "Прізвище" },
-    { name: "customer.email", type: "email", id: "customer.email", label: "Email" },
-    { name: "customer.phone", type: "tel", id: "customer.phone", label: "Телефон" },
+    { name: 'customer.name', type: 'text', id: 'customer.name', label: "Ім'я" },
     {
-      id: "customer.payment",
-      label: "Оберіть спосіб оплати",
+      name: 'customer.surname',
+      type: 'text',
+      id: 'customer.surname',
+      label: 'Прізвище',
+    },
+    {
+      name: 'customer.email',
+      type: 'email',
+      id: 'customer.email',
+      label: 'Email',
+    },
+    {
+      name: 'customer.phone',
+      type: 'tel',
+      id: 'customer.phone',
+      label: 'Телефон',
+    },
+    {
+      id: 'customer.payment',
+      label: 'Оберіть спосіб оплати',
       options: Object.values(PaymentMethod).map(method => ({
         value: method,
-        label: method
+        label: method,
       })),
-      type: "select"
-    }
-  ]
+      type: 'select',
+    },
+  ];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
-    const value = e.target.value
-    setSearchQuery(value)
-    setFieldValue(field.name, value)
-    setShowDropdown(true)
-  }
+    const value = e.target.value;
+    setSearchQuery(value);
+    setFieldValue(field.name, value);
+    setShowDropdown(true);
+  };
 
   const handleCityClick = (city: string) => {
-    handleSelectCity(city)
-    setShowDropdown(false)
-  }
+    handleSelectCity(city);
+    setShowDropdown(false);
+  };
 
   return (
     <>
@@ -243,8 +289,8 @@ const CustomerFields = ({ city, touched, errors }: { city: string; touched: any;
               onChange={e => handleChange(e, field)}
               placeholder=" "
               className={`text-primaryTextColor peer w-full p-4 pt-6 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
-        ${errors.customer?.city && touched.customer?.city ? "border-rose-500" : "border-neutral-300"}
-        ${errors.customer?.city && touched.customer?.city ? "focus:border-rose-500" : "focus:border-green-500"}
+        ${errors.customer?.city && touched.customer?.city ? 'border-rose-500' : 'border-neutral-300'}
+        ${errors.customer?.city && touched.customer?.city ? 'focus:border-rose-500' : 'focus:border-green-500'}
         `}
             />
           )}
@@ -281,8 +327,8 @@ const CustomerFields = ({ city, touched, errors }: { city: string; touched: any;
           as="select"
           disabled={isWarehousesLoading}
           className={`text-primaryTextColor peer w-full p-4 pt-6 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
-        ${errors.customer?.warehouse && touched.customer?.warehouse ? "border-rose-500" : "border-neutral-300"}
-        ${errors.customer?.warehouse && touched.customer?.warehouse ? "focus:border-rose-500" : "focus:border-green-500"}`}
+        ${errors.customer?.warehouse && touched.customer?.warehouse ? 'border-rose-500' : 'border-neutral-300'}
+        ${errors.customer?.warehouse && touched.customer?.warehouse ? 'focus:border-rose-500' : 'focus:border-green-500'}`}
         >
           {warehouses.map((wh, i) => (
             <option key={i} value={wh.Description}>
@@ -304,39 +350,46 @@ const CustomerFields = ({ city, touched, errors }: { city: string; touched: any;
         )}
       </div>
     </>
-  )
-}
+  );
+};
 
 interface GoodsFieldsProps {
-  goods?: IGood[]
-  showSelect: boolean
-  setShowSelect: (value: boolean) => void
+  goods?: IGood[];
+  showSelect: boolean;
+  setShowSelect: (value: boolean) => void;
 }
 
-const GoodsFields = ({ goods, showSelect, setShowSelect }: GoodsFieldsProps) => {
-  const { values, setFieldValue } = useFormikContext<IOrder>()
-  const [searchQuery, setSearchQuery] = useState("")
+const GoodsFields = ({
+  goods,
+  showSelect,
+  setShowSelect,
+}: GoodsFieldsProps) => {
+  const { values, setFieldValue } = useFormikContext<IOrder>();
+  const [searchQuery, setSearchQuery] = useState('');
 
   const filteredGoods = useMemo(() => {
-    if (!searchQuery.trim()) return goods || []
+    if (!searchQuery.trim()) return goods || [];
     return (
       goods?.filter(good =>
         `${good.title} ${good.brand} ${good.model}`
           .toLowerCase()
           .includes(searchQuery.toLowerCase())
       ) || []
-    )
-  }, [searchQuery, goods])
+    );
+  }, [searchQuery, goods]);
 
   const handleSelectGood = (good: IGood) => {
     if (values.orderedGoods.some(item => item._id === good._id)) {
-      toast.warning("Цей товар вже додано!")
-      return
+      toast.warning('Цей товар вже додано!');
+      return;
     }
-    setFieldValue("orderedGoods", [...values.orderedGoods, { ...good, quantity: 1 }])
-    setSearchQuery("")
-    setShowSelect(false)
-  }
+    setFieldValue('orderedGoods', [
+      ...values.orderedGoods,
+      { ...good, quantity: 1 },
+    ]);
+    setSearchQuery('');
+    setShowSelect(false);
+  };
 
   return (
     <>
@@ -346,9 +399,12 @@ const GoodsFields = ({ goods, showSelect, setShowSelect }: GoodsFieldsProps) => 
         render={({ remove }) => (
           <div>
             {values.orderedGoods.map((item, i) => (
-              <div key={item._id} className="border p-4 mb-4 flex items-center gap-4">
+              <div
+                key={item._id}
+                className="border p-4 mb-4 flex items-center gap-4"
+              >
                 <Image
-                  src={item?.src?.[0] || "/placeholder.png"}
+                  src={item?.src?.[0] || '/placeholder.png'}
                   alt="item"
                   width={150}
                   height={150}
@@ -370,12 +426,21 @@ const GoodsFields = ({ goods, showSelect, setShowSelect }: GoodsFieldsProps) => 
                   type="button"
                   label="+"
                   onClick={() =>
-                    setFieldValue(`orderedGoods.${i}.quantity`, (item.quantity || 0) + 1)
+                    setFieldValue(
+                      `orderedGoods.${i}.quantity`,
+                      (item.quantity || 0) + 1
+                    )
                   }
                 />
                 <span>Ціна: {item.price} грн</span>
-                <span>Сума: {(item.price || 0) * (item.quantity || 1)} грн</span>
-                <Button type="button" label="Видалити" onClick={() => remove(i)} />
+                <span>
+                  Сума: {(item.price || 0) * (item.quantity || 1)} грн
+                </span>
+                <Button
+                  type="button"
+                  label="Видалити"
+                  onClick={() => remove(i)}
+                />
               </div>
             ))}
           </div>
@@ -383,7 +448,11 @@ const GoodsFields = ({ goods, showSelect, setShowSelect }: GoodsFieldsProps) => 
       />
 
       <div className="flex justify-between mt-4 mb-4">
-        <Button type="button" label="Додати товар" onClick={() => setShowSelect(true)} />
+        <Button
+          type="button"
+          label="Додати товар"
+          onClick={() => setShowSelect(true)}
+        />
       </div>
 
       {showSelect && (
@@ -406,10 +475,12 @@ const GoodsFields = ({ goods, showSelect, setShowSelect }: GoodsFieldsProps) => 
                 {good.title} - {good.brand} - {good.model}
               </div>
             ))}
-            {!filteredGoods.length && <div className="p-2 text-gray-500">Нічого не знайдено</div>}
+            {!filteredGoods.length && (
+              <div className="p-2 text-gray-500">Нічого не знайдено</div>
+            )}
           </div>
         </div>
       )}
     </>
-  )
-}
+  );
+};

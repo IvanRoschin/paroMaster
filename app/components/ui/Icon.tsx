@@ -1,7 +1,7 @@
-import { type IconName } from "@/types/name"
-import { type SVGProps } from "react"
+import { type IconName } from '@/types/name';
+import { type SVGProps } from 'react';
 
-export { IconName }
+export { IconName };
 
 const Icon = ({
   name,
@@ -10,16 +10,16 @@ const Icon = ({
   children,
   ...props
 }: SVGProps<SVGSVGElement> & {
-  name: string
-  childClassName?: string
+  name: string;
+  childClassName?: string;
 }) => {
-  const baseUrl = process.env.BASE_URL || ""
+  const baseUrl = process.env.BASE_URL || '';
 
   const svgElement = (
     <svg {...props} className={className}>
       <use href={`${baseUrl}/icons/sprite.svg#${name}`} />
     </svg>
-  )
+  );
 
   if (children) {
     return (
@@ -27,10 +27,10 @@ const Icon = ({
         {svgElement}
         {children}
       </span>
-    )
+    );
   }
 
-  return svgElement
-}
+  return svgElement;
+};
 
-export default Icon
+export default Icon;

@@ -2,7 +2,6 @@
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
-    "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
@@ -24,19 +23,27 @@
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
-      "@/components/*": ["app/components/*"],
-      "@/actions/*": ["app/actions/*"],
-      "@/api/*": ["app/api/*"],
-      "@/utils/*": ["app/utils/*"],
-      "@/types/*": ["types/*"],
-      "@/models/*": ["models/*"],
-      "@/helpers/*": ["app/helpers/*"],
-      "@/hooks/*": ["app/hooks/*"],
-      "@/config/*": ["config/*"],
-      "@/lib/*": ["lib/*"],
-      "@/admin/*": ["app/admin/*"]
-    }
+      "@/components/*": ["./app/components/*"],
+      "@/actions/*": ["./app/actions/*"],
+      "@/api/*": ["./app/api/*"],
+      "@/utils/*": ["./app/utils/*"],
+      "@/types/*": ["./types/*"],
+      "@/models/*": ["./models/*"],
+      "@/helpers/*": ["./app/helpers/*"],
+      "@/hooks/*": ["./app/hooks/*"],
+      "@/config/*": ["./config/*"],
+      "@/lib/*": ["./lib/*"],
+      "@/admin/*": ["./app/admin/*"]
+    },
+    "skipLibCheck": true
   },
-  "include": ["**/*.ts", "**/*.tsx", "auth.js", "auth.tjs", "next-env.d.ts", ".next/types/**/*.ts"],
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "auth.js",
+    "auth.tjs",
+    "next-env.d.ts",
+    ".next/types/**/*.ts"
+  ],
   "exclude": ["node_modules"]
 }

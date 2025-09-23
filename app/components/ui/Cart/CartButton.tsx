@@ -1,16 +1,16 @@
-"use client"
+'use client';
 
-import { useShoppingCart } from "app/context/ShoppingCartContext"
-import dynamic from "next/dynamic"
+import { useShoppingCart } from 'app/context/ShoppingCartContext';
+import dynamic from 'next/dynamic';
 
-import { Icon } from "@/components/ui"
-import { useCartModal } from "@/hooks/index"
+import { Icon } from '@/components/ui';
+import { useCartModal } from '@/hooks/index';
 
-type Props = {}
+type Props = {};
 
 const CartButton = (props: Props) => {
-  const { cartQuantity } = useShoppingCart()
-  const cartModal = useCartModal()
+  const { cartQuantity } = useShoppingCart();
+  const cartModal = useCartModal();
 
   return (
     <div className="relative">
@@ -37,7 +37,7 @@ const CartButton = (props: Props) => {
         </button>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default dynamic(() => Promise.resolve(CartButton), { ssr: false })
+export default dynamic(() => Promise.resolve(CartButton), { ssr: false });

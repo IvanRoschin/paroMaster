@@ -1,13 +1,13 @@
-import Link from "next/link"
-import { IconType } from "react-icons"
+import Link from 'next/link';
+import { IconType } from 'react-icons';
 
-import { Button } from "@/components/index"
+import { Button } from '@/components/index';
 
 interface CardProps {
-  title: string
-  count: number
-  link: string
-  icon: IconType
+  title: string;
+  count: number;
+  link: string;
+  icon: IconType;
 }
 
 const Card: React.FC<CardProps> = ({ title, count, icon: Icon, link }) => {
@@ -24,7 +24,7 @@ const Card: React.FC<CardProps> = ({ title, count, icon: Icon, link }) => {
         <Button label="Переглянути" type="button" />
       </Link>
     </div>
-  )
-}
+  );
+};
 
-export default Card
+export default Card;

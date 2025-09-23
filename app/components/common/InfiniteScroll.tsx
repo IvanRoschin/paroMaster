@@ -1,58 +1,59 @@
-"use client"
+'use client';
 
-import { useCallback, useEffect, useState } from "react"
-import { useInView } from "react-intersection-observer"
-import { TailSpin } from "react-loader-spinner"
+import { useCallback, useEffect, useState } from 'react';
+import { useInView } from 'react-intersection-observer';
+import { TailSpin } from 'react-loader-spinner';
 
-import { getAllGoods } from "@/actions/goods"
-import { ProductList } from "@/components/ui"
-import { IGood } from "@/types/IGood"
-import { ISearchParams } from "@/types/searchParams"
+import { getAllGoods } from '@/actions/goods';
+import { ProductList } from '@/components/ui';
+import { IGood } from '@/types/IGood';
+import { ISearchParams } from '@/types/searchParams';
 
 const InfiniteScroll = ({
   initialGoods,
-  searchParams
+  searchParams,
 }: {
-  initialGoods: IGood[]
-  searchParams: ISearchParams
+  initialGoods: IGood[];
+  searchParams: ISearchParams;
 }) => {
-  const [goods, setGoods] = useState<IGood[]>(initialGoods || [])
-  const [pagesLoaded, setPagesLoaded] = useState(1)
-  const [allGoodsLoaded, setAllGoodsLoaded] = useState(false)
-  const [isFetchingMore, setIsFetchingMore] = useState(false)
+  const [goods, setGoods] = useState<IGood[]>(initialGoods || []);
+  const [pagesLoaded, setPagesLoaded] = useState(1);
+  const [allGoodsLoaded, setAllGoodsLoaded] = useState(false);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
   const { ref, inView } = useInView({
-    threshold: 0.5 // Trigger load when the element is halfway in view
-  })
+    threshold: 0.5, // Trigger load when the element is halfway in view
+  });
 
   useEffect(() => {
     if (initialGoods) {
-      setGoods(initialGoods)
+      setGoods(initialGoods);
     }
-  }, [initialGoods])
+  }, [initialGoods]);
 
   const loadMoreGoods = useCallback(async () => {
-    if (isFetchingMore || allGoodsLoaded) return // Prevent multiple fetches
+    if (isFetchingMore || allGoodsLoaded) return; // Prevent multiple fetches
 
-    setIsFetchingMore(true)
+    setIsFetchingMore(true);
 
-    const nextPage = pagesLoaded + 1
-    const newGoods = (await getAllGoods({ ...searchParams, page: nextPage.toString() })) ?? []
+    const nextPage = pagesLoaded + 1;
+    const newGoods =
+      (await getAllGoods({ ...searchParams, page: nextPage.toString() })) ?? [];
 
     if (newGoods?.goods?.length > 0) {
-      setGoods(prevGoods => [...prevGoods, ...newGoods.goods])
-      setPagesLoaded(nextPage)
+      setGoods(prevGoods => [...prevGoods, ...newGoods.goods]);
+      setPagesLoaded(nextPage);
     } else {
-      setAllGoodsLoaded(true)
+      setAllGoodsLoaded(true);
     }
 
-    setIsFetchingMore(false)
-  }, [isFetchingMore, allGoodsLoaded, pagesLoaded, searchParams])
+    setIsFetchingMore(false);
+  }, [isFetchingMore, allGoodsLoaded, pagesLoaded, searchParams]);
 
   useEffect(() => {
     if (inView && !allGoodsLoaded && !isFetchingMore) {
-      loadMoreGoods()
+      loadMoreGoods();
     }
-  }, [inView, allGoodsLoaded, isFetchingMore, loadMoreGoods])
+  }, [inView, allGoodsLoaded, isFetchingMore, loadMoreGoods]);
 
   return (
     <>
@@ -61,7 +62,9 @@ const InfiniteScroll = ({
       </section>
       <section className="flex flex-col items-center justify-center py-10 gap-4">
         {allGoodsLoaded ? (
-          <p className="subtitle mb-4 text-center">Це всі 🤷‍♂️ наявні Товари 🛒</p>
+          <p className="subtitle mb-4 text-center">
+            Це всі 🤷‍♂️ наявні Товари 🛒
+          </p>
         ) : (
           <div ref={ref} className="flex items-center justify-center py-10">
             <TailSpin
@@ -76,7 +79,7 @@ const InfiniteScroll = ({
         )}
       </section>
     </>
-  )
-}
+  );
+};
 
-export default InfiniteScroll
+export default InfiniteScroll;
