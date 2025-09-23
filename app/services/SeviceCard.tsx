@@ -30,7 +30,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
         {desc}
       </p>
       <Link
-        href="#contactForm"
+        href="/#contactForm"
         className="relative inline-block text-sm text-gray-500 text-center italic pt-2 nav hover:text-gray-800"
       >
         {conditions}

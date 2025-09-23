@@ -1,5 +1,6 @@
-import Breadcrumbs from '@/components/common/Breadcrumbs';
 import Image from 'next/image';
+
+import Breadcrumbs from '@/components/common/Breadcrumbs';
 
 const works = [
   {
@@ -28,7 +29,7 @@ const works = [
   },
 ];
 
-const OurWorkPage = () => {
+const OurworkPage = () => {
   return (
     <section className="max-w-6xl mx-auto py-3 container">
       <Breadcrumbs />
@@ -60,4 +61,4 @@ const OurWorkPage = () => {
   );
 };
 
-export default OurWorkPage;
+export default OurworkPage;

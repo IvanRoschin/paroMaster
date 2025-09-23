@@ -1,8 +1,9 @@
 'use client';
 
-import Breadcrumbs from '@/components/common/Breadcrumbs';
 import Image from 'next/image';
 import Link from 'next/link';
+
+import Breadcrumbs from '@/components/common/Breadcrumbs';
 
 const services = [
   {
@@ -35,41 +36,6 @@ const services = [
   },
 ];
 
-// interface ServiceCardProps {
-//   id: number
-//   title: string
-//   desc: string
-//   conditions: string
-//   src: string
-// }
-
-// export const ServiceCard: React.FC<ServiceCardProps> = ({ id, title, desc, conditions, src }) => {
-//   return (
-//     <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
-//       <div className="relative overflow-hidden group">
-//         <Image
-//           src={src}
-//           alt={title}
-//           width={600}
-//           height={400}
-//           className="w-full h-64 object-cover transform group-hover:scale-110 transition-transform duration-300"
-//         />
-//       </div>
-//       <div className="p-4 flex flex-col gap-2">
-//         <h2 className="subtitle">{title}</h2>
-//         <p className="text-gray-600">{desc}</p>
-//         <Link
-//           href="#contactForm"
-//           className="relative inline-block text-sm text-gray-500 italic pt-2 hover:text-gray-800"
-//         >
-//           {conditions}
-//           <span className="absolute h-[3px] w-0 left-0 -bottom-1 rounded-xl bg-orange-600 transition-all duration-300 hover:w-full"></span>
-//         </Link>
-//       </div>
-//     </div>
-//   )
-// }
-
 const ServicesPage = () => {
   return (
     <section className="max-w-6xl mx-auto py-3 container">
@@ -95,7 +61,7 @@ const ServicesPage = () => {
               <h2 className="subtitle">{service.title}</h2>
               <p className="text-gray-600">{service.desc}</p>
               <Link
-                href="#contactForm"
+                href="/#contactForm"
                 className="relative inline-block text-sm text-gray-500 italic pt-2 hover:text-gray-800"
               >
                 {service.conditions}
@@ -103,7 +69,6 @@ const ServicesPage = () => {
               </Link>
             </div>
           </div>
-          // <ServiceCard key={service.id} {...service} />
         ))}
       </div>
     </section>

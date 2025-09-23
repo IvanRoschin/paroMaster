@@ -121,18 +121,9 @@ export default function Goods() {
     <div className="p-3">
       <Breadcrumbs />
 
-      {/* <div className="flex justify-end mb-8">
-        <Link href="/admin/goods/add">
-          <Button type="button" label="Додати" small outline color="border-green-400" />
-        </Link>
-      </div> */}
       <div className="flex items-center justify-between mb-8">
-        {/* <Search placeholder="Знайти товар" /> */}{' '}
         <p className=" text-lg">
-          {' '}
-          Всього в базі <span className="subtitle text-lg">
-            {goodsCount}
-          </span>{' '}
+          Всього в базі <span className="subtitle text-lg">{goodsCount}</span>{' '}
           товара(-ів)
         </p>
         <Link href="/admin/goods/add">
