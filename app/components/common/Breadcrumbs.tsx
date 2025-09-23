@@ -13,7 +13,7 @@ const customNames: Record<string, string> = {
   catalog: 'Каталог',
   category: 'Категорії',
   services: 'Послуги',
-  ourworks: 'Наші роботи',
+  works: 'Наші роботи',
   delivery: 'Доставка',
   guarantee: 'Гарантія',
   contact: 'Контакти',
