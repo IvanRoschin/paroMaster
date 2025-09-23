@@ -17,6 +17,13 @@ const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
   const { data: session } = useSession();
   const isAdmin = session?.user;
 
+  const getCloudinaryUrl = (img: string, width: number, height: number) => {
+    return img.replace(
+      '/upload/',
+      `/upload/c_fill,g_auto,w_${width},h_${height}/f_webp/q_auto/`
+    );
+  };
+
   const {
     getItemQuantity,
     increaseCartQuantity,
@@ -56,7 +63,7 @@ const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
               {good.isCondition ? 'НОВИЙ' : 'Б/У'}
             </div>
             <Image
-              src={good.src[0]}
+              src={getCloudinaryUrl(good.src[0], 200, 200)}
               alt="item_photo"
               width={200}
               height={200}

@@ -13,11 +13,18 @@ interface ImagesBlockProps {
 const ImagesBlock: React.FC<ImagesBlockProps> = ({ item, values }) => {
   const [index, setIndex] = useState<number>(0);
 
+  const getCloudinaryUrl = (img: string, width: number, height: number) => {
+    return img.replace(
+      '/upload/',
+      `/upload/c_fill,g_auto,w_${width},h_${height}/f_webp/q_auto/`
+    );
+  };
+
   const renderImageGallery = (images: string[], altText: string) => (
     <div className="mr-[50px] pb-[40px]">
       <div className="w-[400px] h-[400px] mb-6">
         <Image
-          src={images[index]}
+          src={getCloudinaryUrl(images[index], 400, 400)}
           alt={altText}
           width={400}
           height={400}
@@ -29,7 +36,7 @@ const ImagesBlock: React.FC<ImagesBlockProps> = ({ item, values }) => {
         {images.map((img, imgIndex) => (
           <li key={imgIndex}>
             <Image
-              src={img}
+              src={getCloudinaryUrl(images[index], 120, 120)}
               alt={`${altText} ${imgIndex + 1}`}
               width={120}
               height={120}

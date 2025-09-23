@@ -157,12 +157,6 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
       );
       push('/admin/goods');
 
-      // if (result.success) {
-      //   toast.success(
-      //     isUpdating ? result.message || "Товар оновлено!" : result.message || "Новий товар додано!"
-      //   )
-      // }
-
       resetForm({
         values: {
           ...values,

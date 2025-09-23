@@ -34,8 +34,6 @@ const SlideForm: React.FC<SliderFormProps> = ({ slide, title, action }) => {
   const updateSlideMutation = useUpdateData(action, ['slides']);
 
   const isUpdating = Boolean(slide?._id);
-  // const [images, setImages] = useState<File[]>([])
-  // const [isUploaded, setIsUploaded] = useState<boolean>(false)
 
   const initialValues: InitialStateType = {
     src: Array.isArray(slide?.src) ? slide.src : [slide?.src || ''],
@@ -72,9 +70,6 @@ const SlideForm: React.FC<SliderFormProps> = ({ slide, title, action }) => {
   ) => {
     try {
       const updateSliderData = isUpdating ? { ...values, _id: slide?._id } : {};
-
-      console.log('updateSliderData', updateSliderData);
-      console.log('values', values);
 
       const result = isUpdating
         ? await updateSlideMutation.mutateAsync(updateSliderData)
