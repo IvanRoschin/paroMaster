@@ -1,12 +1,16 @@
-"use client"
+'use client';
 
-import Link from "next/link"
-import { useSearchParams } from "next/navigation"
-import { useState } from "react"
-import { FaPen, FaTrash } from "react-icons/fa"
-import { toast } from "sonner"
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { useState } from 'react';
+import { FaPen, FaTrash } from 'react-icons/fa';
+import { toast } from 'sonner';
 
-import { deleteTestimonial, getAllTestimonials, updateTestimonial } from "@/actions/testimonials"
+import {
+  deleteTestimonial,
+  getAllTestimonials,
+  updateTestimonial,
+} from '@/actions/testimonials';
 import {
   Breadcrumbs,
   Button,
@@ -14,69 +18,76 @@ import {
   ErrorMessage,
   Loader,
   Pagination,
-  Switcher
-} from "@/components/index"
-import { useDeleteData, useFetchData } from "@/hooks/index"
-import { ITestimonial } from "@/types/index"
+  Switcher,
+} from '@/components/index';
+import { useDeleteData, useFetchData } from '@/hooks/index';
+import { ITestimonial } from '@/types/index';
 
 export default function Testimonials() {
-  const [statusFilter, setStatusFilter] = useState<string | null>(null)
-  const searchParams = useSearchParams()
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const searchParams = useSearchParams();
 
-  const page = parseInt(searchParams.get("page") || "1")
-  const limit = parseInt(searchParams.get("limit") || "4")
+  const page = parseInt(searchParams.get('page') || '1');
+  const limit = parseInt(searchParams.get('limit') || '4');
 
   const { data, isLoading, isError, error, refetch } = useFetchData(
     getAllTestimonials,
-    ["testimonials"],
+    ['testimonials'],
     { limit, page, status: statusFilter }
-  )
-  const { mutate: deleteTestimonialById } = useDeleteData(deleteTestimonial, ["testimonials"])
+  );
+  const { mutate: deleteTestimonialById } = useDeleteData(deleteTestimonial, [
+    'testimonials',
+  ]);
 
   const handleDelete = (id: string) => {
-    deleteTestimonialById(id)
-  }
+    deleteTestimonialById(id);
+  };
 
-  const handleStatusToggle = async (_id: string | undefined, isActive: boolean) => {
+  const handleStatusToggle = async (
+    _id: string | undefined,
+    isActive: boolean
+  ) => {
     if (!_id) {
-      toast.error("Invalid testimonial ID.")
-      return
+      toast.error('Invalid testimonial ID.');
+      return;
     }
     try {
-      const values = { _id, isActive: !isActive }
-      await updateTestimonial(values as Partial<ITestimonial> & { _id: string })
-      refetch()
-      toast.success("Статус відгуку змінено!")
+      const values = { _id, isActive: !isActive };
+      await updateTestimonial(
+        values as Partial<ITestimonial> & { _id: string }
+      );
+      refetch();
+      toast.success('Статус відгуку змінено!');
     } catch (error) {
-      toast.error("Unknown error occurred.")
-      console.error("Error updating testimonial status:", error)
+      toast.error('Unknown error occurred.');
+      console.error('Error updating testimonial status:', error);
     }
-  }
+  };
 
-  if (isLoading) return <Loader />
-  if (isError) return <ErrorMessage error={error} />
+  if (isLoading) return <Loader />;
+  if (isError) return <ErrorMessage error={error} />;
   if (!data?.testimonials || data.testimonials.length === 0)
     return (
       <EmptyState
         showReset
         onReset={() => {
-          setStatusFilter(null)
+          setStatusFilter(null);
         }}
       />
-    )
+    );
 
   // Pagination setup
-  const testimonialsCount = data?.count || 0
+  const testimonialsCount = data?.count || 0;
   // const page = searchParams.page ? Number(searchParams.page) : 1
   // const limit = Number(searchParams.limit) || 10
-  const totalPages = Math.ceil(testimonialsCount / limit)
-  const pageNumbers = []
-  const offsetNumber = 3
+  const totalPages = Math.ceil(testimonialsCount / limit);
+  const pageNumbers = [];
+  const offsetNumber = 3;
 
   if (page) {
     for (let i = page - offsetNumber; i <= page + offsetNumber; i++) {
       if (i >= 1 && i <= totalPages) {
-        pageNumbers.push(i)
+        pageNumbers.push(i);
       }
     }
   }
@@ -86,12 +97,14 @@ export default function Testimonials() {
 
       <div className="flex items-center justify-between mb-8">
         <p className=" text-lg">
-          {" "}
-          Всього в базі <span className="subtitle text-lg">{testimonialsCount}</span> відгуки (-ів)
+          {' '}
+          Всього в базі{' '}
+          <span className="subtitle text-lg">{testimonialsCount}</span> відгуки
+          (-ів)
         </p>
         <div className="flex items-center">
           <select
-            value={statusFilter || ""}
+            value={statusFilter || ''}
             onChange={e => setStatusFilter(e.target.value || null)}
             className="border border-gray-300 rounded p-2 text-sm mr-4"
           >
@@ -101,7 +114,13 @@ export default function Testimonials() {
           </select>
 
           <Link href="/admin/testimonials/add">
-            <Button type="button" label="Додати" small outline color="border-green-400" />
+            <Button
+              type="button"
+              label="Додати"
+              small
+              outline
+              color="border-green-400"
+            />
           </Link>
         </div>
       </div>
@@ -109,7 +128,9 @@ export default function Testimonials() {
         <table className="w-full text-xs mb-8">
           <thead>
             <tr className="bg-slate-300 font-semibold">
-              <td className="p-2 border-r-2 text-center">Ім&apos;я користувача</td>
+              <td className="p-2 border-r-2 text-center">
+                Ім&apos;я користувача
+              </td>
               <td className="p-2 border-r-2 text-center">Текст відгуку</td>
               <td className="p-2 border-r-2 text-center">Рейтинг</td>
               <td className="p-2 border-r-2 text-center">Дата додавання</td>
@@ -121,23 +142,36 @@ export default function Testimonials() {
           <tbody>
             {data.testimonials.map(testimonial => (
               <tr key={testimonial._id} className="border-b-2">
-                <td className="p-2 border-r-2 text-center">{testimonial.name}</td>
-                <td className="p-2 border-r-2 text-start">{testimonial.text}</td>
-                <td className="p-2 border-r-2 text-center">{testimonial.rating}</td>
                 <td className="p-2 border-r-2 text-center">
-                  {new Date(testimonial.createdAt).toLocaleDateString("uk-UA")}
+                  {testimonial.name}
+                </td>
+                <td className="p-2 border-r-2 text-start">
+                  {testimonial.text}
+                </td>
+                <td className="p-2 border-r-2 text-center">
+                  {testimonial.rating}
+                </td>
+                <td className="p-2 border-r-2 text-center">
+                  {new Date(testimonial.createdAt).toLocaleDateString('uk-UA')}
                 </td>
                 <td className="p-2 border-r-2 text-center">
                   <Switcher
                     checked={testimonial.isActive}
                     onChange={() =>
-                      testimonial._id && handleStatusToggle(testimonial._id, testimonial.isActive)
+                      testimonial._id &&
+                      handleStatusToggle(testimonial._id, testimonial.isActive)
                     }
                   />
                 </td>
                 <td className="p-2 text-center">
                   <Link href={`/admin/testimonials/${testimonial._id}`}>
-                    <Button type="button" icon={FaPen} small outline color="border-yellow-400" />
+                    <Button
+                      type="button"
+                      icon={FaPen}
+                      small
+                      outline
+                      color="border-yellow-400"
+                    />
                   </Link>
                 </td>
                 <td className="p-2 text-center">
@@ -147,7 +181,10 @@ export default function Testimonials() {
                     small
                     outline
                     color="border-red-400"
-                    onClick={() => testimonial._id && handleDelete(testimonial._id.toString())}
+                    onClick={() =>
+                      testimonial._id &&
+                      handleDelete(testimonial._id.toString())
+                    }
                   />
                 </td>
               </tr>
@@ -155,7 +192,9 @@ export default function Testimonials() {
           </tbody>
         </table>
       </div>
-      {totalPages > 1 && <Pagination count={testimonialsCount} pageNumbers={pageNumbers} />}
+      {totalPages > 1 && (
+        <Pagination count={testimonialsCount} pageNumbers={pageNumbers} />
+      )}
     </div>
-  )
+  );
 }

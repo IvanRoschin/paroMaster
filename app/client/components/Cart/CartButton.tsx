@@ -1,13 +1,13 @@
-"use client"
+'use client';
 
-import { Icon } from "@/components/index"
-import { useCartModal } from "@/hooks/index"
+import { Icon } from '@/components/index';
+import { useCartModal } from '@/hooks/index';
 
-type Props = {}
+type Props = {};
 
 const CartButton = (props: Props) => {
-  const { cartQuantity } = useShoppingCart()
-  const cartModal = useCartModal()
+  const { cartQuantity } = useShoppingCart();
+  const cartModal = useCartModal();
 
   return (
     <div className="relative">
@@ -34,10 +34,10 @@ const CartButton = (props: Props) => {
         </button>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default CartButton
+export default CartButton;
 function useShoppingCart(): { cartQuantity: any } {
-  throw new Error("Function not implemented.")
+  throw new Error('Function not implemented.');
 }

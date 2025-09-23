@@ -1,88 +1,103 @@
-"use client"
+'use client';
 
-import { Field, Form, Formik, useFormikContext } from "formik"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
-import { toast } from "sonner"
+import { Field, Form, Formik, useFormikContext } from 'formik';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
-import { Breadcrumbs, Button, ErrorMessage, FormField } from "@/components/index"
-import { customerFormSchema, storageKeys } from "@/helpers/index"
-import { useAddData, useCities, useUpdateData, useWarehouses } from "@/hooks/index"
-import { ICustomer, IOrder } from "@/types/index"
-import { PaymentMethod } from "@/types/paymentMethod"
+import {
+  Breadcrumbs,
+  Button,
+  ErrorMessage,
+  FormField,
+} from '@/components/index';
+import { customerFormSchema, storageKeys } from '@/helpers/index';
+import {
+  useAddData,
+  useCities,
+  useUpdateData,
+  useWarehouses,
+} from '@/hooks/index';
+import { ICustomer, IOrder } from '@/types/index';
+import { PaymentMethod } from '@/types/paymentMethod';
 
 interface FormikCustomerValues {
-  name: string
-  surname: string
-  phone: string
-  email: string
-  city: string
-  warehouse: string
-  payment: string
+  name: string;
+  surname: string;
+  phone: string;
+  email: string;
+  city: string;
+  warehouse: string;
+  payment: string;
 }
 
 interface CustomerFormProps {
-  customer?: ICustomer
-  title?: string
-  action: (values: ICustomer) => Promise<{ success: boolean; message: string }>
+  customer?: ICustomer;
+  title?: string;
+  action: (values: ICustomer) => Promise<{ success: boolean; message: string }>;
 }
 
 const CustomerForm: React.FC<CustomerFormProps> = ({
   customer,
-  title = "Додати замовника",
-  action
+  title = 'Додати замовника',
+  action,
 }) => {
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
-  const isUpdating = Boolean(customer?._id)
+  const isUpdating = Boolean(customer?._id);
 
-  const addCustomerMutation = useAddData(action, ["customers"])
-  const updateCustomerMutation = useUpdateData(action, ["customers"])
+  const addCustomerMutation = useAddData(action, ['customers']);
+  const updateCustomerMutation = useUpdateData(action, ['customers']);
 
-  const [name, surname] = customer?.name?.split(" ") || ["", ""]
+  const [name, surname] = customer?.name?.split(' ') || ['', ''];
 
   const initialValues: FormikCustomerValues = {
     name,
     surname,
-    email: customer?.email || "",
-    phone: customer?.phone || "",
-    city: customer?.city || "",
-    warehouse: customer?.warehouse || "",
-    payment: customer?.payment || PaymentMethod.CashOnDelivery
-  }
+    email: customer?.email || '',
+    phone: customer?.phone || '',
+    city: customer?.city || '',
+    warehouse: customer?.warehouse || '',
+    payment: customer?.payment || PaymentMethod.CashOnDelivery,
+  };
 
-  const handleSubmit = async (customerValues: IOrder["customer"], resetForm: () => void) => {
+  const handleSubmit = async (
+    customerValues: IOrder['customer'],
+    resetForm: () => void
+  ) => {
     if (!customerValues.city || !customerValues.warehouse) {
-      toast.error("Будь ласка, виберіть місто та відділення")
-      return
+      toast.error('Будь ласка, виберіть місто та відділення');
+      return;
     }
 
     try {
-      setIsLoading(true)
-      const formData = new FormData()
+      setIsLoading(true);
+      const formData = new FormData();
       Object.entries(customerValues).forEach(([key, value]) => {
-        formData.append(key, value)
-      })
+        formData.append(key, value);
+      });
       if (isUpdating && customer?._id) {
-        formData.append("id", customer._id)
+        formData.append('id', customer._id);
       }
 
       if (isUpdating) {
-        await updateCustomerMutation.mutateAsync(formData)
+        await updateCustomerMutation.mutateAsync(formData);
       } else {
-        await addCustomerMutation.mutateAsync(formData)
+        await addCustomerMutation.mutateAsync(formData);
       }
 
-      resetForm()
-      toast.success(isUpdating ? "Замовника оновлено!" : "Нового замовника додано!")
+      resetForm();
+      toast.success(
+        isUpdating ? 'Замовника оновлено!' : 'Нового замовника додано!'
+      );
     } catch (error) {
-      console.error("Помилка оформлення:", error)
-      toast.error(error instanceof Error ? error.message : "Невідома помилка")
+      console.error('Помилка оформлення:', error);
+      toast.error(error instanceof Error ? error.message : 'Невідома помилка');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -98,106 +113,119 @@ const CustomerForm: React.FC<CustomerFormProps> = ({
           {({ values, setFieldValue, errors, touched }) => (
             <Form className="flex flex-col space-y-6">
               <FormEffects />
-              <CustomerFields city={values.city} errors={errors} touched={touched} />
+              <CustomerFields
+                city={values.city}
+                errors={errors}
+                touched={touched}
+              />
               <Button type="submit" label="Відправити" disabled={isLoading} />
             </Form>
           )}
         </Formik>
       </div>
     </div>
-  )
-}
+  );
+};
 
 const FormEffects = () => {
-  const { values, setFieldValue } = useFormikContext<FormikCustomerValues>()
-  const { warehouses } = useWarehouses(values.city)
+  const { values, setFieldValue } = useFormikContext<FormikCustomerValues>();
+  const { warehouses } = useWarehouses(values.city);
 
   useEffect(() => {
     if (warehouses.length && !values.warehouse) {
-      setFieldValue("warehouse", warehouses[0].Description)
+      setFieldValue('warehouse', warehouses[0].Description);
     }
-  }, [warehouses, values.warehouse, setFieldValue])
+  }, [warehouses, values.warehouse, setFieldValue]);
 
   useEffect(() => {
-    sessionStorage.setItem(storageKeys.customer, JSON.stringify(values))
-  }, [values])
+    sessionStorage.setItem(storageKeys.customer, JSON.stringify(values));
+  }, [values]);
 
-  return null
-}
+  return null;
+};
 
 const useCitySelection = (
   fieldValue: string,
   setFieldValue: (field: string, value: any) => void
 ) => {
-  const [filteredCities, setFilteredCities] = useState<string[]>([])
-  const [searchQuery, setSearchQuery] = useState(fieldValue || "")
-  const { allCities } = useCities(searchQuery)
+  const [filteredCities, setFilteredCities] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState(fieldValue || '');
+  const { allCities } = useCities(searchQuery);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (!Array.isArray(allCities)) {
-        setFilteredCities([])
-        return
+        setFilteredCities([]);
+        return;
       }
 
-      const normalizedQuery = searchQuery.trim().toLowerCase()
+      const normalizedQuery = searchQuery.trim().toLowerCase();
       const filtered = allCities
         .filter((city: any) =>
-          (city.description || "").trim().toLowerCase().includes(normalizedQuery)
+          (city.description || '')
+            .trim()
+            .toLowerCase()
+            .includes(normalizedQuery)
         )
-        .map((city: any) => city.description || "")
-      setFilteredCities(filtered)
-    }, 300)
+        .map((city: any) => city.description || '');
+      setFilteredCities(filtered);
+    }, 300);
 
-    return () => clearTimeout(timeoutId)
-  }, [searchQuery, allCities])
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, allCities]);
 
   const handleSelectCity = (city: string) => {
-    setFieldValue("city", city)
-    setSearchQuery(city)
-    setFilteredCities([])
-  }
+    setFieldValue('city', city);
+    setSearchQuery(city);
+    setFilteredCities([]);
+  };
 
-  return { filteredCities, searchQuery, setSearchQuery, handleSelectCity }
-}
+  return { filteredCities, searchQuery, setSearchQuery, handleSelectCity };
+};
 
-const CustomerFields = ({ city, touched, errors }: { city: string; touched: any; errors: any }) => {
-  const { values, setFieldValue } = useFormikContext<FormikCustomerValues>()
-  const { warehouses, isWarehousesLoading } = useWarehouses(city)
-  const [showDropdown, setShowDropdown] = useState(false)
+const CustomerFields = ({
+  city,
+  touched,
+  errors,
+}: {
+  city: string;
+  touched: any;
+  errors: any;
+}) => {
+  const { values, setFieldValue } = useFormikContext<FormikCustomerValues>();
+  const { warehouses, isWarehousesLoading } = useWarehouses(city);
+  const [showDropdown, setShowDropdown] = useState(false);
 
-  const { filteredCities, searchQuery, setSearchQuery, handleSelectCity } = useCitySelection(
-    values?.city,
-    setFieldValue
-  )
+  const { filteredCities, searchQuery, setSearchQuery, handleSelectCity } =
+    useCitySelection(values?.city, setFieldValue);
 
   const customerInputs = [
-    { name: "name", type: "text", id: "name", label: "Ім'я" },
-    { name: "surname", type: "text", id: "surname", label: "Прізвище" },
-    { name: "email", type: "email", id: "email", label: "Email" },
-    { name: "phone", type: "tel", id: "phone", label: "Телефон" },
+    { name: 'name', type: 'text', id: 'name', label: "Ім'я" },
+    { name: 'surname', type: 'text', id: 'surname', label: 'Прізвище' },
+    { name: 'email', type: 'email', id: 'email', label: 'Email' },
+    { name: 'phone', type: 'tel', id: 'phone', label: 'Телефон' },
     {
-      id: "customer.payment",
-      label: "Оберіть спосіб оплати",
+      id: 'customer.payment',
+      label: 'Оберіть спосіб оплати',
       options: Object.values(PaymentMethod).map(method => ({
         value: method,
-        label: method
+        label: method,
       })),
-      type: "select"
-    }
-  ]
+      type: 'select',
+    },
+  ];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
-    const value = e.target.value
-    setSearchQuery(value)
-    setFieldValue(field.name, value)
-    setShowDropdown(true)
-  }
+    const value = e.target.value;
+    setSearchQuery(value);
+    setFieldValue(field.name, value);
+    setShowDropdown(true);
+  };
 
   const handleCityClick = (city: string) => {
-    handleSelectCity(city)
-    setShowDropdown(false)
-  }
+    handleSelectCity(city);
+    setShowDropdown(false);
+  };
 
   return (
     <>
@@ -214,8 +242,8 @@ const CustomerFields = ({ city, touched, errors }: { city: string; touched: any;
               onChange={e => handleChange(e, field)}
               placeholder=" "
               className={`text-primaryTextColor peer w-full p-4 pt-6 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
-        ${errors.customer?.city && touched.customer?.city ? "border-rose-500" : "border-neutral-300"}
-        ${errors.customer?.city && touched.customer?.city ? "focus:border-rose-500" : "focus:border-green-500"}
+        ${errors.customer?.city && touched.customer?.city ? 'border-rose-500' : 'border-neutral-300'}
+        ${errors.customer?.city && touched.customer?.city ? 'focus:border-rose-500' : 'focus:border-green-500'}
         `}
             />
           )}
@@ -252,8 +280,8 @@ const CustomerFields = ({ city, touched, errors }: { city: string; touched: any;
           as="select"
           disabled={isWarehousesLoading}
           className={`text-primaryTextColor peer w-full p-4 pt-6 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
-        ${errors.customer?.warehouse && touched.customer?.warehouse ? "border-rose-500" : "border-neutral-300"}
-        ${errors.customer?.warehouse && touched.customer?.warehouse ? "focus:border-rose-500" : "focus:border-green-500"}`}
+        ${errors.customer?.warehouse && touched.customer?.warehouse ? 'border-rose-500' : 'border-neutral-300'}
+        ${errors.customer?.warehouse && touched.customer?.warehouse ? 'focus:border-rose-500' : 'focus:border-green-500'}`}
         >
           {warehouses.map((wh, i) => (
             <option key={i} value={wh.Description}>
@@ -278,7 +306,7 @@ const CustomerFields = ({ city, touched, errors }: { city: string; touched: any;
         <pre className="text-red-500">{JSON.stringify(errors, null, 2)}</pre>
       )}
     </>
-  )
-}
+  );
+};
 
-export default CustomerForm
+export default CustomerForm;

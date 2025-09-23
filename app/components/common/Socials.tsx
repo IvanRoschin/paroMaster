@@ -1,21 +1,23 @@
-import Link from "next/link"
+import Link from 'next/link';
 
-import { Icon } from "@/components/ui"
+import { Icon } from '@/components/ui';
 
 interface SocialsProps {
-  color?: string
+  color?: string;
 }
 
 const Socials: React.FC<SocialsProps> = ({ color }) => {
-  const phone = process.env.NEXT_PUBLIC_ADMIN_PHONE
-  const email = process.env.NEXT_PUBLIC_ADMIN_EMAIL
+  const phone = process.env.NEXT_PUBLIC_ADMIN_PHONE;
+  const email = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
   if (!phone || !email) {
-    console.error("Missing required environment variables: ADMIN_PHONE or ADMIN_EMAIL")
-    return null
+    console.error(
+      'Missing required environment variables: ADMIN_PHONE or ADMIN_EMAIL'
+    );
+    return null;
   }
 
-  const textColor = color ? "text-white" : "text-black"
+  const textColor = color ? 'text-white' : 'text-black';
 
   return (
     <ul>
@@ -42,7 +44,7 @@ const Socials: React.FC<SocialsProps> = ({ color }) => {
         </Link>
       </li>
     </ul>
-  )
-}
+  );
+};
 
-export default Socials
+export default Socials;

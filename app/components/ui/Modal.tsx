@@ -1,67 +1,69 @@
-"use client"
+'use client';
 
-import { useCallback, useEffect, useState } from "react"
-import { IoMdClose } from "react-icons/io"
+import { useCallback, useEffect, useState } from 'react';
+import { IoMdClose } from 'react-icons/io';
 
 interface ModalProps {
-  body?: React.ReactElement
-  isOpen?: boolean
-  onClose: () => void
-  disabled?: boolean
+  body?: React.ReactElement;
+  isOpen?: boolean;
+  onClose: () => void;
+  disabled?: boolean;
 }
 
 const Modal = ({ isOpen, onClose, body, disabled }: ModalProps) => {
-  const [showModal, setShowModal] = useState(isOpen)
+  const [showModal, setShowModal] = useState(isOpen);
   useEffect(() => {
-    setShowModal(isOpen)
-  }, [isOpen])
+    setShowModal(isOpen);
+  }, [isOpen]);
 
   useEffect(() => {
-    setShowModal(isOpen)
-  }, [isOpen])
+    setShowModal(isOpen);
+  }, [isOpen]);
 
   const handleClose = useCallback(() => {
     if (disabled) {
-      return
+      return;
     }
-    setShowModal(false)
+    setShowModal(false);
     setTimeout(() => {
-      onClose()
-    }, 300)
-  }, [disabled, onClose])
+      onClose();
+    }, 300);
+  }, [disabled, onClose]);
 
   useEffect(() => {
     const onEscClick = (e: KeyboardEvent) => {
-      if (e.code === "Escape") handleClose()
-    }
+      if (e.code === 'Escape') handleClose();
+    };
 
-    window.addEventListener("keydown", onEscClick)
+    window.addEventListener('keydown', onEscClick);
 
     return () => {
-      window.removeEventListener("keydown", onEscClick)
-    }
-  }, [handleClose])
+      window.removeEventListener('keydown', onEscClick);
+    };
+  }, [handleClose]);
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLElement>) => {
-    if (e.currentTarget === e.target) handleClose()
-  }
+    if (e.currentTarget === e.target) handleClose();
+  };
 
   if (!isOpen) {
-    return null
+    return null;
   }
 
   return (
     <div
       onClick={handleBackdropClick}
       className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300 ${
-        showModal ? "opacity-100" : "opacity-0 pointer-events-none"
+        showModal ? 'opacity-100' : 'opacity-0 pointer-events-none'
       }`}
     >
       <div
         className={`relative w-full max-w-2xl mx-auto my-10 rounded-2xl bg-white p-6 shadow-2xl transform transition-all duration-300 ${
-          showModal ? "translate-y-0 scale-100 opacity-100" : "translate-y-10 scale-95 opacity-0"
+          showModal
+            ? 'translate-y-0 scale-100 opacity-100'
+            : 'translate-y-10 scale-95 opacity-0'
         }`}
-        style={{ maxHeight: "90vh", overflowY: "auto" }}
+        style={{ maxHeight: '90vh', overflowY: 'auto' }}
       >
         <button
           onClick={() => handleClose()}
@@ -74,7 +76,7 @@ const Modal = ({ isOpen, onClose, body, disabled }: ModalProps) => {
         {body}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Modal
+export default Modal;

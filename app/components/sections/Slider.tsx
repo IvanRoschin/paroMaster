@@ -1,62 +1,64 @@
-import Image from "next/image"
-import { useCallback, useEffect, useState } from "react"
-import { IoIosArrowDropleft, IoIosArrowDropright } from "react-icons/io"
+import Image from 'next/image';
+import { useCallback, useEffect, useState } from 'react';
+import { IoIosArrowDropleft, IoIosArrowDropright } from 'react-icons/io';
 
-import { IGetAllSlides } from "@/actions/slider"
-import { IGetAllTestimonials } from "@/actions/testimonials"
-import { EmptyState, Loader } from "@/components/common"
-import { Testimonial } from "@/components/index"
+import { IGetAllSlides } from '@/actions/slider';
+import { IGetAllTestimonials } from '@/actions/testimonials';
+import { EmptyState, Loader } from '@/components/common';
+import { Testimonial } from '@/components/index';
 
 interface SliderProps {
-  DescriptionComponent?: any
-  testimonialsData?: IGetAllTestimonials
-  slidesData?: IGetAllSlides
-  testimonials?: boolean
+  DescriptionComponent?: any;
+  testimonialsData?: IGetAllTestimonials;
+  slidesData?: IGetAllSlides;
+  testimonials?: boolean;
 }
 
 const Slider: React.FC<SliderProps> = ({
   DescriptionComponent,
   testimonials = false,
   slidesData,
-  testimonialsData
+  testimonialsData,
 }) => {
-  const [activeImage, setActiveImage] = useState(0)
+  const [activeImage, setActiveImage] = useState(0);
 
-  const slides = testimonials ? testimonialsData?.testimonials : slidesData?.slides
+  const slides = testimonials
+    ? testimonialsData?.testimonials
+    : slidesData?.slides;
 
   const clickNext = useCallback(() => {
     if (slides && slides.length > 0) {
-      setActiveImage(prev => (prev === slides.length - 1 ? 0 : prev + 1))
+      setActiveImage(prev => (prev === slides.length - 1 ? 0 : prev + 1));
     }
-  }, [slides])
+  }, [slides]);
 
   const clickPrev = useCallback(() => {
     if (slides && slides.length > 0) {
-      setActiveImage(prev => (prev === 0 ? slides.length - 1 : prev - 1))
+      setActiveImage(prev => (prev === 0 ? slides.length - 1 : prev - 1));
     }
-  }, [slides])
+  }, [slides]);
 
   useEffect(() => {
     if (slides && slides.length > 0) {
       const timer = setTimeout(() => {
-        clickNext()
-      }, 5000)
-      return () => clearTimeout(timer)
+        clickNext();
+      }, 5000);
+      return () => clearTimeout(timer);
     }
-  }, [activeImage, slides, clickNext])
+  }, [activeImage, slides, clickNext]);
 
   if (!slides) {
-    return <Loader />
+    return <Loader />;
   }
 
   if (slides.length === 0) {
-    return <EmptyState showReset title="Відсутні слайди" />
+    return <EmptyState showReset title="Відсутні слайди" />;
   }
 
   return (
     <main
       className={`grid place-items-center mt-[65px] ${
-        testimonials ? "grid-cols-1" : "grid-cols-2"
+        testimonials ? 'grid-cols-1' : 'grid-cols-2'
       } w-full mx-auto max-w-5xl shadow-2xl rounded-2xl mt-[40px] relative mb-20`}
     >
       <div className="w-full flex justify-center items-center gap-4 transition-transform ease-in-out duration-500 md:rounded-2xl p-6 md:p-0">
@@ -65,8 +67,8 @@ const Slider: React.FC<SliderProps> = ({
             key={idx}
             className={`${
               idx === activeImage
-                ? "block w-full h-full object-cover transition-all duration-500 ease-in-out items-center"
-                : "hidden"
+                ? 'block w-full h-full object-cover transition-all duration-500 ease-in-out items-center'
+                : 'hidden'
             }`}
           >
             {testimonials ? (
@@ -92,12 +94,18 @@ const Slider: React.FC<SliderProps> = ({
       </div>
 
       <div className="absolute bottom-2 lg:bottom-10 right-10 lg:right-0 w-full flex justify-center items-center">
-        <div className="absolute z-50 bottom-2 right-10 cursor-pointer" onClick={clickPrev}>
+        <div
+          className="absolute z-50 bottom-2 right-10 cursor-pointer"
+          onClick={clickPrev}
+        >
           <div className="swiper-button-prev ">
             <IoIosArrowDropleft />
           </div>
         </div>
-        <div className="absolute z-50 bottom-2 right-2 cursor-pointer" onClick={clickNext}>
+        <div
+          className="absolute z-50 bottom-2 right-2 cursor-pointer"
+          onClick={clickNext}
+        >
           <div className="swiper-button-next">
             <IoIosArrowDropright />
           </div>
@@ -114,7 +122,7 @@ const Slider: React.FC<SliderProps> = ({
         />
       )}
     </main>
-  )
-}
+  );
+};
 
-export default Slider
+export default Slider;

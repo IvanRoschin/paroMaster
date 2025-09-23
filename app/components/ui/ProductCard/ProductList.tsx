@@ -1,7 +1,7 @@
-"use client"
+'use client';
 
-import { ProductCard } from "@/components/index"
-import { IGood } from "@/types/index"
+import { ProductCard } from '@/components/index';
+import { IGood } from '@/types/index';
 
 const ProductList = ({ goods, title }: { goods: IGood[]; title?: string }) => {
   return (
@@ -14,7 +14,7 @@ const ProductList = ({ goods, title }: { goods: IGood[]; title?: string }) => {
         {goods?.map((good: IGood, i) => <ProductCard key={i} good={good} />)}
       </ul>
     </>
-  )
-}
+  );
+};
 
-export default ProductList
+export default ProductList;

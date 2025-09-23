@@ -1,32 +1,32 @@
-import Breadcrumbs from "@/components/common/Breadcrumbs"
-import Image from "next/image"
+import Breadcrumbs from '@/components/common/Breadcrumbs';
+import Image from 'next/image';
 
 const works = [
   {
     id: 1,
-    title: "Ремонт плати керування",
-    src: "/works/control-board-repair.webp",
-    desc: "Професійне відновлення плати керування парогенератора Laurastar."
+    title: 'Ремонт плати керування',
+    src: '/works/control-board-repair.webp',
+    desc: 'Професійне відновлення плати керування парогенератора Laurastar.',
   },
   {
     id: 2,
-    title: "Заміна бойлера",
-    src: "/works/boiler-replacement.webp",
-    desc: "Виконано повну заміну бойлера з тестуванням на герметичність."
+    title: 'Заміна бойлера',
+    src: '/works/boiler-replacement.webp',
+    desc: 'Виконано повну заміну бойлера з тестуванням на герметичність.',
   },
   {
     id: 3,
-    title: "Переобладнання підошви праски",
+    title: 'Переобладнання підошви праски',
     src: `/works/iron-soleplate.webp`,
-    desc: "Оновлення підошви для ідеального ковзання по тканині."
+    desc: 'Оновлення підошви для ідеального ковзання по тканині.',
   },
   {
     id: 4,
-    title: "Заміна проводки та шлангів",
+    title: 'Заміна проводки та шлангів',
     src: `/works/wiring-replacement.webp`,
-    desc: "Безпечно і акуратно замінено елементи комунікацій."
-  }
-]
+    desc: 'Безпечно і акуратно замінено елементи комунікацій.',
+  },
+];
 
 const OurWorkPage = () => {
   return (
@@ -36,7 +36,10 @@ const OurWorkPage = () => {
       <h1 className="subtitle mb-4 text-center">Наші роботи</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {works.map(work => (
-          <div key={work.id} className="rounded-2xl overflow-hidden shadow-lg bg-white">
+          <div
+            key={work.id}
+            className="rounded-2xl overflow-hidden shadow-lg bg-white"
+          >
             <div className="relative overflow-hidden group">
               <Image
                 src={work.src}
@@ -54,7 +57,7 @@ const OurWorkPage = () => {
         ))}
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default OurWorkPage
+export default OurWorkPage;

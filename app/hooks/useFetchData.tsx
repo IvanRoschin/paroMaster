@@ -1,5 +1,5 @@
 // hooks/useFetchData.ts
-import { QueryKey, useQuery } from "@tanstack/react-query"
+import { QueryKey, useQuery } from '@tanstack/react-query';
 
 export const useFetchData = <T,>(
   action: (params?: any) => Promise<T>,
@@ -8,10 +8,10 @@ export const useFetchData = <T,>(
 ) => {
   const { data, error, isError, isLoading, refetch } = useQuery<T, Error>({
     queryFn: () => action(params),
-    queryKey: [key, JSON.stringify(params)]
-  })
+    queryKey: [key, JSON.stringify(params)],
+  });
 
-  return { data, error, isError, isLoading, refetch }
-}
+  return { data, error, isError, isLoading, refetch };
+};
 
-export default useFetchData
+export default useFetchData;

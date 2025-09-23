@@ -1,23 +1,25 @@
-import { getOrderById } from "@/actions/orders"
-import { ISearchParams } from "@/types/searchParams"
+import { getOrderById } from '@/actions/orders';
+import { ISearchParams } from '@/types/searchParams';
 
-import { generateSignature } from "../../../lib/generateSignature"
+import { generateSignature } from '../../../lib/generateSignature';
 
-export const dynamic = "force-dynamic" // чтобы не кэшировалось
+export const dynamic = 'force-dynamic'; // чтобы не кэшировалось
 
 export default async function OrderPayPage({
-  searchParams
+  searchParams,
 }: {
-  searchParams: Promise<ISearchParams>
+  searchParams: Promise<ISearchParams>;
 }) {
-  const params = await searchParams
+  const params = await searchParams;
 
-  const order = await getOrderById(params.id)
+  const order = await getOrderById(params.id);
 
-  if (!order) return <div>Замовлення не знайдено</div>
+  if (!order) return <div>Замовлення не знайдено</div>;
 
-  const signature = generateSignature(order)
-  const orderDate = Math.floor(new Date(order.createdAt ?? Date.now()).getTime() / 1000)
+  const signature = generateSignature(order);
+  const orderDate = Math.floor(
+    new Date(order.createdAt ?? Date.now()).getTime() / 1000
+  );
 
   return (
     <div className="flex justify-center mt-24">
@@ -40,7 +42,11 @@ export default async function OrderPayPage({
         />
         <input type="hidden" name="orderReference" value={order.number} />
         <input type="hidden" name="orderDate" value={orderDate.toString()} />
-        <input type="hidden" name="amount" value={order.totalPrice.toFixed(2)} />
+        <input
+          type="hidden"
+          name="amount"
+          value={order.totalPrice.toFixed(2)}
+        />
         <input type="hidden" name="currency" value="UAH" />
         <input type="hidden" name="orderTimeout" value="49000" />
         <input type="hidden" name="defaultPaymentSystem" value="card" />
@@ -48,16 +54,36 @@ export default async function OrderPayPage({
         {order.orderedGoods.map((item: any, index: number) => (
           <div key={index}>
             <input type="hidden" name="productName[]" value={item.title} />
-            <input type="hidden" name="productPrice[]" value={item.price.toString()} />
-            <input type="hidden" name="productCount[]" value={(item.quantity ?? 1).toString()} />
+            <input
+              type="hidden"
+              name="productPrice[]"
+              value={item.price.toString()}
+            />
+            <input
+              type="hidden"
+              name="productCount[]"
+              value={(item.quantity ?? 1).toString()}
+            />
           </div>
         ))}
 
-        <input type="hidden" name="clientFirstName" value={order.customer.name} />
-        <input type="hidden" name="clientLastName" value={order.customer.surname} />
+        <input
+          type="hidden"
+          name="clientFirstName"
+          value={order.customer.name}
+        />
+        <input
+          type="hidden"
+          name="clientLastName"
+          value={order.customer.surname}
+        />
         <input type="hidden" name="clientEmail" value={order.customer.email} />
         <input type="hidden" name="clientCity" value={order.customer.city} />
-        <input type="hidden" name="clientAddress" value={order.customer.warehouse} />
+        <input
+          type="hidden"
+          name="clientAddress"
+          value={order.customer.warehouse}
+        />
         <input type="hidden" name="merchantSignature" value={signature} />
 
         <button
@@ -68,5 +94,5 @@ export default async function OrderPayPage({
         </button>
       </form>
     </div>
-  )
+  );
 }

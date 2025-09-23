@@ -1,6 +1,6 @@
-import Breadcrumbs from "@/components/common/Breadcrumbs"
-import Logo from "@/components/common/Logo"
-import Link from "next/link"
+import Breadcrumbs from '@/components/common/Breadcrumbs';
+import Logo from '@/components/common/Logo';
+import Link from 'next/link';
 
 const PublicOffer = () => {
   return (
@@ -36,9 +36,9 @@ const PublicOffer = () => {
       <Section title="§ 3 ПОРЯДОК ОФОРМЛЕННЯ ЗАМОВЛЕННЯ">
         <List
           items={[
-            "Покупець самостійно оформлює замовлення на Сайті, заповнюючи форму замовлення.",
-            "Під час оформлення замовлення Покупець надає достовірну інформацію про себе.",
-            "Після оформлення замовлення Покупець отримує підтвердження на електронну пошту або за номером телефону."
+            'Покупець самостійно оформлює замовлення на Сайті, заповнюючи форму замовлення.',
+            'Під час оформлення замовлення Покупець надає достовірну інформацію про себе.',
+            'Після оформлення замовлення Покупець отримує підтвердження на електронну пошту або за номером телефону.',
           ]}
         />
       </Section>
@@ -46,8 +46,8 @@ const PublicOffer = () => {
       <Section title="§ 4 ЦІНА ТА ПОРЯДОК ОПЛАТИ">
         <List
           items={[
-            "Ціни на товари вказані в національній валюті та є чинними на момент оформлення замовлення.",
-            "Оплата здійснюється способами, зазначеними на Сайті: готівкою при отриманні або безготівковим переказом через платіжні системи."
+            'Ціни на товари вказані в національній валюті та є чинними на момент оформлення замовлення.',
+            'Оплата здійснюється способами, зазначеними на Сайті: готівкою при отриманні або безготівковим переказом через платіжні системи.',
           ]}
         />
       </Section>
@@ -55,8 +55,8 @@ const PublicOffer = () => {
       <Section title="§ 5 ДОСТАВКА ТА ПЕРЕДАЧА ТОВАРУ">
         <List
           items={[
-            "Доставка здійснюється транспортними компаніями, вибраними Покупцем при оформленні замовлення.",
-            "Ризики випадкової загибелі або пошкодження товару переходять до Покупця з моменту передачі товару перевізнику."
+            'Доставка здійснюється транспортними компаніями, вибраними Покупцем при оформленні замовлення.',
+            'Ризики випадкової загибелі або пошкодження товару переходять до Покупця з моменту передачі товару перевізнику.',
           ]}
         />
       </Section>
@@ -67,8 +67,8 @@ const PublicOffer = () => {
         </p>
         <List
           items={[
-            "Отримувати товар відповідної якості та у встановлений термін.",
-            "Відмовитися від товару відповідно до законодавства України."
+            'Отримувати товар відповідної якості та у встановлений термін.',
+            'Відмовитися від товару відповідно до законодавства України.',
           ]}
         />
         <p className="mb-2">
@@ -76,8 +76,8 @@ const PublicOffer = () => {
         </p>
         <List
           items={[
-            "Надати достовірну інформацію при оформленні замовлення.",
-            "Прийняти та оплатити замовлений товар."
+            'Надати достовірну інформацію при оформленні замовлення.',
+            'Прийняти та оплатити замовлений товар.',
           ]}
         />
         <p className="mb-2">
@@ -85,8 +85,8 @@ const PublicOffer = () => {
         </p>
         <List
           items={[
-            "Призупинити або відмовити у виконанні замовлення у разі виявлення недостовірних даних Покупця.",
-            "Змінювати умови Оферти без попереднього погодження з Покупцем."
+            'Призупинити або відмовити у виконанні замовлення у разі виявлення недостовірних даних Покупця.',
+            'Змінювати умови Оферти без попереднього погодження з Покупцем.',
           ]}
         />
       </Section>
@@ -112,10 +112,11 @@ const PublicOffer = () => {
       <div className="mt-8">
         <p className="mb-2">Контактна інформація Продавця:</p>
         <p className="mb-2">
-          <strong>Юридична адреса:</strong> {process.env.NEXT_PUBLIC_ADMIN_ADDRESS}
+          <strong>Юридична адреса:</strong>{' '}
+          {process.env.NEXT_PUBLIC_ADMIN_ADDRESS}
         </p>
         <p className="mb-2">
-          <strong>Електронна пошта:</strong>{" "}
+          <strong>Електронна пошта:</strong>{' '}
           <a
             href={`mailto:${process.env.NEXT_PUBLIC_ADMIN_EMAIL}`}
             className="hover:text-primaryAccentColor"
@@ -124,7 +125,7 @@ const PublicOffer = () => {
           </a>
         </p>
         <p className="flex items-start mb-2">
-          <strong>Телефон:</strong>{" "}
+          <strong>Телефон:</strong>{' '}
           <Link
             href={`tel:${process.env.NEXT_PUBLIC_ADMIN_PHONE}`}
             className="ml-2 hover:text-primaryAccentColor"
@@ -134,15 +135,18 @@ const PublicOffer = () => {
         </p>
       </div>
     </div>
-  )
-}
+  );
+};
 
-const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
+const Section: React.FC<{ title: string; children: React.ReactNode }> = ({
+  title,
+  children,
+}) => (
   <section className="mb-8">
     <h2 className="text-lg font-semibold mb-4">{title}</h2>
     {children}
   </section>
-)
+);
 
 const List: React.FC<{ items: string[] }> = ({ items }) => (
   <ul className="list-disc list-inside mb-2">
@@ -150,6 +154,6 @@ const List: React.FC<{ items: string[] }> = ({ items }) => (
       <li key={index}>{item}</li>
     ))}
   </ul>
-)
+);
 
-export default PublicOffer
+export default PublicOffer;

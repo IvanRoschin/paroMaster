@@ -1,5 +1,5 @@
-"use client"
-import { FallingLines } from "react-loader-spinner"
+'use client';
+import { FallingLines } from 'react-loader-spinner';
 
 const Loader: React.FC = () => {
   return (
@@ -14,7 +14,7 @@ const Loader: React.FC = () => {
     >
       <FallingLines color="#EA580C" width="100" visible={true} />
     </div>
-  )
-}
+  );
+};
 
-export default Loader
+export default Loader;

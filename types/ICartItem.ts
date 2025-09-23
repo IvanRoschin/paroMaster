@@ -1,6 +1,6 @@
-import { IGood } from "@/types/IGood"
+import { IGood } from '@/types/IGood';
 
 export type ICartItem = {
-  good: IGood
-  quantity: number
-}
+  good: IGood;
+  quantity: number;
+};

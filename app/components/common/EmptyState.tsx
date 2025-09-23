@@ -1,25 +1,25 @@
-"use client"
+'use client';
 
-import { Heading } from "@/components/sections"
-import { Button } from "@/components/ui"
-import { useRouter } from "next/navigation"
+import { Heading } from '@/components/sections';
+import { Button } from '@/components/ui';
+import { useRouter } from 'next/navigation';
 
 interface EmptyStateProps {
-  title?: string
-  subtitle?: string
-  showReset?: boolean
-  category?: string
-  onReset?: () => void
+  title?: string;
+  subtitle?: string;
+  showReset?: boolean;
+  category?: string;
+  onReset?: () => void;
 }
 
 const EmptyState: React.FC<EmptyStateProps> = ({
-  title = "Відсутні товари 🤷‍♂️",
-  subtitle = "Спробуйте змінити фільтри ⚙️",
+  title = 'Відсутні товари 🤷‍♂️',
+  subtitle = 'Спробуйте змінити фільтри ⚙️',
   showReset,
   category,
-  onReset
+  onReset,
 }) => {
-  const router = useRouter()
+  const router = useRouter();
   return (
     <div
       className="
@@ -38,12 +38,12 @@ const EmptyState: React.FC<EmptyStateProps> = ({
             type="button"
             outline
             label="Видалити фільтри"
-            onClick={() => (onReset ? onReset() : router.push("/"))}
+            onClick={() => (onReset ? onReset() : router.push('/'))}
           />
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default EmptyState
+export default EmptyState;

@@ -1,28 +1,31 @@
-"use client"
+'use client';
 
-import { menu } from "app/config/constants"
-import Link from "next/link"
-import { useState } from "react"
-import { MdMenu, MdMenuOpen } from "react-icons/md"
+import { menu } from 'app/config/constants';
+import Link from 'next/link';
+import { useState } from 'react';
+import { MdMenu, MdMenuOpen } from 'react-icons/md';
 
-import { Socials } from "@/components/index"
-import { Icon, SingOutButton } from "@/components/ui"
+import { Socials } from '@/components/index';
+import { Icon, SingOutButton } from '@/components/ui';
 
 interface MenuProps {
-  session?: any
+  session?: any;
 }
 const MobileMenu = ({ session }: MenuProps) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleNavbar = () => {
-    setIsMenuOpen(!isMenuOpen)
-  }
+    setIsMenuOpen(!isMenuOpen);
+  };
 
   return (
     <div className="bg-gray-300 flex justify-between p-4 px-8">
       <Socials />
       <nav className="flex flex-col justify-center items-center">
-        <button onClick={toggleNavbar} className="self-end mb-6 place-self-center">
+        <button
+          onClick={toggleNavbar}
+          className="self-end mb-6 place-self-center"
+        >
           {isMenuOpen ? (
             <MdMenuOpen size={32} className="nav" />
           ) : (
@@ -58,7 +61,7 @@ const MobileMenu = ({ session }: MenuProps) => {
         )}
       </nav>
     </div>
-  )
-}
+  );
+};
 
-export default MobileMenu
+export default MobileMenu;

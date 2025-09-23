@@ -1,4 +1,4 @@
-import Card from "@/admin/components/Card"
+import Card from '@/admin/components/Card';
 import {
   CategoryForm,
   CustomerForm,
@@ -6,10 +6,10 @@ import {
   OrderForm,
   SlideForm,
   TestimonialForm,
-  UserForm
-} from "@/admin/components/forms"
-import MenuLink from "@/admin/components/MenuLink"
-import Navbar from "@/admin/components/Navbar"
+  UserForm,
+} from '@/admin/components/forms';
+import MenuLink from '@/admin/components/MenuLink';
+import Navbar from '@/admin/components/Navbar';
 import {
   Categories,
   Customers,
@@ -17,8 +17,8 @@ import {
   Orders,
   Slides,
   Testimonials,
-  Users
-} from "@/admin/components/sections"
+  Users,
+} from '@/admin/components/sections';
 
 export {
   Card,
@@ -37,5 +37,5 @@ export {
   TestimonialForm,
   Testimonials,
   UserForm,
-  Users
-}
+  Users,
+};

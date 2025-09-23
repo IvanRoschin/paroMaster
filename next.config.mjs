@@ -5,23 +5,23 @@ const nextConfig = {
 
     remotePatterns: [
       {
-        protocol: "https",
-        hostname: "res.cloudinary.com",
-        pathname: "/dfocogmzz/**"
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/dfocogmzz/**',
       },
       {
-        protocol: "https",
-        hostname: "lh3.googleusercontent.com",
-        pathname: "**"
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        pathname: '**',
       },
       {
-        protocol: "http",
-        hostname: "localhost",
-        port: "3000",
-        pathname: "**"
-      }
-    ]
-  }
-}
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3000',
+        pathname: '**',
+      },
+    ],
+  },
+};
 
-export default nextConfig
+export default nextConfig;

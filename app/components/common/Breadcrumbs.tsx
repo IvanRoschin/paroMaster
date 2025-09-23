@@ -1,99 +1,101 @@
-"use client"
+'use client';
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { useEffect, useState } from "react"
-import { FaChevronRight } from "react-icons/fa"
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { FaChevronRight } from 'react-icons/fa';
 
-import { getGoodById } from "@/actions/goods"
+import { getGoodById } from '@/actions/goods';
 
-const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const customNames: Record<string, string> = {
-  catalog: "Каталог",
-  category: "Категорії",
-  services: "Послуги",
-  ourworks: "Наші роботи",
-  delivery: "Доставка",
-  guarantee: "Гарантія",
-  contact: "Контакти",
-  good: "Товари",
-  admin: "Cторінка адміна",
-  orders: "Замовлення",
-  goods: "Товари",
-  users: "Адміни",
-  сategories: "Категорії",
-  testimonials: "Відгуки",
-  slider: "Слайди",
-  checkout: "Оформлення Замовлення",
-  privacypolicy: "Політика Конфіденційності",
-  publicoffer: "Публічна Оферта",
-  customers: "Замовник",
-  search: "Пошук"
-}
+  catalog: 'Каталог',
+  category: 'Категорії',
+  services: 'Послуги',
+  ourworks: 'Наші роботи',
+  delivery: 'Доставка',
+  guarantee: 'Гарантія',
+  contact: 'Контакти',
+  good: 'Товари',
+  admin: 'Cторінка адміна',
+  orders: 'Замовлення',
+  goods: 'Товари',
+  users: 'Адміни',
+  сategories: 'Категорії',
+  testimonials: 'Відгуки',
+  slider: 'Слайди',
+  checkout: 'Оформлення Замовлення',
+  privacypolicy: 'Політика Конфіденційності',
+  publicoffer: 'Публічна Оферта',
+  customers: 'Замовник',
+  search: 'Пошук',
+};
 
 const Breadcrumbs = () => {
-  const pathname = usePathname()
-  const [category, setCategory] = useState<string | null>(null)
-  const [dynamicTitle, setDynamicTitle] = useState<string | null>(null)
+  const pathname = usePathname();
+  const [category, setCategory] = useState<string | null>(null);
+  const [dynamicTitle, setDynamicTitle] = useState<string | null>(null);
 
   const pathSegments = pathname
-    .split("/")
+    .split('/')
     .filter(Boolean)
-    .map(seg => decodeURIComponent(seg))
+    .map(seg => decodeURIComponent(seg));
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const searchParams = new URLSearchParams(window.location.search)
-      setCategory(searchParams.get("category"))
+    if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search);
+      setCategory(searchParams.get('category'));
     }
 
-    const lastSegment = pathSegments[pathSegments.length - 1]
+    const lastSegment = pathSegments[pathSegments.length - 1];
 
     if (/^[0-9a-fA-F]{24}$/.test(lastSegment)) {
       const fetchGood = async () => {
         try {
-          const good = await getGoodById(lastSegment)
+          const good = await getGoodById(lastSegment);
 
           if (good?.title && good?.brand && good?.model) {
-            setDynamicTitle(` ${good.title} ${good.brand} ${good.model}`)
+            setDynamicTitle(` ${good.title} ${good.brand} ${good.model}`);
           } else if (good?.title) {
-            setDynamicTitle(good.title)
+            setDynamicTitle(good.title);
           } else {
-            setDynamicTitle("Товар")
+            setDynamicTitle('Товар');
           }
         } catch (error) {
-          console.error("Error fetching good data:", error)
-          setDynamicTitle("Товар")
+          console.error('Error fetching good data:', error);
+          setDynamicTitle('Товар');
         }
-      }
+      };
 
-      fetchGood()
+      fetchGood();
     }
-  }, [pathname, pathSegments])
+  }, [pathname, pathSegments]);
 
   let segmentCrumbs = pathSegments.map((segment, index) => {
-    const href = "/" + pathSegments.slice(0, index + 1).join("/")
-    let name
+    const href = '/' + pathSegments.slice(0, index + 1).join('/');
+    let name;
 
     if (index === pathSegments.length - 1 && dynamicTitle) {
-      name = dynamicTitle
+      name = dynamicTitle;
     } else {
-      name = customNames[segment] || capitalize(segment.replace(/-/g, " "))
+      name = customNames[segment] || capitalize(segment.replace(/-/g, ' '));
     }
 
-    return { name, href }
-  })
+    return { name, href };
+  });
 
   if (category && !pathSegments.includes(category)) {
-    const insertIndex = dynamicTitle ? segmentCrumbs.length - 1 : segmentCrumbs.length
+    const insertIndex = dynamicTitle
+      ? segmentCrumbs.length - 1
+      : segmentCrumbs.length;
 
     segmentCrumbs.splice(insertIndex, 0, {
       name: capitalize(category),
-      href: `/catalog?category=${category}`
-    })
+      href: `/catalog?category=${category}`,
+    });
   }
-  const crumbs = [...segmentCrumbs]
+  const crumbs = [...segmentCrumbs];
 
   // const crumbs = [{ name: "Головна", href: "/" }, ...segmentCrumbs]
 
@@ -111,7 +113,9 @@ const Breadcrumbs = () => {
             <Link
               href={crumb.href}
               className={`nav text-gray-800 font-medium hover:text-gray-800  ${
-                idx === crumbs.length - 1 ? "text-gray-800 font-medium" : "text-blue-600"
+                idx === crumbs.length - 1
+                  ? 'text-gray-800 font-medium'
+                  : 'text-blue-600'
               }`}
             >
               {crumb.name}
@@ -120,7 +124,7 @@ const Breadcrumbs = () => {
         ))}
       </ol>
     </nav>
-  )
-}
+  );
+};
 
-export default Breadcrumbs
+export default Breadcrumbs;

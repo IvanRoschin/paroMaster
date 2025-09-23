@@ -1,18 +1,24 @@
-import Link from "next/link"
-import { FaPen, FaRegStar, FaStar, FaStarHalfAlt, FaTrash } from "react-icons/fa"
+import Link from 'next/link';
+import {
+  FaPen,
+  FaRegStar,
+  FaStar,
+  FaStarHalfAlt,
+  FaTrash,
+} from 'react-icons/fa';
 
-import Button from "@/components/ui/Button" // або свій компонент кнопки
-import { ITestimonial } from "@/types/index"
+import Button from '@/components/ui/Button'; // або свій компонент кнопки
+import { ITestimonial } from '@/types/index';
 
 type StarProps = {
-  rating?: number
-  size?: number
-}
+  rating?: number;
+  size?: number;
+};
 
 const StarDisplay = ({ rating, size = 18 }: StarProps) => {
-  const fullStars = rating ? Math.floor(rating) : 0
-  const hasHalfStar = rating ? rating - fullStars >= 0.5 : false
-  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0)
+  const fullStars = rating ? Math.floor(rating) : 0;
+  const hasHalfStar = rating ? rating - fullStars >= 0.5 : false;
+  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
 
   return (
     <div className="flex items-center space-x-0.5">
@@ -24,19 +30,19 @@ const StarDisplay = ({ rating, size = 18 }: StarProps) => {
         <FaRegStar key={`empty-${i}`} className="text-yellow-500" size={size} />
       ))}
     </div>
-  )
-}
+  );
+};
 
 type Props = {
   data: {
-    testimonials: ITestimonial[]
-  }
-  isAdmin?: boolean
-  handleDelete: (id: string) => void
-}
+    testimonials: ITestimonial[];
+  };
+  isAdmin?: boolean;
+  handleDelete: (id: string) => void;
+};
 
 const ReviewList = ({ data, isAdmin = false, handleDelete }: Props) => {
-  console.log("reviewsInReviewList", data)
+  console.log('reviewsInReviewList', data);
   return (
     <div className="mt-10">
       <h3 className="text-2xl font-semibold mb-4">Відгуки</h3>
@@ -63,7 +69,7 @@ const ReviewList = ({ data, isAdmin = false, handleDelete }: Props) => {
                       bg="bg"
                       onClick={() => {
                         if (review?._id) {
-                          handleDelete(review._id.toString())
+                          handleDelete(review._id.toString());
                         }
                       }}
                     />
@@ -75,27 +81,33 @@ const ReviewList = ({ data, isAdmin = false, handleDelete }: Props) => {
                   <p className="text-lg font-medium">{review.name}</p>
                   <StarDisplay rating={review?.rating ?? undefined} />
                 </div>
-                <p className="text-gray-600 italic mb-2">&ldquo;{review.text}&rdquo;</p>
+                <p className="text-gray-600 italic mb-2">
+                  &ldquo;{review.text}&rdquo;
+                </p>
                 <p className="text-sm text-gray-400">
-                  Додано:{" "}
-                  {new Date(review.createdAt).toLocaleDateString("uk-UA", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric"
+                  Додано:{' '}
+                  {new Date(review.createdAt).toLocaleDateString('uk-UA', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
                   })}
                 </p>
                 {!review.isActive && (
-                  <p className="text-xs text-red-500 mt-2">* Відгук ще не опублікований</p>
+                  <p className="text-xs text-red-500 mt-2">
+                    * Відгук ще не опублікований
+                  </p>
                 )}
               </li>
             </div>
           ))}
         </ul>
       ) : (
-        <p className="text-gray-500 italic">Цей товар ще не має відгуків. Будь першим!</p>
+        <p className="text-gray-500 italic">
+          Цей товар ще не має відгуків. Будь першим!
+        </p>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default ReviewList
+export default ReviewList;

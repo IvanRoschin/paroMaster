@@ -1,90 +1,100 @@
-import Link from "next/link"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useRef, useState } from "react"
-import { CiSearch } from "react-icons/ci"
-import { useDebouncedCallback } from "use-debounce"
+import Link from 'next/link';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import { CiSearch } from 'react-icons/ci';
+import { useDebouncedCallback } from 'use-debounce';
 
-import { getAllGoods } from "@/actions/goods"
-import { Button, Icon } from "@/components/ui"
-import { useFetchData } from "@/hooks/index"
-import { IGood } from "@/types/index"
+import { getAllGoods } from '@/actions/goods';
+import { Button, Icon } from '@/components/ui';
+import { useFetchData } from '@/hooks/index';
+import { IGood } from '@/types/index';
 
 const Search = ({ placeholder }: { placeholder: string }) => {
-  const searchParams = useSearchParams()
-  const pathname = usePathname()
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
-  const { replace, push } = useRouter()
-  const [inputValue, setInputValue] = useState("")
-  const [suggestions, setSuggestions] = useState<IGood[]>([])
+  const { replace, push } = useRouter();
+  const [inputValue, setInputValue] = useState('');
+  const [suggestions, setSuggestions] = useState<IGood[]>([]);
 
-  const containerRef = useRef<HTMLDivElement | null>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const { data } = useFetchData(getAllGoods, ["goods"], searchParams)
+  const { data } = useFetchData(getAllGoods, ['goods'], searchParams);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setInputValue(value)
-    debouncedSearch(value)
-  }
+    const value = e.target.value;
+    setInputValue(value);
+    debouncedSearch(value);
+  };
 
   const debouncedSearch = useDebouncedCallback((value: string) => {
-    const params = new URLSearchParams(searchParams.toString())
+    const params = new URLSearchParams(searchParams.toString());
 
     if (value) {
-      params.set("q", value)
+      params.set('q', value);
     } else {
-      params.delete("q")
+      params.delete('q');
     }
 
     if (value.length > 2 && data?.goods) {
-      const searchFields: (keyof IGood)[] = ["title", "model", "vendor", "brand"]
+      const searchFields: (keyof IGood)[] = [
+        'title',
+        'model',
+        'vendor',
+        'brand',
+      ];
       const filtered = data.goods.filter(good =>
         searchFields.some(field =>
           good[field]?.toString().toLowerCase().includes(value.toLowerCase())
         )
-      )
-      setSuggestions(filtered)
+      );
+      setSuggestions(filtered);
     } else {
-      setSuggestions([])
+      setSuggestions([]);
     }
-  }, 300)
+  }, 300);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setSuggestions([])
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        setSuggestions([]);
       }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
+    };
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [])
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const clearInput = () => {
-    setInputValue("")
-    setSuggestions([])
-    const params = new URLSearchParams(searchParams.toString())
-    params.delete("q")
-    replace(`${pathname}?${params.toString()}`, { scroll: false })
-  }
+    setInputValue('');
+    setSuggestions([]);
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('q');
+    replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    const value = inputValue.trim()
-    if (value.length === 0) return
+    const value = inputValue.trim();
+    if (value.length === 0) return;
 
-    const params = new URLSearchParams(searchParams.toString())
-    params.set("q", value)
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('q', value);
 
-    push(`/search?${params.toString()}`)
-    setSuggestions([])
-  }
+    push(`/search?${params.toString()}`);
+    setSuggestions([]);
+  };
 
   return (
     <form className="w-full mx-7 relative" onSubmit={handleSubmit}>
-      <label className="mb-2 text-sm font-medium text-gray-900 sr-only">Пошук</label>
+      <label className="mb-2 text-sm font-medium text-gray-900 sr-only">
+        Пошук
+      </label>
       <div className="relative w-full flex justify-center items-center">
         <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none z-10">
           <CiSearch />
@@ -101,7 +111,7 @@ const Search = ({ placeholder }: { placeholder: string }) => {
         <button
           type="button"
           className="absolute top-[15%] right-[120px]"
-          style={{ display: inputValue ? "block" : "none" }}
+          style={{ display: inputValue ? 'block' : 'none' }}
           onClick={clearInput}
         >
           <Icon
@@ -121,8 +131,8 @@ const Search = ({ placeholder }: { placeholder: string }) => {
                 href={`/good/${product._id}`}
                 className="block px-4 py-2 text-sm hover:bg-gray-100"
                 onClick={() => {
-                  setSuggestions([])
-                  setInputValue("")
+                  setSuggestions([]);
+                  setInputValue('');
                 }}
               >
                 <div className="font-medium">{product.category}</div>
@@ -131,7 +141,9 @@ const Search = ({ placeholder }: { placeholder: string }) => {
                   {Number(product.price).toFixed(2)} ₴
                 </div>
                 {product.model && (
-                  <div className="text-gray-500 text-sm mt-1">Модель: {product.model}</div>
+                  <div className="text-gray-500 text-sm mt-1">
+                    Модель: {product.model}
+                  </div>
                 )}
               </Link>
             </li>
@@ -139,7 +151,7 @@ const Search = ({ placeholder }: { placeholder: string }) => {
         </ul>
       )}
     </form>
-  )
-}
+  );
+};
 
-export default Search
+export default Search;

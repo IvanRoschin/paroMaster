@@ -34,8 +34,16 @@
       "@/config/*": ["./config/*"],
       "@/lib/*": ["./lib/*"],
       "@/admin/*": ["./app/admin/*"]
-    }
+    },
+    "skipLibCheck": true
   },
-  "include": ["**/*.ts", "**/*.tsx", "auth.js", "auth.tjs", "next-env.d.ts", ".next/types/**/*.ts"],
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "auth.js",
+    "auth.tjs",
+    "next-env.d.ts",
+    ".next/types/**/*.ts"
+  ],
   "exclude": ["node_modules"]
 }

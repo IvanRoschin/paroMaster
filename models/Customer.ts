@@ -1,39 +1,40 @@
-import mongoose from "mongoose"
+import mongoose from 'mongoose';
 
-const { Schema } = mongoose
+const { Schema } = mongoose;
 
 const customerSchema = new Schema(
   {
     name: {
       type: String,
-      required: true
+      required: true,
     },
     phone: {
       type: String,
-      required: true
+      required: true,
     },
     email: {
       type: String,
-      required: true
+      required: true,
     },
     city: {
       type: String,
-      required: true
+      required: true,
     },
     warehouse: {
       type: String,
-      required: true
+      required: true,
     },
     payment: {
       type: String,
-      required: true
+      required: true,
     },
-    orders: [{ type: Schema.Types.ObjectId, ref: "orders" }]
+    orders: [{ type: Schema.Types.ObjectId, ref: 'orders' }],
   },
 
   { versionKey: false, timestamps: true }
-)
+);
 
-customerSchema.index({ "$**": "text" })
+customerSchema.index({ '$**': 'text' });
 
-export default mongoose.models.Customer || mongoose.model("Customer", customerSchema)
+export default mongoose.models.Customer ||
+  mongoose.model('Customer', customerSchema);

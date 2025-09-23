@@ -1,17 +1,17 @@
-"use client"
+'use client';
 
-import Image from "next/image"
-import { useState } from "react"
+import Image from 'next/image';
+import { useState } from 'react';
 
-import { IGood } from "@/types/IGood"
+import { IGood } from '@/types/IGood';
 
 interface ImagesBlockProps {
-  item?: IGood
-  values?: string[] | string
+  item?: IGood;
+  values?: string[] | string;
 }
 
 const ImagesBlock: React.FC<ImagesBlockProps> = ({ item, values }) => {
-  const [index, setIndex] = useState<number>(0)
+  const [index, setIndex] = useState<number>(0);
 
   const renderImageGallery = (images: string[], altText: string) => (
     <div className="mr-[50px] pb-[40px]">
@@ -38,7 +38,7 @@ const ImagesBlock: React.FC<ImagesBlockProps> = ({ item, values }) => {
                 rounded-md object-cover 
                 transition-all duration-200 
                 hover:shadow-md hover:scale-105
-                ${imgIndex === images.length - 1 ? "mr-0" : ""}
+                ${imgIndex === images.length - 1 ? 'mr-0' : ''}
               `}
               onClick={() => setIndex(imgIndex)}
               priority={true}
@@ -47,7 +47,7 @@ const ImagesBlock: React.FC<ImagesBlockProps> = ({ item, values }) => {
         ))}
       </ul>
     </div>
-  )
+  );
 
   return (
     <div>
@@ -55,10 +55,10 @@ const ImagesBlock: React.FC<ImagesBlockProps> = ({ item, values }) => {
         (item.src?.length > 0
           ? renderImageGallery(item.src, item.title)
           : Array.isArray(values) && values.length > 0
-            ? renderImageGallery(values, "Зображення")
+            ? renderImageGallery(values, 'Зображення')
             : null)}
     </div>
-  )
-}
+  );
+};
 
-export default ImagesBlock
+export default ImagesBlock;

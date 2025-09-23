@@ -1,23 +1,23 @@
-import { useSession } from "next-auth/react"
-import Link from "next/link"
-import React from "react"
-import { FaPen, FaRegStar, FaStar, FaStarHalfAlt } from "react-icons/fa"
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
+import React from 'react';
+import { FaPen, FaRegStar, FaStar, FaStarHalfAlt } from 'react-icons/fa';
 
 interface TestimonialProps {
-  id: string
-  name: string
-  text: string
-  stars: number
+  id: string;
+  name: string;
+  text: string;
+  stars: number;
 }
 
 const Testimonial: React.FC<TestimonialProps> = ({ id, name, text, stars }) => {
-  const { data: session } = useSession()
-  const isAdmin = Boolean(session?.user)
+  const { data: session } = useSession();
+  const isAdmin = Boolean(session?.user);
 
   const renderStars = (rating: number) => {
-    const full = Math.floor(rating)
-    const half = rating % 1 >= 0.5 ? 1 : 0
-    const empty = 5 - full - half
+    const full = Math.floor(rating);
+    const half = rating % 1 >= 0.5 ? 1 : 0;
+    const empty = 5 - full - half;
 
     return (
       <div className="flex items-center gap-1 text-yellow-400">
@@ -37,8 +37,8 @@ const Testimonial: React.FC<TestimonialProps> = ({ id, name, text, stars }) => {
             <FaRegStar key={`e-${i}`} />
           ))}
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <div className="relative w-full h-full px-6 py-8 md:py-10 md:px-12 bg-white shadow-md rounded-xl flex flex-col justify-between gap-4 text-center md:text-left">
@@ -55,7 +55,7 @@ const Testimonial: React.FC<TestimonialProps> = ({ id, name, text, stars }) => {
         “{text}”
       </p>
     </div>
-  )
-}
+  );
+};
 
-export default Testimonial
+export default Testimonial;

@@ -1,4 +1,4 @@
-import { QueryClient, QueryKey } from "@tanstack/react-query"
+import { QueryClient, QueryKey } from '@tanstack/react-query';
 
 const prefetchData = async <T,>(
   queryClient: QueryClient,
@@ -8,9 +8,9 @@ const prefetchData = async <T,>(
 ) => {
   await queryClient.prefetchQuery({
     queryKey,
-    queryFn: () => action(params)
-  })
-  return queryClient
-}
+    queryFn: () => action(params),
+  });
+  return queryClient;
+};
 
-export default prefetchData
+export default prefetchData;

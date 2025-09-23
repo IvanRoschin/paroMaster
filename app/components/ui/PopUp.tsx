@@ -1,6 +1,6 @@
 interface PopUpProps {
-  message: string
-  onClose: () => void
+  message: string;
+  onClose: () => void;
 }
 
 const PopUp: React.FC<PopUpProps> = ({ message, onClose }) => {
@@ -16,7 +16,7 @@ const PopUp: React.FC<PopUpProps> = ({ message, onClose }) => {
         </button>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default PopUp
+export default PopUp;

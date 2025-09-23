@@ -1,60 +1,68 @@
-import { Metadata } from "next"
+import { Metadata } from 'next';
 
-import { getAllGoods } from "@/actions/goods"
-import { Breadcrumbs, InfiniteScroll } from "@/components/index"
-import prefetchData from "@/hooks/usePrefetchData"
-import { IGood, ISearchParams } from "@/types/index"
-import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
+import { getAllGoods } from '@/actions/goods';
+import { Breadcrumbs, InfiniteScroll } from '@/components/index';
+import prefetchData from '@/hooks/usePrefetchData';
+import { IGood, ISearchParams } from '@/types/index';
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from '@tanstack/react-query';
 
 // app/catalog/page.tsx
 
 interface GoodsData {
-  goods: IGood[]
+  goods: IGood[];
 }
 
-export const dynamic = "force-dynamic"
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: "Каталог товарів | ParoMaster",
+  title: 'Каталог товарів | ParoMaster',
   description:
-    "Великий каталог товарів для парогенераторів: запчастини, аксесуари, обладнання. Доставка по Україні. ParoMaster – надійний партнер у ремонті та сервісі.",
+    'Великий каталог товарів для парогенераторів: запчастини, аксесуари, обладнання. Доставка по Україні. ParoMaster – надійний партнер у ремонті та сервісі.',
   keywords: [
-    "каталог товарів",
-    "запчастини для парогенератора",
-    "купити парогенератор",
-    "ремонт парогенератора",
-    "ParoMaster"
+    'каталог товарів',
+    'запчастини для парогенератора',
+    'купити парогенератор',
+    'ремонт парогенератора',
+    'ParoMaster',
   ],
   openGraph: {
-    title: "Каталог товарів | ParoMaster",
-    description: "Перегляньте повний каталог запчастин та обладнання для парогенераторів.",
+    title: 'Каталог товарів | ParoMaster',
+    description:
+      'Перегляньте повний каталог запчастин та обладнання для парогенераторів.',
     url: `${process.env.PUBLIC_URL}/catalog`,
-    siteName: "ParoMaster",
+    siteName: 'ParoMaster',
     images: [
       {
-        url: "/services/03.webp",
+        url: '/services/03.webp',
         width: 1200,
         height: 630,
-        alt: "Каталог товарів ParoMaster"
-      }
-    ]
-  }
-}
+        alt: 'Каталог товарів ParoMaster',
+      },
+    ],
+  },
+};
 
 export default async function CatalogPage({
-  searchParams
+  searchParams,
 }: {
-  searchParams: Promise<ISearchParams>
+  searchParams: Promise<ISearchParams>;
 }) {
-  const params = await searchParams
-  const queryClient = new QueryClient()
+  const params = await searchParams;
+  const queryClient = new QueryClient();
 
-  const goodsKey = ["goods", params] // единый ключ
+  const goodsKey = ['goods', params]; // единый ключ
 
-  await prefetchData(queryClient, getAllGoods, goodsKey, { ...params, limit: 8 })
+  await prefetchData(queryClient, getAllGoods, goodsKey, {
+    ...params,
+    limit: 8,
+  });
 
-  const goodsData = queryClient.getQueryData<GoodsData>(goodsKey)
-  const goods = goodsData?.goods || []
+  const goodsData = queryClient.getQueryData<GoodsData>(goodsKey);
+  const goods = goodsData?.goods || [];
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
@@ -64,5 +72,5 @@ export default async function CatalogPage({
         <InfiniteScroll initialGoods={goods} searchParams={params} />
       </div>
     </HydrationBoundary>
-  )
+  );
 }

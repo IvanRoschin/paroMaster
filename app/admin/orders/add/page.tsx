@@ -1,28 +1,36 @@
-import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from '@tanstack/react-query';
 
-import { getAllGoods } from "@/actions/goods"
-import { OrderForm } from "@/admin/components"
-import { IGood } from "@/types/index"
-import { ISearchParams } from "@/types/searchParams"
+import { getAllGoods } from '@/actions/goods';
+import { OrderForm } from '@/admin/components';
+import { IGood } from '@/types/index';
+import { ISearchParams } from '@/types/searchParams';
 
 interface GoodsData {
-  goods: IGood[]
+  goods: IGood[];
 }
 
-export const dynamic = "force-dynamic"
+export const dynamic = 'force-dynamic';
 
-const AddOrderPage = async ({ searchParams }: { searchParams: Promise<ISearchParams> }) => {
-  const params = await searchParams
-  const queryClient = new QueryClient()
+const AddOrderPage = async ({
+  searchParams,
+}: {
+  searchParams: Promise<ISearchParams>;
+}) => {
+  const params = await searchParams;
+  const queryClient = new QueryClient();
 
-  const goodsKey = ["goods", params]
+  const goodsKey = ['goods', params];
 
   await queryClient.prefetchQuery({
     queryKey: goodsKey,
-    queryFn: () => getAllGoods(params)
-  })
+    queryFn: () => getAllGoods(params),
+  });
 
-  const goods = (queryClient.getQueryData(goodsKey) as GoodsData)?.goods || []
+  const goods = (queryClient.getQueryData(goodsKey) as GoodsData)?.goods || [];
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
@@ -30,7 +38,7 @@ const AddOrderPage = async ({ searchParams }: { searchParams: Promise<ISearchPar
         <OrderForm title="Додати новий ордер" goods={goods} />
       </div>
     </HydrationBoundary>
-  )
-}
+  );
+};
 
-export default AddOrderPage
+export default AddOrderPage;

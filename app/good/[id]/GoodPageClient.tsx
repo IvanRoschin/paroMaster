@@ -1,81 +1,101 @@
-"use client"
+'use client';
 
-import { useShoppingCart } from "app/context/ShoppingCartContext"
-import { useSession } from "next-auth/react"
-import Link from "next/link"
-import { useEffect, useState } from "react"
-import { FaPen, FaRegStar, FaStar, FaStarHalfAlt, FaTrash } from "react-icons/fa"
+import { useShoppingCart } from 'app/context/ShoppingCartContext';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import {
+  FaPen,
+  FaRegStar,
+  FaStar,
+  FaStarHalfAlt,
+  FaTrash,
+} from 'react-icons/fa';
 
-import { deleteTestimonial, getGoodTestimonials } from "@/actions/testimonials"
-import DeleteConfirmation from "@/components/common/DeleteConfirmation"
+import { deleteTestimonial, getGoodTestimonials } from '@/actions/testimonials';
+import DeleteConfirmation from '@/components/common/DeleteConfirmation';
 import {
   Breadcrumbs,
   ErrorMessage,
   Loader,
   Modal,
   ProductList,
-  TestimonialForm
-} from "@/components/index"
-import ImagesBlock from "@/components/sections/ImagesBlock"
-import Button from "@/components/ui/Button"
-import { useDeleteData, useDeleteModal, useFetchData, useTestimonialModal } from "@/hooks/index"
-import { IGood, ITestimonial } from "@/types/index"
+  TestimonialForm,
+} from '@/components/index';
+import ImagesBlock from '@/components/sections/ImagesBlock';
+import Button from '@/components/ui/Button';
+import {
+  useDeleteData,
+  useDeleteModal,
+  useFetchData,
+  useTestimonialModal,
+} from '@/hooks/index';
+import { IGood, ITestimonial } from '@/types/index';
 
 interface GoodPageClientProps {
-  initialGood: IGood
+  initialGood: IGood;
 }
 
 export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
-  const { data: session } = useSession()
-  const isAdmin = !!session?.user
-  const [, setAmount] = useState(0)
-  const [testimonialToDelete, setTestimonialToDelete] = useState<string>("")
+  const { data: session } = useSession();
+  const isAdmin = !!session?.user;
+  const [, setAmount] = useState(0);
+  const [testimonialToDelete, setTestimonialToDelete] = useState<string>('');
 
-  const { getItemQuantity, increaseCartQuantity, decreaseCartQuantity, removeFromCart } =
-    useShoppingCart()
+  const {
+    getItemQuantity,
+    increaseCartQuantity,
+    decreaseCartQuantity,
+    removeFromCart,
+  } = useShoppingCart();
 
-  const productId = initialGood?._id
+  const productId = initialGood?._id;
 
   const {
     data: testimonials,
     isLoading: isTestimonialsLoading,
     isError: isTestimonialsError,
-    error: testimonialsError
-  } = useFetchData(getGoodTestimonials, ["testimonials", productId], productId)
+    error: testimonialsError,
+  } = useFetchData(getGoodTestimonials, ['testimonials', productId], productId);
 
-  const { mutate: deleteTestimonialById } = useDeleteData(deleteTestimonial, ["testimonials"])
+  const { mutate: deleteTestimonialById } = useDeleteData(deleteTestimonial, [
+    'testimonials',
+  ]);
 
-  const testimonialModal = useTestimonialModal()
-  const deleteModal = useDeleteModal()
+  const testimonialModal = useTestimonialModal();
+  const deleteModal = useDeleteModal();
 
   useEffect(() => {
-    if (!initialGood) return
-    const newAmount = initialGood.price * getItemQuantity(initialGood._id)
-    setAmount(newAmount)
-    localStorage.setItem(`amount-${initialGood._id}`, JSON.stringify(newAmount))
-  }, [initialGood, getItemQuantity])
+    if (!initialGood) return;
+    const newAmount = initialGood.price * getItemQuantity(initialGood._id);
+    setAmount(newAmount);
+    localStorage.setItem(
+      `amount-${initialGood._id}`,
+      JSON.stringify(newAmount)
+    );
+  }, [initialGood, getItemQuantity]);
 
   const handleDelete = (id: string) => {
-    setTestimonialToDelete(id)
-    deleteModal.onOpen()
-  }
+    setTestimonialToDelete(id);
+    deleteModal.onOpen();
+  };
 
   const handleDeleteTestimonial = (id: string) => {
     try {
-      deleteTestimonialById(id)
+      deleteTestimonialById(id);
     } catch (error) {
-      console.error("Error deleting testimonial:", error)
+      console.error('Error deleting testimonial:', error);
     }
-  }
+  };
   if (isTestimonialsLoading || !initialGood || !testimonials) {
-    return <Loader />
+    return <Loader />;
   }
 
   if (isTestimonialsError) {
-    return <ErrorMessage error={testimonialsError} />
+    return <ErrorMessage error={testimonialsError} />;
   }
 
-  const quantity = getItemQuantity(initialGood._id)
+  const quantity = getItemQuantity(initialGood._id);
 
   return (
     <div className="m-6">
@@ -96,11 +116,15 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
           )}
           <h2 className="subtitle mb-[40px]">{initialGood.title}</h2>
           <p className="mb-[20px]">{initialGood.description}</p>
-          <p className={`mb-[30px] ${initialGood.isAvailable ? "text-green-600" : "text-red-600"}`}>
-            {initialGood.isAvailable ? "В наявності" : "Немає в наявності"}
+          <p
+            className={`mb-[30px] ${initialGood.isAvailable ? 'text-green-600' : 'text-red-600'}`}
+          >
+            {initialGood.isAvailable ? 'В наявності' : 'Немає в наявності'}
           </p>
           <p className="mb-[20px]">Артикул: {initialGood.vendor}</p>
-          <p className="text-2xl font-bold mb-[30px]">{initialGood.price} грн</p>
+          <p className="text-2xl font-bold mb-[30px]">
+            {initialGood.price} грн
+          </p>
 
           <div className="mb-4">
             {quantity === 0 ? (
@@ -140,8 +164,8 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
                   label="Видалити"
                   disabled={!initialGood.isAvailable}
                   onClick={() => {
-                    removeFromCart(initialGood._id)
-                    localStorage.removeItem(`amount-${initialGood._id}`)
+                    removeFromCart(initialGood._id);
+                    localStorage.removeItem(`amount-${initialGood._id}`);
                   }}
                 />
               </div>
@@ -156,7 +180,7 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
               type="button"
               label="Додати відгук"
               onClick={() => {
-                testimonialModal.onOpen()
+                testimonialModal.onOpen();
               }}
             />
           </div>
@@ -187,7 +211,9 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
                         small
                         outline
                         bg="bg"
-                        onClick={() => review._id && handleDelete(review._id.toString())}
+                        onClick={() =>
+                          review._id && handleDelete(review._id.toString())
+                        }
                       />
                     </div>
                   </div>
@@ -201,24 +227,30 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
                     {review.rating && <StarDisplay rating={review.rating} />}
                     {/* <span className="text-yellow-500 font-bold">{review.rating} ★</span> */}
                   </div>
-                  <p className="text-gray-600 italic mb-2">&ldquo;{review.text}&rdquo;</p>
+                  <p className="text-gray-600 italic mb-2">
+                    &ldquo;{review.text}&rdquo;
+                  </p>
                   <p className="text-sm text-gray-400">
-                    Додано:{" "}
-                    {new Date(review.createdAt).toLocaleDateString("uk-UA", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric"
+                    Додано:{' '}
+                    {new Date(review.createdAt).toLocaleDateString('uk-UA', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
                     })}
                   </p>
                   {!review.isActive && (
-                    <p className="text-xs text-red-500 mt-2">* Відгук ще не опублікований</p>
+                    <p className="text-xs text-red-500 mt-2">
+                      * Відгук ще не опублікований
+                    </p>
                   )}
                 </li>
               </div>
             ))}
           </ul>
         ) : (
-          <p className="text-gray-500 italic">Цей товар ще не має відгуків. Будь першим!</p>
+          <p className="text-gray-500 italic">
+            Цей товар ще не має відгуків. Будь першим!
+          </p>
         )}
       </div>
 
@@ -243,8 +275,8 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
           <DeleteConfirmation
             onConfirm={() => {
               if (testimonialToDelete) {
-                handleDeleteTestimonial(testimonialToDelete)
-                deleteModal.onClose()
+                handleDeleteTestimonial(testimonialToDelete);
+                deleteModal.onClose();
               }
             }}
             onCancel={() => deleteModal.onClose()}
@@ -256,54 +288,70 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
         disabled={isTestimonialsLoading}
       />
     </div>
-  )
+  );
   function ItemDetails({ item }: { item: IGood }) {
     return (
       <>
         <p className="font-light text-gray-500">
-          Сумісність з іншими моделями:{" "}
-          <span className="font-bold">{item.isCompatible ? "так" : "ні"}</span>
+          Сумісність з іншими моделями:{' '}
+          <span className="font-bold">{item.isCompatible ? 'так' : 'ні'}</span>
         </p>
         <p className="font-light text-gray-500">
           Виробник: <span className="font-bold"> {item.brand}</span>
         </p>
         <p className="font-light text-gray-500">
-          Модель: <span className="font-bold">{item.model}</span>{" "}
+          Модель: <span className="font-bold">{item.model}</span>{' '}
         </p>
         <p className="font-light text-gray-500">
-          Сумісний з моделями:{" "}
+          Сумісний з моделями:{' '}
           <span className="font-bold">
-            {(initialGood.compatibleGoods || []).map((product: IGood, i: number) => (
-              <span key={product._id}>
-                <Link
-                  href={`/good/${product._id}`}
-                  className="text-primaryAccentColor hover:underline"
-                >
-                  {product.model}
-                </Link>
-                {i < (initialGood.compatibleGoods?.length || 0) - 1 ? ", " : ""}
-              </span>
-            ))}
+            {(initialGood.compatibleGoods || []).map(
+              (product: IGood, i: number) => (
+                <span key={product._id}>
+                  <Link
+                    href={`/good/${product._id}`}
+                    className="text-primaryAccentColor hover:underline"
+                  >
+                    {product.model}
+                  </Link>
+                  {i < (initialGood.compatibleGoods?.length || 0) - 1
+                    ? ', '
+                    : ''}
+                </span>
+              )
+            )}
           </span>
         </p>
       </>
-    )
+    );
   }
-  function StarDisplay({ rating, size = 18 }: { rating: number; size?: number }) {
-    const fullStars = Math.floor(rating)
-    const hasHalfStar = rating - fullStars >= 0.5
-    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0)
+  function StarDisplay({
+    rating,
+    size = 18,
+  }: {
+    rating: number;
+    size?: number;
+  }) {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating - fullStars >= 0.5;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
 
     return (
       <div className="flex items-center space-x-0.5">
         {[...Array(fullStars)].map((_, i) => (
           <FaStar key={`full-${i}`} className="text-yellow-500" size={size} />
         ))}
-        {hasHalfStar && <FaStarHalfAlt key="half" className="text-yellow-500" size={size} />}
+        {hasHalfStar && (
+          <FaStarHalfAlt key="half" className="text-yellow-500" size={size} />
+        )}
         {[...Array(emptyStars)].map((_, i) => (
-          <FaRegStar key={`empty-${i}`} className="text-yellow-500" size={size} />
+          <FaRegStar
+            key={`empty-${i}`}
+            className="text-yellow-500"
+            size={size}
+          />
         ))}
       </div>
-    )
+    );
   }
 }

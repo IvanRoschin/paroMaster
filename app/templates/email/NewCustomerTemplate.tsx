@@ -1,9 +1,9 @@
-import { IOrder } from "@/types/index"
+import { IOrder } from '@/types/index';
 
 enum PaymentMethod {
-  CashOnDelivery = "Оплата після отримання",
-  CreditCard = "Оплата на карту",
-  InvoiceForSPD = "Рахунок для СПД"
+  CashOnDelivery = 'Оплата після отримання',
+  CreditCard = 'Оплата на карту',
+  InvoiceForSPD = 'Рахунок для СПД',
 }
 
 export function generateCustomerEmailContent(data: IOrder) {
@@ -19,7 +19,10 @@ export function generateCustomerEmailContent(data: IOrder) {
     data.orderedGoods.length === 0 ||
     data.totalPrice <= 0
   ) {
-    return { success: false, error: "Validation Error: Missing or invalid required data." }
+    return {
+      success: false,
+      error: 'Validation Error: Missing or invalid required data.',
+    };
   }
 
   const itemsContent = data.orderedGoods
@@ -36,7 +39,7 @@ export function generateCustomerEmailContent(data: IOrder) {
         </tr>
       `
     )
-    .join("")
+    .join('');
 
   return `
     <div style="max-width: 700px; margin: 0 auto; padding: 30px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; background-color: #f9f9f9; border-radius: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
@@ -86,5 +89,5 @@ export function generateCustomerEmailContent(data: IOrder) {
         <p>📧 ${process.env.NEXT_PUBLIC_ADMIN_EMAIL}</p>
       </div>
     </div>
-  `
+  `;
 }

@@ -1,9 +1,9 @@
-version: "3.8"
+version: '3.8'
 
 services:
   frontend:
     ports:
-      - "3000:3000"
+      - '3000:3000'
     volumes:
       - ./:/app
       - /app/node_modules

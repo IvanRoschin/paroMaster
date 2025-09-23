@@ -1,13 +1,13 @@
-import { Button } from "@/components/index"
+import { Button } from '@/components/index';
 
 const DeleteConfirmation = ({
   onConfirm,
   onCancel,
-  title
+  title,
 }: {
-  onConfirm: () => void
-  onCancel: () => void
-  title?: string
+  onConfirm: () => void;
+  onCancel: () => void;
+  title?: string;
 }) => {
   return (
     <div>
@@ -15,12 +15,18 @@ const DeleteConfirmation = ({
         <h3 className="text-lg font-semibold mb-4">Ви впевнені?</h3>
         <p className="mb-4">Ви хочете видалити цей {title}?</p>
         <div className="grid grid-cols-2 gap-4">
-          <Button type="button" label="Скасувати" onClick={onCancel} small outline />
+          <Button
+            type="button"
+            label="Скасувати"
+            onClick={onCancel}
+            small
+            outline
+          />
           <Button type="button" label="Підтвердити" onClick={onConfirm} small />
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default DeleteConfirmation
+export default DeleteConfirmation;
