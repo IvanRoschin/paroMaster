@@ -1,13 +1,14 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from '@tanstack/react-query';
 import { notFound } from 'next/navigation';
 
 import { getGoodById } from '@/actions/goods';
 import { getGoodTestimonials } from '@/actions/testimonials';
 import prefetchData from '@/hooks/usePrefetchData';
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from '@tanstack/react-query';
+
 import GoodPageClient from './GoodPageClient';
 
 interface GoodPageProps {
@@ -15,9 +16,7 @@ interface GoodPageProps {
 }
 
 export async function generateMetadata({ params }: GoodPageProps) {
-  const resolvedParams = await params;
-
-  const { id } = resolvedParams;
+  const { id } = params;
 
   const good = await getGoodById(id);
 
@@ -40,9 +39,7 @@ export async function generateMetadata({ params }: GoodPageProps) {
 }
 
 export default async function GoodPage({ params }: GoodPageProps) {
-  const resolvedParams = await params;
-
-  const { id } = resolvedParams;
+  const { id } = params;
 
   const good = await getGoodById(id);
 
