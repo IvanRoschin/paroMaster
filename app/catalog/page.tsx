@@ -1,3 +1,5 @@
+import { Metadata } from "next"
+
 import { getAllGoods } from "@/actions/goods"
 import { Breadcrumbs, InfiniteScroll } from "@/components/index"
 import prefetchData from "@/hooks/usePrefetchData"
@@ -11,6 +13,33 @@ interface GoodsData {
 }
 
 export const dynamic = "force-dynamic"
+
+export const metadata: Metadata = {
+  title: "Каталог товарів | ParoMaster",
+  description:
+    "Великий каталог товарів для парогенераторів: запчастини, аксесуари, обладнання. Доставка по Україні. ParoMaster – надійний партнер у ремонті та сервісі.",
+  keywords: [
+    "каталог товарів",
+    "запчастини для парогенератора",
+    "купити парогенератор",
+    "ремонт парогенератора",
+    "ParoMaster"
+  ],
+  openGraph: {
+    title: "Каталог товарів | ParoMaster",
+    description: "Перегляньте повний каталог запчастин та обладнання для парогенераторів.",
+    url: `${process.env.PUBLIC_URL}/catalog`,
+    siteName: "ParoMaster",
+    images: [
+      {
+        url: "/services/03.webp",
+        width: 1200,
+        height: 630,
+        alt: "Каталог товарів ParoMaster"
+      }
+    ]
+  }
+}
 
 export default async function CatalogPage({
   searchParams

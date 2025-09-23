@@ -24,17 +24,17 @@
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
-      "@/components/*": ["app/components/*"],
-      "@/actions/*": ["app/actions/*"],
-      "@/api/*": ["app/api/*"],
-      "@/utils/*": ["app/utils/*"],
-      "@/types/*": ["types/*"],
-      "@/models/*": ["models/*"],
-      "@/helpers/*": ["app/helpers/*"],
-      "@/hooks/*": ["app/hooks/*"],
-      "@/config/*": ["config/*"],
-      "@/lib/*": ["lib/*"],
-      "@/admin/*": ["app/admin/*"]
+      "@/components/*": ["./app/components/*"],
+      "@/actions/*": ["./app/actions/*"],
+      "@/api/*": ["./app/api/*"],
+      "@/utils/*": ["./app/utils/*"],
+      "@/types/*": ["./types/*"],
+      "@/models/*": ["./models/*"],
+      "@/helpers/*": ["./app/helpers/*"],
+      "@/hooks/*": ["./app/hooks/*"],
+      "@/config/*": ["./config/*"],
+      "@/lib/*": ["./lib/*"],
+      "@/admin/*": ["./app/admin/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", "auth.js", "auth.tjs", "next-env.d.ts", ".next/types/**/*.ts"],

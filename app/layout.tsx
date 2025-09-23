@@ -1,7 +1,7 @@
 import "./globals.css"
 
+import { Metadata } from "next"
 import { getServerSession } from "next-auth"
-import { Inter } from "next/font/google"
 
 import { getAllCategories, IGetAllCategories } from "@/actions/categories"
 import { getMinMaxPrice, IGetAllBrands, IGetPrices, uniqueBrands } from "@/actions/goods"
@@ -12,13 +12,41 @@ import AdminSidebar from "./admin/components/AdminSidebar"
 import { Footer, Header, Sidebar } from "./components"
 import { authOptions } from "./config/authOptions"
 import { Providers } from "./providers/providers"
+import { eUkraine, eUkrainehead, geistMono, geistSans, manrope } from "./ui/fonts/index"
 
-import type { Metadata } from "next"
-const inter = Inter({ subsets: ["latin"] })
+const baseUrl = process.env.PUBLIC_URL || "https://paro-master.vercel.app"
 
 export const metadata: Metadata = {
-  title: "ParoMaster",
-  description: "Веб-сайт по ремонту парогенераторів та продажу запчастин до парогенераторів"
+  title: {
+    default: "ParoMaster",
+    template: "%s | ParoMaster"
+  },
+  description: "Веб-сайт по ремонту парогенераторів",
+  keywords: [
+    "ремонт парогенераторів Київ",
+    "запчастини для парогенератора",
+    "майстер по ремонту парогенераторів",
+    "купити парогенератор б/у",
+    "ремонт побутової техніки Київ"
+  ],
+  authors: [{ name: process.env.NEXT_PUBLIC_ADMIN_NAME || "ParoMaster" }],
+  creator: "ParoMaster Team",
+  metadataBase: new URL(baseUrl),
+  openGraph: {
+    type: "website",
+    url: baseUrl,
+    title: "ParoMaster",
+    description: "Веб-сайт по ремонту парогенераторів та продажу запчастин до парогенераторів",
+    siteName: "ParoMaster",
+    images: [
+      {
+        url: `${baseUrl}/dervices/03.webp`,
+        width: 1200,
+        height: 630,
+        alt: "ParoMaster Preview"
+      }
+    ]
+  }
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -63,8 +91,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     : null
 
   return (
-    <html lang="uk">
-      <body className={`${inter.className} primaryTextColor`}>
+    <html
+      lang="uk"
+      className={`${geistSans.variable} ${geistMono.variable} ${eUkrainehead.variable} ${manrope.variable} ${eUkraine.variable} antialiased`}
+    >
+      <body className={`font-manrope primaryTextColor ?? "text-gray-900"}`}>
         <Providers dehydratedState={dehydratedState}>
           <Header session={session} />
           <div className="px-8 flex items-start flex-col md:flex-row">

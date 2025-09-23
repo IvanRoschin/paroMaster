@@ -1,5 +1,5 @@
 export interface IGood {
-  _id?: string
+  _id: string
   category: string
   src: string[]
   brand: string
@@ -15,6 +15,7 @@ export interface IGood {
   quantity?: number
   averageRating?: number
   ratingCount?: number
+  compatibleGoods?: IGood[]
 }
 
 export interface SGood {
