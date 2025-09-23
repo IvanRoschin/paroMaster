@@ -1,22 +1,25 @@
-import { notFound } from 'next/navigation';
-
-import { getGoodById } from '@/actions/goods';
-import { getGoodTestimonials } from '@/actions/testimonials';
-import prefetchData from '@/hooks/usePrefetchData';
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
+import { notFound } from 'next/navigation';
 
+import { getGoodById } from '@/actions/goods';
+import { getGoodTestimonials } from '@/actions/testimonials';
+import prefetchData from '@/hooks/usePrefetchData';
 import GoodPageClient from './GoodPageClient';
 
+// app/good/[id]/page.tsx
+
+// ✅ Тип просто объект, без Promise
 interface GoodPageProps {
   params: { id: string };
 }
 
+// ------------------- generateMetadata -------------------
 export async function generateMetadata({ params }: GoodPageProps) {
-  const { id } = params;
+  const { id } = params; // ❌ без await
 
   const good = await getGoodById(id);
 
@@ -38,13 +41,14 @@ export async function generateMetadata({ params }: GoodPageProps) {
   };
 }
 
+// ------------------- Page Component -------------------
 export default async function GoodPage({ params }: GoodPageProps) {
-  const { id } = params;
+  const { id } = params; // ❌ без await
 
   const good = await getGoodById(id);
-
   if (!good) notFound();
 
+  // react-query prefetch
   const queryClient = new QueryClient();
   await prefetchData(
     queryClient,
