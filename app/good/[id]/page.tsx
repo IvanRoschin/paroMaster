@@ -12,14 +12,11 @@ import GoodPageClient from './GoodPageClient';
 
 // app/good/[id]/page.tsx
 
-// ✅ Тип просто объект, без Promise
-interface GoodPageProps {
-  params: { id: string };
-}
+export type paramsType = Promise<{ id: string }>;
 
 // ------------------- generateMetadata -------------------
-export async function generateMetadata({ params }: GoodPageProps) {
-  const { id } = params; // ❌ без await
+export async function generateMetadata(props: { params: paramsType }) {
+  const { id } = await props.params;
 
   const good = await getGoodById(id);
 
@@ -42,8 +39,8 @@ export async function generateMetadata({ params }: GoodPageProps) {
 }
 
 // ------------------- Page Component -------------------
-export default async function GoodPage({ params }: GoodPageProps) {
-  const { id } = params; // ❌ без await
+export default async function GoodPage(props: { params: paramsType }) {
+  const { id } = await props.params;
 
   const good = await getGoodById(id);
   if (!good) notFound();
