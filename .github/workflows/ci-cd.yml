@@ -94,12 +94,14 @@ jobs:
 
           echo "🌀 Starting container"
           docker rm -f $CONTAINER_NAME || true
+          docker pull $IMAGE_NAME:latest || true
           docker run -d --name $CONTAINER_NAME \
             -p 3030:3000 \
             -e NODE_ENV=production \
             -e MONGODB_URI=${MONGODB_URI} \
             -e NEXTAUTH_SECRET=${NEXTAUTH_SECRET} \
             $IMAGE_NAME:latest
+
 
           echo "⏳ Waiting for container to start..."
           sleep 15
