@@ -111,9 +111,9 @@ export default function Orders() {
 
       {/* Список замовлень */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {data.orders?.map(order => (
+        {data.orders?.map((order, index) => (
           <div
-            key={order._id}
+            key={`${order._id}-${index}`}
             className="bg-white rounded shadow-md p-4 relative"
           >
             <div className="flex justify-between items-start mb-2">

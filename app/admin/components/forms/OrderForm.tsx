@@ -472,7 +472,7 @@ const GoodsFields = ({
                 className="p-2 hover:bg-gray-200 cursor-pointer"
                 onClick={() => handleSelectGood(good)}
               >
-                {good.title} - {good.brand} - {good.model}
+                {good.title} - {good.brand.name} - {good.model}
               </div>
             ))}
             {!filteredGoods.length && (

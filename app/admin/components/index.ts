@@ -1,5 +1,6 @@
 import Card from '@/admin/components/Card';
 import {
+  BrandForm,
   CategoryForm,
   CustomerForm,
   GoodForm,
@@ -21,6 +22,7 @@ import {
 } from '@/admin/components/sections';
 
 export {
+  BrandForm,
   Card,
   Categories,
   CategoryForm,

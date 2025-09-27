@@ -1,18 +1,11 @@
-import './globals.css';
-
+import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { Metadata } from 'next';
 import { getServerSession } from 'next-auth';
 
-import { getAllCategories, IGetAllCategories } from '@/actions/categories';
-import {
-  getMinMaxPrice,
-  IGetAllBrands,
-  IGetPrices,
-  uniqueBrands,
-} from '@/actions/goods';
-import { dehydrate, QueryClient } from '@tanstack/react-query';
-
 import { ISearchParams } from '../types';
+import { IGetAllBrands } from './actions/brands';
+import { getAllCategories, IGetAllCategories } from './actions/categories';
+import { getMinMaxPrice, IGetPrices } from './actions/goods';
 import AdminSidebar from './admin/components/AdminSidebar';
 import { Footer, Header, Sidebar } from './components';
 import { authOptions } from './config/authOptions';
@@ -24,6 +17,8 @@ import {
   geistSans,
   manrope,
 } from './ui/fonts/index';
+
+import './globals.css';
 
 const baseUrl = process.env.PUBLIC_URL || 'https://paro-master.vercel.app';
 
@@ -80,7 +75,7 @@ export default async function RootLayout({
       queryKey: ['categories'],
       queryFn: () => getAllCategories({} as ISearchParams),
     }),
-    queryClient.prefetchQuery({ queryKey: ['brands'], queryFn: uniqueBrands }),
+    // queryClient.prefetchQuery({ queryKey: ['brands'], queryFn: uniqueBrands }),
   ]);
 
   const dehydratedState = dehydrate(queryClient);
@@ -97,6 +92,7 @@ export default async function RootLayout({
     count: 0,
     categories: [],
   };
+
   const brandsData = queryClient.getQueryData<IGetAllBrands>(['brands']) ?? {
     success: false,
     count: 0,
@@ -137,6 +133,7 @@ export default async function RootLayout({
             )}
           </div>
           <section id="footer" className="snap-start px-4">
+            <p>Footer</p>
             <Footer categories={categoriesData.categories} />
           </section>
         </Providers>

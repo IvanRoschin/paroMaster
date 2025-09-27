@@ -1,10 +1,10 @@
-import { IGood, ISearchParams, ITestimonial } from '@/types/index';
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
 
+import { IGood, ISearchParams, ITestimonial } from '@/types/index';
 import { getAllGoods } from './actions/goods';
 import { getAllSlides, IGetAllSlides } from './actions/slider';
 import {

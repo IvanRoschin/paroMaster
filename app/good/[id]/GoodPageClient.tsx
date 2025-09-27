@@ -3,7 +3,7 @@
 import { useShoppingCart } from 'app/context/ShoppingCartContext';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   FaPen,
   FaRegStar,
@@ -24,6 +24,7 @@ import {
 } from '@/components/index';
 import ImagesBlock from '@/components/sections/ImagesBlock';
 import Button from '@/components/ui/Button';
+import { getReadableGoodTitle } from '@/helpers/index';
 import {
   useDeleteData,
   useDeleteModal,
@@ -114,7 +115,9 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
               </span>
             </Link>
           )}
-          <h2 className="subtitle mb-[40px]">{initialGood.title}</h2>
+          <h2 className="subtitle mb-[40px]">
+            {getReadableGoodTitle(initialGood)}
+          </h2>
           <p className="mb-[20px]">{initialGood.description}</p>
           <p
             className={`mb-[30px] ${initialGood.isAvailable ? 'text-green-600' : 'text-red-600'}`}
@@ -289,42 +292,51 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
       />
     </div>
   );
+
   function ItemDetails({ item }: { item: IGood }) {
+    const compatibleGoods = item.compatibleGoods || [];
+    console.log('item:', item);
+
     return (
-      <>
+      <div className="space-y-2">
+        <p className="font-light text-gray-500">
+          Назва товару:{' '}
+          <span className="font-bold">{getReadableGoodTitle(item)}</span>
+        </p>
+
+        <p className="font-light text-gray-500">
+          Виробник: <span className="font-bold">{item.brand}</span>
+        </p>
+
+        <p className="font-light text-gray-500">
+          Модель: <span className="font-bold">{item.model}</span>
+        </p>
+
         <p className="font-light text-gray-500">
           Сумісність з іншими моделями:{' '}
           <span className="font-bold">{item.isCompatible ? 'так' : 'ні'}</span>
         </p>
-        <p className="font-light text-gray-500">
-          Виробник: <span className="font-bold"> {item.brand}</span>
-        </p>
-        <p className="font-light text-gray-500">
-          Модель: <span className="font-bold">{item.model}</span>{' '}
-        </p>
-        <p className="font-light text-gray-500">
-          Сумісний з моделями:{' '}
-          <span className="font-bold">
-            {(initialGood.compatibleGoods || []).map(
-              (product: IGood, i: number) => (
-                <span key={product._id}>
-                  <Link
-                    href={`/good/${product._id}`}
-                    className="text-primaryAccentColor hover:underline"
-                  >
-                    {product.model}
-                  </Link>
-                  {i < (initialGood.compatibleGoods?.length || 0) - 1
-                    ? ', '
-                    : ''}
-                </span>
-              )
-            )}
-          </span>
-        </p>
-      </>
+
+        {compatibleGoods.length > 0 && (
+          <p className="font-light text-gray-500">
+            Сумісні товари:{' '}
+            {compatibleGoods.map((product: IGood, i: number) => (
+              <React.Fragment key={product._id}>
+                <Link
+                  href={`/good/${product._id}`}
+                  className="text-primaryAccentColor hover:underline"
+                >
+                  {getReadableGoodTitle(product)}
+                </Link>
+                {i < compatibleGoods.length - 1 ? ', ' : ''}
+              </React.Fragment>
+            ))}
+          </p>
+        )}
+      </div>
     );
   }
+
   function StarDisplay({
     rating,
     size = 18,

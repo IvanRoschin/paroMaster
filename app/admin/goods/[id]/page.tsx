@@ -1,26 +1,36 @@
+import { getAllBrands } from '@/actions/brands';
+import { getAllCategories } from '@/actions/categories';
 import { getGoodById, updateGood } from '@/actions/goods';
 import { GoodForm } from '@/admin/components';
-import { ISearchParams } from '@/types/searchParams';
+import { IGood } from '@/types/IGood';
 
-const SingleGoodPage = async ({
-  searchParams,
-}: {
-  searchParams: Promise<ISearchParams>;
-}) => {
-  const params = await searchParams;
+export type ParamsType = { id: string };
 
+interface SingleGoodPageProps {
+  params: ParamsType;
+}
+
+export default async function SingleGoodPage({ params }: SingleGoodPageProps) {
   const { id } = params;
-  const good = await getGoodById(id);
+
+  const [good, categoriesResponse, brandsResponse] = await Promise.all([
+    getGoodById(id),
+    getAllCategories(params),
+    getAllBrands(params),
+  ]);
+
+  const categories = categoriesResponse.categories ?? [];
+  const brands = brandsResponse.brands ?? [];
 
   return (
     <div className="mb-20">
       <GoodForm
-        title={'Редагувати дані про товар'}
-        good={good}
+        title="Редагувати дані про товар"
+        good={good as IGood}
+        allowedCategories={categories}
+        allowedBrands={brands}
         action={updateGood}
       />
     </div>
   );
-};
-
-export default SingleGoodPage;
+}

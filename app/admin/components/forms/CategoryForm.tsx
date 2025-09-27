@@ -1,6 +1,7 @@
 'use client';
 
 import { Field, Form, Formik, FormikState } from 'formik';
+import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
@@ -67,7 +68,9 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
       } else {
         await addCategoryMutation.mutateAsync(formData);
       }
+
       resetForm();
+
       toast.success(
         isUpdating ? 'Категорію оновлено!' : 'Нову категорію додано!'
       );
@@ -86,34 +89,79 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
   };
 
   return (
-    <div className="my-10">
-      <h3 className="text-lg mb-4">{title || 'Додати категорію'}</h3>
-      <Formik initialValues={initialValues} onSubmit={handleSubmit}>
-        {({ setFieldValue, values, errors }) => (
-          <Form>
-            <div className="mb-4">
-              <label htmlFor="title" className="block text-gray-700">
-                Назва категорії
-              </label>
-              <Field
-                id="title"
-                name="title"
-                type="text"
-                className="mt-1 block w-full p-2 border rounded-md"
-                placeholder="Введіть назву категорії"
-                required
-              />
-            </div>
-            <ImageUploadCloudinary
-              setFieldValue={setFieldValue}
-              values={values.src}
-              errors={errors}
-            />
-            <CustomButton label="Зберегти" disabled={isLoading} />
-          </Form>
-        )}
-      </Formik>
-    </div>
+    <>
+      {' '}
+      <div className="my-10 p-6 rounded-2xl shadow-sm bg-white flex justify-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="text-lg font-semibold mb-4">
+            <motion.h3
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              {title || 'Додати категорію'}
+            </motion.h3>
+          </div>
+
+          <Formik initialValues={initialValues} onSubmit={handleSubmit}>
+            {({ setFieldValue, values, errors }) => (
+              <Form className="flex flex-col w-[600px] gap-4 space-y-5">
+                <div className="mb-4">
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15 }}
+                  >
+                    <label htmlFor="title" className="block text-gray-700 mb-1">
+                      Назва категорії
+                    </label>
+                    <Field
+                      id="title"
+                      name="title"
+                      type="text"
+                      className="mt-1 block w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primaryAccentColor transition-shadow"
+                      placeholder="Введіть назву категорії"
+                      required
+                    />
+                  </motion.div>
+                </div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25 }}
+                >
+                  <ImageUploadCloudinary
+                    setFieldValue={setFieldValue}
+                    values={values.src}
+                    errors={errors}
+                    multiple={false}
+                    uploadPreset="preset_category"
+                  />
+                </motion.div>
+
+                <div className="pt-4">
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.35 }}
+                  >
+                    <CustomButton
+                      label={isLoading ? 'Збереження...' : 'Зберегти'}
+                      disabled={isLoading}
+                    />
+                  </motion.div>
+                </div>
+              </Form>
+            )}
+          </Formik>
+        </motion.div>
+      </div>
+    </>
   );
 };
 

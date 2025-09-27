@@ -1,3 +1,4 @@
+import BrandForm from '@/admin/components/forms/BrandForm';
 import CategoryForm from '@/admin/components/forms/CategoryForm';
 import CustomerForm from '@/admin/components/forms/CustromerForm';
 import GoodForm from '@/admin/components/forms/GoodForm';
@@ -7,6 +8,7 @@ import TestimonialForm from '@/admin/components/forms/TestimonialForm';
 import UserForm from '@/admin/components/forms/UserForm';
 
 export {
+  BrandForm,
   CategoryForm,
   CustomerForm,
   GoodForm,

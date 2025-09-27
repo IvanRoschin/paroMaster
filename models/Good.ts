@@ -1,14 +1,12 @@
 import mongoose from 'mongoose';
+
 const { Schema } = mongoose;
 
 const goodSchema = new Schema(
   {
     category: {
-      type: String,
-      required: true,
-    },
-    title: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: 'Category',
       required: true,
     },
     description: {
@@ -20,7 +18,8 @@ const goodSchema = new Schema(
       required: true,
     },
     brand: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: 'Brand',
       required: true,
     },
     model: {

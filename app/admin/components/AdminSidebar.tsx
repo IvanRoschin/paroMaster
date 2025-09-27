@@ -3,7 +3,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import {
+  MdBrandingWatermark,
   MdDashboard,
+  MdPayment,
   MdProductionQuantityLimits,
   MdShoppingBag,
   MdSupervisedUserCircle,
@@ -35,6 +37,16 @@ const menuItems = [
     icon: <MdShoppingBag />,
   },
   {
+    title: 'Бренди',
+    path: '/admin/brands',
+    icon: <MdBrandingWatermark />,
+  },
+  {
+    title: 'Платежі',
+    path: '/admin/payments',
+    icon: <MdPayment />,
+  },
+  {
     title: 'Адміністратори',
     path: '/admin/users',
     icon: <MdVerifiedUser />,
@@ -63,13 +75,14 @@ type AdminSidebarProps = {
     email?: string;
   };
 };
+
 const AdminSidebar = ({ user }: AdminSidebarProps) => {
   return (
     <div className="pt-0 mr-4 text-sm w-[250px] mb-4">
       <h2 className="text-2xl text-primaryAccentColor mb-4 bold text-center">
         Меню адміна
       </h2>
-       
+
       <div className="flex flex-col justify-center items-center mb-4">
         {user.image ? (
           <Image
@@ -77,7 +90,7 @@ const AdminSidebar = ({ user }: AdminSidebarProps) => {
             alt="user photo"
             width={50}
             height={50}
-            className="border-[50%] rounded-[50%]"
+            className="rounded-full"
             priority={true}
           />
         ) : (
@@ -86,7 +99,7 @@ const AdminSidebar = ({ user }: AdminSidebarProps) => {
             alt="user photo"
             width={50}
             height={50}
-            className="border-[50%] rounded-[50%] m-2"
+            className="rounded-full m-2"
             priority={true}
           />
         )}
@@ -94,17 +107,16 @@ const AdminSidebar = ({ user }: AdminSidebarProps) => {
           <span className="text-primaryAccentColor text-lg">{user?.name}</span>
         </div>
       </div>
+
       <ul className="bg-secondaryBackground p-4 rounded-t-lg">
-        {menuItems.map(({ title, path, icon }) => {
-          return (
-            <li key={title} className="mb-3 nav">
-              <Link href={path} className="flex items-center gap-2">
-                {icon}
-                <span>{title}</span>
-              </Link>
-            </li>
-          );
-        })}
+        {menuItems.map(({ title, path, icon }) => (
+          <li key={title} className="mb-3 nav">
+            <Link href={path} className="flex items-center gap-2">
+              {icon}
+              <span>{title}</span>
+            </Link>
+          </li>
+        ))}
       </ul>
     </div>
   );

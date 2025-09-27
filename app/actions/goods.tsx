@@ -1,11 +1,12 @@
 'use server';
 
+import mongoose from 'mongoose';
 import { revalidatePath } from 'next/cache';
 
 import { buildFilter, buildPagination, buildSort } from '@/helpers/index';
-import Good from '@/models/Good';
+import { Good } from '@/models/index';
 import Testimonial from '@/models/Testimonial';
-import { IGood, ISearchParams } from '@/types/index';
+import { IBrand, IGood, ISearchParams } from '@/types/index';
 import { connectToDB } from '@/utils/dbConnect';
 
 export interface IGetAllGoods {
@@ -16,7 +17,8 @@ export interface IGetAllGoods {
 
 export interface IGetAllBrands {
   success: boolean;
-  brands: string[];
+  brands: IBrand[];
+  count: number;
 }
 
 export interface IGetPrices {
@@ -37,14 +39,22 @@ export async function getAllGoods(
     const count = await Good.countDocuments(filter);
 
     const goods: IGood[] = await Good.find(filter)
+      .populate('category', 'title')
+      .populate('brand', 'name')
       .sort(sortOption)
       .skip(skip)
       .limit(limit)
       .exec();
 
+    const serializedGoods = JSON.parse(JSON.stringify(goods)).map((g: any) => ({
+      ...g,
+      category: g.category?.title || '',
+      brand: g.brand?.name || '',
+    }));
+
     return {
       success: true,
-      goods: JSON.parse(JSON.stringify(goods)),
+      goods: serializedGoods,
       count,
     };
   } catch (error) {
@@ -56,7 +66,10 @@ export async function getAllGoods(
 export async function getGoodById(id: string) {
   try {
     await connectToDB();
-    const good = await Good.findById({ _id: id });
+    const good = await Good.findById({ _id: id })
+      .populate('category', 'title')
+      .populate('brand', 'name');
+
     if (!good) return null;
 
     const testimonials = await Testimonial.find({
@@ -68,9 +81,12 @@ export async function getGoodById(id: string) {
       isCompatible: true,
       compatibility: { $regex: good.model, $options: 'i' },
     });
+
     return JSON.parse(
       JSON.stringify({
         ...good.toObject(),
+        category: good.category?.title ?? '',
+        brand: good.brand?.name ?? '',
         testimonials,
         compatibleGoods,
       })
@@ -83,48 +99,43 @@ export async function getGoodById(id: string) {
 export async function addGood(formData: FormData) {
   const values: Record<string, any> = {};
 
-  // Convert FormData to an object
+  // Преобразуем FormData в объект
   formData.forEach((value, key) => {
-    if (!values[key]) {
-      values[key] = [];
-    }
-    values[key].push(value);
-  });
-
-  // If an array has only one item, convert it to a single value
-  Object.keys(values).forEach(key => {
-    if (values[key].length === 1) {
-      values[key] = values[key][0];
+    // Обрабатываем массивы с "[]"
+    if (key.endsWith('[]')) {
+      const cleanKey = key.replace('[]', '');
+      if (!values[cleanKey]) values[cleanKey] = [];
+      values[cleanKey].push(value);
+    } else {
+      values[key] = value;
     }
   });
 
-  // Ensure price is a number
-  const price = Number(values.price);
-  if (isNaN(price)) {
-    console.error('Price must be a valid number');
-    return {
-      success: false,
-      message: 'Invalid price',
-    };
+  // Преобразуем price в число
+  values.price = Number(values.price);
+  if (isNaN(values.price)) {
+    return { success: false, message: 'Invalid price' };
   }
-  values.price = price;
 
-  // Validate required fields
-  if (
-    !values.category ||
-    !values.title ||
-    !values.brand ||
-    !values.model ||
-    !values.vendor ||
-    !values.price ||
-    !values.description ||
-    !values.src
-  ) {
-    console.error('Missing required fields');
-    return {
-      success: false,
-      message: 'Missing required fields',
-    };
+  // Проверка обязательных полей
+  const requiredFields = [
+    'category',
+    'title',
+    'brand',
+    'model',
+    'vendor',
+    'price',
+    'description',
+    'src',
+  ];
+  for (const field of requiredFields) {
+    if (
+      !values[field] ||
+      (Array.isArray(values[field]) && values[field].length === 0)
+    ) {
+      console.log('Missing field:', field, values[field]);
+      return { success: false, message: `Missing required field: ${field}` };
+    }
   }
 
   try {
@@ -145,28 +156,23 @@ export async function addGood(formData: FormData) {
         values.brand.charAt(0).toUpperCase() +
         values.brand.slice(1).toLowerCase(),
       model: values.model,
-      price: Number(values.price),
+      price: values.price,
       description: values.description,
       src: Array.isArray(values.src) ? values.src : [values.src],
       vendor: values.vendor,
-      isCondition: values.isAvailable === 'true',
+      isCondition: values.isCondition === 'true',
       isAvailable: values.isAvailable === 'true',
       isCompatible: values.isCompatible === 'true',
-      compatibility: values.compatibility,
+      compatibility: values.compatibility || [],
     });
 
-    return {
-      success: true,
-      message: 'Good added successfully',
-    };
+    return { success: true, message: 'Good added successfully' };
   } catch (error) {
-    if (error instanceof Error) {
-      console.error('Error adding good:', error);
-      return {
-        success: false,
-        message: error.message || 'Error adding good',
-      };
-    }
+    console.error('Error adding good:', error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Error adding good',
+    };
   }
 }
 
@@ -185,12 +191,14 @@ export async function deleteGood(id: string): Promise<void> {
 }
 
 export async function updateGood(formData: FormData) {
-  const values: any = {};
+  const values: Record<string, any> = {};
+
   formData.forEach((value, key) => {
     if (!values[key]) values[key] = [];
     values[key].push(value);
   });
 
+  // упрощаем: если массив длиной 1, берем единственный элемент
   Object.keys(values).forEach(key => {
     if (values[key].length === 1) values[key] = values[key][0];
   });
@@ -209,40 +217,33 @@ export async function updateGood(formData: FormData) {
     isAvailable,
     isCompatible,
     compatibility,
-  } = values as {
-    id: string;
-    category?: string;
-    src?: any;
-    brand?: string;
-    model?: string;
-    vendor?: string;
-    title?: string;
-    description?: string;
-    price?: number;
-    isCondition?: string;
-    isAvailable?: string;
-    isCompatible?: string;
-    compatibility?: any;
-  };
+  } = values;
 
   try {
     await connectToDB();
 
     const updateFields: Partial<IGood> = {
-      category,
-      src,
-      brand,
+      category: category
+        ? new mongoose.Types.ObjectId(category).toString()
+        : undefined,
+      brand: brand ? new mongoose.Types.ObjectId(brand).toString() : undefined,
+      src: Array.isArray(src) ? src : src ? [src] : [],
       model,
       vendor,
       title,
       description,
-      price: Number(price),
+      price: price !== undefined ? Number(price) : undefined,
       isCondition: isCondition === 'true',
       isAvailable: isAvailable === 'true',
       isCompatible: isCompatible === 'true',
-      compatibility,
+      compatibility: Array.isArray(compatibility)
+        ? compatibility
+        : compatibility
+          ? [compatibility]
+          : [],
     };
 
+    // удаляем поля с undefined или пустой строкой
     Object.keys(updateFields).forEach(
       key =>
         (updateFields[key as keyof IGood] === '' ||
@@ -257,31 +258,11 @@ export async function updateGood(formData: FormData) {
       message: 'Good updated successfully',
     };
   } catch (error) {
-    if (error instanceof Error) {
-      console.error('Error updating good:', error);
-      return {
-        success: false,
-        message: error.message || 'Error updating good',
-      };
-    }
+    console.error('Error updating good:', error);
     return {
       success: false,
-      message: 'Unknown error occurred',
+      message: error instanceof Error ? error.message : 'Unknown error',
     };
-  }
-}
-
-export async function uniqueBrands(): Promise<IGetAllBrands> {
-  try {
-    connectToDB();
-    const uniqueBrands = await Good.distinct('brand');
-    return {
-      success: true,
-      brands: uniqueBrands,
-    };
-  } catch (error) {
-    console.log(error);
-    return { success: false, brands: [] };
   }
 }
 

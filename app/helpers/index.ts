@@ -15,6 +15,9 @@ import {
   userLoginSchema,
 } from '@/helpers/validationSchemas';
 
+import { getCloudinaryUrl } from './getCloudinaryUrl';
+import { getReadableGoodTitle } from './getReadableGoodTitle';
+
 export {
   buildFilter,
   buildPagination,
@@ -23,6 +26,8 @@ export {
   contactFormSchema,
   customerFormSchema,
   formatDate,
+  getCloudinaryUrl,
+  getReadableGoodTitle,
   goodFormSchema,
   orderFormSchema,
   sliderFormSchema,

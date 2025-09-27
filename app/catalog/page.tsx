@@ -1,14 +1,14 @@
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from '@tanstack/react-query';
 import { Metadata } from 'next';
 
 import { getAllGoods } from '@/actions/goods';
 import { Breadcrumbs, InfiniteScroll } from '@/components/index';
 import prefetchData from '@/hooks/usePrefetchData';
 import { IGood, ISearchParams } from '@/types/index';
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from '@tanstack/react-query';
 
 // app/catalog/page.tsx
 
@@ -54,7 +54,7 @@ export default async function CatalogPage({
   const params = await searchParams;
   const queryClient = new QueryClient();
 
-  const goodsKey = ['goods', params]; // единый ключ
+  const goodsKey = ['goods', params];
 
   await prefetchData(queryClient, getAllGoods, goodsKey, {
     ...params,

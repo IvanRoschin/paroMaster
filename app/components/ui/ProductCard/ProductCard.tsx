@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react';
 import { FaPen } from 'react-icons/fa';
 
 import { Button } from '@/components/index';
+import { getCloudinaryUrl } from '@/helpers/getCloudinaryUrl';
+import { getReadableGoodTitle } from '@/helpers/index';
 import { IGood } from '@/types/IGood';
 
 interface IProductCardProps {
@@ -16,13 +18,6 @@ interface IProductCardProps {
 const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
   const { data: session } = useSession();
   const isAdmin = session?.user;
-
-  const getCloudinaryUrl = (img: string, width: number, height: number) => {
-    return img.replace(
-      '/upload/',
-      `/upload/c_fill,g_auto,w_${width},h_${height}/f_webp/q_auto/`
-    );
-  };
 
   const {
     getItemQuantity,
@@ -82,7 +77,9 @@ const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
               ({good.ratingCount || 0} відгуків)
             </span>
           </div>
-          <h2 className="font-semibold mb-[20px]">{good.title}</h2>
+          <h2 className="font-semibold mb-[20px]">
+            {getReadableGoodTitle(good)}
+          </h2>
           <div>
             <p
               className={`mb-[20px] ${good.isAvailable ? 'text-green-600' : 'text-red-600'}`}

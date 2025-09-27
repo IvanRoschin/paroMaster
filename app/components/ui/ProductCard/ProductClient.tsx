@@ -4,6 +4,7 @@ import { useShoppingCart } from 'app/context/ShoppingCartContext';
 
 import { getGoodById } from '@/actions/goods';
 import { Icon, ImagesBlock, Loader } from '@/components/index';
+import { getReadableGoodTitle } from '@/helpers/index';
 import { useFetchDataById } from '@/hooks/index';
 import { SGood } from '@/types/IGood';
 
@@ -40,7 +41,9 @@ const ProductClient = ({ id }: { id: string }) => {
       <div className="flex">
         <ImagesBlock item={item} />
         <div className="pt-10">
-          <h2 className="font-semibold text-2xl mb-[40px]">{item.title}</h2>
+          <h2 className="font-semibold text-2xl mb-[40px]">
+            {getReadableGoodTitle(item)}
+          </h2>
           <p className="mb-[20px]">{item.description}</p>
           {item.isAvailable ? (
             <p className="text-green-600 mb-[30px]">В наявності</p>

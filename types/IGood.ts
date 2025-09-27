@@ -1,8 +1,11 @@
+import { ICategory } from './ICategory';
+import { IBrand } from './IBrand';
+
 export interface IGood {
   _id: string;
-  category: string;
+  brand: IBrand | string;
+  category: ICategory | string;
   src: string[];
-  brand: string;
   model: string;
   vendor: string;
   title: string;

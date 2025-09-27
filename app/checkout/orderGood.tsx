@@ -1,7 +1,9 @@
-import Image from 'next/image';
 import React from 'react';
 
+import Image from 'next/image';
+
 import { IGood } from '@/types/index';
+import { getReadableGoodTitle } from '../helpers';
 
 type CartItemProps = {
   good: IGood;
@@ -12,9 +14,9 @@ const OrderGood: React.FC<CartItemProps> = ({ good, quantity }) => {
   if (!good) {
     return;
   }
-  const { _id, title, price, src } = good;
+  const title = getReadableGoodTitle(good);
 
-  const totalPrice = price * quantity;
+  const totalPrice = good.price * quantity;
 
   return (
     <div>
@@ -22,7 +24,7 @@ const OrderGood: React.FC<CartItemProps> = ({ good, quantity }) => {
         <div className="flex items-center gap-2 w-2/3">
           {/* Product Image */}
           <Image
-            src={src[0]}
+            src={good.src[0]}
             alt={title}
             width={40}
             height={40}
@@ -34,7 +36,7 @@ const OrderGood: React.FC<CartItemProps> = ({ good, quantity }) => {
 
         <div className="flex flex-col items-end w-1/3">
           <div className="flex text-xs text-gray-600">
-            <span className="font-medium">Ціна:</span> {price} грн
+            <span className="font-medium">Ціна:</span> {good.price} грн
           </div>
           <div className="flex text-xs text-gray-600">
             <span className="font-medium">Кількість:</span> {quantity}

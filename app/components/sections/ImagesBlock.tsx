@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useState } from 'react';
 
+import { getCloudinaryUrl } from '@/helpers/index';
 import { IGood } from '@/types/IGood';
 
 interface ImagesBlockProps {
@@ -12,13 +13,6 @@ interface ImagesBlockProps {
 
 const ImagesBlock: React.FC<ImagesBlockProps> = ({ item, values }) => {
   const [index, setIndex] = useState<number>(0);
-
-  const getCloudinaryUrl = (img: string, width: number, height: number) => {
-    return img.replace(
-      '/upload/',
-      `/upload/c_fill,g_auto,w_${width},h_${height}/f_webp/q_auto/`
-    );
-  };
 
   const renderImageGallery = (images: string[], altText: string) => (
     <div className="mr-[50px] pb-[40px]">

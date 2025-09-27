@@ -1,7 +1,6 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 
 import { buildPagination } from '@/helpers/index';
 import Category from '@/models/Category';
@@ -37,6 +36,8 @@ export async function addCategory(formData: FormData) {
       throw new Error('Category already exists');
     }
     await Category.create(values);
+    revalidatePath('/admin/categories');
+
     return {
       success: true,
       message: ' Category added successfully',
@@ -47,9 +48,6 @@ export async function addCategory(formData: FormData) {
       success: false,
       message: 'Error adding Category',
     };
-  } finally {
-    revalidatePath('/admin/categories');
-    redirect('/admin/categories');
   }
 }
 
@@ -81,17 +79,18 @@ export async function getAllCategories(
 }
 
 export async function getCategoryById(id: string) {
+  if (!id) throw new Error('ID категорії не переданий');
   try {
     await connectToDB();
     const category = await Category.findById({ _id: id });
     return JSON.parse(JSON.stringify(category));
   } catch (error) {
     if (error instanceof Error) {
-      console.error('Error getting categories:', error);
-      throw new Error('Failed to get categories: ' + error.message);
+      console.error('Помилка отримання категорії:', error);
+      throw new Error('Помилка отримання категорії: ' + error.message);
     } else {
-      console.error('Unknown error:', error);
-      throw new Error('Failed to get categories: Unknown error');
+      console.error('Не відома помилка:', error);
+      throw new Error('Помилка отримання категорії: Не відома помилка');
     }
   }
 }

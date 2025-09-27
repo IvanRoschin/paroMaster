@@ -9,8 +9,10 @@ import { ISlider } from '@/types/ISlider';
 import { ITestimonial } from '@/types/ITestimonial';
 import { IUser } from '@/types/IUser';
 import { ISearchParams } from '@/types/searchParams';
+import { IBrand } from './IBrand';
 
 export type {
+  IBrand,
   ICartItem,
   ICategory,
   ICustomer,

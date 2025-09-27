@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation';
 
 import { getGoodById } from '@/actions/goods';
 import { getGoodTestimonials } from '@/actions/testimonials';
+import { getReadableGoodTitle } from '@/helpers/index';
 import prefetchData from '@/hooks/usePrefetchData';
 import GoodPageClient from './GoodPageClient';
 
@@ -27,11 +28,13 @@ export async function generateMetadata(props: { params: paramsType }) {
     };
   }
 
+  const title = getReadableGoodTitle(good);
+
   return {
-    title: `${good.title} | ParoMaster`,
+    title,
     description: good.description || 'Деталі про товар.',
     openGraph: {
-      title: good.title,
+      title,
       description: good.description,
       images: good.images?.map((img: string) => ({ url: img })) || [],
     },
@@ -44,6 +47,8 @@ export default async function GoodPage(props: { params: paramsType }) {
 
   const good = await getGoodById(id);
   if (!good) notFound();
+
+  console.log('good', good);
 
   // react-query prefetch
   const queryClient = new QueryClient();
