@@ -12,7 +12,7 @@ import {
 import { toast } from 'sonner';
 
 import { getGoodById } from '@/actions/goods';
-import { getReadableGoodTitle, storageKeys } from '@/helpers/index';
+import { storageKeys } from '@/helpers/index';
 import { ICartItem } from '@/types/index';
 
 // Динамический импорт компонента корзины без SSR
@@ -100,16 +100,14 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
       .then(newGood => {
         setCart(currItems => {
           const existing = currItems.find(item => item.good._id === id);
-          const newGoodTitle = getReadableGoodTitle(newGood);
           if (!existing) {
-            toast.success(`Товар "${newGoodTitle}" додано до корзини`, {
+            toast.success(`Товар "${newGood.title}" додано до корзини`, {
               id: `add-${id}`,
             });
             return [...currItems, { good: newGood, quantity: 1 }];
           }
-          const existingGoodTitle = getReadableGoodTitle(existing.good);
 
-          toast.info(`Кількість товару "${existingGoodTitle}" збільшено`, {
+          toast.info(`Кількість товару "${existing.good.title}" збільшено`, {
             id: `update-${id}`,
           });
           return currItems.map(item =>
@@ -129,15 +127,14 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
     setCart(currItems => {
       const existing = currItems.find(item => item.good._id === id);
       if (!existing) return currItems;
-      const existingGoodTitle = getReadableGoodTitle(existing.good);
       if (existing.quantity === 1) {
-        toast.warning(`Товар "${existingGoodTitle}" видалено з корзини`, {
+        toast.warning(`Товар "${existing.good.title}" видалено з корзини`, {
           id: `remove-${id}`,
         });
         return currItems.filter(item => item.good._id !== id);
       }
 
-      toast.info(`Кількість товару "${existingGoodTitle}" зменшено`, {
+      toast.info(`Кількість товару "${existing.good.title}" зменшено`, {
         id: `decrease-${id}`,
       });
       return currItems.map(item =>

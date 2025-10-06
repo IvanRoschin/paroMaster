@@ -52,7 +52,7 @@ const orderSchema = new Schema(
           type: String,
           required: true,
         },
-        vendor: {
+        sku: {
           type: String,
           required: true,
         },

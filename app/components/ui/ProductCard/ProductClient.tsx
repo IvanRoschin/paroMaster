@@ -50,7 +50,7 @@ const ProductClient = ({ id }: { id: string }) => {
           ) : (
             <p className="text-red-600 mb-[30px]">Немає в наявності</p>
           )}
-          <p className="mb-[20px]">Артикул: {item.vendor}</p>
+          <p className="mb-[20px]">Артикул: {item.sku}</p>
           <p className="text-2xl font-bold mb-[30px]">{item.price} грн</p>
           <div>
             <div>

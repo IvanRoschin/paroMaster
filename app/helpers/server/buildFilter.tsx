@@ -23,7 +23,7 @@ const buildFilter = (searchParams: ISearchParams): any => {
     andConditions.push({
       $or: [
         { title: { $regex: searchParams.q, $options: 'i' } },
-        { vendor: searchParams.q },
+        { sku: searchParams.q },
         { brand: { $regex: searchParams.q, $options: 'i' } },
         { model: { $regex: searchParams.q, $options: 'i' } },
         { compatibility: { $regex: searchParams.q, $options: 'i' } },

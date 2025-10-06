@@ -1,7 +1,7 @@
 import { ICartItem } from '@/types/ICartItem';
 import { ICategory } from '@/types/ICategory';
 import { ICustomer } from '@/types/ICustomer';
-import { IGood } from '@/types/IGood';
+import { IGoodDB, IGoodUI } from '@/types/IGood';
 import { ILid } from '@/types/ILid';
 import { IOrder } from '@/types/IOrder';
 import { ISimplifiedOrder } from '@/types/ISimplifiedOrder';
@@ -16,7 +16,8 @@ export type {
   ICartItem,
   ICategory,
   ICustomer,
-  IGood,
+  IGoodDB,
+  IGoodUI,
   ILid,
   IOrder,
   ISearchParams,

@@ -52,25 +52,27 @@ export async function addCategory(formData: FormData) {
 }
 
 export async function getAllCategories(
-  searchParams: ISearchParams
+  searchParams?: ISearchParams
 ): Promise<IGetAllCategories> {
-  const currentPage = Number(searchParams.page) || 1;
-  const { skip, limit } = buildPagination(searchParams, currentPage);
-
   try {
     await connectToDB();
 
     const count = await Category.countDocuments();
 
-    const categories: ICategory[] = await Category.find()
-      .skip(skip)
-      .limit(limit)
-      .exec();
+    const query = Category.find();
+
+    if (searchParams?.page) {
+      const currentPage = Number(searchParams.page) || 1;
+      const { skip, limit } = buildPagination(searchParams, currentPage);
+      query.skip(skip).limit(limit);
+    }
+
+    const categories: ICategory[] = await query.exec();
 
     return {
       success: true,
       categories: JSON.parse(JSON.stringify(categories)),
-      count: count,
+      count,
     };
   } catch (error) {
     console.log(error);

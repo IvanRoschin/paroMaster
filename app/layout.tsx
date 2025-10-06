@@ -1,11 +1,12 @@
 import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { Metadata } from 'next';
 import { getServerSession } from 'next-auth';
+import Script from 'next/script';
 
 import { ISearchParams } from '../types';
 import { IGetAllBrands } from './actions/brands';
 import { getAllCategories, IGetAllCategories } from './actions/categories';
-import { getMinMaxPrice, IGetPrices } from './actions/goods';
+import { getMinMaxPrice } from './actions/goods';
 import AdminSidebar from './admin/components/AdminSidebar';
 import { Footer, Header, Sidebar } from './components';
 import { authOptions } from './config/authOptions';
@@ -133,10 +134,14 @@ export default async function RootLayout({
             )}
           </div>
           <section id="footer" className="snap-start px-4">
-            <p>Footer</p>
             <Footer categories={categoriesData.categories} />
           </section>
         </Providers>
+        {/* Cloudinary Upload Widget */}
+        <Script
+          src="https://widget.cloudinary.com/v2.0/global/all.js"
+          strategy="beforeInteractive"
+        />
       </body>
     </html>
   );

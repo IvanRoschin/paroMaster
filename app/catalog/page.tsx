@@ -8,12 +8,12 @@ import { Metadata } from 'next';
 import { getAllGoods } from '@/actions/goods';
 import { Breadcrumbs, InfiniteScroll } from '@/components/index';
 import prefetchData from '@/hooks/usePrefetchData';
-import { IGood, ISearchParams } from '@/types/index';
+import { IGoodUI, ISearchParams } from '@/types/index';
 
 // app/catalog/page.tsx
 
 interface GoodsData {
-  goods: IGood[];
+  goods: IGoodUI[];
 }
 
 export const dynamic = 'force-dynamic';

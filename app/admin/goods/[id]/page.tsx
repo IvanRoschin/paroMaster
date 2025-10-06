@@ -3,20 +3,21 @@ import { getAllCategories } from '@/actions/categories';
 import { getGoodById, updateGood } from '@/actions/goods';
 import { GoodForm } from '@/admin/components';
 import { IGood } from '@/types/IGood';
+import { ISearchParams } from '@/types/index';
 
 export type ParamsType = { id: string };
 
-interface SingleGoodPageProps {
-  params: ParamsType;
-}
-
-export default async function SingleGoodPage({ params }: SingleGoodPageProps) {
-  const { id } = params;
+export default async function SingleGoodPage({
+  searchParams,
+}: {
+  searchParams: Promise<ISearchParams>;
+}) {
+  const params = await searchParams;
 
   const [good, categoriesResponse, brandsResponse] = await Promise.all([
-    getGoodById(id),
-    getAllCategories(params),
-    getAllBrands(params),
+    getGoodById(params.id),
+    getAllCategories(searchParams),
+    getAllBrands(searchParams),
   ]);
 
   const categories = categoriesResponse.categories ?? [];

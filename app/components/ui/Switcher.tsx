@@ -4,38 +4,55 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 interface SwitcherProps {
   id?: string;
-  labels?: [string, string];
+  label?: string; // ✅ основной заголовок (подпись для свитчера)
+  labels?: [string, string]; // ✅ подписи для состояний
   checked: boolean;
   onChange: (checked: boolean) => void;
+  labelPosition?: 'top' | 'left'; // ✅ позиция основного лейбла
 }
 
 const Switcher: React.FC<SwitcherProps> = ({
   id,
+  label,
   labels = ['Off', 'On'],
   checked,
   onChange,
+  labelPosition = 'top',
 }) => {
   const handleToggle = () => {
     onChange(!checked);
   };
 
   return (
-    <div className="flex flex-col items-center">
-      {/* Лейбл с анимацией появления/исчезновения */}
+    <div
+      className={`flex ${
+        labelPosition === 'left'
+          ? 'flex-row items-center gap-3'
+          : 'flex-col items-center'
+      }`}
+    >
+      {/* Основной label */}
+      {label && (
+        <span className="text-sm font-medium text-gray-700">{label}</span>
+      )}
+
+      {/* Лейбл состояния с анимацией */}
       <div className="h-5 mb-1 flex justify-center items-center relative w-12">
-        <AnimatePresence mode="wait">
-          <div className="absolute text-xs font-medium">
-            <motion.span
-              key={checked ? 'on' : 'off'}
-              initial={{ opacity: 0, x: checked ? 20 : -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: checked ? -20 : 20 }}
-              transition={{ duration: 0.2 }}
-            >
-              {checked ? labels[1] : labels[0]}
-            </motion.span>
-          </div>
-        </AnimatePresence>
+        {labels && (
+          <AnimatePresence mode="wait">
+            <div className="absolute text-xs font-medium">
+              <motion.span
+                key={checked ? 'on' : 'off'}
+                initial={{ opacity: 0, x: checked ? 20 : -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: checked ? -20 : 20 }}
+                transition={{ duration: 0.2 }}
+              >
+                {checked ? labels[1] : labels[0]}
+              </motion.span>
+            </div>
+          </AnimatePresence>
+        )}
       </div>
 
       {/* Сам переключатель */}

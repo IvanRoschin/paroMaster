@@ -27,13 +27,13 @@ export function generateEmailContent(data: IOrder) {
 
   const itemsContent = data.orderedGoods
     .map(
-      ({ _id, title, brand, model, vendor, quantity, price }, index) => `
+      ({ _id, title, brand, model, sku, quantity, price }, index) => `
         <tr key="${_id}">
           <td style="padding: 8px; border: 1px solid #ccc; text-align: center;">${index + 1}</td>
           <td style="padding: 8px; border: 1px solid #ccc;">${title}</td>
           <td style="padding: 8px; border: 1px solid #ccc; text-align: center;">${brand}</td>
           <td style="padding: 8px; border: 1px solid #ccc; text-align: center;">${model}</td>
-          <td style="padding: 8px; border: 1px solid #ccc; text-align: center;">${vendor}</td>
+          <td style="padding: 8px; border: 1px solid #ccc; text-align: center;">${sku}</td>
           <td style="padding: 8px; border: 1px solid #ccc; text-align: center;">${quantity}</td>
           <td style="padding: 8px; border: 1px solid #ccc; text-align: center;">${price} грн</td>
         </tr>

@@ -5,11 +5,11 @@ import { getAllCategories } from '@/actions/categories';
 import { addGood, getAllGoods } from '@/actions/goods';
 import { GoodForm } from '@/admin/components';
 import prefetchData from '@/hooks/usePrefetchData';
-import { IGood } from '@/types/IGood';
+import { IGoodUI } from '@/types/index';
 import { ISearchParams } from '@/types/searchParams';
 
 interface GoodsData {
-  goods: IGood[];
+  goods: IGoodUI[];
 }
 
 export default async function AddGoodPage({

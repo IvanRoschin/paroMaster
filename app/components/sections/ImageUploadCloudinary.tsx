@@ -10,7 +10,7 @@ interface ImageUploadCloudinaryProps {
   values: string | string[];
   errors?: Record<string, any>;
   uploadPreset?: string;
-  multiple?: boolean; // 👈 добавил
+  multiple?: boolean;
 }
 
 const ImageUploadCloudinary: React.FC<ImageUploadCloudinaryProps> = ({

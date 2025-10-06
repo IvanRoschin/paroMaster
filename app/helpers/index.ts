@@ -1,8 +1,8 @@
-import buildFilter from '@/helpers/buildFilter';
-import buildPagination from '@/helpers/buildPagination';
-import buildQueryParams from '@/helpers/buildQueryParams';
-import buildSort from '@/helpers/buildSort';
 import formatDate from '@/helpers/formatDate';
+import buildFilter from '@/helpers/server/buildFilter';
+import buildPagination from '@/helpers/server/buildPagination';
+import buildQueryParams from '@/helpers/server/buildQueryParams';
+import buildSort from '@/helpers/server/buildSort';
 import storageKeys from '@/helpers/storageKeys';
 import {
   contactFormSchema,

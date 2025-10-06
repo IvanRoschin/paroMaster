@@ -11,105 +11,76 @@ import {
   ImageUploadCloudinary,
   Switcher,
 } from '@/components/index';
-import { getReadableGoodTitle, storageKeys } from '@/helpers/index';
+import {
+  getReadableGoodTitle,
+  goodFormSchema,
+  storageKeys,
+} from '@/helpers/index';
 import { useAddData, useUpdateData } from '@/hooks/index';
-import { IGood } from '@/types/IGood';
+import { IGoodDB, IGoodUI } from '@/types/IGood';
 import { IBrand, ICategory } from '@/types/index';
 
-// -----------------------------
-// Типизация состояния формы
-// -----------------------------
-interface InitialStateType extends Omit<IGood, '_id' | 'category' | 'brand'> {
+interface InitialStateType extends Omit<IGoodDB, '_id' | 'category' | 'brand'> {
   category: string;
   brand: string;
 }
 
-// -----------------------------
-// Пропсы компонента
-// -----------------------------
 interface GoodFormProps {
-  good?: IGood;
-  goods?: IGood[];
+  good?: IGoodUI;
+  goods?: IGoodUI[];
   title?: string;
   allowedCategories: ICategory[];
   allowedBrands: IBrand[];
   action: (data: FormData) => Promise<{ success: boolean; message: string }>;
 }
 
-// -----------------------------
-// Генерация случайного vendor
-// -----------------------------
-const generateSimpleVendor = () =>
+const generateSimplesku = () =>
   Math.floor(100000000 + Math.random() * 900000000).toString();
 
-// -----------------------------
-// Кастомный Switcher с метками
-// -----------------------------
-interface SwitcherProps {
-  id?: string;
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-  labels?: [string, string];
-}
-
-const LabeledSwitcher: React.FC<SwitcherProps> = ({
-  id,
-  checked,
-  onChange,
-  labels = ['Off', 'On'],
-}) => {
-  const handleToggle = () => onChange(!checked);
-
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-sm font-medium">
-        {checked ? labels[1] : labels[0]}
-      </span>
-      <div
-        className={`relative w-14 h-8 rounded-full cursor-pointer transition-colors ${
-          checked ? 'bg-primaryAccentColor' : 'bg-gray-300'
-        }`}
-        onClick={handleToggle}
-      >
-        <div
-          className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform ${
-            checked ? 'translate-x-6' : ''
-          }`}
-        ></div>
-      </div>
-    </div>
-  );
-};
-
-// -----------------------------
-// Контент формы
-// -----------------------------
 const GoodFormContent: React.FC<{
   formikProps: FormikProps<InitialStateType>;
-  good?: IGood;
-  goods?: IGood[];
+  good?: IGoodUI;
+  goods?: IGoodUI[];
   allowedCategories: ICategory[];
   allowedBrands: IBrand[];
 }> = ({ formikProps, good, goods, allowedCategories, allowedBrands }) => {
   const { values, setFieldValue, errors } = formikProps;
   const goodId = good?._id ?? '';
 
-  // -----------------------------
-  // Фильтрация моделей для совместимости
-  // -----------------------------
   const existingModelsForBrand = useMemo(() => {
     if (!goods || !values.brand) return [];
     return goods
-      .filter((g: IGood) => {
+      .filter(g => {
         const brandId = typeof g.brand === 'string' ? g.brand : g.brand?._id;
         return brandId === values.brand && g._id !== goodId;
       })
       .map(g => g.model);
   }, [goods, values.brand, goodId]);
 
-  // -----------------------------
-  // Автосохранение в sessionStorage
-  // -----------------------------
+  useEffect(() => {
+    const categoryTitle =
+      allowedCategories.find(c => c._id === values.category)?.title || '';
+    const brandName =
+      allowedBrands.find(b => b._id === values.brand)?.name || '';
+
+    setFieldValue(
+      'title',
+      getReadableGoodTitle({
+        category: categoryTitle,
+        brand: brandName,
+        model: values.model,
+      }),
+      false
+    );
+  }, [
+    values.category,
+    values.brand,
+    values.model,
+    allowedCategories,
+    allowedBrands,
+    setFieldValue,
+  ]);
+
   useEffect(() => {
     const timeout = setTimeout(() => {
       try {
@@ -129,14 +100,14 @@ const GoodFormContent: React.FC<{
 
   return (
     <Form className="flex flex-col w-[600px] gap-4">
-      {/* Основные поля */}
+      {/* Поля */}
       {[
         {
           id: 'category',
           label: 'Оберіть категорію товара',
           type: 'select',
           options: allowedCategories.map(cat => ({
-            value: cat._id ?? '', // ✅ фиксим type error
+            value: cat._id ?? '',
             label: cat.title,
           })),
         },
@@ -145,7 +116,7 @@ const GoodFormContent: React.FC<{
           label: 'Оберіть бренд товара',
           type: 'select',
           options: allowedBrands.map(brand => ({
-            value: brand._id ?? '', // ✅ фиксим type error
+            value: brand._id ?? '',
             label: brand.name,
           })),
         },
@@ -166,7 +137,8 @@ const GoodFormContent: React.FC<{
         />
       ))}
 
-      {/* Изображения */}
+      <input type="hidden" name="title" value={values.title} readOnly />
+
       <ImageUploadCloudinary
         setFieldValue={setFieldValue}
         values={values.src}
@@ -174,20 +146,17 @@ const GoodFormContent: React.FC<{
         uploadPreset="preset_good"
       />
 
-      {/* Переключатели с интуитивными подписями */}
+      {/* Свитчи */}
       <div className="flex justify-around items-center w-full max-w-md mx-auto mb-6">
-        {/* Стан */}
         <div className="flex flex-col items-center">
           <span className="text-sm font-medium mb-1">Стан</span>
           <Switcher
-            id="isCondition"
-            checked={values.isCondition}
-            onChange={checked => setFieldValue('isCondition', checked)}
-            labels={['Новий', 'Б/У']}
+            id="isNew"
+            checked={values.isNew}
+            onChange={checked => setFieldValue('isNew', checked)}
+            labels={['Б/У', 'Новий']}
           />
         </div>
-
-        {/* Наявність */}
         <div className="flex flex-col items-center">
           <span className="text-sm font-medium mb-1">Наявність</span>
           <Switcher
@@ -197,8 +166,6 @@ const GoodFormContent: React.FC<{
             labels={['Немає', 'Є']}
           />
         </div>
-
-        {/* Сумісність */}
         <div className="flex flex-col items-center">
           <span className="text-sm font-medium mb-1">Сумісність</span>
           <Switcher
@@ -210,7 +177,6 @@ const GoodFormContent: React.FC<{
         </div>
       </div>
 
-      {/* Выбор совместимых моделей */}
       {values.isCompatible && existingModelsForBrand.length > 0 && (
         <div className="mb-4">
           <label className="block font-semibold mb-2">
@@ -245,9 +211,6 @@ const GoodFormContent: React.FC<{
   );
 };
 
-// -----------------------------
-// Основной компонент формы
-// -----------------------------
 const GoodForm: React.FC<GoodFormProps> = ({
   good,
   goods,
@@ -262,9 +225,6 @@ const GoodForm: React.FC<GoodFormProps> = ({
   const updateMutation = useUpdateData(action, ['goods']);
   const isUpdating = Boolean(good?._id);
 
-  // -----------------------------
-  // Инициализация значений
-  // -----------------------------
   const initialValues: InitialStateType = {
     category:
       typeof good?.category === 'string'
@@ -276,19 +236,15 @@ const GoodForm: React.FC<GoodFormProps> = ({
         : good?.brand?._id || allowedBrands[0]?._id || '',
     src: good?.src || [],
     model: good?.model || '',
-    vendor: good?.vendor || generateSimpleVendor(),
+    sku: good?.sku || generateSimplesku(),
     title: good?.title || '',
     description: good?.description || '',
     price: good?.price || 0,
-    isCondition: good?.isCondition || false,
-    isAvailable: good?.isAvailable || false,
+    isNew: good?.isNew || true,
+    isAvailable: good?.isAvailable || true,
     isCompatible: good?.isCompatible || false,
     compatibility: good?.compatibility || [],
   };
-
-  // -----------------------------
-  // Отправка формы
-  // -----------------------------
 
   const handleSubmit = async (
     values: InitialStateType,
@@ -304,22 +260,9 @@ const GoodForm: React.FC<GoodFormProps> = ({
         else formData.append(key, value as string | Blob);
       });
 
-      const categoryTitle =
-        allowedCategories.find(c => c._id === values.category)?.title || '';
-      const brandName =
-        allowedBrands.find(b => b._id === values.brand)?.name || '';
-
-      formData.set(
-        'title',
-        getReadableGoodTitle({
-          category: categoryTitle,
-          brand: brandName,
-          model: values.model,
-        })
-      );
-
-      formData.set('vendor', generateSimpleVendor());
       if (good?._id) formData.append('id', good._id);
+
+      console.log('formData:', formData);
 
       const mutation = isUpdating ? updateMutation : addMutation;
       const result = await mutation.mutateAsync(formData);
@@ -343,11 +286,12 @@ const GoodForm: React.FC<GoodFormProps> = ({
 
   return (
     <div className="flex flex-col justify-center items-center">
-      <h2 className="text-4xl mb-4">{title}</h2>
+      <h2 className="title mb-4">{title}</h2>
       <Formik
         initialValues={initialValues}
         onSubmit={handleSubmit}
         enableReinitialize
+        validationSchema={goodFormSchema}
       >
         {formikProps => (
           <GoodFormContent

@@ -1,6 +1,7 @@
 'use client';
 
 import { Form, Formik, FormikState } from 'formik';
+import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import slugify from 'slugify';
@@ -61,8 +62,6 @@ const BrandForm: React.FC<BrandFormProps> = ({ brand, title, action }) => {
       setIsLoading(true);
 
       const formData = new FormData();
-
-      // завжди додаємо slug на бекенд
       formData.append(
         'slug',
         slugify(values.name, { lower: true, strict: true })
@@ -100,37 +99,76 @@ const BrandForm: React.FC<BrandFormProps> = ({ brand, title, action }) => {
   };
 
   return (
-    <div className="my-10">
-      <h3 className="text-lg mb-4">{title || 'Додати бренд'}</h3>
-      <Formik
-        initialValues={initialValues}
-        onSubmit={handleSubmit}
-        validationSchema={brandSchema}
-        enableReinitialize
+    <div className="my-10 p-6 rounded-2xl shadow-sm bg-white flex justify-center">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3 }}
       >
-        {({ setFieldValue, values, errors }) => (
-          <Form>
-            {brandInputs.map((input, i) => (
-              <FormField
-                key={i}
-                item={input}
-                setFieldValue={setFieldValue}
-                errors={errors}
-              />
-            ))}
+        <div className="title mb-4">
+          <motion.h3
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            {title || 'Додати бренд'}
+          </motion.h3>
+        </div>
 
-            <ImageUploadCloudinary
-              setFieldValue={setFieldValue}
-              values={values.src as string}
-              errors={errors}
-              multiple={false}
-              uploadPreset="preset_brand"
-            />
+        <Formik
+          initialValues={initialValues}
+          onSubmit={handleSubmit}
+          validationSchema={brandSchema}
+          enableReinitialize
+        >
+          {({ setFieldValue, values, errors }) => (
+            <Form className="flex flex-col w-[600px] gap-4 space-y-5">
+              {brandInputs.map((input, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 * (i + 1) }}
+                >
+                  <FormField
+                    item={input}
+                    setFieldValue={setFieldValue}
+                    errors={errors}
+                  />
+                </motion.div>
+              ))}
 
-            <CustomButton label="Зберегти" type="submit" disabled={isLoading} />
-          </Form>
-        )}
-      </Formik>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25 }}
+              >
+                <ImageUploadCloudinary
+                  setFieldValue={setFieldValue}
+                  values={values.src as string}
+                  errors={errors}
+                  multiple={false}
+                  uploadPreset="preset_brand"
+                />
+              </motion.div>
+
+              <div className="pt-4">
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.35 }}
+                >
+                  <CustomButton
+                    label={isLoading ? 'Збереження...' : 'Зберегти'}
+                    type="submit"
+                    disabled={isLoading}
+                  />
+                </motion.div>
+              </div>
+            </Form>
+          )}
+        </Formik>
+      </motion.div>
     </div>
   );
 };

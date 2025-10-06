@@ -1,39 +1,33 @@
-import { ICategory } from './ICategory';
 import { IBrand } from './IBrand';
+import { ICategory } from './ICategory';
+import { ITestimonial } from './ITestimonial';
 
-export interface IGood {
+export interface IGoodBase {
   _id: string;
-  brand: IBrand | string;
-  category: ICategory | string;
   src: string[];
   model: string;
-  vendor: string;
+  sku: string;
   title: string;
   description: string;
   price: number;
-  isCondition: boolean;
+  isNew: boolean;
   isAvailable: boolean;
   isCompatible: boolean;
   compatibility: string[];
   quantity?: number;
   averageRating?: number;
   ratingCount?: number;
-  compatibleGoods?: IGood[];
 }
 
-export interface SGood {
-  quantity: number;
-  _id: string;
-  category: string;
-  src: string[];
+export interface IGoodDB extends IGoodBase {
   brand: string;
-  model: string;
-  vendor: string;
-  title: string;
-  description: string;
-  price: number;
-  isCondition: boolean;
-  isAvailable: boolean;
-  isCompatible: boolean;
-  compatibility: string[];
+  category: string;
+  compatibleGoods?: string[];
+}
+
+export interface IGoodUI extends IGoodBase {
+  brand: IBrand | null;
+  category: ICategory | null;
+  compatibleGoods: IGoodUI[];
+  testimonials?: ITestimonial[];
 }

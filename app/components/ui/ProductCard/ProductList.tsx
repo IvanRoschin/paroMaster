@@ -1,9 +1,15 @@
 'use client';
 
 import { ProductCard } from '@/components/index';
-import { IGood } from '@/types/index';
+import { IGoodUI } from '@/types/index';
 
-const ProductList = ({ goods, title }: { goods: IGood[]; title?: string }) => {
+const ProductList = ({
+  goods,
+  title,
+}: {
+  goods: IGoodUI[];
+  title?: string;
+}) => {
   return (
     <>
       <h2 className="subtitle-main">{title}</h2>
@@ -11,7 +17,7 @@ const ProductList = ({ goods, title }: { goods: IGood[]; title?: string }) => {
         key={Math.random()}
         className="grid xl:grid-cols-4 gap-4 mb-20 md:grid-cols-2 grid-cols-1"
       >
-        {goods?.map((good: IGood, i) => <ProductCard key={i} good={good} />)}
+        {goods?.map((good: IGoodUI, i) => <ProductCard key={i} good={good} />)}
       </ul>
     </>
   );

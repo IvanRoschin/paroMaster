@@ -17,7 +17,7 @@ const customNames: Record<string, string> = {
   delivery: 'Доставка',
   guarantee: 'Гарантія',
   contact: 'Контакти',
-  good: 'Товари',
+  good: 'Товар',
   admin: 'Cторінка адміна',
   orders: 'Замовлення',
   goods: 'Товари',
@@ -37,7 +37,10 @@ const customNames: Record<string, string> = {
 const Breadcrumbs = () => {
   const pathname = usePathname();
   const [dynamicTitle, setDynamicTitle] = useState<string | null>(null);
-  const [dynamicCategory, setDynamicCategory] = useState<string | null>(null);
+  const [dynamicCategory, setDynamicCategory] = useState<{
+    title: string;
+    slug: string;
+  } | null>(null);
 
   const pathSegments = pathname
     .split('/')
@@ -47,22 +50,26 @@ const Breadcrumbs = () => {
   useEffect(() => {
     const lastSegment = pathSegments[pathSegments.length - 1];
 
-    // Если последний сегмент — это MongoID товара
+    // Проверяем, что это ObjectId
     if (/^[0-9a-fA-F]{24}$/.test(lastSegment)) {
       const fetchGood = async () => {
         try {
           const good = await getGoodById(lastSegment);
 
-          const brandName = good?.brand || '';
+          const brandName = good?.brand?.name || '';
           const modelName = good?.model || '';
-          const categoryName = good?.category || '';
+          const categoryTitle = good?.category?.title || '';
+          const categorySlug = good?.category?.slug || '';
 
-          // Название товара
           setDynamicTitle(
             [brandName, modelName].filter(Boolean).join(' ') || 'Товар'
           );
-          // Категория товара
-          setDynamicCategory(categoryName || null);
+
+          if (categoryTitle && categorySlug) {
+            setDynamicCategory({ title: categoryTitle, slug: categorySlug });
+          } else {
+            setDynamicCategory(null);
+          }
         } catch (error) {
           console.error('Error fetching good data:', error);
           setDynamicTitle('Товар');
@@ -78,7 +85,6 @@ const Breadcrumbs = () => {
     const href = '/' + pathSegments.slice(0, index + 1).join('/');
     let name;
 
-    // Последний сегмент — название товара
     if (index === pathSegments.length - 1 && dynamicTitle) {
       name = dynamicTitle;
     } else {
@@ -88,11 +94,11 @@ const Breadcrumbs = () => {
     return { name, href };
   });
 
-  // Вставляем категорию товара как предпоследний элемент
+  // Добавляем категорию товара (между "Каталог" и товаром)
   if (dynamicCategory && segmentCrumbs.length > 1) {
     segmentCrumbs.splice(segmentCrumbs.length - 1, 0, {
-      name: dynamicCategory,
-      href: `/catalog?category=${dynamicCategory}`,
+      name: dynamicCategory.title,
+      href: `/catalog?category=${dynamicCategory.slug}`,
     });
   }
 

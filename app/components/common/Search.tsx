@@ -37,12 +37,7 @@ const Search = ({ placeholder }: { placeholder: string }) => {
     }
 
     if (value.length > 2 && data?.goods) {
-      const searchFields: (keyof IGood)[] = [
-        'title',
-        'model',
-        'vendor',
-        'brand',
-      ];
+      const searchFields: (keyof IGood)[] = ['title', 'model', 'sku', 'brand'];
       const filtered = data.goods.filter(good =>
         searchFields.some(field =>
           good[field]?.toString().toLowerCase().includes(value.toLowerCase())

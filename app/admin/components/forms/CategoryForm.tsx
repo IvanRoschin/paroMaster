@@ -97,7 +97,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <div className="text-lg font-semibold mb-4">
+          <div className="title mb-4">
             <motion.h3
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}

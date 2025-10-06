@@ -6,17 +6,17 @@ import { TailSpin } from 'react-loader-spinner';
 
 import { getAllGoods } from '@/actions/goods';
 import { ProductList } from '@/components/ui';
-import { IGood } from '@/types/IGood';
+import { IGoodUI } from '@/types/IGood';
 import { ISearchParams } from '@/types/searchParams';
 
 const InfiniteScroll = ({
   initialGoods,
   searchParams,
 }: {
-  initialGoods: IGood[];
+  initialGoods: IGoodUI[];
   searchParams: ISearchParams;
 }) => {
-  const [goods, setGoods] = useState<IGood[]>(initialGoods || []);
+  const [goods, setGoods] = useState<IGoodUI[]>(initialGoods || []);
   const [pagesLoaded, setPagesLoaded] = useState(1);
   const [allGoodsLoaded, setAllGoodsLoaded] = useState(false);
   const [isFetchingMore, setIsFetchingMore] = useState(false);

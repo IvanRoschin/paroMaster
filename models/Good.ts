@@ -9,6 +9,10 @@ const goodSchema = new Schema(
       ref: 'Category',
       required: true,
     },
+    title: {
+      type: String,
+      required: true,
+    },
     description: {
       type: String,
       required: true,
@@ -26,7 +30,7 @@ const goodSchema = new Schema(
       type: String,
       required: true,
     },
-    vendor: {
+    sku: {
       type: String,
       required: true,
     },
@@ -34,7 +38,7 @@ const goodSchema = new Schema(
       type: Number,
       required: true,
     },
-    isCondition: {
+    isNew: {
       type: Boolean,
       required: true,
     },
@@ -57,7 +61,11 @@ const goodSchema = new Schema(
       type: Number,
     },
   },
-  { versionKey: false, timestamps: true }
+  {
+    versionKey: false,
+    timestamps: true,
+    suppressReservedKeysWarning: true,
+  }
 );
 
 goodSchema.index({ '$**': 'text' });

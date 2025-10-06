@@ -47,22 +47,27 @@ export async function addBrand(formData: FormData) {
 }
 
 export async function getAllBrands(
-  searchParams: ISearchParams
+  searchParams?: ISearchParams
 ): Promise<IGetAllBrands> {
-  const currentPage = Number(searchParams.page) || 1;
-  const { skip, limit } = buildPagination(searchParams, currentPage);
-
   try {
     await connectToDB();
 
     const count = await Brand.countDocuments();
 
-    const brands: IBrand[] = await Brand.find().skip(skip).limit(limit).exec();
+    const query = Brand.find();
+
+    if (searchParams?.page) {
+      const currentPage = Number(searchParams.page) || 1;
+      const { skip, limit } = buildPagination(searchParams, currentPage);
+      query.skip(skip).limit(limit);
+    }
+
+    const categories: IBrand[] = await query.exec();
 
     return {
       success: true,
-      brands: JSON.parse(JSON.stringify(brands)),
-      count: count,
+      brands: JSON.parse(JSON.stringify(categories)),
+      count,
     };
   } catch (error) {
     console.log(error);

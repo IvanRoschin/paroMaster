@@ -1,5 +1,4 @@
 import Breadcrumbs from '@/components/common/Breadcrumbs';
-import DeleteConfirmation from '@/components/common/DeleteConfirmation';
 import EmptyState from '@/components/common/EmptyState';
 import FormField from '@/components/common/FormField';
 import InfiniteScroll from '@/components/common/InfiniteScroll';

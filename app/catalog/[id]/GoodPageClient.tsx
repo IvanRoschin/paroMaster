@@ -24,17 +24,16 @@ import {
 } from '@/components/index';
 import ImagesBlock from '@/components/sections/ImagesBlock';
 import Button from '@/components/ui/Button';
-import { getReadableGoodTitle } from '@/helpers/index';
 import {
   useDeleteData,
   useDeleteModal,
   useFetchData,
   useTestimonialModal,
 } from '@/hooks/index';
-import { IGood, ITestimonial } from '@/types/index';
+import { IGoodUI, ITestimonial } from '@/types/index';
 
 interface GoodPageClientProps {
-  initialGood: IGood;
+  initialGood: IGoodUI;
 }
 
 export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
@@ -115,16 +114,14 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
               </span>
             </Link>
           )}
-          <h2 className="subtitle mb-[40px]">
-            {getReadableGoodTitle(initialGood)}
-          </h2>
+          <h2 className="subtitle mb-[40px]">{initialGood.title}</h2>
           <p className="mb-[20px]">{initialGood.description}</p>
           <p
             className={`mb-[30px] ${initialGood.isAvailable ? 'text-green-600' : 'text-red-600'}`}
           >
             {initialGood.isAvailable ? 'В наявності' : 'Немає в наявності'}
           </p>
-          <p className="mb-[20px]">Артикул: {initialGood.vendor}</p>
+          <p className="mb-[20px]">Артикул: {initialGood.sku}</p>
           <p className="text-2xl font-bold mb-[30px]">
             {initialGood.price} грн
           </p>
@@ -293,19 +290,23 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
     </div>
   );
 
-  function ItemDetails({ item }: { item: IGood }) {
+  function ItemDetails({ item }: { item: IGoodUI }) {
     const compatibleGoods = item.compatibleGoods || [];
     console.log('item:', item);
 
     return (
       <div className="space-y-2">
         <p className="font-light text-gray-500">
-          Назва товару:{' '}
-          <span className="font-bold">{getReadableGoodTitle(item)}</span>
+          Назва товару: <span className="font-bold">{item.title}</span>
         </p>
 
         <p className="font-light text-gray-500">
-          Виробник: <span className="font-bold">{item.brand}</span>
+          Виробник:{' '}
+          <span className="font-bold">
+            {typeof item.brand === 'string'
+              ? item.brand
+              : (item.brand?.name ?? '—')}
+          </span>{' '}
         </p>
 
         <p className="font-light text-gray-500">
@@ -320,13 +321,13 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
         {compatibleGoods.length > 0 && (
           <p className="font-light text-gray-500">
             Сумісні товари:{' '}
-            {compatibleGoods.map((product: IGood, i: number) => (
+            {compatibleGoods.map((product: IGoodUI, i: number) => (
               <React.Fragment key={product._id}>
                 <Link
                   href={`/good/${product._id}`}
                   className="text-primaryAccentColor hover:underline"
                 >
-                  {getReadableGoodTitle(product)}
+                  {product.title}
                 </Link>
                 {i < compatibleGoods.length - 1 ? ', ' : ''}
               </React.Fragment>

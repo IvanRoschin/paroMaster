@@ -5,6 +5,10 @@ const goodFormSchema = Yup.object().shape({
     .min(2, 'Мінімум 2 символи')
     .max(50, 'Максимум 50 символів')
     .required(`Обов'язкове поле`),
+  title: Yup.string()
+    .min(2, 'Мінімум 2 символи')
+    .max(80, 'Максимум 80 символів')
+    .notRequired(),
   description: Yup.string()
     .min(20, 'Мінімум 20 символів')
     .max(200, 'Максимум 200 символів')
@@ -27,7 +31,7 @@ const goodFormSchema = Yup.object().shape({
     .min(0, 'Ціна товару повинан бути вище 0')
     .required(`Обов'язкове поле`)
     .nullable(),
-  isCondition: Yup.boolean().required(`Обов'язкове поле`),
+  isNew: Yup.boolean().required(`Обов'язкове поле`),
   isAvailable: Yup.boolean().required(`Обов'язкове поле`),
   isCompatible: Yup.boolean().required(`Обов'язкове поле`),
   compatibility: Yup.array()

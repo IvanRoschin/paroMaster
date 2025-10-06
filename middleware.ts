@@ -5,7 +5,7 @@ import { NextFetchEvent, NextRequest, NextResponse } from 'next/server';
 const publicPages = [
   '/',
   '/catalog',
-  '/good/[productId]',
+  '/catalog/[id]',
   '/ourworks',
   '/services',
   '/delivery',

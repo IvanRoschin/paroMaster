@@ -18,7 +18,6 @@ export async function getAllOrders(
 ): Promise<IGetAllOrdesResponse> {
   const currentPage = Number(searchParams.page) || 1;
   const { skip, limit } = buildPagination(searchParams, currentPage);
-  // const filter = buildFilter(searchParams)
   const sortOption = buildSort(searchParams);
 
   const status = searchParams.status;
