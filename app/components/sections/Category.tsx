@@ -6,7 +6,7 @@ import { useCallback } from 'react';
 import { useMediaQuery } from '@/hooks/index';
 
 interface CategoryPage {
-  categories: { src: string; title: string }[];
+  categories: { value: string; label: string; src: string; slug: string }[];
 }
 
 const Category: React.FC<CategoryPage> = ({ categories }) => {
@@ -17,11 +17,8 @@ const Category: React.FC<CategoryPage> = ({ categories }) => {
   const createQueryString = useCallback(
     (name: string, value: string) => {
       const params = new URLSearchParams(searchParams.toString());
-      if (value) {
-        params.set(name, value);
-      } else {
-        params.delete(name);
-      }
+      if (value) params.set(name, value);
+      else params.delete(name);
       return params.toString();
     },
     [searchParams]
@@ -37,21 +34,21 @@ const Category: React.FC<CategoryPage> = ({ categories }) => {
           isMobile ? 'grid grid-cols-2 gap-3' : ''
         }`}
       >
-        {categories.map(({ src, title }, index) => (
-          <li key={index} className="mb-3 nav">
+        {categories.map(({ value, label, src, slug }, i) => (
+          <li key={i} className="mb-3 nav">
             <Link
-              href={`/category/?${createQueryString('category', title)}`}
+              href={`/category/?${createQueryString('category', value)}`}
               className="flex justify-start items-start group"
             >
               <Image
-                alt={title}
-                src={src}
+                alt={label}
+                src={src || '/placeholder.svg'}
                 width={20}
                 height={20}
                 className="w-5 h-5 mr-3 transition-filter duration-300 ease-in-out group-hover:filter-primary"
                 priority={true}
               />
-              {title}
+              {label}
             </Link>
           </li>
         ))}

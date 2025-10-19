@@ -28,18 +28,21 @@ const FormField: React.FC<FormFieldProps> = ({
 }) => {
   const [, meta] = useField(item.id);
 
+  const value =
+    meta.value !== undefined && meta.value !== null
+      ? Array.isArray(meta.value)
+        ? meta.value.join(', ')
+        : meta.value
+      : '';
+
   if (item.id === 'compatibility') {
     return (
       <div className="relative w-full mb-4">
         <input
           type="text"
-          value={
-            (Array.isArray(meta.value) ? meta.value.join(', ') : meta.value) ||
-            ''
-          }
+          value={value}
           onChange={e => {
-            const value = e.target.value;
-            const array = value
+            const array = e.target.value
               .split(',')
               .map(item => item.trim())
               .filter(Boolean);
@@ -119,10 +122,15 @@ const FormField: React.FC<FormFieldProps> = ({
             name={item.id}
             type={item.type}
             disabled={item.disabled}
+            value={value}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              const newValue = e.target.value;
+              setFieldValue?.(item.id, newValue);
+            }}
             className={`text-primaryTextColor peer w-full p-4 pt-6 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
-            ${meta.error && meta.touched ? 'border-rose-500' : 'border-neutral-300'}
-            ${meta.error && meta.touched ? 'focus:border-rose-500' : 'focus:border-green-500'}
-            `}
+  ${meta.error && meta.touched ? 'border-rose-500' : 'border-neutral-300'}
+  ${meta.error && meta.touched ? 'focus:border-rose-500' : 'focus:border-green-500'}
+  `}
           />
           <label
             className="text-primaryTextColor absolute text-md duration-150 left-3 top-5 z-10 origin-[0] transform -translate-y-3

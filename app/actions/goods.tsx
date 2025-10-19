@@ -1,50 +1,96 @@
 'use server';
 
+import mongoose from 'mongoose';
 import { revalidatePath } from 'next/cache';
 
-import { buildFilter, buildPagination, buildSort } from '@/helpers/index';
+import { buildFilter } from '@/helpers/server';
 import Good from '@/models/Good';
 import Testimonial from '@/models/Testimonial';
-import { IGood, ISearchParams } from '@/types/index';
+import {
+  IGoodDB,
+  IGoodUI,
+  IMinMaxPriceResponse,
+  ISearchParams,
+} from '@/types/index';
 import { connectToDB } from '@/utils/dbConnect';
 
 export interface IGetAllGoods {
   success: boolean;
-  goods: IGood[];
+  goods: IGoodUI[];
   count: number;
 }
 
-export interface IGetAllBrands {
-  success: boolean;
-  brands: string[];
+export type IGoodCreate = Omit<IGoodDB, '_id' | 'compatibleGoods'>;
+
+// ======================= Сериализация =======================
+function serializeGood(g: any): IGoodUI {
+  return {
+    _id: g._id.toString(),
+    title: g.title,
+    description: g.description,
+    price: g.price,
+    discountPrice: g.discountPrice ?? 0, // + discountPrice
+    src: Array.isArray(g.src) ? g.src : g.src ? [g.src] : [],
+    category: g.category
+      ? {
+          _id: g.category._id.toString(),
+          name: g.category.name,
+          slug: g.category.slug || '',
+          src: g.category.src || '',
+        }
+      : null,
+    brand: g.brand
+      ? {
+          _id: g.brand._id.toString(),
+          name: g.brand.name,
+          slug: g.brand.slug || '',
+          src: g.brand.src || undefined,
+          country: g.brand.country || undefined,
+          website: g.brand.website || undefined,
+        }
+      : null,
+    model: g.model ?? '',
+    sku: g.sku ?? '',
+    isNew: g.isNew ?? false,
+    isAvailable: g.isAvailable ?? true,
+    isCompatible: g.isCompatible ?? false,
+    compatibility: Array.isArray(g.compatibility) ? g.compatibility : [],
+    quantity: g.quantity ?? 0,
+    averageRating: g.averageRating ?? 0,
+    ratingCount: g.ratingCount ?? 0,
+    compatibleGoods: g.compatibleGoods ?? [],
+  };
 }
 
-export interface IGetPrices {
-  success: boolean;
-  minPrice: number;
-  maxPrice: number;
-}
+// ======================= ACTIONS =======================
+
 export async function getAllGoods(
   searchParams: ISearchParams
 ): Promise<IGetAllGoods> {
-  const filter = buildFilter(searchParams);
-  const sortOption = buildSort(searchParams);
+  const filter = await buildFilter(searchParams);
+
   const currentPage = Number(searchParams.page) || 1;
-  const { skip, limit } = buildPagination(searchParams, currentPage);
+  const limit = Number(searchParams.limit) || 20;
+  const skip = (currentPage - 1) * limit;
+
   try {
     await connectToDB();
 
     const count = await Good.countDocuments(filter);
 
-    const goods: IGood[] = await Good.find(filter)
-      .sort(sortOption)
+    const goods = await Good.find(filter)
+      .populate('category', 'name slug src')
+      .populate('brand', 'name slug src country website')
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .exec();
 
+    const serializedGoods: IGoodUI[] = goods.map(serializeGood);
+
     return {
       success: true,
-      goods: JSON.parse(JSON.stringify(goods)),
+      goods: serializedGoods,
       count,
     };
   } catch (error) {
@@ -53,10 +99,14 @@ export async function getAllGoods(
   }
 }
 
-export async function getGoodById(id: string) {
+export async function getGoodById(id: string): Promise<IGoodUI | null> {
   try {
     await connectToDB();
-    const good = await Good.findById({ _id: id });
+
+    const good = await Good.findById(id)
+      .populate('category', 'title src')
+      .populate('brand', 'name slug src country website createdAt updatedAt');
+
     if (!good) return null;
 
     const testimonials = await Testimonial.find({
@@ -68,124 +118,119 @@ export async function getGoodById(id: string) {
       isCompatible: true,
       compatibility: { $regex: good.model, $options: 'i' },
     });
-    return JSON.parse(
-      JSON.stringify({
-        ...good.toObject(),
-        testimonials,
-        compatibleGoods,
-      })
-    );
+
+    const serializedCompatibleGoods: IGoodUI[] =
+      compatibleGoods.map(serializeGood);
+
+    return {
+      ...serializeGood(good),
+      testimonials,
+      compatibleGoods: serializedCompatibleGoods,
+    };
   } catch (error) {
-    console.log(error);
+    console.error('Error fetching good by id:', error);
+    return null;
   }
 }
 
 export async function addGood(formData: FormData) {
   const values: Record<string, any> = {};
 
-  // Convert FormData to an object
   formData.forEach((value, key) => {
-    if (!values[key]) {
-      values[key] = [];
-    }
-    values[key].push(value);
-  });
-
-  // If an array has only one item, convert it to a single value
-  Object.keys(values).forEach(key => {
-    if (values[key].length === 1) {
-      values[key] = values[key][0];
+    if (key.endsWith('[]')) {
+      const cleanKey = key.replace('[]', '');
+      if (!values[cleanKey]) values[cleanKey] = [];
+      values[cleanKey].push(value);
+    } else {
+      values[key] = value;
     }
   });
 
-  // Ensure price is a number
-  const price = Number(values.price);
-  if (isNaN(price)) {
-    console.error('Price must be a valid number');
-    return {
-      success: false,
-      message: 'Invalid price',
-    };
+  values.price = Number(values.price);
+  values.discountPrice = Number(values.discountPrice ?? 0); // + discountPrice
+
+  if (isNaN(values.price)) {
+    return { success: false, message: 'Ціна повинна бути числом' };
   }
-  values.price = price;
 
-  // Validate required fields
-  if (
-    !values.category ||
-    !values.title ||
-    !values.brand ||
-    !values.model ||
-    !values.vendor ||
-    !values.price ||
-    !values.description ||
-    !values.src
-  ) {
-    console.error('Missing required fields');
-    return {
-      success: false,
-      message: 'Missing required fields',
-    };
+  const requiredFields = [
+    'category',
+    'title',
+    'brand',
+    'model',
+    'sku',
+    'price',
+    'description',
+    'src',
+  ];
+
+  for (const field of requiredFields) {
+    if (
+      !values[field] ||
+      (Array.isArray(values[field]) && values[field].length === 0)
+    ) {
+      return { success: false, message: `Поле "${field}" є обов'язковим` };
+    }
   }
 
   try {
     await connectToDB();
 
-    const existingGood = await Good.findOne({ vendor: values.vendor });
+    const existingGood = await Good.findOne({ sku: values.sku });
     if (existingGood) {
-      return {
-        success: false,
-        message: 'Good with this vendor already exists',
-      };
+      return { success: false, message: 'Товар з таким SKU вже існує' };
     }
 
-    await Good.create({
+    const newGood: IGoodCreate = {
       category: values.category,
+      brand: values.brand,
       title: values.title,
-      brand:
-        values.brand.charAt(0).toUpperCase() +
-        values.brand.slice(1).toLowerCase(),
       model: values.model,
-      price: Number(values.price),
+      sku: values.sku,
+      price: values.price,
+      discountPrice: values.discountPrice, // + discountPrice
       description: values.description,
       src: Array.isArray(values.src) ? values.src : [values.src],
-      vendor: values.vendor,
-      isCondition: values.isAvailable === 'true',
-      isAvailable: values.isAvailable === 'true',
-      isCompatible: values.isCompatible === 'true',
-      compatibility: values.compatibility,
-    });
-
-    return {
-      success: true,
-      message: 'Good added successfully',
+      isNew:
+        values.isNew === 'true' ||
+        values.isNew === true ||
+        values.isNew === undefined,
+      isAvailable:
+        values.isAvailable === 'true' ||
+        values.isAvailable === true ||
+        values.isAvailable === undefined,
+      isCompatible:
+        values.isCompatible === 'true' || values.isCompatible === true
+          ? true
+          : false,
+      compatibility: values.compatibility || [],
     };
+    await Good.create(newGood);
+
+    return { success: true, message: 'Товар додано успішно' };
   } catch (error) {
-    if (error instanceof Error) {
-      console.error('Error adding good:', error);
+    console.error('Помилка додавання товару:', error);
+
+    if (error instanceof mongoose.Error.ValidationError) {
+      const fieldErrors = Object.values(error.errors)
+        .map(e => e.message)
+        .join(', ');
       return {
         success: false,
-        message: error.message || 'Error adding good',
+        message: `Помилка валідації: ${fieldErrors}`,
       };
     }
-  }
-}
 
-export async function deleteGood(id: string): Promise<void> {
-  if (!id) return;
-  await connectToDB();
-  const deletedReviews = await Testimonial.deleteMany({ product: id });
-  if (deletedReviews.deletedCount > 0) {
-    console.log(
-      `Видалено ${deletedReviews.deletedCount} відгуків для товару з ID: ${id}`
-    );
-  } else {
-    console.log('Відгуків не було знайдено для видалення');
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Невідома помилка',
+    };
   }
-  await Good.findByIdAndDelete(id);
 }
 
 export async function updateGood(formData: FormData) {
-  const values: any = {};
+  const values: Record<string, any> = {};
+
   formData.forEach((value, key) => {
     if (!values[key]) values[key] = [];
     values[key].push(value);
@@ -198,145 +243,105 @@ export async function updateGood(formData: FormData) {
   const {
     id,
     category,
-    src,
     brand,
+    src,
     model,
-    vendor,
+    sku,
     title,
     description,
     price,
-    isCondition,
+    discountPrice, // + discountPrice
+    isNew,
     isAvailable,
     isCompatible,
     compatibility,
-  } = values as {
-    id: string;
-    category?: string;
-    src?: any;
-    brand?: string;
-    model?: string;
-    vendor?: string;
-    title?: string;
-    description?: string;
-    price?: number;
-    isCondition?: string;
-    isAvailable?: string;
-    isCompatible?: string;
-    compatibility?: any;
-  };
+  } = values;
 
   try {
     await connectToDB();
 
-    const updateFields: Partial<IGood> = {
-      category,
-      src,
-      brand,
+    const updateFields: Partial<IGoodDB> = {
+      category: category || undefined,
+      brand: brand || undefined,
+      src: src ? (Array.isArray(src) ? src : [src]) : undefined,
       model,
-      vendor,
+      sku,
       title,
       description,
-      price: Number(price),
-      isCondition: isCondition === 'true',
+      price: price !== undefined ? Number(price) : undefined,
+      discountPrice:
+        discountPrice !== undefined ? Number(discountPrice) : undefined, // + discountPrice
+      isNew: isNew === 'true',
       isAvailable: isAvailable === 'true',
       isCompatible: isCompatible === 'true',
-      compatibility,
+      compatibility: compatibility
+        ? Array.isArray(compatibility)
+          ? compatibility
+          : [compatibility]
+        : [],
     };
 
-    Object.keys(updateFields).forEach(
-      key =>
-        (updateFields[key as keyof IGood] === '' ||
-          updateFields[key as keyof IGood] === undefined) &&
-        delete updateFields[key as keyof IGood]
-    );
+    Object.keys(updateFields).forEach(key => {
+      if (
+        updateFields[key as keyof IGoodDB] === undefined ||
+        updateFields[key as keyof IGoodDB] === ''
+      ) {
+        delete updateFields[key as keyof IGoodDB];
+      }
+    });
 
     await Good.findByIdAndUpdate(id, updateFields);
 
-    return {
-      success: true,
-      message: 'Good updated successfully',
-    };
+    return { success: true, message: 'Товар оновлено успішно' };
   } catch (error) {
-    if (error instanceof Error) {
-      console.error('Error updating good:', error);
-      return {
-        success: false,
-        message: error.message || 'Error updating good',
-      };
-    }
+    console.error('Помилка оновлення Товару:', error);
     return {
       success: false,
-      message: 'Unknown error occurred',
+      message: error instanceof Error ? error.message : 'Невідома помилка',
     };
   }
 }
 
-export async function uniqueBrands(): Promise<IGetAllBrands> {
-  try {
-    connectToDB();
-    const uniqueBrands = await Good.distinct('brand');
-    return {
-      success: true,
-      brands: uniqueBrands,
-    };
-  } catch (error) {
-    console.log(error);
-    return { success: false, brands: [] };
-  }
+export async function deleteGood(id: string): Promise<void> {
+  if (!id) return;
+  await connectToDB();
+  await Testimonial.deleteMany({ product: id });
+  await Good.findByIdAndDelete(id);
 }
 
 export async function getMostPopularGoods() {
   try {
     await connectToDB();
-    const mostPopularGoods: IGood[] = await Good.find()
+    const mostPopularGoods: IGoodDB[] = await Good.find()
       .sort({ averageRating: -1, ratingCount: -1 })
       .limit(10);
-
-    return {
-      success: true,
-      goods: JSON.parse(JSON.stringify(mostPopularGoods)),
-    };
+    return { success: true, goods: mostPopularGoods.map(serializeGood) };
   } catch (error) {
-    console.log('Error fetching most popular goods:', error);
+    console.error('Error fetching most popular goods:', error);
     return { success: false, goods: [] };
   } finally {
     revalidatePath('/');
   }
 }
 
-export async function getMinMaxPrice(): Promise<{
-  success: boolean;
-  minPrice: number | null;
-  maxPrice: number | null;
-  message?: string;
-}> {
+export async function getMinMaxPrice(): Promise<IMinMaxPriceResponse> {
   try {
-    // Connect to the database
     await connectToDB();
-
-    // Perform the aggregation
     const result = await Good.aggregate([
       {
         $project: {
-          price: {
-            $cond: {
-              if: { $isNumber: { $toDouble: '$price' } },
-              then: { $toDouble: '$price' },
-              else: null,
-            },
-          },
+          price: { $toDouble: '$price' },
+          discountPrice: { $toDouble: '$discountPrice' },
         },
-      },
-      {
-        $match: {
-          price: { $ne: null },
-        },
-      },
+      }, // + discountPrice
+      { $match: { price: { $ne: null } } },
       {
         $group: {
           _id: null,
           minPrice: { $min: '$price' },
           maxPrice: { $max: '$price' },
+          minDiscountPrice: { $min: '$discountPrice' }, // + discountPrice
+          maxDiscountPrice: { $max: '$discountPrice' }, // + discountPrice
         },
       },
       {
@@ -344,31 +349,37 @@ export async function getMinMaxPrice(): Promise<{
           _id: 0,
           minPrice: 1,
           maxPrice: 1,
+          minDiscountPrice: 1,
+          maxDiscountPrice: 1,
         },
-      },
+      }, // + discountPrice
     ]).exec();
 
-    // Check if results were found
-    if (result.length === 0) {
+    if (!result.length)
       return {
         success: false,
         minPrice: null,
         maxPrice: null,
+        minDiscountPrice: null,
+        maxDiscountPrice: null,
         message: 'No valid goods found',
       };
-    }
 
     return {
       success: true,
       minPrice: result[0].minPrice,
       maxPrice: result[0].maxPrice,
+      minDiscountPrice: result[0].minDiscountPrice, // + discountPrice
+      maxDiscountPrice: result[0].maxDiscountPrice, // + discountPrice
     };
   } catch (error: any) {
-    console.error('Error fetching min and max prices:', error);
+    console.error('Error fetching min/max price:', error);
     return {
       success: false,
       minPrice: null,
       maxPrice: null,
+      minDiscountPrice: null,
+      maxDiscountPrice: null,
       message: error.message,
     };
   }

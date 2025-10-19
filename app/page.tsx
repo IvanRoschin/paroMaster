@@ -1,10 +1,10 @@
-import { IGood, ISearchParams, ITestimonial } from '@/types/index';
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
 
+import { IGoodUI, ISearchParams, ITestimonial } from '@/types/index';
 import { getAllGoods } from './actions/goods';
 import { getAllSlides, IGetAllSlides } from './actions/slider';
 import {
@@ -31,7 +31,7 @@ const TESTIMONIALS_QUERY_KEY = (params: ISearchParams) => [
 ];
 
 interface GoodsData {
-  goods: IGood[];
+  goods: IGoodUI[];
 }
 
 export default async function Home({

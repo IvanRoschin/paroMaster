@@ -1,10 +1,8 @@
 import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
 
-type AddAction = (
-  newData: any
-) => Promise<{ success: boolean; message: string }>;
+type AddAction<T = any> = (newData: any) => Promise<T>;
 
-const useAddData = (actionFn: AddAction, key: QueryKey) => {
+const useAddData = <T,>(actionFn: AddAction<T>, key: QueryKey) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -12,8 +10,8 @@ const useAddData = (actionFn: AddAction, key: QueryKey) => {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: [key] });
     },
-    onError: () => {
-      console.error('Помилка при створенні');
+    onError: error => {
+      console.error('Помилка при створенні', error);
     },
   });
 };

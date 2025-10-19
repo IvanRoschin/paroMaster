@@ -3,7 +3,7 @@
 import {
   generateLidEmailContent,
   NewLidTemplateProps,
-} from 'app/templates/email/NewLidTemplate';
+} from 'app/templates/email/NewLeadTemplate';
 import { generateEmailContent } from 'app/templates/email/NewOrderTemplate';
 import { FieldValues } from 'react-hook-form';
 
@@ -23,14 +23,17 @@ sendgrid.setApiKey(process.env.NEXT_PUBLIC_SENDGRID_API_KEY);
 const fromEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
 function validateOrderData(data: IOrder) {
+  // Используем customerSnapshot вместо customer
+  const customer = data.customerSnapshot;
+
   if (
     !data.number ||
-    !data.customer.name ||
-    !data.customer.email ||
-    !data.customer.phone ||
-    !data.customer.city ||
-    !data.customer.warehouse ||
-    !data.customer.payment ||
+    !customer?.name ||
+    !customer?.email ||
+    !customer?.phone ||
+    !customer?.city ||
+    !customer?.warehouse ||
+    !customer?.payment ||
     !Array.isArray(data.orderedGoods) ||
     data.orderedGoods.length === 0 ||
     data.totalPrice <= 0
@@ -47,6 +50,8 @@ function validateOrderData(data: IOrder) {
 export async function sendAdminEmail(data: IOrder) {
   const validation = validateOrderData(data);
   if (!validation.success) return validation;
+
+  const customer = data.customerSnapshot;
 
   try {
     // Prepare email content
@@ -67,8 +72,8 @@ export async function sendAdminEmail(data: IOrder) {
     await sendgrid.send({
       from: fromEmail,
       to: fromEmail,
-      subject: `Нове замовлення №${data.number} від ${data.customer.name}${data.customer.surname ? ` ${data.customer.surname}` : ''}`,
-      text: `Замовлення №${data.number} від: ${data.customer.name}${data.customer.surname ? ` ${data.customer.surname}` : ''}, Телефон: ${data.customer.phone}, Email: ${data.customer.email}`,
+      subject: `Нове замовлення №${data.number} від ${customer.name}${customer.surname ? ` ${customer.surname}` : ''}`,
+      text: `Замовлення №${data.number} від: ${customer.name}${customer.surname ? ` ${customer.surname}` : ''}, Телефон: ${customer.phone}, Email: ${customer.email}`,
       html: emailContent,
     });
 
@@ -88,6 +93,8 @@ export async function sendCustomerEmail(data: IOrder) {
   const validation = validateOrderData(data);
   if (!validation.success) return validation;
 
+  const customer = data.customerSnapshot;
+
   try {
     const emailContent = generateEmailContent(data);
 
@@ -95,30 +102,33 @@ export async function sendCustomerEmail(data: IOrder) {
       console.error('Помилка генерації контенту листа:', emailContent.error);
       return { success: false, error: emailContent.error };
     }
-    if (!fromEmail || !data.customer.email) {
+
+    if (!fromEmail || !customer.email) {
       return {
         success: false,
-        error: 'Configuration Error: Missing sender && reciver email address.',
+        error: 'Configuration Error: Missing sender or receiver email address.',
       };
     }
 
     await sendgrid.send({
       from: fromEmail,
-      to: [`${data.customer.email}`],
+      to: [customer.email],
       subject: `Ваше замовлення на сайті ParoMaster`,
       html: emailContent,
     });
 
     console.log('Customer Email sent successfully');
     return { success: true };
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error('Error in sendEmail function:', error);
-      throw new Error('Error in sendEmail function: ' + error.message);
-    } else {
-      console.error('Unknown error:', error);
-      throw new Error('Error in sendEmail function: Unknown error');
-    }
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.body?.errors?.[0]?.message ||
+      error.message ||
+      'Unknown error occurred.';
+    console.error('Error sending customer email:', errorMessage);
+    return {
+      success: false,
+      error: errorMessage,
+    };
   }
 }
 
@@ -126,8 +136,12 @@ export async function sendEmailToLid(data: FieldValues) {
   const { email, name, phone } = data;
 
   if (!email || !name || !phone) {
-    throw new Error('Error not all data passed');
+    return {
+      success: false,
+      error: 'Error: not all data passed',
+    };
   }
+
   try {
     const emailContent = generateLidEmailContent({
       email,
@@ -135,24 +149,24 @@ export async function sendEmailToLid(data: FieldValues) {
       phone,
     } as NewLidTemplateProps);
 
-    if (!phone || !email) return;
-
     await sendgrid.send({
       from: fromEmail,
       to: fromEmail,
-      subject: `Заповнена форма зв'язку  на сайті від ${name}, контактний email: ${email}`,
+      subject: `Заповнена форма зв'язку на сайті від ${name}, контактний email: ${email}`,
       html: emailContent,
     });
 
     console.log('Lid email sent successfully');
     return { success: true };
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error('Error in sendEmail function:', error);
-      throw new Error('Error in sendEmail function: ' + error.message);
-    } else {
-      console.error('Unknown error:', error);
-      throw new Error('Error in sendEmail function: Unknown error');
-    }
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.body?.errors?.[0]?.message ||
+      error.message ||
+      'Unknown error occurred.';
+    console.error('Error sending lid email:', errorMessage);
+    return {
+      success: false,
+      error: errorMessage,
+    };
   }
 }

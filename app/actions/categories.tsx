@@ -1,9 +1,9 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 
 import { buildPagination } from '@/helpers/index';
+import { slugify } from '@/lib/slugify';
 import Category from '@/models/Category';
 import { ICategory, ISearchParams } from '@/types/index';
 import { connectToDB } from '@/utils/dbConnect';
@@ -15,64 +15,53 @@ export interface IGetAllCategories {
 }
 
 export async function addCategory(formData: FormData) {
-  const values: Record<string, any> = {};
-
-  formData.forEach((value, key) => {
-    if (!values[key]) {
-      values[key] = [];
-    }
-    values[key].push(value);
-  });
-
-  Object.keys(values).forEach(key => {
-    if (values[key].length === 1) {
-      values[key] = values[key][0];
-    }
-  });
+  const values: Record<string, any> = Object.fromEntries(formData.entries());
   try {
     await connectToDB();
-    const title = values.title;
-    const existingCategory = await Category.findOne({ title });
-    if (existingCategory) {
-      throw new Error('Category already exists');
-    }
+
+    // Генерируем slug на сервере
+    if (!values.name) throw new Error(`Назва категорії обов'язкова`);
+    values.slug = slugify(values.name);
+
+    const existingCategory = await Category.findOne({ slug: values.slug });
+    if (existingCategory) throw new Error('Категорія з такою назвою вже існує');
+
     await Category.create(values);
-    return {
-      success: true,
-      message: ' Category added successfully',
-    };
+    revalidatePath('/admin/categories');
+
+    return { success: true, message: 'Категорію додано успішно' };
   } catch (error) {
-    console.error('Error adding Category:', error);
+    console.error('Помилка додавання категорії:', error);
     return {
       success: false,
-      message: 'Error adding Category',
+      message:
+        error instanceof Error ? error.message : 'Помилка додавання категорії',
     };
-  } finally {
-    revalidatePath('/admin/categories');
-    redirect('/admin/categories');
   }
 }
 
 export async function getAllCategories(
-  searchParams: ISearchParams
+  searchParams?: ISearchParams
 ): Promise<IGetAllCategories> {
-  const currentPage = Number(searchParams.page) || 1;
-  const { skip, limit } = buildPagination(searchParams, currentPage);
-
   try {
     await connectToDB();
 
     const count = await Category.countDocuments();
 
-    const categories: ICategory[] = await Category.find()
-      .skip(skip)
-      .limit(limit)
-      .exec();
+    const query = Category.find();
+
+    if (searchParams?.page) {
+      const currentPage = Number(searchParams.page) || 1;
+      const { skip, limit } = buildPagination(searchParams, currentPage);
+      query.skip(skip).limit(limit);
+    }
+
+    const categories: ICategory[] = await query.exec();
 
     return {
       success: true,
       categories: JSON.parse(JSON.stringify(categories)),
-      count: count,
+      count,
     };
   } catch (error) {
     console.log(error);
@@ -81,17 +70,18 @@ export async function getAllCategories(
 }
 
 export async function getCategoryById(id: string) {
+  if (!id) throw new Error('ID категорії не переданий');
   try {
     await connectToDB();
     const category = await Category.findById({ _id: id });
     return JSON.parse(JSON.stringify(category));
   } catch (error) {
     if (error instanceof Error) {
-      console.error('Error getting categories:', error);
-      throw new Error('Failed to get categories: ' + error.message);
+      console.error('Помилка отримання категорії:', error);
+      throw new Error('Помилка отримання категорії: ' + error.message);
     } else {
-      console.error('Unknown error:', error);
-      throw new Error('Failed to get categories: Unknown error');
+      console.error('Не відома помилка:', error);
+      throw new Error('Помилка отримання категорії: Не відома помилка');
     }
   }
 }
@@ -103,38 +93,40 @@ export async function deleteCategory(id: string): Promise<void> {
 }
 
 export async function updateCategory(formData: FormData) {
-  const entries = Object.fromEntries(formData.entries());
-  const { id, title, src } = entries as {
+  const values: Record<string, any> = Object.fromEntries(formData.entries());
+  const { id, name, src } = values as {
     id: string;
-    title?: string;
+    name?: string;
     src?: string;
   };
+
+  if (!id) throw new Error('Category id is required');
+
   try {
     await connectToDB();
-    const updateFields: Partial<ICategory> = {
-      title,
-      src,
-    };
+    const updateFields: Partial<ICategory> = { name, src };
+
+    // Удаляем пустые поля
     Object.keys(updateFields).forEach(
       key =>
         (updateFields[key as keyof ICategory] === '' ||
           updateFields[key as keyof ICategory] === undefined) &&
         delete updateFields[key as keyof ICategory]
     );
+
+    // Генерируем slug при обновлении
+    if (name) updateFields.slug = slugify(name);
+
     await Category.findByIdAndUpdate(id, updateFields);
-    return {
-      success: true,
-      message: 'Category updated successfully',
-    };
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error('Error update category:', error);
-      throw new Error('Failed to category user: ' + error.message);
-    } else {
-      console.error('Unknown error:', error);
-      throw new Error('Failed to update category: Unknown error');
-    }
-  } finally {
     revalidatePath('/admin/categories');
+
+    return { success: true, message: 'Category updated successfully' };
+  } catch (error) {
+    console.error('Error updating Category:', error);
+    return {
+      success: false,
+      message:
+        error instanceof Error ? error.message : 'Error updating Category',
+    };
   }
 }

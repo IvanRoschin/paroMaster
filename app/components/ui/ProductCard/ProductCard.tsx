@@ -7,22 +7,16 @@ import { useEffect, useState } from 'react';
 import { FaPen } from 'react-icons/fa';
 
 import { Button } from '@/components/index';
-import { IGood } from '@/types/IGood';
+import { getCloudinaryUrl } from '@/helpers/getCloudinaryUrl';
+import { IGoodUI } from '@/types/IGood';
 
 interface IProductCardProps {
-  good: IGood;
+  good: IGoodUI;
 }
 
 const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
   const { data: session } = useSession();
   const isAdmin = session?.user;
-
-  const getCloudinaryUrl = (img: string, width: number, height: number) => {
-    return img.replace(
-      '/upload/',
-      `/upload/c_fill,g_auto,w_${width},h_${height}/f_webp/q_auto/`
-    );
-  };
 
   const {
     getItemQuantity,
@@ -55,12 +49,12 @@ const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
     <li className="flex flex-col justify-between border border-gray-300 rounded-md p-4 hover:shadow-[10px_10px_15px_-3px_rgba(0,0,0,0.3)] transition-all">
       <div className="relative">
         <Link
-          href={`/good/${good._id}`}
+          href={`/catalog/${good._id}`}
           className="flex flex-col h-full justify-between"
         >
           <div className="w-[200px] h-[200px]">
             <div className="absolute top-2 left-2 bg-primaryAccentColor text-white text-xs font-semibold px-2 py-1 rounded">
-              {good.isCondition ? 'НОВИЙ' : 'Б/У'}
+              {good.isNew ? 'НОВИЙ ' : 'Б/У'}
             </div>
             <Image
               src={getCloudinaryUrl(good.src[0], 200, 200)}
@@ -89,7 +83,7 @@ const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
             >
               {good.isAvailable ? 'В наявності' : 'Немає в наявності'}
             </p>
-            <p className="mb-[20px]">Артикул: {good.vendor}</p>
+            <p className="mb-[20px]">Артикул: {good.sku}</p>
             <p className="text-2xl font-bold mb-[20px]">{good.price} грн</p>
           </div>
         </Link>
@@ -183,7 +177,7 @@ const CartActions: React.FC<CartActionsProps> = ({
 };
 
 interface ItemDetailsProps {
-  item: IGood;
+  item: IGoodUI;
 }
 
 const ItemDetails: React.FC<ItemDetailsProps> = ({ item }) => {
@@ -192,8 +186,15 @@ const ItemDetails: React.FC<ItemDetailsProps> = ({ item }) => {
       <p className="font-light text-gray-500">
         Сумісність з брендами: {item.isCompatible ? 'так' : 'ні'}
       </p>
-      <p className="font-light text-gray-500">Brand: {item.brand}</p>
-      <p className="font-light text-gray-500">Model: {item.model}</p>
+      <p className="font-light text-gray-500">
+        Виробник:
+        <span className="font-bold">
+          {typeof item.brand === 'string'
+            ? item.brand
+            : (item.brand?.name ?? '—')}
+        </span>
+      </p>
+      <p className="font-light text-gray-500">Модель: {item.model}</p>
       <p className="font-light text-gray-500">
         Сумісність з брендами: {item.compatibility}
       </p>

@@ -1,4 +1,3 @@
-// hooks/useFetchData.ts
 import { QueryKey, useQuery } from '@tanstack/react-query';
 
 export const useFetchData = <T,>(
@@ -10,8 +9,6 @@ export const useFetchData = <T,>(
     queryFn: () => action(params),
     queryKey: [key, JSON.stringify(params)],
   });
-
   return { data, error, isError, isLoading, refetch };
 };
-
 export default useFetchData;

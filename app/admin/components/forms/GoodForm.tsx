@@ -1,8 +1,8 @@
 'use client';
 
-import { Form, Formik, FormikState } from 'formik';
+import { Form, Formik, FormikHelpers, FormikProps } from 'formik';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import {
@@ -11,171 +11,289 @@ import {
   ImageUploadCloudinary,
   Switcher,
 } from '@/components/index';
-import { goodFormSchema } from '@/helpers/index';
-import { useAddData, useCategoriesEnum, useUpdateData } from '@/hooks/index';
-import { IGood } from '@/types/IGood';
-import { ICategory } from '@/types/index';
+import {
+  getReadableGoodTitle,
+  goodFormSchema,
+  storageKeys,
+} from '@/helpers/index';
+import { useAddData, useUpdateData } from '@/hooks/index';
+import { IGoodDB, IGoodUI } from '@/types/IGood';
+import { IBrand, ICategory } from '@/types/index';
 
-interface InitialStateType extends Omit<IGood, '_id'> {}
-
-interface ResetFormProps {
-  resetForm: (nextState?: Partial<FormikState<InitialStateType>>) => void;
+interface InitialStateType extends Omit<IGoodDB, '_id' | 'category' | 'brand'> {
+  category: string;
+  brand: string;
 }
 
 interface GoodFormProps {
-  good?: IGood;
+  good?: IGoodUI;
+  goods?: IGoodUI[];
   title?: string;
+  allowedCategories: ICategory[];
+  allowedBrands: IBrand[];
   action: (data: FormData) => Promise<{ success: boolean; message: string }>;
 }
 
-const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const { push } = useRouter();
-  const isUpdating = Boolean(good?._id);
+const generateSimplesku = () =>
+  Math.floor(100000000 + Math.random() * 900000000).toString();
 
-  const { categories, allowedCategories } = useCategoriesEnum();
+const GoodFormContent: React.FC<{
+  formikProps: FormikProps<InitialStateType>;
+  good?: IGoodUI;
+  goods?: IGoodUI[];
+  allowedCategories: ICategory[];
+  allowedBrands: IBrand[];
+}> = ({ formikProps, good, goods, allowedCategories, allowedBrands }) => {
+  const { values, setFieldValue, errors } = formikProps;
+  const goodId = good?._id ?? '';
 
-  const addGoodMutation = useAddData(action, ['goods']);
-  const updateGoodMutation = useUpdateData(action, ['goods']);
+  const existingModelsForBrand = useMemo(() => {
+    if (!goods || !values.brand) return [];
+    return goods
+      .filter(g => {
+        const brandId = typeof g.brand === 'string' ? g.brand : g.brand?._id;
+        return brandId === values.brand && g._id !== goodId;
+      })
+      .map(g => g.model);
+  }, [goods, values.brand, goodId]);
+
+  useEffect(() => {
+    const categoryTitle =
+      allowedCategories.find(c => c._id === values.category)?.name || '';
+    const brandName =
+      allowedBrands.find(b => b._id === values.brand)?.name || '';
+
+    setFieldValue(
+      'title',
+      getReadableGoodTitle({
+        category: categoryTitle,
+        brand: brandName,
+        model: values.model,
+      }),
+      false
+    );
+  }, [
+    values.category,
+    values.brand,
+    values.model,
+    allowedCategories,
+    allowedBrands,
+    setFieldValue,
+  ]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      try {
+        sessionStorage.setItem(storageKeys.good, JSON.stringify(values));
+      } catch (err) {
+        console.error('Error saving form data:', err);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [values]);
 
   const textareaStyles: React.CSSProperties = {
-    height: '100px',
+    height: 100,
     overflowY: 'auto',
   };
 
-  const inputs = [
-    {
-      id: 'category',
-      label: 'Оберіть категорію',
-      type: 'select',
-      options: categories?.map((category: ICategory) => ({
-        value: category.title,
-        label: category.title,
-      })),
-      required: true,
-    },
-    {
-      id: 'title',
-      label: 'Назва товару',
-      type: 'text',
-      required: true,
-    },
-    {
-      id: 'brand',
-      label: 'Бренд',
-      type: 'text',
-      required: true,
-    },
-    {
-      id: 'model',
-      label: 'Модель',
-      type: 'text',
-      required: true,
-    },
-    {
-      id: 'vendor',
-      label: 'Артикул',
-      type: 'text',
-      required: true,
-    },
-    {
-      id: 'price',
-      label: 'Ціна',
-      type: 'number',
-      required: true,
-    },
-    {
-      id: 'isCondition',
-      label: 'Новий?',
-      type: 'switcher',
-    },
-    {
-      id: 'isAvailable',
-      label: 'В наявності?',
-      type: 'switcher',
-    },
-    {
-      id: 'isCompatible',
-      label: 'Сумісний з іншими?',
-      type: 'switcher',
-    },
-    {
-      id: 'compatibility',
-      label: 'З якими моделями?',
-      type: 'text',
-    },
-    {
-      id: 'description',
-      label: 'Опис',
-      type: 'textarea',
-      style: textareaStyles,
-    },
-  ];
+  // Рассчёт скидки
+  const discountPercent =
+    values.price && values.discountPrice
+      ? Math.round(((values.price - values.discountPrice) / values.price) * 100)
+      : 0;
+
+  return (
+    <Form className="flex flex-col w-[600px] gap-4">
+      {/* Поля */}
+      {[
+        {
+          id: 'category',
+          label: 'Оберіть категорію товара',
+          type: 'select',
+          options: allowedCategories.map(cat => ({
+            value: cat._id ?? '',
+            label: cat.name,
+          })),
+        },
+        {
+          id: 'brand',
+          label: 'Оберіть бренд товара',
+          type: 'select',
+          options: allowedBrands.map(brand => ({
+            value: brand._id ?? '',
+            label: brand.name,
+          })),
+        },
+        { id: 'model', type: 'text', label: 'Модель' },
+        { id: 'price', type: 'number', label: 'Ціна' },
+        { id: 'discountPrice', type: 'number', label: 'Ціна зі знижкою' },
+        {
+          id: 'description',
+          type: 'textarea',
+          label: 'Опис',
+          style: textareaStyles,
+        },
+      ].map((input, i) => (
+        <FormField
+          key={i}
+          item={input}
+          setFieldValue={setFieldValue}
+          errors={errors}
+        />
+      ))}
+
+      {values.discountPrice && discountPercent > 0 && (
+        <p className="text-sm text-green-600 font-medium">
+          Знижка: {discountPercent}%
+        </p>
+      )}
+
+      <input type="hidden" name="title" value={values.title} readOnly />
+
+      <ImageUploadCloudinary
+        setFieldValue={setFieldValue}
+        values={values.src}
+        errors={errors.src as any}
+        uploadPreset="preset_good"
+      />
+
+      {/* Свитчи */}
+      <div className="flex justify-around items-center w-full max-w-md mx-auto mb-6">
+        <div className="flex flex-col items-center">
+          <span className="text-sm font-medium mb-1">Стан</span>
+          <Switcher
+            id="isNew"
+            checked={values.isNew}
+            onChange={checked => setFieldValue('isNew', checked)}
+            labels={['Б/У', 'Новий']}
+          />
+        </div>
+        <div className="flex flex-col items-center">
+          <span className="text-sm font-medium mb-1">Наявність</span>
+          <Switcher
+            id="isAvailable"
+            checked={values.isAvailable}
+            onChange={checked => setFieldValue('isAvailable', checked)}
+            labels={['Немає', 'Є']}
+          />
+        </div>
+        <div className="flex flex-col items-center">
+          <span className="text-sm font-medium mb-1">Сумісність</span>
+          <Switcher
+            id="isCompatible"
+            checked={values.isCompatible}
+            onChange={checked => setFieldValue('isCompatible', checked)}
+            labels={['Ні', 'Так']}
+          />
+        </div>
+      </div>
+
+      {values.isCompatible && existingModelsForBrand.length > 0 && (
+        <div className="mb-4">
+          <label className="block font-semibold mb-2">
+            Сумісний з моделями:
+          </label>
+          <div className="flex flex-col gap-1 max-h-48 overflow-y-auto border rounded p-2">
+            {existingModelsForBrand.map(model => (
+              <label key={model} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={values.compatibility.includes(model)}
+                  onChange={e => {
+                    const newArr = e.target.checked
+                      ? [...values.compatibility, model]
+                      : values.compatibility.filter(m => m !== model);
+                    setFieldValue('compatibility', newArr);
+                  }}
+                />
+                {model}
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <CustomButton
+        label="Зберегти"
+        type="submit"
+        disabled={formikProps.isSubmitting}
+      />
+    </Form>
+  );
+};
+
+const GoodForm: React.FC<GoodFormProps> = ({
+  good,
+  goods,
+  title,
+  allowedCategories,
+  allowedBrands,
+  action,
+}) => {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const addMutation = useAddData(action, ['goods']);
+  const updateMutation = useUpdateData(action, ['goods']);
+  const isUpdating = Boolean(good?._id);
 
   const initialValues: InitialStateType = {
-    category: good?.category || allowedCategories[0],
+    category:
+      typeof good?.category === 'string'
+        ? good.category
+        : good?.category?._id || allowedCategories[0]?._id || '',
+    brand:
+      typeof good?.brand === 'string'
+        ? good.brand
+        : good?.brand?._id || allowedBrands[0]?._id || '',
     src: good?.src || [],
-    brand: good?.brand || '',
     model: good?.model || '',
-    vendor: good?.vendor || '',
+    sku: good?.sku || generateSimplesku(),
     title: good?.title || '',
     description: good?.description || '',
     price: good?.price || 0,
-    isCondition: good?.isCondition || false,
-    isAvailable: good?.isAvailable || false,
+    discountPrice: good?.discountPrice || 0,
+    isNew: good?.isNew || true,
+    isAvailable: good?.isAvailable || true,
     isCompatible: good?.isCompatible || false,
     compatibility: good?.compatibility || [],
   };
 
   const handleSubmit = async (
     values: InitialStateType,
-    { resetForm }: ResetFormProps
+    { resetForm }: FormikHelpers<InitialStateType>
   ) => {
     try {
       setIsLoading(true);
-
       const formData = new FormData();
-      Object.keys(values).forEach(key => {
-        const value = (values as Record<string, any>)[key];
-        if (Array.isArray(value)) {
-          value.forEach(val => formData.append(`${key}[]`, val));
-        } else {
-          formData.append(key, value);
-        }
-      });
-      if (good?._id) {
-        formData.append('id', good._id);
-      }
 
-      const mutation = isUpdating ? updateGoodMutation : addGoodMutation;
+      Object.entries(values).forEach(([key, value]) => {
+        if (Array.isArray(value))
+          value.forEach(v => formData.append(`${key}[]`, v));
+        else formData.append(key, value as string | Blob);
+      });
+
+      if (good?._id) formData.append('id', good._id);
+
+      const mutation = isUpdating ? updateMutation : addMutation;
       const result = await mutation.mutateAsync(formData);
 
-      toast.success(
-        isUpdating
-          ? result.message || 'Товар оновлено!'
-          : result.message || 'Новий товар додано!'
-      );
-      push('/admin/goods');
-
-      resetForm({
-        values: {
-          ...values,
-          title: '',
-          vendor: '',
-          model: '',
-          price: 0,
-          description: '',
-          src: [],
-        },
-      });
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-        console.error(error.message);
-      } else {
-        toast.error('An unknown error occurred');
-        console.error(error);
+      if (!result.success) {
+        throw new Error('Помилка додавання чи оновлення');
       }
+      toast.success(
+        result.message ||
+          (isUpdating ? 'Товар оновлено!' : 'Новий товар додано!')
+      );
+      sessionStorage.removeItem(storageKeys.good);
+      router.push('/admin/goods');
+
+      resetForm({ values: initialValues });
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'An unknown error occurred'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -183,63 +301,21 @@ const GoodForm: React.FC<GoodFormProps> = ({ good, title, action }) => {
 
   return (
     <div className="flex flex-col justify-center items-center">
-      <h2 className="text-4xl mb-4">{title}</h2>
+      <h2 className="title mb-4">{title}</h2>
       <Formik
         initialValues={initialValues}
         onSubmit={handleSubmit}
-        validationSchema={goodFormSchema}
         enableReinitialize
+        validationSchema={goodFormSchema}
       >
-        {({ errors, setFieldValue, values, touched }) => (
-          <Form className="flex flex-col w-[600px]">
-            <ImageUploadCloudinary
-              setFieldValue={setFieldValue}
-              values={values.src}
-              errors={errors}
-              uploadPreset="preset_good"
-            />
-            {inputs.map((item, i) => (
-              <div key={i}>
-                {item.type === 'switcher' ? (
-                  <>
-                    {(item.id === 'isCondition' ||
-                      item.id === 'isAvailable' ||
-                      item.id === 'isCompatible') && (
-                      <div className="mb-1 text-sm text-gray-600">
-                        {item.id === 'isCondition' &&
-                          `Стан: ${values.isCondition ? 'Б/У' : 'Нова'}`}
-                        {item.id === 'isAvailable' &&
-                          `Наявність: ${values.isAvailable ? 'Є в наявності' : 'Немає'}`}
-                        {item.id === 'isCompatible' &&
-                          `Сумісність: ${values.isCompatible ? 'Сумісний' : 'Не сумісний'}`}
-                      </div>
-                    )}
-                    <Switcher
-                      id={item.id}
-                      label={
-                        item.id === 'isCondition'
-                          ? 'Б/У?'
-                          : item.id === 'isAvailable'
-                            ? 'Є в наявності?'
-                            : item.id === 'isCompatible'
-                              ? 'Сумісний?'
-                              : item.label
-                      }
-                      checked={!!(values as Record<string, any>)[item.id]}
-                      onChange={checked => setFieldValue(item.id, checked)}
-                    />
-                  </>
-                ) : (
-                  <FormField
-                    item={item}
-                    setFieldValue={setFieldValue}
-                    errors={errors}
-                  />
-                )}
-              </div>
-            ))}
-            <CustomButton label="Зберегти" disabled={isLoading} />
-          </Form>
+        {formikProps => (
+          <GoodFormContent
+            formikProps={formikProps}
+            good={good}
+            goods={goods}
+            allowedCategories={allowedCategories}
+            allowedBrands={allowedBrands}
+          />
         )}
       </Formik>
     </div>

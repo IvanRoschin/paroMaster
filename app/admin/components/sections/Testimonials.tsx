@@ -140,8 +140,8 @@ export default function Testimonials() {
             </tr>
           </thead>
           <tbody>
-            {data.testimonials.map(testimonial => (
-              <tr key={testimonial._id} className="border-b-2">
+            {data.testimonials.map((testimonial, index) => (
+              <tr key={`${testimonial._id}-${index}`} className="border-b-2">
                 <td className="p-2 border-r-2 text-center">
                   {testimonial.name}
                 </td>

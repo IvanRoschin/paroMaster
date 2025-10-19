@@ -1,5 +1,6 @@
 import Card from '@/admin/components/Card';
 import {
+  BrandForm,
   CategoryForm,
   CustomerForm,
   GoodForm,
@@ -8,6 +9,7 @@ import {
   TestimonialForm,
   UserForm,
 } from '@/admin/components/forms';
+import { GoodsFields } from '@/admin/components/GoodsFields';
 import MenuLink from '@/admin/components/MenuLink';
 import Navbar from '@/admin/components/Navbar';
 import {
@@ -21,6 +23,7 @@ import {
 } from '@/admin/components/sections';
 
 export {
+  BrandForm,
   Card,
   Categories,
   CategoryForm,
@@ -28,6 +31,7 @@ export {
   Customers,
   GoodForm,
   Goods,
+  GoodsFields,
   MenuLink,
   Navbar,
   OrderForm,

@@ -9,11 +9,13 @@ import useMediaQuery from '@/hooks/useMediaQuery';
 import usePrefetchData from '@/hooks/usePrefetchData';
 import useUpdateData from '@/hooks/useUpdateData';
 import useWarehouses from '@/hooks/useWarehouses';
+import useBrandsEnum from './useBrandsEnum';
 import useDeleteModal from './useDeleteModal';
 import useTestimonialModal from './useTestimonialsModal';
 
 export {
   useAddData,
+  useBrandsEnum,
   useCartModal,
   useCategoriesEnum,
   useCities,

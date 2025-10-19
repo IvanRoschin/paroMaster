@@ -1,6 +1,7 @@
 'use client';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { FaPen, FaSortAlphaDown, FaSortAlphaUp, FaTrash } from 'react-icons/fa';
 
@@ -21,6 +22,7 @@ export default function Categories({
 }: {
   searchParams: ISearchParams;
 }) {
+  const { push } = useRouter();
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   const { data, isLoading, isError, error } = useFetchData(
@@ -46,7 +48,13 @@ export default function Categories({
   }
 
   if (!data?.categories || data.categories.length === 0) {
-    return <EmptyState showReset title="Категорії відсутні" />;
+    return (
+      <EmptyState
+        title="Категорії відсутні"
+        actionLabel="Додати категорію"
+        actionHref="/admin/categories/add"
+      />
+    );
   }
 
   const handleSort = () => {
@@ -72,7 +80,7 @@ export default function Categories({
   }
 
   const sortedCategories = [...(data?.categories || [])].sort((a, b) => {
-    const comparison = a.title.localeCompare(b.title);
+    const comparison = a.name.localeCompare(b.name);
     return sortOrder === 'asc' ? comparison : -comparison;
   });
   return (
@@ -119,12 +127,12 @@ export default function Categories({
         <tbody>
           {sortedCategories.map(category => (
             <tr key={category._id} className="border-b-2">
-              <td className="p-2 border-r-2 text-start">{category.title}</td>
+              <td className="p-2 border-r-2 text-start">{category.name}</td>
               <td className="p-2 border-r-2 text-start">
                 <div className="flex justify-center">
                   <Image
                     src={category.src}
-                    alt={category.title}
+                    alt={category.name}
                     width={24}
                     height={24}
                     priority={true}

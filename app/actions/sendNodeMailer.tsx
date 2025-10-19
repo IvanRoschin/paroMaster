@@ -3,7 +3,7 @@
 import {
   generateLidEmailContent,
   NewLidTemplateProps,
-} from 'app/templates/email/NewLidTemplate';
+} from 'app/templates/email/NewLeadTemplate';
 import { generateEmailContent } from 'app/templates/email/NewOrderTemplate';
 import { FieldValues } from 'react-hook-form';
 
@@ -18,14 +18,17 @@ if (!fromEmail) {
 }
 
 function validateOrderData(data: IOrder) {
+  // Используем customerSnapshot вместо customer
+  const customer = data.customerSnapshot;
+
   if (
     !data.number ||
-    !data.customer.name ||
-    !data.customer.email ||
-    !data.customer.phone ||
-    !data.customer.city ||
-    !data.customer.warehouse ||
-    !data.customer.payment ||
+    !customer?.name ||
+    !customer?.email ||
+    !customer?.phone ||
+    !customer?.city ||
+    !customer?.warehouse ||
+    !customer?.payment ||
     !Array.isArray(data.orderedGoods) ||
     data.orderedGoods.length === 0 ||
     data.totalPrice <= 0
@@ -43,6 +46,8 @@ export async function sendAdminEmail(data: IOrder) {
   const validation = validateOrderData(data);
   if (!validation.success) return validation;
 
+  const customer = data.customerSnapshot;
+
   try {
     const emailContent = generateEmailContent(data);
 
@@ -54,8 +59,8 @@ export async function sendAdminEmail(data: IOrder) {
     await sendMail({
       to: fromEmail!,
       name: 'ParoMaster Admin',
-      subject: `Нове замовлення №${data.number} від ${data.customer.name}${
-        data.customer.surname ? ` ${data.customer.surname}` : ''
+      subject: `Нове замовлення №${data.number} від ${customer.name}${
+        customer.surname ? ` ${customer.surname}` : ''
       }`,
       body: emailContent,
     });
@@ -75,6 +80,8 @@ export async function sendCustomerEmail(data: IOrder) {
   const validation = validateOrderData(data);
   if (!validation.success) return validation;
 
+  const customer = data.customerSnapshot;
+
   try {
     const emailContent = generateEmailContent(data);
 
@@ -83,13 +90,13 @@ export async function sendCustomerEmail(data: IOrder) {
       return { success: false, error: emailContent.error };
     }
 
-    if (!data.customer.email) {
+    if (!customer.email) {
       return { success: false, error: 'Missing recipient email address.' };
     }
 
     await sendMail({
-      to: data.customer.email,
-      name: data.customer.name,
+      to: customer.email,
+      name: customer.name,
       subject: `Ваше замовлення на сайті ParoMaster`,
       body: emailContent,
     });
@@ -109,7 +116,10 @@ export async function sendEmailToLid(data: FieldValues) {
   const { email, name, phone } = data;
 
   if (!email || !name || !phone) {
-    throw new Error('Error: not all data passed');
+    return {
+      success: false,
+      error: 'Error: not all data passed',
+    };
   }
 
   try {

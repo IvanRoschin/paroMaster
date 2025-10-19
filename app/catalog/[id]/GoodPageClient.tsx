@@ -3,7 +3,7 @@
 import { useShoppingCart } from 'app/context/ShoppingCartContext';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   FaPen,
   FaRegStar,
@@ -30,10 +30,10 @@ import {
   useFetchData,
   useTestimonialModal,
 } from '@/hooks/index';
-import { IGood, ITestimonial } from '@/types/index';
+import { IGoodUI, ITestimonial } from '@/types/index';
 
 interface GoodPageClientProps {
-  initialGood: IGood;
+  initialGood: IGoodUI;
 }
 
 export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
@@ -121,7 +121,7 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
           >
             {initialGood.isAvailable ? 'В наявності' : 'Немає в наявності'}
           </p>
-          <p className="mb-[20px]">Артикул: {initialGood.vendor}</p>
+          <p className="mb-[20px]">Артикул: {initialGood.sku}</p>
           <p className="text-2xl font-bold mb-[30px]">
             {initialGood.price} грн
           </p>
@@ -255,12 +255,15 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
       </div>
 
       {/* Display compatibleGoods */}
+
       {(initialGood.compatibleGoods?.length || 0) > 0 && (
         <div className="mt-10">
           <h3 className="subtitle">Сумісні товари</h3>
+
           <ProductList goods={initialGood.compatibleGoods || []} />
         </div>
       )}
+
       {/* Модалка для відгуку */}
       <Modal
         body={<TestimonialForm productId={initialGood._id} />}
@@ -289,42 +292,54 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
       />
     </div>
   );
-  function ItemDetails({ item }: { item: IGood }) {
+
+  function ItemDetails({ item }: { item: IGoodUI }) {
+    const compatibleGoods = item.compatibleGoods || [];
+
     return (
-      <>
+      <div className="space-y-2">
+        <p className="font-light text-gray-500">
+          Назва товару: <span className="font-bold">{item.title}</span>
+        </p>
+
+        <p className="font-light text-gray-500">
+          Виробник:{' '}
+          <span className="font-bold">
+            {typeof item.brand === 'string'
+              ? item.brand
+              : (item.brand?.name ?? '—')}
+          </span>{' '}
+        </p>
+
+        <p className="font-light text-gray-500">
+          Модель: <span className="font-bold">{item.model}</span>
+        </p>
+
         <p className="font-light text-gray-500">
           Сумісність з іншими моделями:{' '}
           <span className="font-bold">{item.isCompatible ? 'так' : 'ні'}</span>
         </p>
-        <p className="font-light text-gray-500">
-          Виробник: <span className="font-bold"> {item.brand}</span>
-        </p>
-        <p className="font-light text-gray-500">
-          Модель: <span className="font-bold">{item.model}</span>{' '}
-        </p>
-        <p className="font-light text-gray-500">
-          Сумісний з моделями:{' '}
-          <span className="font-bold">
-            {(initialGood.compatibleGoods || []).map(
-              (product: IGood, i: number) => (
-                <span key={product._id}>
-                  <Link
-                    href={`/good/${product._id}`}
-                    className="text-primaryAccentColor hover:underline"
-                  >
-                    {product.model}
-                  </Link>
-                  {i < (initialGood.compatibleGoods?.length || 0) - 1
-                    ? ', '
-                    : ''}
-                </span>
-              )
-            )}
-          </span>
-        </p>
-      </>
+
+        {compatibleGoods.length > 0 && (
+          <p className="font-light text-gray-500">
+            Сумісні товари:{' '}
+            {compatibleGoods.map((product: IGoodUI, i: number) => (
+              <React.Fragment key={product._id}>
+                <Link
+                  href={`/catalog/${product._id}`}
+                  className="text-primaryAccentColor hover:underline"
+                >
+                  {product.title}
+                </Link>
+                {i < compatibleGoods.length - 1 ? ', ' : ''}
+              </React.Fragment>
+            ))}
+          </p>
+        )}
+      </div>
     );
   }
+
   function StarDisplay({
     rating,
     size = 18,

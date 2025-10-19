@@ -6,11 +6,11 @@ import {
 
 import { getAllGoods } from '@/actions/goods';
 import { OrderForm } from '@/admin/components';
-import { IGood } from '@/types/index';
+import { IGoodUI } from '@/types/index';
 import { ISearchParams } from '@/types/searchParams';
 
 interface GoodsData {
-  goods: IGood[];
+  goods: IGoodUI[];
 }
 
 export const dynamic = 'force-dynamic';

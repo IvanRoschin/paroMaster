@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 
+import { orderStatus } from '@/config/constants';
+
 const { Schema } = mongoose;
 
 const orderSchema = new Schema(
@@ -8,64 +10,21 @@ const orderSchema = new Schema(
       type: String,
       required: true,
     },
-    customer: {
-      name: {
-        type: String,
-        required: true,
-      },
-      phone: {
-        type: String,
-        required: true,
-      },
-      email: {
-        type: String,
-        required: true,
-      },
-      city: {
-        type: String,
-        required: true,
-      },
-      warehouse: {
-        type: String,
-        required: true,
-      },
-      payment: {
-        type: String,
-        required: true,
-      },
+    customer: { type: Schema.Types.ObjectId, ref: 'Customer' },
+    customerSnapshot: {
+      name: { type: String, required: true },
+      surname: { type: String, required: true },
+      phone: { type: String, required: true },
+      email: { type: String },
+      city: { type: String, required: true },
+      warehouse: { type: String, required: true },
+      payment: { type: String, required: true },
     },
     orderedGoods: [
       {
-        _id: {
-          type: String,
-          ref: 'Good',
-        },
-        title: {
-          type: String,
-          required: true,
-        },
-        brand: {
-          type: String,
-          required: true,
-        },
-        model: {
-          type: String,
-          required: true,
-        },
-        vendor: {
-          type: String,
-          required: true,
-        },
-        quantity: {
-          type: Number,
-        },
-        src: {
-          type: [String],
-        },
-        price: {
-          type: Number,
-          required: true,
-        },
+        good: { type: Schema.Types.ObjectId, ref: 'Good', required: true },
+        quantity: { type: Number, required: true },
+        price: { type: Number, required: true },
       },
     ],
     totalPrice: {
@@ -74,10 +33,11 @@ const orderSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ['Новий', 'Опрацьовується', 'Оплачено', 'На відправку', 'Закритий'],
-      required: true,
+      enum: orderStatus.map(s => s.id),
+      default: 'NEW',
     },
   },
+
   { versionKey: false, timestamps: true }
 );
 

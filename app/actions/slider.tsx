@@ -1,7 +1,5 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
-
 import { buildPagination } from '@/helpers/index';
 import Slider from '@/models/Slider';
 import { ISearchParams, ISlider } from '@/types/index';

@@ -31,8 +31,8 @@
       "@/models/*": ["./models/*"],
       "@/helpers/*": ["./app/helpers/*"],
       "@/hooks/*": ["./app/hooks/*"],
-      "@/config/*": ["./config/*"],
-      "@/lib/*": ["./lib/*"],
+      "@/config/*": ["./app/config/*"],
+      "@/lib/*": ["./app/lib/*"],
       "@/admin/*": ["./app/admin/*"]
     },
     "skipLibCheck": true

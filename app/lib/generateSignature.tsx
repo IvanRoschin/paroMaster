@@ -1,5 +1,6 @@
-import { IOrder } from '@/types/index';
 import crypto from 'crypto';
+
+import { IOrder } from '@/types/index';
 
 export function generateSignature(order: IOrder) {
   const merchantAccount = process.env.NEXT_PUBLIC_WAYFORPAY_MERCHANT_ACCOUNT!;
@@ -12,12 +13,16 @@ export function generateSignature(order: IOrder) {
     );
   }
 
-  const orderDate = Math.floor(
-    new Date(order.createdAt as string).getTime() / 1000
-  );
+  function toUnixTimestamp(date?: Date | string): number {
+    if (!date) return Math.floor(Date.now() / 1000);
+    const parsed = new Date(date);
+    return Math.floor(parsed.getTime() / 1000);
+  }
+
+  const orderDate = toUnixTimestamp(order.createdAt);
 
   // Собираем массивы продуктов
-  const productNames = order.orderedGoods.map(item => item.title);
+  const productNames = order.orderedGoods.map(item => item.good);
   const productCounts = order.orderedGoods.map(item =>
     (item.quantity ?? 1).toString()
   );

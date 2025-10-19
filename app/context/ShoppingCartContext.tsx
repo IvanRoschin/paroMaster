@@ -98,14 +98,19 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
   const increaseCartQuantity = useCallback((id: string) => {
     getGoodById(id)
       .then(newGood => {
+        if (!newGood) {
+          toast.error('Товар не знайдено');
+          return;
+        }
         setCart(currItems => {
           const existing = currItems.find(item => item.good._id === id);
           if (!existing) {
             toast.success(`Товар "${newGood.title}" додано до корзини`, {
               id: `add-${id}`,
             });
-            return [...currItems, { good: newGood, quantity: 1 }]; // корректный тип
+            return [...currItems, { good: newGood, quantity: 1 }];
           }
+
           toast.info(`Кількість товару "${existing.good.title}" збільшено`, {
             id: `update-${id}`,
           });
@@ -126,7 +131,6 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
     setCart(currItems => {
       const existing = currItems.find(item => item.good._id === id);
       if (!existing) return currItems;
-
       if (existing.quantity === 1) {
         toast.warning(`Товар "${existing.good.title}" видалено з корзини`, {
           id: `remove-${id}`,

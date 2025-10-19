@@ -12,7 +12,7 @@ import {
   Search,
   Socials,
 } from '@/components/common';
-import { LidForm, LoginForm, TestimonialForm } from '@/components/forms';
+import { LeadForm, LoginForm, TestimonialForm } from '@/components/forms';
 import {
   Advantages,
   BrandFilter,
@@ -73,7 +73,7 @@ export {
   ImagesBlock,
   ImageUploadCloudinary,
   InfiniteScroll,
-  LidForm,
+  LeadForm,
   Loader,
   LoginForm,
   Logo,

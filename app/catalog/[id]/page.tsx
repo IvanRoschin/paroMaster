@@ -28,12 +28,12 @@ export async function generateMetadata(props: { params: paramsType }) {
   }
 
   return {
-    title: `${good.title} | ParoMaster`,
+    title: good.title,
     description: good.description || 'Деталі про товар.',
     openGraph: {
       title: good.title,
       description: good.description,
-      images: good.images?.map((img: string) => ({ url: img })) || [],
+      images: good.src?.map((img: string) => ({ url: img })) || [],
     },
   };
 }
@@ -45,13 +45,12 @@ export default async function GoodPage(props: { params: paramsType }) {
   const good = await getGoodById(id);
   if (!good) notFound();
 
-  // react-query prefetch
   const queryClient = new QueryClient();
   await prefetchData(
     queryClient,
     getGoodTestimonials,
-    ['testimonials', good.id],
-    good.id
+    ['testimonials', good._id],
+    good._id
   );
 
   return (

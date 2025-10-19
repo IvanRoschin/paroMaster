@@ -60,7 +60,7 @@ export async function getAllUsers(searchParams: ISearchParams) {
   const currentPage = Number(searchParams.page) || 1;
 
   const { skip, limit } = buildPagination(searchParams, currentPage);
-  const filter = buildFilter(searchParams);
+  const filter = await buildFilter(searchParams);
   const sortOption = buildSort(searchParams);
 
   try {

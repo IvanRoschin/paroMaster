@@ -127,8 +127,8 @@ export default function Slides({
           </tr>
         </thead>
         <tbody>
-          {data.slides.map(slide => (
-            <tr key={slide._id} className="border-b-2">
+          {data.slides.map((slide, index) => (
+            <tr key={`${slide._id}-${index}`} className="border-b-2">
               <td className="p-2 border-r-2 text-start">{slide.title}</td>
               <td className="p-2 border-r-2 text-start">{slide.desc}</td>
               <td className="p-2 border-r-2">

@@ -1,4 +1,5 @@
 'use client';
+
 import { useShoppingCart } from 'app/context/ShoppingCartContext';
 import { createWayForPayInvoice } from 'app/lib/wayforpay';
 import PublicOfferSummary from 'app/publicoffer/PublicOfferSummary';
@@ -10,23 +11,18 @@ import { toast } from 'sonner';
 import { addCustomer } from '@/actions/customers';
 import { addOrder } from '@/actions/orders';
 import { sendAdminEmail, sendCustomerEmail } from '@/actions/sendNodeMailer';
-// import WayForPayForm from "@/components/forms/WayForPayForm"
 import { Breadcrumbs, Button, FormField } from '@/components/index';
 import { customerFormSchema, storageKeys } from '@/helpers/index';
 import { useCities, useWarehouses } from '@/hooks/index';
-import { ICartItem, IOrder } from '@/types/index';
+import { IGoodBase } from '@/types/IGood';
+import { ICartItem, ICustomerSnapshot, IOrder } from '@/types/index';
+import { OrderStatus } from '@/types/orderStatus';
 import { PaymentMethod } from '@/types/paymentMethod';
 
 import OrderGood from './orderGood';
 
-interface FormikCustomerValues {
-  name: string;
-  surname: string;
-  phone: string;
-  email: string;
-  city: string;
-  warehouse: string;
-  payment: string;
+interface FormikCustomerValues extends ICustomerSnapshot {
+  _id?: string;
 }
 
 const OrderPage = () => {
@@ -46,12 +42,11 @@ const OrderPage = () => {
       ),
     [cart]
   );
+
   const getSavedFormData = (): FormikCustomerValues | null => {
     try {
       const savedData = sessionStorage.getItem(storageKeys.customer);
-      if (savedData) {
-        return JSON.parse(savedData) as FormikCustomerValues;
-      }
+      if (savedData) return JSON.parse(savedData) as FormikCustomerValues;
       return null;
     } catch (error) {
       console.error('Помилка при читанні даних форми:', error);
@@ -61,17 +56,17 @@ const OrderPage = () => {
 
   const savedFormData = getSavedFormData();
 
-  const initialValues = savedFormData || {
+  const initialValues: FormikCustomerValues = savedFormData || {
     name: '',
     surname: '',
     email: '',
     phone: '',
     city: '',
     warehouse: '',
-    payment: PaymentMethod.CashOnDelivery,
+    payment: PaymentMethod.CASH_ON_DELIVERY,
   };
 
-  const handleSubmit = async (customerValues: IOrder['customer']) => {
+  const handleSubmit = async (customerValues: FormikCustomerValues) => {
     if (!isCheckboxChecked) {
       toast.error('Будь ласка, погодьтесь із публічною офертою');
       return;
@@ -82,40 +77,52 @@ const OrderPage = () => {
       return;
     }
 
-    const orderedGoods = cart.map(item => ({
-      ...item.good,
-      quantity: item.quantity,
-    }));
-
-    if (orderedGoods.length === 0) {
+    if (cart.length === 0) {
       toast.error(
         'Кошик порожній. Додайте товари перед оформленням замовлення.'
       );
       return;
     }
 
-    const totalPrice = orderedGoods.reduce(
-      (acc, item) => acc + (item.price || 0) * (item.quantity || 1),
-      0
-    );
+    // Сформувати список товарів для замовлення
+    const orderedGoods = cart.map(item => ({
+      good: item.good as IGoodBase,
+      quantity: item.quantity,
+      price: item.good.price,
+    }));
+
+    // Знімок покупця
+    const customerSnapshot: ICustomerSnapshot = {
+      name: customerValues.name,
+      surname: customerValues.surname,
+      phone: customerValues.phone,
+      email: customerValues.email,
+      city: customerValues.city,
+      warehouse: customerValues.warehouse,
+      payment: customerValues.payment,
+    };
 
     const orderData: IOrder = {
       number: generatedNumber,
-      customer: customerValues,
+      customer: customerValues._id,
+      customerSnapshot,
       orderedGoods,
       totalPrice,
-      status: 'Новий',
+      status: OrderStatus.NEW,
     };
 
     try {
-      // Виконуємо збереження на бекенді
+      setIsLoading(true);
+
       const [
         customerResult,
         orderResult,
         adminEmailResult,
         customerEmailResult,
       ] = await Promise.all([
-        addCustomer(orderData.customer),
+        customerValues._id
+          ? Promise.resolve({ success: true })
+          : addCustomer(customerSnapshot),
         addOrder(orderData),
         sendAdminEmail(orderData),
         sendCustomerEmail(orderData),
@@ -123,7 +130,6 @@ const OrderPage = () => {
 
       const allSuccessful =
         customerResult?.success &&
-        orderResult?.success &&
         orderResult?.success &&
         adminEmailResult?.success &&
         customerEmailResult?.success;
@@ -135,13 +141,13 @@ const OrderPage = () => {
 
       toast.success('Замовлення успішно створено! 🚀', { duration: 3000 });
 
-      // Очищення форми та сховищ
+      // Очищення кошика та форми
       resetCart();
       sessionStorage.removeItem(storageKeys.customer);
       localStorage.clear();
 
-      // WayForPay — редірект на інвойс
-      if (orderData.customer.payment === PaymentMethod.WayForPay) {
+      // WayForPay
+      if (customerSnapshot.payment === PaymentMethod.WAY_FOR_PAY) {
         try {
           const result = await createWayForPayInvoice(orderData);
           if (result.url) {
@@ -159,6 +165,8 @@ const OrderPage = () => {
     } catch (error) {
       console.error('🔁 Загальна помилка в сабміті:', error);
       toast.error('Сталася помилка. Спробуйте ще раз.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -172,9 +180,9 @@ const OrderPage = () => {
         </h2>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Форма оформлення */}
+          {/* Форма замовника */}
           <div className="w-full lg:w-2/3">
-            <Formik
+            <Formik<FormikCustomerValues>
               initialValues={initialValues}
               onSubmit={handleSubmit}
               validationSchema={customerFormSchema}
@@ -192,7 +200,6 @@ const OrderPage = () => {
                       className="mr-2"
                     />
                     <label htmlFor="termsCheckbox">
-                      {' '}
                       <PublicOfferSummary />
                     </label>
                   </div>
@@ -206,14 +213,14 @@ const OrderPage = () => {
             </Formik>
           </div>
 
-          {/* Товари у кошику */}
+          {/* Кошик */}
           <div className="w-full lg:w-1/3 flex flex-col gap-4">
             <h3 className="text-2xl font-semibold mb-4">Ваші товари</h3>
             {cart.length > 0 ? (
               cart.map((item: ICartItem, i) => (
                 <OrderGood
                   key={item.good._id || i}
-                  good={item.good}
+                  good={item.good as IGoodBase}
                   quantity={item.quantity}
                 />
               ))
@@ -227,7 +234,7 @@ const OrderPage = () => {
               {totalPrice >= 1000
                 ? '🚚 Доставка безкоштовна'
                 : '🚚 Вартість доставки: за тарифами перевізника'}
-            </p>{' '}
+            </p>
           </div>
         </div>
       </div>
@@ -235,7 +242,8 @@ const OrderPage = () => {
   );
 };
 
-// Custom hook for city selection
+/* -------------------- HOOKS & COMPONENTS -------------------- */
+
 const useCitySelection = (
   fieldValue: string,
   setFieldValue: (field: string, value: any) => void
@@ -252,25 +260,22 @@ const useCitySelection = (
       }
 
       const normalizedQuery = (searchQuery || '').trim().toLowerCase();
-
       const filtered = allCities
-        .filter((city: any) => {
-          const description = (city?.description || '').trim().toLowerCase();
-          return description.includes(normalizedQuery);
-        })
+        .filter((city: any) =>
+          (city.description || '').toLowerCase().includes(normalizedQuery)
+        )
         .map((city: any) => city.description || '');
 
       setFilteredCities(filtered);
     }, 300);
+
     return () => clearTimeout(timeoutId);
   }, [searchQuery, allCities]);
 
   const handleSelectCity = (city: string) => {
     setFieldValue('city', city);
     setSearchQuery(city);
-    setTimeout(() => {
-      setFilteredCities([]);
-    }, 0);
+    setTimeout(() => setFilteredCities([]), 0);
   };
 
   return { filteredCities, searchQuery, setSearchQuery, handleSelectCity };
@@ -282,7 +287,7 @@ const FormEffects = () => {
   const prevWarehouseRef = useRef<string | null>(null);
 
   useEffect(() => {
-    const firstDescription = warehouses[0]?.Description;
+    const firstDescription = warehouses[0]?.Description || '';
 
     if (!values.city && values.warehouse) {
       setValues({ ...values, warehouse: '' });
@@ -320,7 +325,6 @@ const CustomerFields = ({ touched, errors }: { touched: any; errors: any }) => {
   const { values, setFieldValue } = useFormikContext<FormikCustomerValues>();
   const { warehouses, isWarehousesLoading } = useWarehouses(values?.city);
   const [showDropdown, setShowDropdown] = useState(false);
-
   const { filteredCities, searchQuery, setSearchQuery, handleSelectCity } =
     useCitySelection(values?.city, setFieldValue);
 
@@ -367,17 +371,14 @@ const CustomerFields = ({ touched, errors }: { touched: any; errors: any }) => {
               value={searchQuery}
               onChange={e => handleChange(e, field)}
               placeholder=" "
-              className={`text-primaryTextColor peer w-full p-4 pt-6 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
-        ${errors?.city && touched?.city ? 'border-rose-500' : 'border-neutral-300'}
-        ${errors?.city && touched?.city ? 'focus:border-rose-500' : 'focus:border-green-500'}
-        `}
+              className={`peer w-full p-4 pt-6 border-2 rounded-md outline-none
+                ${errors?.city && touched?.city ? 'border-rose-500' : 'border-neutral-300'}
+                ${errors?.city && touched?.city ? 'focus:border-rose-500' : 'focus:border-green-500'}
+              `}
             />
           )}
         </Field>
-        <label
-          className="text-primaryTextColor absolute text-md duration-150 left-3 top-5 z-10 origin-[0] transform -translate-y-3
-        peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
-        >
+        <label className="absolute left-3 top-5 z-10 text-md transform -translate-y-3">
           Введіть назву міста
         </label>
         {touched?.city && errors?.city && (
@@ -400,14 +401,16 @@ const CustomerFields = ({ touched, errors }: { touched: any; errors: any }) => {
           </div>
         )}
       </div>
+
       <div className="relative w-full mb-4">
         <Field
           name="warehouse"
           as="select"
           disabled={isWarehousesLoading}
-          className={`text-primaryTextColor peer w-full p-4 pt-6 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
-        ${errors?.warehouse && touched?.warehouse ? 'border-rose-500' : 'border-neutral-300'}
-        ${errors?.warehouse && touched?.warehouse ? 'focus:border-rose-500' : 'focus:border-green-500'}`}
+          className={`w-full p-4 pt-6 border-2 rounded-md outline-none
+            ${errors?.warehouse && touched?.warehouse ? 'border-rose-500' : 'border-neutral-300'}
+            ${errors?.warehouse && touched?.warehouse ? 'focus:border-rose-500' : 'focus:border-green-500'}
+          `}
         >
           {warehouses.map((wh, i) => (
             <option key={i} value={wh.Description}>
@@ -415,11 +418,7 @@ const CustomerFields = ({ touched, errors }: { touched: any; errors: any }) => {
             </option>
           ))}
         </Field>
-        <label
-          htmlFor="warehouse"
-          className="text-primaryTextColor absolute text-md duration-150 left-3 top-3 z-9 origin-[0] transform -translate-y-3
-            peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
-        >
+        <label className="absolute left-3 top-3 text-md z-9">
           Оберіть відділення
         </label>
         {touched?.warehouse && errors?.warehouse && (
@@ -428,26 +427,8 @@ const CustomerFields = ({ touched, errors }: { touched: any; errors: any }) => {
           </div>
         )}
       </div>
-      {Object.keys(errors).length > 0 && (
-        <pre className="text-red-500">{JSON.stringify(errors, null, 2)}</pre>
-      )}
     </>
   );
 };
 
 export default OrderPage;
-
-function sanitizeObject(obj: any) {
-  const result: any = {};
-  for (const key in obj) {
-    const value = obj[key];
-    if (
-      typeof value !== 'object' ||
-      value === null ||
-      (Array.isArray(value) && value.every(v => typeof v !== 'object'))
-    ) {
-      result[key] = value;
-    }
-  }
-  return result;
-}

@@ -13,7 +13,7 @@ const useCategoriesEnum = () => {
   );
 
   const allowedCategories =
-    data?.categories?.map((cat: ICategory) => cat.title) ?? [];
+    data?.categories?.map((cat: ICategory) => cat.name) ?? [];
 
   return {
     categories: data?.categories ?? [],

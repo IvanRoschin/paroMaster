@@ -1,212 +1,315 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
+import { FaPen, FaPlus, FaTrash } from 'react-icons/fa';
+
+import { deleteGood, getAllGoods, IGetAllGoods } from '@/actions/goods';
+import DeleteConfirmation from '@/components/common/DeleteConfirmation';
+import { Button, Modal } from '@/components/ui';
+import useDeleteData from '@/hooks/useDeleteData';
+import useDeleteModal from '@/hooks/useDeleteModal';
+import useFetchData from '@/hooks/useFetchData';
+
 import {
-  FaPen,
-  FaSortAlphaDown,
-  FaSortAlphaUp,
-  FaSortAmountDown,
-  FaSortAmountUp,
-  FaTrash,
-} from 'react-icons/fa';
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui';
 
-import { deleteGood, getAllGoods } from '@/actions/goods';
-import {
-  Breadcrumbs,
-  Button,
-  EmptyState,
-  ErrorMessage,
-  Loader,
-  Pagination,
-} from '@/components/index';
-import { useDeleteData, useFetchData } from '@/hooks/index';
+interface Option {
+  value: string;
+  label: string;
+}
 
-// interface Props {
-//   goods: IGood[]
-//   searchParams: ISearchParams
-// }
+interface GoodsProps {
+  searchParams?: any;
+  categories: Option[];
+  brands: Option[];
+}
 
-type SortKey = 'category' | 'brand' | 'price' | 'availability' | 'condition';
+export default function Goods({
+  searchParams,
+  categories,
+  brands,
+}: GoodsProps) {
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedBrand, setSelectedBrand] = useState('all');
+  const [selectedAvailability, setSelectedAvailability] = useState('all');
+  const [selectedCondition, setSelectedCondition] = useState('all'); // ✅ новый фильтр
+  const [sortPrice, setSortPrice] = useState<'asc' | 'desc' | 'none'>('none');
+  const [search, setSearch] = useState('');
+  const [goodToDelete, setGoodToDelete] = useState<string>('');
 
-const getPageNumbers = (
-  page: number,
-  totalPages: number,
-  offset = 3
-): number[] => {
-  const pages = [];
-  for (let i = page - offset; i <= page + offset; i++) {
-    if (i >= 1 && i <= totalPages) pages.push(i);
-  }
-  return pages;
-};
-
-export default function Goods() {
-  const searchParams = useSearchParams();
-
-  const page = parseInt(searchParams.get('page') || '1');
-  const limit = parseInt(searchParams.get('limit') || '10');
-
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [sortBy, setSortBy] = useState<SortKey>('category');
-
-  const { data, isLoading, isError, error } = useFetchData(
+  const { data, isLoading, isError } = useFetchData<IGetAllGoods>(
     getAllGoods,
     ['goods'],
-    {
-      page,
-      limit,
-      sortOrder,
-      sortBy,
-    }
+    searchParams
   );
-  const { mutate: deleteGoodById } = useDeleteData(deleteGood, ['goods']);
+
+  const { mutate: mutateDeleteGood } = useDeleteData(deleteGood, ['goods']);
+
+  const deleteModal = useDeleteModal();
 
   const handleDelete = (id: string) => {
-    deleteGoodById(id);
+    setGoodToDelete(id);
+    deleteModal.onOpen();
   };
 
-  const goodsCount = data?.count || 0;
-  const totalPages = Math.ceil(goodsCount / limit);
-  const pageNumbers = getPageNumbers(page, totalPages);
-
-  const sortedGoods = useMemo(() => {
-    return [...(data?.goods || [])].sort((a, b) => {
-      let comparison = 0;
-      switch (sortBy) {
-        case 'category':
-          comparison = a.category.localeCompare(b.category);
-          break;
-        case 'brand':
-          comparison = a.brand.localeCompare(b.brand);
-          break;
-        case 'price':
-          comparison = a.price - b.price;
-          break;
-        case 'availability':
-          comparison =
-            a.isAvailable === b.isAvailable ? 0 : a.isAvailable ? -1 : 1;
-          break;
-        case 'condition':
-          comparison =
-            a.isCondition === b.isCondition ? 0 : a.isCondition ? -1 : 1;
-          break;
-      }
-      return sortOrder === 'asc' ? comparison : -comparison;
-    });
-  }, [data?.goods, sortBy, sortOrder]);
-
-  if (isLoading) return <Loader />;
-  if (isError) return <ErrorMessage error={error} />;
-  if (!data?.goods || data.goods.length === 0) return <EmptyState showReset />;
-
-  const handleSort = (sortKey: SortKey) => {
-    setSortBy(sortKey);
-    setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'));
-  };
-
-  const getSortIcon = (key: SortKey) => {
-    if (key === sortBy) {
-      if (['price', 'availability'].includes(key)) {
-        return sortOrder === 'asc' ? FaSortAmountUp : FaSortAmountDown;
-      } else {
-        return sortOrder === 'asc' ? FaSortAlphaUp : FaSortAlphaDown;
-      }
+  const handleDeleteGood = (id: string) => {
+    try {
+      mutateDeleteGood(id);
+    } catch (error) {
+      console.error('Error deleting testimonial:', error);
     }
-    return undefined;
   };
+  const goods = data?.goods || [];
+
+  const normalizedGoods = goods.map(g => ({
+    ...g,
+    category: typeof g.category === 'string' ? null : (g.category ?? null),
+    brand: typeof g.brand === 'string' ? null : (g.brand ?? null),
+  }));
+
+  const filteredGoods = useMemo(() => {
+    let result = [...normalizedGoods];
+
+    result = result.filter(g => {
+      const matchCategory =
+        selectedCategory === 'all' || g.category?._id === selectedCategory;
+      const matchBrand =
+        selectedBrand === 'all' || g.brand?._id === selectedBrand;
+      const matchAvailability =
+        selectedAvailability === 'all' ||
+        (selectedAvailability === 'available' && g.isAvailable) ||
+        (selectedAvailability === 'unavailable' && !g.isAvailable);
+      const matchCondition =
+        selectedCondition === 'all' ||
+        (selectedCondition === 'new' && g.isNew === g.isNew) ||
+        (selectedCondition === 'used' && g.isNew === !g.isNew);
+      const matchSearch =
+        !search || g.sku?.toLowerCase().includes(search.toLowerCase());
+
+      return (
+        matchCategory &&
+        matchBrand &&
+        matchAvailability &&
+        matchCondition &&
+        matchSearch
+      );
+    });
+
+    if (sortPrice !== 'none') {
+      result.sort((a, b) =>
+        sortPrice === 'asc' ? a.price - b.price : b.price - a.price
+      );
+    }
+
+    return result;
+  }, [
+    normalizedGoods,
+    selectedCategory,
+    selectedBrand,
+    selectedAvailability,
+    selectedCondition,
+    sortPrice,
+    search,
+  ]);
+
+  if (isLoading) return <p className="text-center mt-10">Завантаження...</p>;
+  if (isError)
+    return (
+      <p className="text-center mt-10 text-red-500">Помилка завантаження</p>
+    );
 
   return (
-    <div className="p-3">
-      <Breadcrumbs />
+    <div className="p-6 space-y-6">
+      {/* Панель фильтров */}
+      <div className="flex flex-wrap items-center gap-4">
+        <Input
+          placeholder="Пошук по артикулу (sku)..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="w-64"
+        />
 
-      <div className="flex items-center justify-between mb-8">
-        <p className=" text-lg">
-          Всього в базі <span className="subtitle text-lg">{goodsCount}</span>{' '}
-          товара(-ів)
-        </p>
-        <Link href="/admin/goods/add">
-          <Button
-            type="button"
-            label="Додати"
-            small
-            outline
-            color="border-green-400"
-          />
+        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <SelectTrigger className="w-56">
+            <SelectValue placeholder="Категорія" />
+          </SelectTrigger>
+          <SelectContent className="bg-white border shadow-lg">
+            <SelectItem value="all">Всі категорії</SelectItem>
+            {categories.map(c => (
+              <SelectItem key={c.value} value={c.value}>
+                {c.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={selectedBrand} onValueChange={setSelectedBrand}>
+          <SelectTrigger className="w-56">
+            <SelectValue placeholder="Бренд" />
+          </SelectTrigger>
+          <SelectContent className="bg-white border shadow-lg">
+            <SelectItem value="all">Всі бренди</SelectItem>
+            {brands.map(b => (
+              <SelectItem key={b.value} value={b.value}>
+                {b.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={selectedAvailability}
+          onValueChange={setSelectedAvailability}
+        >
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="Наявність" />
+          </SelectTrigger>
+          <SelectContent className="bg-white border shadow-lg">
+            <SelectItem value="all">Всі</SelectItem>
+            <SelectItem value="available">Є в наявності</SelectItem>
+            <SelectItem value="unavailable">Немає</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {/* ✅ новый фильтр по состоянию товара */}
+        <Select value={selectedCondition} onValueChange={setSelectedCondition}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="Стан" />
+          </SelectTrigger>
+          <SelectContent className="bg-white border shadow-lg">
+            <SelectItem value="all">Всі</SelectItem>
+            <SelectItem value="new">Новий</SelectItem>
+            <SelectItem value="used">Б/у</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={sortPrice}
+          onValueChange={val => setSortPrice(val as 'asc' | 'desc' | 'none')}
+        >
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Сортувати за ціною" />
+          </SelectTrigger>
+          <SelectContent className="bg-white border shadow-lg">
+            <SelectItem value="none">Без сортування</SelectItem>
+            <SelectItem value="asc">Ціна ↑</SelectItem>
+            <SelectItem value="desc">Ціна ↓</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Link href="/admin/goods/add" className="ml-auto">
+          <Button icon={FaPlus}>Додати товар</Button>
         </Link>
       </div>
-
-      <table className="w-full text-xs mb-8">
-        <thead>
-          <tr className="bg-slate-300 font-semibold">
-            {(
-              [
-                { label: 'Категорія', key: 'category' },
-                { label: 'Бренд', key: 'brand' },
-                { label: 'Ціна', key: 'price' },
-                { label: 'В наявності', key: 'availability' },
-                { label: 'Стан', key: 'condition' },
-              ] as { label: string; key: SortKey }[]
-            ).map(({ label, key }) => (
-              <th key={key} className="p-2 border-r-2 text-center">
-                <Button
-                  type="button"
-                  label={label}
-                  icon={getSortIcon(key)}
-                  onClick={() => handleSort(key)}
-                />
-              </th>
-            ))}
-            <th className="p-2 border-r-2 text-center">Модель</th>
-            <th className="p-2 border-r-2 text-center">Артикул</th>
-            <th className="p-2 border-r-2 text-center">Редагувати</th>
-            <th className="p-2 border-r-2 text-center">Видалити</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sortedGoods.map(good => (
-            <tr key={good._id} className="border-b-2">
-              <td className="p-2 border-r-2 text-start">{good.category}</td>
-              <td className="p-2 border-r-2 text-start">{good.brand}</td>
-              <td className="p-2 border-r-2 text-center">{good.price} грн</td>
-              <td className="p-2 border-r-2 text-center">
-                {good.isAvailable ? 'Так' : 'Ні'}
-              </td>
-              <td className="p-2 border-r-2 text-center">
-                {good.isCondition ? 'Б/У' : 'Нова'}
-              </td>
-              <td className="p-2 border-r-2 text-center">{good.model}</td>
-              <td className="p-2 border-r-2 text-center">{good.vendor}</td>
-              <td className="p-2 border-r-2 text-center">
-                <Link href={`/admin/goods/${good._id}`}>
-                  <Button
-                    type="button"
-                    icon={FaPen}
-                    small
-                    outline
-                    color="border-yellow-400"
+      {/* список товаров */}
+      {filteredGoods.length === 0 ? (
+        <p className="text-center text-gray-500 mt-6">Товари не знайдені</p>
+      ) : (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filteredGoods.map(good => (
+            <div
+              key={good._id}
+              className="bg-white rounded-2xl shadow-md hover:shadow-xl transition flex flex-col overflow-hidden border"
+            >
+              {/* изображение */}
+              {good.src?.length > 0 && (
+                <div className="relative h-48 bg-gray-50 flex items-center justify-center">
+                  <Image
+                    src={good.src[0]}
+                    alt={good.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw,
+             (max-width: 1200px) 50vw,
+             25vw"
+                    className="object-contain p-2"
                   />
-                </Link>
-              </td>
-              <td className="p-2 text-center">
-                <Button
-                  type="button"
-                  icon={FaTrash}
-                  small
-                  outline
-                  color="border-red-400"
-                  onClick={() => good._id && handleDelete(good._id.toString())}
-                />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                </div>
+              )}
 
-      {totalPages > 1 && (
-        <Pagination count={goodsCount} pageNumbers={pageNumbers} />
+              <div className="p-4 flex flex-col flex-1">
+                <h2 className="font-bold text-lg text-gray-800 truncate mb-1">
+                  {good.title}
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Категорія: {good.category?.name || '-'}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Бренд: {good.brand?.name || '-'}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Артикул: {good.sku || '-'}
+                </p>
+                {/* ✅ отображение состояния */}
+                {good.isNew !== undefined && (
+                  <span
+                    className={`inline-block mt-2 text-xs font-medium px-2 py-1 rounded-full w-fit ${
+                      good.isNew
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-yellow-100 text-yellow-700'
+                    }`}
+                  >
+                    {good.isNew ? 'Новий' : 'Б/у'}
+                  </span>
+                )}
+                <div className="mt-auto">
+                  <div className="mt-4 flex justify-between items-center">
+                    <span
+                      className={`font-semibold ${
+                        good.isAvailable ? 'text-green-600' : 'text-red-600'
+                      }`}
+                    >
+                      {good.isAvailable ? 'Є в наявності' : 'Немає'}
+                    </span>
+                    <span className="font-semibold text-gray-800">
+                      {good.price} грн
+                    </span>
+                  </div>
+
+                  <div className="mt-4 flex justify-center gap-3">
+                    <Link href={`/admin/goods/${good._id}`}>
+                      <Button type="button" icon={FaPen}>
+                        Редагувати
+                      </Button>
+                    </Link>
+                    <Button
+                      type="button"
+                      icon={FaTrash}
+                      outline
+                      className="text-red-500 border-red-300 hover:bg-red-50"
+                      onClick={() => handleDelete(good._id)}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
+      {/* Модалка для підтвердження видалення */}
+      <Modal
+        body={
+          <DeleteConfirmation
+            onConfirm={() => {
+              if (goodToDelete) {
+                handleDeleteGood(goodToDelete);
+                deleteModal.onClose();
+              }
+            }}
+            onCancel={() => deleteModal.onClose()}
+            title={`товар: ${goodToDelete}`}
+          />
+        }
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.onClose}
+      />
     </div>
   );
 }

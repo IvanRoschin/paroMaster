@@ -17,7 +17,7 @@ const customNames: Record<string, string> = {
   delivery: 'Доставка',
   guarantee: 'Гарантія',
   contact: 'Контакти',
-  good: 'Товари',
+  good: 'Товар',
   admin: 'Cторінка адміна',
   orders: 'Замовлення',
   goods: 'Товари',
@@ -30,12 +30,16 @@ const customNames: Record<string, string> = {
   publicoffer: 'Публічна Оферта',
   customers: 'Замовник',
   search: 'Пошук',
+  Brands: 'Бренди',
 };
 
 const Breadcrumbs = () => {
   const pathname = usePathname();
-  const [category, setCategory] = useState<string | null>(null);
   const [dynamicTitle, setDynamicTitle] = useState<string | null>(null);
+  const [dynamicCategory, setDynamicCategory] = useState<{
+    name: string;
+    slug: string;
+  } | null>(null);
 
   const pathSegments = pathname
     .split('/')
@@ -43,28 +47,32 @@ const Breadcrumbs = () => {
     .map(seg => decodeURIComponent(seg));
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const searchParams = new URLSearchParams(window.location.search);
-      setCategory(searchParams.get('category'));
-    }
-
     const lastSegment = pathSegments[pathSegments.length - 1];
 
+    // Проверяем, что это ObjectId
     if (/^[0-9a-fA-F]{24}$/.test(lastSegment)) {
       const fetchGood = async () => {
         try {
           const good = await getGoodById(lastSegment);
 
-          if (good?.title && good?.brand && good?.model) {
-            setDynamicTitle(` ${good.title} ${good.brand} ${good.model}`);
-          } else if (good?.title) {
-            setDynamicTitle(good.title);
+          const brandName = good?.brand?.name || '';
+          const modelName = good?.model || '';
+          const categoryName = good?.category?.name || '';
+          const categorySlug = good?.category?.slug || '';
+
+          setDynamicTitle(
+            [brandName, modelName].filter(Boolean).join(' ') || 'Товар'
+          );
+
+          if (categoryName && categorySlug) {
+            setDynamicCategory({ name: categoryName, slug: categorySlug });
           } else {
-            setDynamicTitle('Товар');
+            setDynamicCategory(null);
           }
         } catch (error) {
           console.error('Error fetching good data:', error);
           setDynamicTitle('Товар');
+          setDynamicCategory(null);
         }
       };
 
@@ -85,35 +93,29 @@ const Breadcrumbs = () => {
     return { name, href };
   });
 
-  if (category && !pathSegments.includes(category)) {
-    const insertIndex = dynamicTitle
-      ? segmentCrumbs.length - 1
-      : segmentCrumbs.length;
-
-    segmentCrumbs.splice(insertIndex, 0, {
-      name: capitalize(category),
-      href: `/catalog?category=${category}`,
+  // Добавляем категорию товара (между "Каталог" и товаром)
+  if (dynamicCategory && segmentCrumbs.length > 1) {
+    segmentCrumbs.splice(segmentCrumbs.length - 1, 0, {
+      name: dynamicCategory.name,
+      href: `/catalog?category=${dynamicCategory.slug}`,
     });
   }
-  const crumbs = [...segmentCrumbs];
-
-  // const crumbs = [{ name: "Головна", href: "/" }, ...segmentCrumbs]
 
   return (
     <nav aria-label="breadcrumbs" className="text-sm text-gray-600 mb-4">
       <ol className="flex items-center flex-wrap space-x-2">
         <li>
-          <Link href="/" className="nav text-gray-600 hover:text-gray-600  ">
+          <Link href="/" className="nav text-gray-600 hover:text-gray-600">
             Головна
           </Link>
         </li>
-        {crumbs.map((crumb, idx) => (
-          <li key={crumb.href} className="flex items-center space-x-2 ">
+        {segmentCrumbs.map((crumb, idx) => (
+          <li key={crumb.href} className="flex items-center space-x-2">
             <FaChevronRight className="mx-1 text-gray-400 text-xs" />
             <Link
               href={crumb.href}
-              className={`nav text-gray-800 font-medium hover:text-gray-800  ${
-                idx === crumbs.length - 1
+              className={`nav text-gray-800 font-medium hover:text-gray-800 ${
+                idx === segmentCrumbs.length - 1
                   ? 'text-gray-800 font-medium'
                   : 'text-blue-600'
               }`}

@@ -1,10 +1,12 @@
 import mongoose from 'mongoose';
+
 const { Schema } = mongoose;
 
 const goodSchema = new Schema(
   {
     category: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: 'Category',
       required: true,
     },
     title: {
@@ -20,14 +22,15 @@ const goodSchema = new Schema(
       required: true,
     },
     brand: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: 'Brand',
       required: true,
     },
     model: {
       type: String,
       required: true,
     },
-    vendor: {
+    sku: {
       type: String,
       required: true,
     },
@@ -35,7 +38,10 @@ const goodSchema = new Schema(
       type: Number,
       required: true,
     },
-    isCondition: {
+    discountPrice: {
+      type: Number,
+    },
+    isNew: {
       type: Boolean,
       required: true,
     },
@@ -58,7 +64,11 @@ const goodSchema = new Schema(
       type: Number,
     },
   },
-  { versionKey: false, timestamps: true }
+  {
+    versionKey: false,
+    timestamps: true,
+    suppressReservedKeysWarning: true,
+  }
 );
 
 goodSchema.index({ '$**': 'text' });

@@ -1,15 +1,13 @@
 import { getCategoryById, updateCategory } from '@/actions/categories';
 import { CategoryForm } from '@/admin/components';
-import { ISearchParams } from '@/types/searchParams';
 
-const SingleCategoryPage = async ({
-  searchParams,
-}: {
-  searchParams: Promise<ISearchParams>;
-}) => {
-  const params = await searchParams;
+export type paramsType = Promise<{ id: string }>;
 
-  const { id } = params;
+export default async function SingleCategoryPage(props: {
+  params: paramsType;
+}) {
+  const { id } = await props.params;
+
   const category = await getCategoryById(id);
   return (
     <div className="mb-20">
@@ -20,6 +18,4 @@ const SingleCategoryPage = async ({
       />
     </div>
   );
-};
-
-export default SingleCategoryPage;
+}

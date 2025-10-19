@@ -24,7 +24,12 @@ export default function Orders() {
   const page = parseInt(searchParams.get('page') || '1');
   const limit = parseInt(searchParams.get('limit') || '10');
 
-  const { mutate: deleteOrderById } = useDeleteData(deleteOrder, ['orders']);
+  const { mutate: deleteOrderById } = useDeleteData(
+    async (id: string) => {
+      await deleteOrder(id);
+    },
+    ['orders']
+  );
   const { data, isLoading, isError, error } = useFetchData(
     getAllOrders,
     ['orders'],
@@ -111,9 +116,9 @@ export default function Orders() {
 
       {/* Список замовлень */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {data.orders?.map(order => (
+        {data.orders?.map((order, i) => (
           <div
-            key={order._id}
+            key={`${order._id}-${i}`}
             className="bg-white rounded shadow-md p-4 relative"
           >
             <div className="flex justify-between items-start mb-2">
@@ -134,29 +139,35 @@ export default function Orders() {
 
             <div className="text-sm text-gray-800 mb-2 space-y-1">
               <p>
-                <strong>Ім’я:</strong> {order.customer.name}
+                <strong>Ім’я:</strong> {order.customerSnapshot.name}
               </p>
               <p>
-                <strong>Телефон:</strong> {order.customer.phone}
+                <strong>Телефон:</strong> {order.customerSnapshot.phone}
               </p>
               <p>
-                <strong>Місто:</strong> {order.customer.city}
+                <strong>Місто:</strong> {order.customerSnapshot.city}
               </p>
               <p>
-                <strong>Склад:</strong> {order.customer.warehouse}
+                <strong>Склад:</strong> {order.customerSnapshot.warehouse}
               </p>
               <p>
-                <strong>Оплата:</strong> {order.customer.payment}
+                <strong>Оплата:</strong> {order.customerSnapshot.payment}
               </p>
             </div>
 
             <ul className="text-xs text-gray-600 list-disc pl-5 mb-2">
-              {order.orderedGoods.map(good => (
-                <li key={good._id}>
-                  {good.title} ({good.brand}) — {good.quantity} × {good.price}{' '}
-                  грн
-                </li>
-              ))}
+              {order.orderedGoods.map((item, i) => {
+                const title =
+                  typeof item.good === 'string' ? item.good : item.good.title;
+
+                return (
+                  <li
+                    key={`${typeof item.good === 'string' ? item.good : item.good._id}-${i}`}
+                  >
+                    {title} — {item.quantity}×{item.price} грн
+                  </li>
+                );
+              })}
             </ul>
 
             <div className="flex justify-between items-center">

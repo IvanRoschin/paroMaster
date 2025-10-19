@@ -14,6 +14,8 @@ interface ButtonProps {
   type?: 'submit' | 'reset' | 'button';
   bg?: string;
   children?: React.ReactNode;
+  className?: string;
+  variant?: 'solid' | 'outline' | 'ghost'; // ✅ добавили
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -22,45 +24,40 @@ const Button: React.FC<ButtonProps> = ({
   disabled,
   outline,
   small,
+  icon: Icon,
   color,
   width,
-  type,
-  icon: Icon,
-  children,
+  type = 'button',
   bg,
+  children,
+  className,
+  variant = 'solid', // ✅ дефолт
 }) => {
+  // Если variant передан, игнорируем старый outline
+  const isOutline = variant === 'outline' || outline;
+
+  const baseClasses = `flex items-center justify-center rounded-lg transition disabled:opacity-70 disabled:cursor-not-allowed ${
+    small ? 'text-sm py-1 px-2 border' : 'text-md py-2 px-4 border-2'
+  }`;
+
+  const widthClass = width ? `w-[${width}px]` : 'w-full';
+  const bgClass = isOutline ? 'bg-white' : bg ? bg : 'bg-orange-600 text-white';
+  const borderClass = isOutline
+    ? color || 'border-orange-600'
+    : color
+      ? color
+      : 'border-orange-600';
+  const textClass = isOutline ? color || 'text-orange-600' : 'text-white';
+
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={` 
-				flex items-center justify-center
-				disabled:opacity-70 disabled:cursor-not-allowed rounded-lg hover:opacity-80 transition
-				${width ? `w-[${width}px]` : `w-full`}
-			${small && color ? `${color}` : 'bg-orange-600'} 
-			${outline ? 'bg-white' : 'bg-orange-600'} 
-      ${outline ? 'border-orange-600' : 'border-orange-600'} 
-      ${outline ? 'border-orange-600' : 'text-white'} 
-      ${small ? 'py-[2px]' : 'py-2'} 
-			${small ? 'px-1' : 'px-2'}
-      ${small ? 'text-md' : 'text-md'} 
-      ${small ? 'border-[1px]' : 'border-2'}
-      ${small && width ? `w-[${width}px]` : 'w-full'}
-      ${small && bg ? 'border-none' : 'border-[1px]'}
-      `}
+      className={`${baseClasses} ${widthClass} ${bgClass} ${borderClass} ${textClass} ${className || ''} hover:opacity-80`}
     >
-      <span
-        className={`cursor-pointer rounded-full flex justify-center items-center hover:opacity-80
-          ${bg ? 'bg-orange-600' : 'bg-none'} 
-          ${bg ? 'w-[30px] h-[30px]' : 'w-full h-full'} 
-          `}
-      >
-        {Icon && (
-          <Icon size={12} className={`${bg ? 'text-white' : 'text-black'}`} />
-        )}
-        {label || children}
-      </span>
+      {Icon && <Icon size={small ? 14 : 18} className="mr-2" />}
+      {label || children}
     </button>
   );
 };
