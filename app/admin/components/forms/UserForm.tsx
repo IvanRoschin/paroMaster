@@ -79,10 +79,10 @@ const UserForm: React.FC<UserFormProps> = ({ user, title, action }) => {
 
   const initialValues: InitialStateType = {
     name: user?.name || '',
+    surname: user?.name || '',
     phone: user?.phone || '',
     email: user?.email || '',
     password: '',
-    createdAt: user?.createdAt || '',
     isAdmin: user?.isAdmin || false,
     isActive: user?.isActive || false,
   };

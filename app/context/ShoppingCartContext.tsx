@@ -98,6 +98,10 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
   const increaseCartQuantity = useCallback((id: string) => {
     getGoodById(id)
       .then(newGood => {
+        if (!newGood) {
+          toast.error('Товар не знайдено');
+          return;
+        }
         setCart(currItems => {
           const existing = currItems.find(item => item.good._id === id);
           if (!existing) {

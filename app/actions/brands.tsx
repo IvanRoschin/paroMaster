@@ -28,7 +28,7 @@ export async function addBrand(formData: FormData) {
     const name = values.name;
     const existingBrand = await Brand.findOne({ name });
     if (existingBrand) {
-      throw new Error('Category already exists');
+      throw new Error(`Бренд з таким ім'ям вже існує`);
     }
     await Brand.create(values);
     return {

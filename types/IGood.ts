@@ -10,6 +10,7 @@ export interface IGoodBase {
   title: string;
   description: string;
   price: number;
+  discountPrice: number;
   isNew: boolean;
   isAvailable: boolean;
   isCompatible: boolean;

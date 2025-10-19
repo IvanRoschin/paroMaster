@@ -1,7 +1,9 @@
-import { PaymentMethod } from '@/types/paymentMethod'; // Assuming you have this enum in your types
 import * as Yup from 'yup';
 
+import { PaymentMethod } from '@/types/paymentMethod';
+
 const nameRegex = /^[а-яА-ЯіІїЇєЄґҐ']+$/;
+
 const emailRegex =
   /^(?=.{1,63}$)(?=.{2,}@)[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const phoneRegex = /^\+380\d{9}$/;

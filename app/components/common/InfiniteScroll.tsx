@@ -9,10 +9,19 @@ import { ProductList } from '@/components/ui';
 import { IGoodUI } from '@/types/IGood';
 import { ISearchParams } from '@/types/searchParams';
 
+interface Option {
+  value: string;
+  label: string;
+}
+
 const InfiniteScroll = ({
   initialGoods,
   searchParams,
+  categories,
+  brands,
 }: {
+  categories?: Option[];
+  brands?: Option[];
   initialGoods: IGoodUI[];
   searchParams: ISearchParams;
 }) => {
@@ -58,7 +67,7 @@ const InfiniteScroll = ({
   return (
     <>
       <section>
-        <ProductList goods={goods} />
+        <ProductList goods={goods} categories={categories} brands={brands} />
       </section>
       <section className="flex flex-col items-center justify-center py-10 gap-4">
         {allGoodsLoaded ? (

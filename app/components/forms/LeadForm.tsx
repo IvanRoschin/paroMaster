@@ -7,16 +7,16 @@ import { sendEmailToLid } from '@/actions/sendNodeMailer';
 import FormField from '@/components/common/FormField';
 import CustomButton from '@/components/ui/CustomFormikButton';
 import { contactFormSchema } from '@/helpers/index';
-import { ILid } from '@/types/ILid';
+import { ILead } from '@/types/ILead';
 
-interface InitialStateType extends Omit<ILid, '_id'> {}
+interface InitialStateType extends Omit<ILead, '_id'> {}
 
 interface ResetFormProps {
   resetForm: (nextState?: Partial<FormikState<InitialStateType>>) => void;
 }
 
 interface NewLidFormProps {
-  lid?: Partial<ILid>;
+  lid?: Partial<ILead>;
   action: (data: FormData) => Promise<{
     success: boolean;
     data: {
@@ -30,7 +30,7 @@ interface NewLidFormProps {
   icon?: React.ReactNode;
 }
 
-const LidForm: React.FC<NewLidFormProps> = ({
+const LeadForm: React.FC<NewLidFormProps> = ({
   lid,
   title,
   action,
@@ -123,4 +123,4 @@ const LidForm: React.FC<NewLidFormProps> = ({
   );
 };
 
-export default LidForm;
+export default LeadForm;

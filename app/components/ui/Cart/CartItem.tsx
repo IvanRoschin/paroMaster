@@ -6,11 +6,10 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
 import { Button, Icon } from '@/components/index';
-import { getReadableGoodTitle } from '@/helpers/index';
-import { IGood } from '@/types/index';
+import { IGoodUI } from '@/types/index';
 
 type CartItemProps = {
-  good: IGood;
+  good: IGoodUI;
   quantity: number;
 };
 
@@ -28,7 +27,6 @@ const CartItem: React.FC<CartItemProps> = ({ good, quantity }) => {
   }, [good, quantity]);
 
   const { _id, price, src } = good;
-  const title = getReadableGoodTitle(good);
 
   return (
     <div className="relative flex items-center gap-6 rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all duration-300 p-4">
@@ -42,7 +40,7 @@ const CartItem: React.FC<CartItemProps> = ({ good, quantity }) => {
         <div className="relative w-[120px] h-[120px] flex-shrink-0 rounded-lg overflow-hidden bg-gray-50">
           <Image
             src={src[0]}
-            alt={title}
+            alt={good.title}
             fill
             className="object-contain p-2"
             priority
@@ -54,7 +52,7 @@ const CartItem: React.FC<CartItemProps> = ({ good, quantity }) => {
           {/* Title + remove */}
           <div className="flex items-start justify-between mb-3">
             <h3 className="text-base font-semibold text-gray-800 line-clamp-2 pr-6">
-              {title}
+              {good.title}
             </h3>
             <button
               onClick={() => {

@@ -38,6 +38,9 @@ const goodSchema = new Schema(
       type: Number,
       required: true,
     },
+    discountPrice: {
+      type: Number,
+    },
     isNew: {
       type: Boolean,
       required: true,

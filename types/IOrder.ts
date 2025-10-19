@@ -1,25 +1,19 @@
-import { IGood } from '@/types/IGood';
+import { ICustomer, ICustomerSnapshot } from './ICustomer';
+import { IGoodBase } from './IGood';
+import { OrderStatus } from './orderStatus';
 
 export interface IOrder {
   _id?: string;
   number: string;
-  customer: {
-    name: string;
-    surname: string;
-    email: string;
-    phone: string;
-    city: string;
-    warehouse: string;
-    payment: string;
-  };
-  orderedGoods: IGood[];
+  customer?: string | ICustomer;
+  customerSnapshot: ICustomerSnapshot;
+  orderedGoods: Array<{
+    good: string | IGoodBase;
+    quantity: number;
+    price: number;
+  }>;
   totalPrice: number;
-  status:
-    | 'Новий'
-    | 'Опрацьовується'
-    | 'Оплачений'
-    | 'На відправку'
-    | 'Закритий';
-  createdAt?: string;
-  updatedAt?: string;
+  status: OrderStatus;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

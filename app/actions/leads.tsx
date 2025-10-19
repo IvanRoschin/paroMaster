@@ -2,32 +2,25 @@
 
 import { revalidatePath } from 'next/cache';
 
-import Lid from '@/models/Lid';
+import Lead from '@/models/Lead';
 import { connectToDB } from '@/utils/dbConnect';
 
-export async function addNewLid(formData: FormData) {
+export async function addNewLead(formData: FormData) {
   try {
     await connectToDB();
-    // Check if email already exists
     const email = formData.get('email') as string;
-
-    // const existingLid = await Lid.findOne({ email })
-    // if (existingLid) {
-    // 	throw new Error('Email already exists')
-    // }
-
     const name = formData.get('name') as string;
     const phone = formData.get('phone') as string;
 
-    const newLid = new Lid({
+    const newLead = new Lead({
       name,
       phone,
       email,
     });
-    await newLid.save();
+    await newLead.save();
     return {
       success: true,
-      data: JSON.parse(JSON.stringify(newLid)),
+      data: JSON.parse(JSON.stringify(newLead)),
     };
   } catch (error) {
     if (error instanceof Error) {

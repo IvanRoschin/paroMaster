@@ -3,10 +3,15 @@
 import mongoose from 'mongoose';
 import { revalidatePath } from 'next/cache';
 
-import { buildFilter, buildPagination, buildSort } from '@/helpers/server';
+import { buildFilter } from '@/helpers/server';
 import Good from '@/models/Good';
 import Testimonial from '@/models/Testimonial';
-import { IGoodDB, IGoodUI, ISearchParams } from '@/types/index';
+import {
+  IGoodDB,
+  IGoodUI,
+  IMinMaxPriceResponse,
+  ISearchParams,
+} from '@/types/index';
 import { connectToDB } from '@/utils/dbConnect';
 
 export interface IGetAllGoods {
@@ -17,22 +22,19 @@ export interface IGetAllGoods {
 
 export type IGoodCreate = Omit<IGoodDB, '_id' | 'compatibleGoods'>;
 
-// ======================= HELPERS =======================
-
-/**
- * Сериализация товара из БД в UI формат
- */
+// ======================= Сериализация =======================
 function serializeGood(g: any): IGoodUI {
   return {
     _id: g._id.toString(),
     title: g.title,
     description: g.description,
     price: g.price,
+    discountPrice: g.discountPrice ?? 0, // + discountPrice
     src: Array.isArray(g.src) ? g.src : g.src ? [g.src] : [],
     category: g.category
       ? {
           _id: g.category._id.toString(),
-          title: g.category.title,
+          name: g.category.name,
           slug: g.category.slug || '',
           src: g.category.src || '',
         }
@@ -42,10 +44,6 @@ function serializeGood(g: any): IGoodUI {
           _id: g.brand._id.toString(),
           name: g.brand.name,
           slug: g.brand.slug || '',
-          createdAt:
-            g.brand.createdAt?.toISOString() || new Date().toISOString(),
-          updatedAt:
-            g.brand.updatedAt?.toISOString() || new Date().toISOString(),
           src: g.brand.src || undefined,
           country: g.brand.country || undefined,
           website: g.brand.website || undefined,
@@ -69,10 +67,11 @@ function serializeGood(g: any): IGoodUI {
 export async function getAllGoods(
   searchParams: ISearchParams
 ): Promise<IGetAllGoods> {
-  const filter = buildFilter(searchParams);
-  const sortOption = buildSort(searchParams);
+  const filter = await buildFilter(searchParams);
+
   const currentPage = Number(searchParams.page) || 1;
-  const { skip, limit } = buildPagination(searchParams, currentPage);
+  const limit = Number(searchParams.limit) || 20;
+  const skip = (currentPage - 1) * limit;
 
   try {
     await connectToDB();
@@ -80,9 +79,9 @@ export async function getAllGoods(
     const count = await Good.countDocuments(filter);
 
     const goods = await Good.find(filter)
-      .populate('category', 'title src')
-      .populate('brand', 'name slug src country website createdAt updatedAt')
-      .sort(sortOption)
+      .populate('category', 'name slug src')
+      .populate('brand', 'name slug src country website')
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .exec();
@@ -148,6 +147,7 @@ export async function addGood(formData: FormData) {
   });
 
   values.price = Number(values.price);
+  values.discountPrice = Number(values.discountPrice ?? 0); // + discountPrice
 
   if (isNaN(values.price)) {
     return { success: false, message: 'Ціна повинна бути числом' };
@@ -188,6 +188,7 @@ export async function addGood(formData: FormData) {
       model: values.model,
       sku: values.sku,
       price: values.price,
+      discountPrice: values.discountPrice, // + discountPrice
       description: values.description,
       src: Array.isArray(values.src) ? values.src : [values.src],
       isNew:
@@ -204,7 +205,6 @@ export async function addGood(formData: FormData) {
           : false,
       compatibility: values.compatibility || [],
     };
-    console.log('newgood', newGood);
     await Good.create(newGood);
 
     return { success: true, message: 'Товар додано успішно' };
@@ -250,6 +250,7 @@ export async function updateGood(formData: FormData) {
     title,
     description,
     price,
+    discountPrice, // + discountPrice
     isNew,
     isAvailable,
     isCompatible,
@@ -268,6 +269,8 @@ export async function updateGood(formData: FormData) {
       title,
       description,
       price: price !== undefined ? Number(price) : undefined,
+      discountPrice:
+        discountPrice !== undefined ? Number(discountPrice) : undefined, // + discountPrice
       isNew: isNew === 'true',
       isAvailable: isAvailable === 'true',
       isCompatible: isCompatible === 'true',
@@ -289,12 +292,12 @@ export async function updateGood(formData: FormData) {
 
     await Good.findByIdAndUpdate(id, updateFields);
 
-    return { success: true, message: 'Good updated successfully' };
+    return { success: true, message: 'Товар оновлено успішно' };
   } catch (error) {
-    console.error('Error updating good:', error);
+    console.error('Помилка оновлення Товару:', error);
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'Unknown error',
+      message: error instanceof Error ? error.message : 'Невідома помилка',
     };
   }
 }
@@ -321,25 +324,35 @@ export async function getMostPopularGoods() {
   }
 }
 
-export async function getMinMaxPrice(): Promise<{
-  success: boolean;
-  minPrice: number | null;
-  maxPrice: number | null;
-  message?: string;
-}> {
+export async function getMinMaxPrice(): Promise<IMinMaxPriceResponse> {
   try {
     await connectToDB();
     const result = await Good.aggregate([
-      { $project: { price: { $toDouble: '$price' } } },
+      {
+        $project: {
+          price: { $toDouble: '$price' },
+          discountPrice: { $toDouble: '$discountPrice' },
+        },
+      }, // + discountPrice
       { $match: { price: { $ne: null } } },
       {
         $group: {
           _id: null,
           minPrice: { $min: '$price' },
           maxPrice: { $max: '$price' },
+          minDiscountPrice: { $min: '$discountPrice' }, // + discountPrice
+          maxDiscountPrice: { $max: '$discountPrice' }, // + discountPrice
         },
       },
-      { $project: { _id: 0, minPrice: 1, maxPrice: 1 } },
+      {
+        $project: {
+          _id: 0,
+          minPrice: 1,
+          maxPrice: 1,
+          minDiscountPrice: 1,
+          maxDiscountPrice: 1,
+        },
+      }, // + discountPrice
     ]).exec();
 
     if (!result.length)
@@ -347,6 +360,8 @@ export async function getMinMaxPrice(): Promise<{
         success: false,
         minPrice: null,
         maxPrice: null,
+        minDiscountPrice: null,
+        maxDiscountPrice: null,
         message: 'No valid goods found',
       };
 
@@ -354,6 +369,8 @@ export async function getMinMaxPrice(): Promise<{
       success: true,
       minPrice: result[0].minPrice,
       maxPrice: result[0].maxPrice,
+      minDiscountPrice: result[0].minDiscountPrice, // + discountPrice
+      maxDiscountPrice: result[0].maxDiscountPrice, // + discountPrice
     };
   } catch (error: any) {
     console.error('Error fetching min/max price:', error);
@@ -361,6 +378,8 @@ export async function getMinMaxPrice(): Promise<{
       success: false,
       minPrice: null,
       maxPrice: null,
+      minDiscountPrice: null,
+      maxDiscountPrice: null,
       message: error.message,
     };
   }

@@ -133,7 +133,9 @@ export default function Users({
                 <td className="p-2 border-r-2 text-center">{user.email}</td>
                 <td className="p-2 border-r-2 text-center">{user.phone}</td>
                 <td className="p-2 border-r-2 text-center">
-                  {new Date(user.createdAt).toLocaleDateString('uk-UA')}
+                  {user.createdAt
+                    ? new Date(user.createdAt).toLocaleDateString('uk-UA')
+                    : '-'}
                 </td>
                 <td className="p-2 border-r-2 text-center">
                   {user.isAdmin ? 'admin' : 'user'}

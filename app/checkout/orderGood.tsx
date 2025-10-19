@@ -1,12 +1,10 @@
+import Image from 'next/image';
 import React from 'react';
 
-import Image from 'next/image';
-
-import { IGood } from '@/types/index';
-import { getReadableGoodTitle } from '../helpers';
+import { IGoodBase } from '@/types/IGood';
 
 type CartItemProps = {
-  good: IGood;
+  good: IGoodBase;
   quantity: number;
 };
 
@@ -14,7 +12,6 @@ const OrderGood: React.FC<CartItemProps> = ({ good, quantity }) => {
   if (!good) {
     return;
   }
-  const title = getReadableGoodTitle(good);
 
   const totalPrice = good.price * quantity;
 
@@ -25,13 +22,15 @@ const OrderGood: React.FC<CartItemProps> = ({ good, quantity }) => {
           {/* Product Image */}
           <Image
             src={good.src[0]}
-            alt={title}
+            alt={good.title}
             width={40}
             height={40}
             className="w-10 h-10 object-cover rounded-md"
           />
           {/* Product Title */}
-          <p className="text-xs font-medium text-gray-800 truncate">{title}</p>
+          <p className="text-xs font-medium text-gray-800 truncate">
+            {good.title}
+          </p>
         </div>
 
         <div className="flex flex-col items-end w-1/3">

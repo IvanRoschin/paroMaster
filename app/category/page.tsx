@@ -7,12 +7,12 @@ import {
 import { getAllGoods } from '@/actions/goods';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import InfiniteScrollGoods from '@/components/common/InfiniteScroll';
-import { IGood } from '@/types/index';
+import { IGoodUI } from '@/types/index';
 import { ISearchParams } from '@/types/searchParams';
 import { EmptyState } from '../components';
 
 interface GoodsData {
-  goods: IGood[];
+  goods: IGoodUI[];
 }
 
 export const dynamic = 'force-dynamic';

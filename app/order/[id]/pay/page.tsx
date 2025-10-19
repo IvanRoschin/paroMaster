@@ -1,6 +1,5 @@
 import { getOrderById } from '@/actions/orders';
 import { ISearchParams } from '@/types/searchParams';
-
 import { generateSignature } from '../../../lib/generateSignature';
 
 export const dynamic = 'force-dynamic'; // чтобы не кэшировалось
@@ -70,19 +69,27 @@ export default async function OrderPayPage({
         <input
           type="hidden"
           name="clientFirstName"
-          value={order.customer.name}
+          value={order.customerSnapshot.name}
         />
         <input
           type="hidden"
           name="clientLastName"
-          value={order.customer.surname}
+          value={order.customerSnapshot.surname}
         />
-        <input type="hidden" name="clientEmail" value={order.customer.email} />
-        <input type="hidden" name="clientCity" value={order.customer.city} />
+        <input
+          type="hidden"
+          name="clientEmail"
+          value={order.customerSnapshot.email}
+        />
+        <input
+          type="hidden"
+          name="clientCity"
+          value={order.customerSnapshot.city}
+        />
         <input
           type="hidden"
           name="clientAddress"
-          value={order.customer.warehouse}
+          value={order.customerSnapshot.warehouse}
         />
         <input type="hidden" name="merchantSignature" value={signature} />
 

@@ -2,8 +2,8 @@
 
 import { FaCalendarAlt, FaMapMarkerAlt } from 'react-icons/fa';
 
-import { addNewLid } from '@/actions/lids';
-import { Breadcrumbs, LidForm, Logo } from '@/components/index';
+import { addNewLead } from '@/actions/leads';
+import { Breadcrumbs, LeadForm, Logo } from '@/components/index';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 
 const containerStyle = {
@@ -67,8 +67,8 @@ const ContactPage = () => {
         </section>
         {/* Contact Form */}
         <section>
-          <LidForm
-            action={addNewLid}
+          <LeadForm
+            action={addNewLead}
             title="Замовити зворотній дзвінок"
             subtitle
           />

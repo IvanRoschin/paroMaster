@@ -4,9 +4,7 @@ import { useShoppingCart } from 'app/context/ShoppingCartContext';
 
 import { getGoodById } from '@/actions/goods';
 import { Icon, ImagesBlock, Loader } from '@/components/index';
-import { getReadableGoodTitle } from '@/helpers/index';
 import { useFetchDataById } from '@/hooks/index';
-import { SGood } from '@/types/IGood';
 
 const ProductClient = ({ id }: { id: string }) => {
   const {
@@ -16,13 +14,14 @@ const ProductClient = ({ id }: { id: string }) => {
     removeFromCart,
   } = useShoppingCart();
 
-  const { data, isLoading, isError, error } = useFetchDataById(
-    getGoodById,
-    ['goodById'],
-    id
-  );
+  const {
+    data: good,
+    isLoading,
+    isError,
+    error,
+  } = useFetchDataById(getGoodById, ['goodById'], id);
 
-  if (isLoading || !data) return <Loader />;
+  if (isLoading || !good) return <Loader />;
   if (isError) {
     return (
       <div>
@@ -32,26 +31,22 @@ const ProductClient = ({ id }: { id: string }) => {
     );
   }
 
-  const item: SGood = JSON.parse(data);
-
-  const quantity = getItemQuantity(item._id);
+  const quantity = getItemQuantity(good._id);
 
   return (
-    item && (
+    good && (
       <div className="flex">
-        <ImagesBlock item={item} />
+        <ImagesBlock item={good} />
         <div className="pt-10">
-          <h2 className="font-semibold text-2xl mb-[40px]">
-            {getReadableGoodTitle(item)}
-          </h2>
-          <p className="mb-[20px]">{item.description}</p>
-          {item.isAvailable ? (
+          <h2 className="font-semibold text-2xl mb-[40px]">{good.title} </h2>
+          <p className="mb-[20px]">{good.description}</p>
+          {good.isAvailable ? (
             <p className="text-green-600 mb-[30px]">В наявності</p>
           ) : (
             <p className="text-red-600 mb-[30px]">Немає в наявності</p>
           )}
-          <p className="mb-[20px]">Артикул: {item.sku}</p>
-          <p className="text-2xl font-bold mb-[30px]">{item.price} грн</p>
+          <p className="mb-[20px]">Артикул: {good.sku}</p>
+          <p className="text-2xl font-bold mb-[30px]">{good.price} грн</p>
           <div>
             <div>
               {quantity === 0 ? (
@@ -59,7 +54,7 @@ const ProductClient = ({ id }: { id: string }) => {
                   type="button"
                   className="p-4 w-full mb-[20px] bg-orange-600 hover:bg-orange-700 focus:bg-orange-700 text-white transition-all font-semibold text-lg
 									rounded-md"
-                  onClick={() => increaseCartQuantity(item._id)}
+                  onClick={() => increaseCartQuantity(good._id)}
                 >
                   Купити
                 </button>
@@ -68,7 +63,7 @@ const ProductClient = ({ id }: { id: string }) => {
                   <div className="flex items-center justify-center">
                     <button
                       className="w-[20px] mb-[10px] mr-[10px] bg-orange-600 hover:bg-orange-700 focus:bg-orange-700 text-white transition-all text-lg rounded-md"
-                      onClick={() => decreaseCartQuantity(item._id)}
+                      onClick={() => decreaseCartQuantity(good._id)}
                     >
                       -
                     </button>
@@ -77,7 +72,7 @@ const ProductClient = ({ id }: { id: string }) => {
                     </div>{' '}
                     <button
                       className="w-[20px] mb-[10px] ml-[10px] bg-orange-600 hover:bg-orange-700 focus:bg-orange-700 text-white transition-all text-lg rounded-md"
-                      onClick={() => increaseCartQuantity(item._id)}
+                      onClick={() => increaseCartQuantity(good._id)}
                     >
                       +
                     </button>
@@ -88,7 +83,7 @@ const ProductClient = ({ id }: { id: string }) => {
 										items-center 
 										justify-center
 										w-[50%] mb-[10px] mr-[10px] bg-red-600 hover:bg-red-700 focus:bg-red-700 text-white transition-all text-sm rounded-md py-2 px-3"
-                    onClick={() => removeFromCart(item._id)}
+                    onClick={() => removeFromCart(good._id)}
                   >
                     <Icon
                       name="icon_trash"
@@ -105,19 +100,21 @@ const ProductClient = ({ id }: { id: string }) => {
             </div>
 
             <p className="font-light text-gray-500">
-              Сумісність з брендами: {item.isCompatible ? 'так' : 'ні'}
+              Сумісність з брендами: {good.isCompatible ? 'так' : 'ні'}
             </p>
-            <p className="font-light text-gray-500">Brand: {item.brand}</p>
-            <p className="font-light text-gray-500">Model: {item.model}</p>
             <p className="font-light text-gray-500">
-              Сумісність з брендами: {item.compatibility}
+              Виробник: {good.brand?.name}
+            </p>
+            <p className="font-light text-gray-500">Model: {good.model}</p>
+            <p className="font-light text-gray-500">
+              Сумісність з брендами: {good.compatibility}
             </p>
           </div>
           <p className="font-light text-gray-500">
             Сумісність з моделями:{' '}
-            {Array.isArray(item.compatibility)
-              ? item.compatibility.join(', ')
-              : item.compatibility}
+            {Array.isArray(good.compatibility)
+              ? good.compatibility.join(', ')
+              : good.compatibility}
           </p>
         </div>
       </div>

@@ -3,9 +3,12 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { useMediaQuery } from '@/hooks/index';
-import { IBrand } from '@/types/IBrand';
 
-const BrandFilter = ({ brands }: { brands: IBrand[] }) => {
+interface Option {
+  value: string;
+  label: string;
+}
+const BrandFilter = ({ brands }: { brands: Option[] }) => {
   const isMobile = useMediaQuery('(max-width: 767px)');
 
   const searchParams = useSearchParams();
@@ -33,22 +36,22 @@ const BrandFilter = ({ brands }: { brands: IBrand[] }) => {
     <div>
       <h2 className="subtitle-main">Бренди</h2>
       <ul className={`p-4 ${isMobile ? 'grid grid-cols-3 gap-3' : ''}`}>
-        {brands.map((brand, index) => {
-          const isChecked = selectedBrands.includes(brand.name);
+        {brands.map((brand, i) => {
+          const isChecked = selectedBrands.includes(brand.label);
           return (
-            <li key={index} className="flex items-center space-x-2">
+            <li key={i} className="flex items-center space-x-2">
               <input
                 type="checkbox"
                 checked={isChecked}
-                onChange={() => handleBrandCheckboxClick(brand.name)}
+                onChange={() => handleBrandCheckboxClick(brand.label)}
                 className="custom-checkbox"
-                id={`checkbox-${index}`}
+                id={`checkbox-${i}`}
               />
               <label
-                htmlFor={`checkbox-${index}`}
+                htmlFor={`checkbox-${i}`}
                 className="text-primaryTextColor cursor-pointer"
               >
-                {brand.name}
+                {brand.label}
               </label>
             </li>
           );

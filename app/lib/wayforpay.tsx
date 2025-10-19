@@ -23,7 +23,7 @@ function createStringForSignature(arr: (string | number)[]): string {
 }
 
 function prepareFields(order: IOrder) {
-  const { orderedGoods, customer, totalPrice, number } = order;
+  const { orderedGoods, customerSnapshot, totalPrice, number } = order;
 
   return {
     merchantAccount: account,
@@ -33,14 +33,14 @@ function prepareFields(order: IOrder) {
     orderDate: Date.now(),
     amount: totalPrice,
     currency: 'UAH',
-    productName: orderedGoods.map(good => String(good.title || '').trim()),
+    productName: orderedGoods.map(good => String(good.good || '').trim()),
     productPrice: orderedGoods.map(good => String(good.price ?? '0')),
     productCount: orderedGoods.map(good => String(good.quantity ?? '1')),
-    ...(customer && { clientFirstName: customer.name }),
-    ...(customer && { clientLastName: customer.surname }),
-    ...(customer && { clientAddress: customer.warehouse }),
-    ...(customer && { clientCity: customer.city }),
-    ...(customer && { clientEmail: customer.email }),
+    ...(customerSnapshot && { clientFirstName: customerSnapshot.name }),
+    ...(customerSnapshot && { clientLastName: customerSnapshot.surname }),
+    ...(customerSnapshot && { clientAddress: customerSnapshot.warehouse }),
+    ...(customerSnapshot && { clientCity: customerSnapshot.city }),
+    ...(customerSnapshot && { clientEmail: customerSnapshot.email }),
     defaultPaymentSystem: 'card',
     serviceUrl: `${baseUrl}/api/wayforpay-callback`,
   };

@@ -1,12 +1,9 @@
-import { dehydrate, QueryClient } from '@tanstack/react-query';
+import './globals.css';
+
 import { Metadata } from 'next';
 import { getServerSession } from 'next-auth';
 import Script from 'next/script';
 
-import { ISearchParams } from '../types';
-import { IGetAllBrands } from './actions/brands';
-import { getAllCategories, IGetAllCategories } from './actions/categories';
-import { getMinMaxPrice } from './actions/goods';
 import AdminSidebar from './admin/components/AdminSidebar';
 import { Footer, Header, Sidebar } from './components';
 import { authOptions } from './config/authOptions';
@@ -17,11 +14,12 @@ import {
   geistMono,
   geistSans,
   manrope,
-} from './ui/fonts/index';
+} from './ui/fonts';
 
-import './globals.css';
-
-const baseUrl = process.env.PUBLIC_URL || 'https://paro-master.vercel.app';
+const baseUrl =
+  typeof window !== 'undefined'
+    ? ''
+    : process.env.NEXT_PUBLIC_BASE_URL || 'https://paromaster.vercel.app';
 
 export const metadata: Metadata = {
   title: {
@@ -64,42 +62,6 @@ export default async function RootLayout({
 }) {
   const session = await getServerSession(authOptions);
 
-  const queryClient = new QueryClient();
-
-  // Prefetch данных
-  await Promise.all([
-    queryClient.prefetchQuery({
-      queryKey: ['prices'],
-      queryFn: getMinMaxPrice,
-    }),
-    queryClient.prefetchQuery({
-      queryKey: ['categories'],
-      queryFn: () => getAllCategories({} as ISearchParams),
-    }),
-    // queryClient.prefetchQuery({ queryKey: ['brands'], queryFn: uniqueBrands }),
-  ]);
-
-  const dehydratedState = dehydrate(queryClient);
-
-  const pricesData = queryClient.getQueryData<IGetPrices>(['prices']) ?? {
-    success: false,
-    minPrice: 0,
-    maxPrice: 100,
-  };
-  const categoriesData = queryClient.getQueryData<IGetAllCategories>([
-    'categories',
-  ]) ?? {
-    success: false,
-    count: 0,
-    categories: [],
-  };
-
-  const brandsData = queryClient.getQueryData<IGetAllBrands>(['brands']) ?? {
-    success: false,
-    count: 0,
-    brands: [],
-  };
-
   const user = session?.user
     ? {
         name: session.user.name ?? 'Guest',
@@ -113,8 +75,8 @@ export default async function RootLayout({
       lang="uk"
       className={`${geistSans.variable} ${geistMono.variable} ${eUkrainehead.variable} ${manrope.variable} ${eUkraine.variable} antialiased`}
     >
-      <body className={`font-manrope primaryTextColor ?? "text-gray-900"}`}>
-        <Providers dehydratedState={dehydratedState}>
+      <body className="font-manrope text-gray-900">
+        <Providers>
           <Header session={session} />
           <div className="px-8 flex items-start flex-col md:flex-row">
             {user ? (
@@ -124,19 +86,16 @@ export default async function RootLayout({
               </>
             ) : (
               <>
-                <Sidebar
-                  pricesData={pricesData}
-                  categoriesData={categoriesData}
-                  brandsData={brandsData}
-                />
+                <Sidebar />
                 <div className="w-full">{children}</div>
               </>
             )}
           </div>
           <section id="footer" className="snap-start px-4">
-            <Footer categories={categoriesData.categories} />
+            <Footer />
           </section>
         </Providers>
+
         {/* Cloudinary Upload Widget */}
         <Script
           src="https://widget.cloudinary.com/v2.0/global/all.js"

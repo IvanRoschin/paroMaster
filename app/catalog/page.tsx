@@ -1,14 +1,16 @@
+import { Metadata } from 'next';
+
+import { getAllBrands } from '@/actions/brands';
+import { getAllCategories } from '@/actions/categories';
+import { getAllGoods } from '@/actions/goods';
+import { Breadcrumbs, InfiniteScroll } from '@/components/index';
+import prefetchData from '@/hooks/usePrefetchData';
+import { IGoodUI, ISearchParams } from '@/types/index';
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
-import { Metadata } from 'next';
-
-import { getAllGoods } from '@/actions/goods';
-import { Breadcrumbs, InfiniteScroll } from '@/components/index';
-import prefetchData from '@/hooks/usePrefetchData';
-import { IGoodUI, ISearchParams } from '@/types/index';
 
 // app/catalog/page.tsx
 
@@ -64,12 +66,36 @@ export default async function CatalogPage({
   const goodsData = queryClient.getQueryData<GoodsData>(goodsKey);
   const goods = goodsData?.goods || [];
 
+  const [categoriesResponse, brandsResponse] = await Promise.all([
+    getAllCategories(params),
+    getAllBrands(params),
+  ]);
+
+  const categories = (categoriesResponse.categories ?? [])
+    .filter(c => c._id)
+    .map(c => ({
+      value: String(c._id),
+      label: c.name ?? 'Без назви',
+    }));
+
+  const brands = (brandsResponse.brands ?? [])
+    .filter(b => b._id)
+    .map(b => ({
+      value: String(b._id),
+      label: b.name ?? 'Без назви',
+    }));
+
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="max-w-6xl mx-auto py-3 container">
         <Breadcrumbs />
         <h2 className="subtitle text-center">Каталог товарів</h2>
-        <InfiniteScroll initialGoods={goods} searchParams={params} />
+        <InfiniteScroll
+          initialGoods={goods}
+          searchParams={params}
+          categories={categories}
+          brands={brands}
+        />
       </div>
     </HydrationBoundary>
   );

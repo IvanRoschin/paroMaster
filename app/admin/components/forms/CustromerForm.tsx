@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
+import * as customerActions from '@/actions/customers';
 import {
   Breadcrumbs,
   Button,
@@ -18,7 +19,7 @@ import {
   useUpdateData,
   useWarehouses,
 } from '@/hooks/index';
-import { ICustomer, IOrder } from '@/types/index';
+import { ICustomer } from '@/types/index';
 import { PaymentMethod } from '@/types/paymentMethod';
 
 interface FormikCustomerValues {
@@ -34,7 +35,9 @@ interface FormikCustomerValues {
 interface CustomerFormProps {
   customer?: ICustomer;
   title?: string;
-  action: (values: ICustomer) => Promise<{ success: boolean; message: string }>;
+  action?: (
+    values: ICustomer
+  ) => Promise<{ success: boolean; message: string }>;
 }
 
 const CustomerForm: React.FC<CustomerFormProps> = ({
@@ -43,56 +46,59 @@ const CustomerForm: React.FC<CustomerFormProps> = ({
   action,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const { push } = useRouter();
 
+  const finalAction =
+    action ||
+    (customer ? customerActions.updateCustomer : customerActions.addCustomer);
   const isUpdating = Boolean(customer?._id);
 
-  const addCustomerMutation = useAddData(action, ['customers']);
-  const updateCustomerMutation = useUpdateData(action, ['customers']);
-
-  const [name, surname] = customer?.name?.split(' ') || ['', ''];
+  const addCustomerMutation = useAddData(customerActions.addCustomer, [
+    'customers',
+  ]);
+  const updateCustomerMutation = useUpdateData(customerActions.updateCustomer, [
+    'customers',
+  ]);
 
   const initialValues: FormikCustomerValues = {
-    name,
-    surname,
+    name: customer?.name || '',
+    surname: customer?.surname || '',
     email: customer?.email || '',
     phone: customer?.phone || '',
     city: customer?.city || '',
     warehouse: customer?.warehouse || '',
-    payment: customer?.payment || PaymentMethod.CashOnDelivery,
+    payment: customer?.payment || PaymentMethod.CASH_ON_DELIVERY,
   };
 
   const handleSubmit = async (
-    customerValues: IOrder['customer'],
+    values: FormikCustomerValues,
     resetForm: () => void
   ) => {
-    if (!customerValues.city || !customerValues.warehouse) {
+    if (!values.city || !values.warehouse) {
       toast.error('Будь ласка, виберіть місто та відділення');
       return;
     }
 
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      const formData = new FormData();
-      Object.entries(customerValues).forEach(([key, value]) => {
-        formData.append(key, value);
-      });
-      if (isUpdating && customer?._id) {
-        formData.append('id', customer._id);
-      }
+      const dataToSend: ICustomer = {
+        _id: customer?._id,
+        ...values,
+        payment: values.payment as PaymentMethod,
+      };
 
-      if (isUpdating) {
-        await updateCustomerMutation.mutateAsync(formData);
-      } else {
-        await addCustomerMutation.mutateAsync(formData);
-      }
+      const result = isUpdating
+        ? await updateCustomerMutation.mutateAsync(dataToSend)
+        : await addCustomerMutation.mutateAsync(dataToSend);
+
+      if (!result.success) throw new Error(result.message || 'Помилка');
 
       resetForm();
       toast.success(
         isUpdating ? 'Замовника оновлено!' : 'Нового замовника додано!'
       );
+      push(isUpdating ? '/admin/customers' : '/admin/orders');
     } catch (error) {
-      console.error('Помилка оформлення:', error);
       toast.error(error instanceof Error ? error.message : 'Невідома помилка');
     } finally {
       setIsLoading(false);
@@ -127,6 +133,9 @@ const CustomerForm: React.FC<CustomerFormProps> = ({
   );
 };
 
+export default CustomerForm;
+
+// --- FormEffects ---
 const FormEffects = () => {
   const { values, setFieldValue } = useFormikContext<FormikCustomerValues>();
   const { warehouses } = useWarehouses(values.city);
@@ -135,7 +144,13 @@ const FormEffects = () => {
     if (warehouses.length && !values.warehouse) {
       setFieldValue('warehouse', warehouses[0].Description);
     }
-  }, [warehouses, values.warehouse, setFieldValue]);
+    if (
+      values.warehouse &&
+      !warehouses.some(w => w.Description === values.warehouse)
+    ) {
+      setFieldValue('warehouse', '');
+    }
+  }, [warehouses, values.warehouse, values.city, setFieldValue]);
 
   useEffect(() => {
     sessionStorage.setItem(storageKeys.customer, JSON.stringify(values));
@@ -144,45 +159,7 @@ const FormEffects = () => {
   return null;
 };
 
-const useCitySelection = (
-  fieldValue: string,
-  setFieldValue: (field: string, value: any) => void
-) => {
-  const [filteredCities, setFilteredCities] = useState<string[]>([]);
-  const [searchQuery, setSearchQuery] = useState(fieldValue || '');
-  const { allCities } = useCities(searchQuery);
-
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (!Array.isArray(allCities)) {
-        setFilteredCities([]);
-        return;
-      }
-
-      const normalizedQuery = searchQuery.trim().toLowerCase();
-      const filtered = allCities
-        .filter((city: any) =>
-          (city.description || '')
-            .trim()
-            .toLowerCase()
-            .includes(normalizedQuery)
-        )
-        .map((city: any) => city.description || '');
-      setFilteredCities(filtered);
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery, allCities]);
-
-  const handleSelectCity = (city: string) => {
-    setFieldValue('city', city);
-    setSearchQuery(city);
-    setFilteredCities([]);
-  };
-
-  return { filteredCities, searchQuery, setSearchQuery, handleSelectCity };
-};
-
+// --- CustomerFields ---
 const CustomerFields = ({
   city,
   touched,
@@ -193,39 +170,27 @@ const CustomerFields = ({
   errors: any;
 }) => {
   const { values, setFieldValue } = useFormikContext<FormikCustomerValues>();
-  const { warehouses, isWarehousesLoading } = useWarehouses(city);
+  const { warehouses } = useWarehouses(city);
   const [showDropdown, setShowDropdown] = useState(false);
-
   const { filteredCities, searchQuery, setSearchQuery, handleSelectCity } =
-    useCitySelection(values?.city, setFieldValue);
+    useCitySelection(values.city, setFieldValue);
 
   const customerInputs = [
-    { name: 'name', type: 'text', id: 'name', label: "Ім'я" },
-    { name: 'surname', type: 'text', id: 'surname', label: 'Прізвище' },
-    { name: 'email', type: 'email', id: 'email', label: 'Email' },
-    { name: 'phone', type: 'tel', id: 'phone', label: 'Телефон' },
+    { id: 'name', name: 'name', type: 'text', label: "Ім'я" },
+    { id: 'surname', name: 'surname', type: 'text', label: 'Прізвище' },
+    { id: 'email', name: 'email', type: 'email', label: 'Email' },
+    { id: 'phone', name: 'phone', type: 'tel', label: 'Телефон' },
     {
-      id: 'customer.payment',
+      id: 'payment',
+      name: 'payment',
+      type: 'select',
       label: 'Оберіть спосіб оплати',
       options: Object.values(PaymentMethod).map(method => ({
         value: method,
         label: method,
       })),
-      type: 'select',
     },
   ];
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-    setFieldValue(field.name, value);
-    setShowDropdown(true);
-  };
-
-  const handleCityClick = (city: string) => {
-    handleSelectCity(city);
-    setShowDropdown(false);
-  };
 
   return (
     <>
@@ -233,39 +198,36 @@ const CustomerFields = ({
         <FormField key={i} item={input} setFieldValue={setFieldValue} />
       ))}
 
+      {/* Вибір міста */}
       <div className="relative mb-4">
-        <Field name="customer.city">
+        <Field name="city">
           {({ field }: any) => (
             <input
               {...field}
               value={searchQuery}
-              onChange={e => handleChange(e, field)}
+              onChange={e => {
+                setSearchQuery(e.target.value);
+                setFieldValue('city', e.target.value);
+                setFieldValue('warehouse', '');
+                setShowDropdown(true);
+              }}
               placeholder=" "
-              className={`text-primaryTextColor peer w-full p-4 pt-6 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
-        ${errors.customer?.city && touched.customer?.city ? 'border-rose-500' : 'border-neutral-300'}
-        ${errors.customer?.city && touched.customer?.city ? 'focus:border-rose-500' : 'focus:border-green-500'}
-        `}
+              autoComplete="off"
+              className={`peer w-full p-4 pt-6 border-2 rounded-md outline-none
+                ${errors.city && touched.city ? 'border-rose-500' : 'border-neutral-300'}
+              `}
             />
           )}
         </Field>
-        <label
-          className="text-primaryTextColor absolute text-md duration-150 left-3 top-5 z-10 origin-[0] transform -translate-y-3
-        peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
-        >
+        <label className="absolute left-3 top-5 text-md peer-focus:-translate-y-3 peer-placeholder-shown:translate-y-0">
           Введіть назву міста
         </label>
-        {touched?.city && errors?.city && (
-          <div className="text-rose-500 text-sm mt-1">
-            <ErrorMessage error={errors?.city} />
-          </div>
-        )}
-
         {showDropdown && filteredCities.length > 0 && (
           <div className="absolute z-10 w-full bg-white border rounded-md max-h-60 overflow-y-auto">
             {filteredCities.map(city => (
               <div
                 key={city}
-                onClick={() => handleCityClick(city)}
+                onClick={() => handleSelectCity(city)}
                 className="p-2 hover:bg-gray-200 cursor-pointer"
               >
                 {city}
@@ -273,40 +235,75 @@ const CustomerFields = ({
             ))}
           </div>
         )}
+        {touched.city && errors.city && (
+          <div className="text-rose-500 text-sm mt-1">
+            <ErrorMessage error={errors.city} />
+          </div>
+        )}
       </div>
-      <div className="relative w-full mb-4">
+
+      {/* Вибір відділення */}
+      <div className="relative mb-4">
         <Field
-          name="customer.warehouse"
           as="select"
-          disabled={isWarehousesLoading}
-          className={`text-primaryTextColor peer w-full p-4 pt-6 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
-        ${errors.customer?.warehouse && touched.customer?.warehouse ? 'border-rose-500' : 'border-neutral-300'}
-        ${errors.customer?.warehouse && touched.customer?.warehouse ? 'focus:border-rose-500' : 'focus:border-green-500'}`}
+          name="warehouse"
+          disabled={!city}
+          value={values.warehouse || ''}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setFieldValue('warehouse', e.target.value)
+          }
+          className="peer w-full p-4 pt-6 border-2 rounded-md outline-none"
         >
+          <option value="">Оберіть відділення</option>
           {warehouses.map((wh, i) => (
             <option key={i} value={wh.Description}>
               {wh.Description}
             </option>
           ))}
         </Field>
-        <label
-          htmlFor="customer.warehouse"
-          className="text-primaryTextColor absolute text-md duration-150 left-3 top-3 z-9 origin-[0] transform -translate-y-3
-            peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
-        >
+        <label className="absolute left-3 top-3 text-md">
           Оберіть відділення
         </label>
-        {touched?.warehouse && errors?.warehouse && (
+        {touched.warehouse && errors.warehouse && (
           <div className="text-rose-500 text-sm mt-1">
-            <ErrorMessage error={errors?.warehouse} />
+            <ErrorMessage error={errors.warehouse} />
           </div>
         )}
       </div>
-      {Object.keys(errors).length > 0 && (
-        <pre className="text-red-500">{JSON.stringify(errors, null, 2)}</pre>
-      )}
     </>
   );
 };
 
-export default CustomerForm;
+// --- useCitySelection ---
+const useCitySelection = (
+  fieldValue: string,
+  setFieldValue: (field: string, value: any) => void
+) => {
+  const [filteredCities, setFilteredCities] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState(fieldValue || '');
+  const { allCities } = useCities(searchQuery);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!Array.isArray(allCities)) return setFilteredCities([]);
+      const normalized = searchQuery.trim().toLowerCase();
+      setFilteredCities(
+        allCities
+          .filter((c: any) =>
+            (c.description || '').toLowerCase().includes(normalized)
+          )
+          .map((c: any) => c.description)
+      );
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [searchQuery, allCities]);
+
+  const handleSelectCity = (city: string) => {
+    setFieldValue('city', city);
+    setFieldValue('warehouse', '');
+    setSearchQuery(city);
+    setFilteredCities([]);
+  };
+
+  return { filteredCities, searchQuery, setSearchQuery, handleSelectCity };
+};

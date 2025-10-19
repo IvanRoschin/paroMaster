@@ -1,4 +1,4 @@
-export interface ILid {
+export interface ILead {
   _id?: string;
   name: string;
   phone: string;

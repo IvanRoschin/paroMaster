@@ -31,6 +31,18 @@ const goodFormSchema = Yup.object().shape({
     .min(0, 'Ціна товару повинан бути вище 0')
     .required(`Обов'язкове поле`)
     .nullable(),
+  discountPrice: Yup.number()
+    .min(0, 'Ціна зі знижкою повинна бути ≥ 0')
+    .nullable()
+    .notRequired()
+    .test(
+      'is-less-than-price',
+      'Ціна зі знижкою повинна бути менше основної ціни',
+      function (value) {
+        const { price } = this.parent;
+        return value === undefined || value === null || value < price;
+      }
+    ),
   isNew: Yup.boolean().required(`Обов'язкове поле`),
   isAvailable: Yup.boolean().required(`Обов'язкове поле`),
   isCompatible: Yup.boolean().required(`Обов'язкове поле`),
@@ -38,7 +50,10 @@ const goodFormSchema = Yup.object().shape({
     .of(Yup.string())
     .when('isCompatible', {
       is: true,
-      then: schema => schema.required('Заповніть поле сумісності'),
+      then: schema =>
+        schema
+          .min(1, 'Заповніть поле сумісності')
+          .required('Заповніть поле сумісності'),
       otherwise: schema => schema.notRequired(),
     }),
 });

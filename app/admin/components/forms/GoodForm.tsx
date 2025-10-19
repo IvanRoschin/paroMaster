@@ -59,7 +59,7 @@ const GoodFormContent: React.FC<{
 
   useEffect(() => {
     const categoryTitle =
-      allowedCategories.find(c => c._id === values.category)?.title || '';
+      allowedCategories.find(c => c._id === values.category)?.name || '';
     const brandName =
       allowedBrands.find(b => b._id === values.brand)?.name || '';
 
@@ -98,6 +98,12 @@ const GoodFormContent: React.FC<{
     overflowY: 'auto',
   };
 
+  // Рассчёт скидки
+  const discountPercent =
+    values.price && values.discountPrice
+      ? Math.round(((values.price - values.discountPrice) / values.price) * 100)
+      : 0;
+
   return (
     <Form className="flex flex-col w-[600px] gap-4">
       {/* Поля */}
@@ -108,7 +114,7 @@ const GoodFormContent: React.FC<{
           type: 'select',
           options: allowedCategories.map(cat => ({
             value: cat._id ?? '',
-            label: cat.title,
+            label: cat.name,
           })),
         },
         {
@@ -122,6 +128,7 @@ const GoodFormContent: React.FC<{
         },
         { id: 'model', type: 'text', label: 'Модель' },
         { id: 'price', type: 'number', label: 'Ціна' },
+        { id: 'discountPrice', type: 'number', label: 'Ціна зі знижкою' },
         {
           id: 'description',
           type: 'textarea',
@@ -136,6 +143,12 @@ const GoodFormContent: React.FC<{
           errors={errors}
         />
       ))}
+
+      {values.discountPrice && discountPercent > 0 && (
+        <p className="text-sm text-green-600 font-medium">
+          Знижка: {discountPercent}%
+        </p>
+      )}
 
       <input type="hidden" name="title" value={values.title} readOnly />
 
@@ -240,6 +253,7 @@ const GoodForm: React.FC<GoodFormProps> = ({
     title: good?.title || '',
     description: good?.description || '',
     price: good?.price || 0,
+    discountPrice: good?.discountPrice || 0,
     isNew: good?.isNew || true,
     isAvailable: good?.isAvailable || true,
     isCompatible: good?.isCompatible || false,
@@ -262,11 +276,12 @@ const GoodForm: React.FC<GoodFormProps> = ({
 
       if (good?._id) formData.append('id', good._id);
 
-      console.log('formData:', formData);
-
       const mutation = isUpdating ? updateMutation : addMutation;
       const result = await mutation.mutateAsync(formData);
 
+      if (!result.success) {
+        throw new Error('Помилка додавання чи оновлення');
+      }
       toast.success(
         result.message ||
           (isUpdating ? 'Товар оновлено!' : 'Новий товар додано!')

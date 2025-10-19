@@ -1,13 +1,14 @@
+import { useEffect, useRef, useState } from 'react';
+
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
 import { CiSearch } from 'react-icons/ci';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { getAllGoods } from '@/actions/goods';
 import { Button, Icon } from '@/components/ui';
 import { useFetchData } from '@/hooks/index';
-import { IGood } from '@/types/index';
+import { IGoodUI } from '@/types/index';
 
 const Search = ({ placeholder }: { placeholder: string }) => {
   const searchParams = useSearchParams();
@@ -15,7 +16,7 @@ const Search = ({ placeholder }: { placeholder: string }) => {
 
   const { replace, push } = useRouter();
   const [inputValue, setInputValue] = useState('');
-  const [suggestions, setSuggestions] = useState<IGood[]>([]);
+  const [suggestions, setSuggestions] = useState<IGoodUI[]>([]);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -37,7 +38,12 @@ const Search = ({ placeholder }: { placeholder: string }) => {
     }
 
     if (value.length > 2 && data?.goods) {
-      const searchFields: (keyof IGood)[] = ['title', 'model', 'sku', 'brand'];
+      const searchFields: (keyof IGoodUI)[] = [
+        'title',
+        'model',
+        'sku',
+        'brand',
+      ];
       const filtered = data.goods.filter(good =>
         searchFields.some(field =>
           good[field]?.toString().toLowerCase().includes(value.toLowerCase())
@@ -130,9 +136,9 @@ const Search = ({ placeholder }: { placeholder: string }) => {
                   setInputValue('');
                 }}
               >
-                <div className="font-medium">{product.category}</div>
+                <div className="font-medium">{product.category?.name}</div>
                 <div className="text-gray-600 text-sm">
-                  {product.title} &middot; {product.brand} &middot;
+                  {product.title} &middot; {product.brand?.name} &middot;
                   {Number(product.price).toFixed(2)} ₴
                 </div>
                 {product.model && (

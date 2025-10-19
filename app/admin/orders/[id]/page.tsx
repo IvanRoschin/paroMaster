@@ -1,30 +1,31 @@
+import { getAllOrders, getOrderById } from '@/actions/orders';
+import { OrderForm } from '@/admin/components/index';
+import { IGoodUI, ISearchParams } from '@/types/index';
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
 
-import { getAllOrders, getOrderById } from '@/actions/orders';
-import { OrderForm } from '@/admin/components/index';
-import { IGood, ISearchParams } from '@/types/index';
-
 interface GoodsData {
-  goods: IGood[];
+  goods: IGoodUI[];
 }
 
 const SingleOrderPage = async ({
+  params,
   searchParams,
 }: {
+  params: Promise<{ id: string }>;
   searchParams: Promise<ISearchParams>;
 }) => {
-  const params = await searchParams;
-  const { id } = params;
+  const { id } = await params;
+  const query = await searchParams;
   const order = await getOrderById(id);
   const queryClient = new QueryClient();
   try {
     await queryClient.prefetchQuery({
       queryKey: ['orders'],
-      queryFn: () => getAllOrders(params),
+      queryFn: () => getAllOrders(query),
     });
   } catch (error) {
     console.error('Error prefetching data:', error);

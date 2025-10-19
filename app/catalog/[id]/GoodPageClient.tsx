@@ -255,12 +255,15 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
       </div>
 
       {/* Display compatibleGoods */}
+
       {(initialGood.compatibleGoods?.length || 0) > 0 && (
         <div className="mt-10">
           <h3 className="subtitle">Сумісні товари</h3>
+
           <ProductList goods={initialGood.compatibleGoods || []} />
         </div>
       )}
+
       {/* Модалка для відгуку */}
       <Modal
         body={<TestimonialForm productId={initialGood._id} />}
@@ -292,7 +295,6 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
 
   function ItemDetails({ item }: { item: IGoodUI }) {
     const compatibleGoods = item.compatibleGoods || [];
-    console.log('item:', item);
 
     return (
       <div className="space-y-2">
@@ -324,7 +326,7 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
             {compatibleGoods.map((product: IGoodUI, i: number) => (
               <React.Fragment key={product._id}>
                 <Link
-                  href={`/good/${product._id}`}
+                  href={`/catalog/${product._id}`}
                   className="text-primaryAccentColor hover:underline"
                 >
                   {product.title}

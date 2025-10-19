@@ -1,15 +1,12 @@
 import { getCustomerById, updateCustomer } from '@/actions/customers';
 import { CustomerForm } from '@/admin/components/index';
-import { ISearchParams } from '@/types/searchParams';
 
 const SingleCustomerPage = async ({
-  searchParams,
+  params,
 }: {
-  searchParams: Promise<ISearchParams>;
+  params: Promise<{ id: string }>;
 }) => {
-  const params = await searchParams;
-
-  const { id } = params;
+  const { id } = await params;
 
   const customer = await getCustomerById(id);
   return (

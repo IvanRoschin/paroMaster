@@ -4,7 +4,7 @@ import { FormikErrors } from 'formik';
 import { ChangeEvent, useState } from 'react';
 
 import { ImagesBlock } from '@/components/index';
-import { IGood } from '@/types/IGood';
+import { IGoodUI } from '@/types/IGood';
 import { uploadCloudinary } from '@/utils/uploadCloudinary';
 
 interface FormikProps {
@@ -17,7 +17,7 @@ interface FormikProps {
   errors?: {
     [key: string]: string | string[] | FormikErrors<any> | FormikErrors<any>[];
   };
-  good?: IGood;
+  good?: IGoodUI;
 }
 
 const ImagesUpload: React.FC<FormikProps> = ({

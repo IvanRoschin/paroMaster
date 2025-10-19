@@ -39,7 +39,7 @@ export default async function ProductsPage({
     .filter(c => c._id)
     .map(c => ({
       value: String(c._id),
-      label: c.title ?? 'Без назви',
+      label: c.name ?? 'Без назви',
     }));
 
   const brands = (brandsResponse.brands ?? [])

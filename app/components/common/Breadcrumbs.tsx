@@ -23,7 +23,6 @@ const customNames: Record<string, string> = {
   goods: 'Товари',
   users: 'Адміни',
   сategories: 'Категорії',
-  Categories: 'Категорії',
   testimonials: 'Відгуки',
   slider: 'Слайди',
   checkout: 'Оформлення Замовлення',
@@ -38,7 +37,7 @@ const Breadcrumbs = () => {
   const pathname = usePathname();
   const [dynamicTitle, setDynamicTitle] = useState<string | null>(null);
   const [dynamicCategory, setDynamicCategory] = useState<{
-    title: string;
+    name: string;
     slug: string;
   } | null>(null);
 
@@ -58,15 +57,15 @@ const Breadcrumbs = () => {
 
           const brandName = good?.brand?.name || '';
           const modelName = good?.model || '';
-          const categoryTitle = good?.category?.title || '';
+          const categoryName = good?.category?.name || '';
           const categorySlug = good?.category?.slug || '';
 
           setDynamicTitle(
             [brandName, modelName].filter(Boolean).join(' ') || 'Товар'
           );
 
-          if (categoryTitle && categorySlug) {
-            setDynamicCategory({ title: categoryTitle, slug: categorySlug });
+          if (categoryName && categorySlug) {
+            setDynamicCategory({ name: categoryName, slug: categorySlug });
           } else {
             setDynamicCategory(null);
           }
@@ -97,7 +96,7 @@ const Breadcrumbs = () => {
   // Добавляем категорию товара (между "Каталог" и товаром)
   if (dynamicCategory && segmentCrumbs.length > 1) {
     segmentCrumbs.splice(segmentCrumbs.length - 1, 0, {
-      name: dynamicCategory.title,
+      name: dynamicCategory.name,
       href: `/catalog?category=${dynamicCategory.slug}`,
     });
   }

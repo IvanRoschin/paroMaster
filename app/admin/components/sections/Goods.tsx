@@ -239,7 +239,7 @@ export default function Goods({
                   {good.title}
                 </h2>
                 <p className="text-sm text-gray-600">
-                  Категорія: {good.category?.title || '-'}
+                  Категорія: {good.category?.name || '-'}
                 </p>
                 <p className="text-sm text-gray-600">
                   Бренд: {good.brand?.name || '-'}

@@ -9,6 +9,7 @@ import {
   TestimonialForm,
   UserForm,
 } from '@/admin/components/forms';
+import { GoodsFields } from '@/admin/components/GoodsFields';
 import MenuLink from '@/admin/components/MenuLink';
 import Navbar from '@/admin/components/Navbar';
 import {
@@ -30,6 +31,7 @@ export {
   Customers,
   GoodForm,
   Goods,
+  GoodsFields,
   MenuLink,
   Navbar,
   OrderForm,
