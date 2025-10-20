@@ -1,10 +1,10 @@
+import { IGoodUI, ISearchParams, ITestimonial } from '@/types/index';
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
 
-import { IGoodUI, ISearchParams, ITestimonial } from '@/types/index';
 import { getAllGoods } from './actions/goods';
 import { getAllSlides, IGetAllSlides } from './actions/slider';
 import {
@@ -14,10 +14,10 @@ import {
 import {
   Advantages,
   Description,
-  ProductList,
   Slider,
   TestimonialsList,
 } from './components';
+import DailyDealsSection from './components/sections/DailyDealsSection';
 
 // Константы для ключей React Query
 const GOODS_QUERY_KEY = (limit: number) => ['goods', { limit }];
@@ -93,7 +93,7 @@ export default async function Home({
         )}
 
         <section>
-          <ProductList goods={goods} title="Пропозиції дня" />
+          <DailyDealsSection goods={goods} title="Пропозиції дня" />
         </section>
 
         {testimonialsData && (

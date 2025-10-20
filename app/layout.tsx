@@ -5,7 +5,8 @@ import { getServerSession } from 'next-auth';
 import Script from 'next/script';
 
 import AdminSidebar from './admin/components/AdminSidebar';
-import { Footer, Header, Sidebar } from './components';
+import { Footer, Header } from './components';
+import SidebarServer from './components/sections/SidebarServer';
 import { authOptions } from './config/authOptions';
 import { Providers } from './providers/providers';
 import {
@@ -17,9 +18,7 @@ import {
 } from './ui/fonts';
 
 const baseUrl =
-  typeof window !== 'undefined'
-    ? ''
-    : process.env.NEXT_PUBLIC_BASE_URL || 'https://paromaster.vercel.app';
+  process.env.NEXT_PUBLIC_BASE_URL || 'https://paromaster.vercel.app';
 
 export const metadata: Metadata = {
   title: {
@@ -86,7 +85,7 @@ export default async function RootLayout({
               </>
             ) : (
               <>
-                <Sidebar />
+                <SidebarServer />
                 <div className="w-full">{children}</div>
               </>
             )}

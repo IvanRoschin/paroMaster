@@ -49,11 +49,20 @@ const goodSchema = new Schema(
       type: Boolean,
       required: true,
     },
+
+    isDailyDeal: {
+      type: Boolean,
+      required: true,
+    },
+    dealExpiresAt: {
+      type: Date,
+      required: true,
+    },
     isCompatible: {
       type: Boolean,
       required: true,
     },
-    compatibility: {
+    compatibleGoods: {
       type: [String],
       default: [],
     },
