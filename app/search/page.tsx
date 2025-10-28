@@ -1,14 +1,15 @@
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from '@tanstack/react-query';
+
 import { getAllBrands } from '@/actions/brands';
 import { getAllCategories } from '@/actions/categories';
 import { getAllGoods } from '@/actions/goods';
 import { Breadcrumbs, EmptyState, InfiniteScroll } from '@/components/index';
 import { IGoodUI } from '@/types/index';
 import { ISearchParams } from '@/types/searchParams';
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from '@tanstack/react-query';
 
 interface GoodsData {
   goods: IGoodUI[];

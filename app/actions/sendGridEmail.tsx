@@ -156,7 +156,7 @@ export async function sendEmailToLid(data: FieldValues) {
       html: emailContent,
     });
 
-    console.log('Lid email sent successfully');
+    console.log('Lead email sent successfully');
     return { success: true };
   } catch (error: any) {
     const errorMessage =

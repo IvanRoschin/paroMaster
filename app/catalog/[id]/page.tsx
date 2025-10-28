@@ -1,13 +1,14 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from '@tanstack/react-query';
 import { notFound } from 'next/navigation';
 
 import { getGoodById } from '@/actions/goods';
 import { getGoodTestimonials } from '@/actions/testimonials';
 import prefetchData from '@/hooks/usePrefetchData';
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from '@tanstack/react-query';
+
 import GoodPageClient from './GoodPageClient';
 
 // app/good/[id]/page.tsx
@@ -55,7 +56,7 @@ export default async function GoodPage(props: { params: paramsType }) {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <GoodPageClient initialGood={good} />
+      <GoodPageClient good={good} />
     </HydrationBoundary>
   );
 }

@@ -1,6 +1,6 @@
 import { getAllBrands } from '@/actions/brands';
 import { getAllCategories } from '@/actions/categories';
-import { getGoodById, updateGood } from '@/actions/goods';
+import { getGoodById, getGoodsByBrand, updateGood } from '@/actions/goods';
 import { GoodForm } from '@/admin/components';
 import { IGoodUI } from '@/types/IGood';
 import { ISearchParams } from '@/types/index';
@@ -26,11 +26,30 @@ export default async function SingleGoodPage({
   const categories = categoriesResponse.categories ?? [];
   const brands = brandsResponse.brands ?? [];
 
+  const goodNotNull = good;
+  if (!goodNotNull) {
+    return <p>Товар не знайдено</p>; // или редирект / 404
+  }
+
+  const brandId: string | undefined =
+    goodNotNull.brand && typeof goodNotNull.brand === 'object'
+      ? goodNotNull.brand._id
+      : typeof goodNotNull.brand === 'string'
+        ? goodNotNull.brand
+        : undefined;
+
+  let goodsByBrand: IGoodUI[] = [];
+  if (brandId) {
+    const rawGoods = await getGoodsByBrand(brandId, goodNotNull._id);
+    goodsByBrand = rawGoods as unknown as IGoodUI[];
+  }
+
   return (
     <div className="mb-20">
       <GoodForm
         title="Редагувати дані про товар"
         good={good as IGoodUI}
+        goodsByBrand={goodsByBrand as IGoodUI[]}
         allowedCategories={categories}
         allowedBrands={brands}
         action={updateGood}

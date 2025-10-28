@@ -13,6 +13,7 @@ import {
   ProductCard,
   ProductClient,
   ProductList,
+  ProductListSkeleton,
 } from '@/components/ui/ProductCard';
 import Rating from '@/components/ui/Rating';
 import SingOutButton from '@/components/ui/SingOutButton';
@@ -30,6 +31,7 @@ export {
   ProductCard,
   ProductClient,
   ProductList,
+  ProductListSkeleton,
   Rating,
   ShoppingCart,
   SingOutButton,

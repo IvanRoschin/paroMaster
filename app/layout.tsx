@@ -1,11 +1,10 @@
-import './globals.css';
-
 import { Metadata } from 'next';
 import { getServerSession } from 'next-auth';
 import Script from 'next/script';
 
 import AdminSidebar from './admin/components/AdminSidebar';
-import { Footer, Header } from './components';
+import { Header } from './components';
+import FooterServer from './components/sections/FooterServer';
 import SidebarServer from './components/sections/SidebarServer';
 import { authOptions } from './config/authOptions';
 import { Providers } from './providers/providers';
@@ -16,6 +15,8 @@ import {
   geistSans,
   manrope,
 } from './ui/fonts';
+
+import './globals.css';
 
 const baseUrl =
   process.env.NEXT_PUBLIC_BASE_URL || 'https://paromaster.vercel.app';
@@ -91,7 +92,7 @@ export default async function RootLayout({
             )}
           </div>
           <section id="footer" className="snap-start px-4">
-            <Footer />
+            <FooterServer />
           </section>
         </Providers>
 

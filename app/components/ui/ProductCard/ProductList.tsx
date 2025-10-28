@@ -18,16 +18,18 @@ interface ProductListProps {
   title?: string;
   categories?: Option[];
   brands?: Option[];
+  initialCategory?: string;
 }
 
 export default function ProductList({
   goods,
   title,
+  initialCategory,
   categories = [],
   brands = [],
 }: ProductListProps) {
   const [filters, setFilters] = useState<ProductFiltersState>({
-    category: 'all',
+    category: initialCategory ?? 'all',
     brand: 'all',
     availability: 'all',
     condition: 'all',
@@ -89,7 +91,17 @@ export default function ProductList({
       ) : (
         <ul className="grid xl:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-4 mb-20">
           {filteredGoods.map((good, i) => (
-            <ProductCard key={i} good={good} />
+            <ProductCard
+              key={i}
+              good={{
+                ...good,
+                compatibleGoods: Array.isArray(good.compatibleGoods)
+                  ? good.compatibleGoods.filter(
+                      (g): g is IGoodUI => typeof g !== 'string'
+                    )
+                  : [],
+              }}
+            />
           ))}
         </ul>
       )}

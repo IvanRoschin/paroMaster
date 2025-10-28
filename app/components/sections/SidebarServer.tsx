@@ -1,10 +1,10 @@
 import { getAllBrands } from '@/actions/brands';
 import { getAllCategories } from '@/actions/categories';
 import { getMinMaxPrice } from '@/actions/goods';
-// app/components/sections/SidebarServer.tsx
 import { ISearchParams } from '@/types/index';
-
 import Sidebar from './Sidebar';
+
+// app/components/sections/SidebarServer.tsx
 
 interface SidebarServerProps {
   searchParams?: ISearchParams;
@@ -18,8 +18,6 @@ export default async function SidebarServer({
     getAllCategories(searchParams ?? {}),
     getAllBrands(searchParams ?? {}),
   ]);
-
-  console.log('pricesData:', pricesData);
 
   return (
     <Sidebar

@@ -29,7 +29,7 @@ interface InitialStateType extends Omit<IGoodUI, '_id' | 'category' | 'brand'> {
 
 interface GoodFormProps {
   good?: IGoodUI;
-  goods?: IGoodUI[];
+  goodsByBrand?: IGoodUI[];
   title?: string;
   allowedCategories: ICategory[];
   allowedBrands: IBrand[];
@@ -42,22 +42,28 @@ const generateSimplesku = () =>
 const GoodFormContent: React.FC<{
   formikProps: FormikProps<InitialStateType>;
   good?: IGoodUI;
-  goods?: IGoodUI[];
+  goodsByBrand?: IGoodUI[];
   allowedCategories: ICategory[];
   allowedBrands: IBrand[];
-}> = ({ formikProps, good, goods, allowedCategories, allowedBrands }) => {
+}> = ({
+  formikProps,
+  good,
+  goodsByBrand,
+  allowedCategories,
+  allowedBrands,
+}) => {
   const { values, setFieldValue, errors } = formikProps;
   const goodId = good?._id ?? '';
 
-  const existingModelsForBrand = useMemo(() => {
-    if (!goods || !values.brand) return [];
-    return goods
-      .filter(g => {
-        const brandId = typeof g.brand === 'string' ? g.brand : g.brand?._id;
-        return brandId === values.brand && g._id !== goodId;
-      })
-      .map(g => g.model);
-  }, [goods, values.brand, goodId]);
+  const existingGoodsForBrand = useMemo(() => {
+    if (!goodsByBrand || !values.brand) return [];
+
+    return goodsByBrand.filter(g => {
+      const brandId =
+        typeof g.brand === 'string' ? g.brand : g.brand?._id?.toString();
+      return brandId === values.brand?.toString() && g._id !== good?._id;
+    });
+  }, [goodsByBrand, values.brand, good?._id]);
 
   useEffect(() => {
     const categoryTitle =
@@ -100,11 +106,25 @@ const GoodFormContent: React.FC<{
     overflowY: 'auto',
   };
 
-  const discountPercent =
-    values.price && values.discountPrice
-      ? Math.round(((values.price - values.discountPrice) / values.price) * 100)
-      : 0;
+  const discountPriceNum =
+    values.discountPrice !== undefined && values.discountPrice !== null
+      ? Number(values.discountPrice)
+      : undefined;
 
+  const priceNum =
+    values.price !== undefined && values.price !== null
+      ? Number(values.price)
+      : undefined;
+
+  const hasDiscount =
+    discountPriceNum !== undefined &&
+    priceNum !== undefined &&
+    discountPriceNum > 0 &&
+    discountPriceNum < priceNum;
+
+  const discountPercent = hasDiscount
+    ? Math.round(((priceNum! - discountPriceNum!) / priceNum!) * 100)
+    : undefined;
   return (
     <Form className="flex flex-col w-[600px] gap-4">
       {/* Поля */}
@@ -131,11 +151,6 @@ const GoodFormContent: React.FC<{
         { id: 'price', type: 'number', label: 'Ціна' },
         { id: 'discountPrice', type: 'number', label: 'Ціна зі знижкою' },
         {
-          id: 'dealExpiresAt',
-          type: 'datetime-local',
-          label: 'Дата завершення пропозиції дня',
-        },
-        {
           id: 'description',
           type: 'textarea',
           label: 'Опис',
@@ -150,7 +165,7 @@ const GoodFormContent: React.FC<{
         />
       ))}
 
-      {values.discountPrice && discountPercent > 0 && (
+      {hasDiscount && discountPercent !== undefined && (
         <p className="text-sm text-green-600 font-medium">
           Знижка: {discountPercent}%
         </p>
@@ -219,25 +234,27 @@ const GoodFormContent: React.FC<{
         />
       </div>
 
-      {values.isCompatible && existingModelsForBrand.length > 0 && (
+      {values.isCompatible && existingGoodsForBrand.length > 0 && (
         <div className="mb-4">
           <label className="block font-semibold mb-2">
-            Сумісний з моделями:
+            Сумісний з товарами бренду:
           </label>
           <div className="flex flex-col gap-1 max-h-48 overflow-y-auto border rounded p-2">
-            {existingModelsForBrand.map(model => (
-              <label key={model} className="flex items-center gap-2">
+            {existingGoodsForBrand.map(goodItem => (
+              <label key={goodItem._id} className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={values.compatibleGoods.includes(model)}
+                  checked={values.compatibleGoods.includes(goodItem._id)}
                   onChange={e => {
                     const newArr = e.target.checked
-                      ? [...values.compatibleGoods, model]
-                      : values.compatibleGoods.filter(m => m !== model);
-                    setFieldValue('compatibility', newArr);
+                      ? [...values.compatibleGoods, goodItem._id]
+                      : values.compatibleGoods.filter(
+                          id => id !== goodItem._id
+                        );
+                    setFieldValue('compatibleGoods', newArr);
                   }}
                 />
-                {model}
+                {goodItem.model} {/* или title для отображения */}
               </label>
             ))}
           </div>
@@ -255,7 +272,7 @@ const GoodFormContent: React.FC<{
 
 const GoodForm: React.FC<GoodFormProps> = ({
   good,
-  goods,
+  goodsByBrand,
   title,
   allowedCategories,
   allowedBrands,
@@ -282,7 +299,7 @@ const GoodForm: React.FC<GoodFormProps> = ({
     title: good?.title || '',
     description: good?.description || '',
     price: good?.price || 0,
-    discountPrice: good?.discountPrice || 0,
+    discountPrice: good?.discountPrice,
     isNew: good?.isNew || true,
     isAvailable: good?.isAvailable || true,
     isDailyDeal: good?.isDailyDeal || false,
@@ -313,10 +330,10 @@ const GoodForm: React.FC<GoodFormProps> = ({
       if (good?._id) formData.append('id', good._id);
 
       if (values.dealExpiresAt) {
-        formData.append(
-          'dealExpiresAt',
-          new Date(values.dealExpiresAt).toISOString()
-        );
+        const date = new Date(values.dealExpiresAt);
+        if (!isNaN(date.getTime())) {
+          formData.append('dealExpiresAt', date.toISOString());
+        }
       }
 
       const mutation = isUpdating ? updateMutation : addMutation;
@@ -355,7 +372,7 @@ const GoodForm: React.FC<GoodFormProps> = ({
           <GoodFormContent
             formikProps={formikProps}
             good={good}
-            goods={goods}
+            goodsByBrand={goodsByBrand}
             allowedCategories={allowedCategories}
             allowedBrands={allowedBrands}
           />

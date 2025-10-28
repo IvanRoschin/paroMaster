@@ -4,7 +4,7 @@ import { useShoppingCart } from 'app/context/ShoppingCartContext';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FaPen } from 'react-icons/fa';
 
 import { Button } from '@/components/index';
@@ -29,118 +29,123 @@ const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
   const [quantity, setQuantity] = useState(0);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setQuantity(getItemQuantity(good._id));
-    }
+    setQuantity(getItemQuantity(good._id));
   }, [getItemQuantity, good._id]);
 
-  const displayPrice =
-    good.discountPrice && good.discountPrice < good.price
-      ? good.discountPrice
-      : good.price;
+  const { displayPrice, discountPercent } = useMemo(() => {
+    const hasDiscount = good.discountPrice && good.discountPrice < good.price;
 
-  const discountPercent =
-    good.discountPrice && good.discountPrice < good.price
-      ? Math.round(((good.price - good.discountPrice) / good.price) * 100)
-      : 0;
+    return {
+      displayPrice: hasDiscount ? good.discountPrice! : good.price,
+      discountPercent: hasDiscount
+        ? Math.round(((good.price - good.discountPrice!) / good.price) * 100)
+        : 0,
+    };
+  }, [good.price, good.discountPrice]);
 
   return (
-    <li className="flex flex-col justify-between border border-gray-300 rounded-md p-4 hover:shadow-lg transition-all relative">
-      <Link
-        href={`/catalog/${good._id}`}
-        className="flex flex-col h-full justify-between"
-      >
-        <div className="relative w-full h-[200px] mb-4">
+    <li className="flex flex-col justify-between border border-gray-200 rounded-2xl p-4 hover:shadow-lg transition-all relative bg-white">
+      {/* Верх: изображение и бейджи */}
+      <div className="relative w-full h-[200px] mb-4">
+        <Link href={`/catalog/${good._id}`}>
           <Image
-            src={getCloudinaryUrl(good.src[0], 200, 200)}
+            src={getCloudinaryUrl(good.src?.[0], 300, 300)}
             alt={good.title}
             fill
-            className="object-contain bg-gray-50 p-2"
+            className="object-contain bg-gray-50 p-2 rounded-lg"
           />
-          <div className="absolute top-2 left-2 bg-primaryAccentColor text-white text-xs font-semibold px-2 py-1 rounded">
-            {good.isNew ? 'НОВИЙ' : 'Б/У'}
-          </div>
-          {discountPercent > 0 && (
-            <div className="absolute top-2 right-2 bg-red-100 text-red-700 text-xs font-semibold px-2 py-1 rounded">
-              -{discountPercent}%
-            </div>
-          )}
+        </Link>
+
+        <div className="absolute top-2 left-2 bg-primaryAccentColor text-white text-xs font-semibold px-2 py-1 rounded">
+          {good.isNew ? 'НОВИЙ' : 'Б/У'}
         </div>
 
-        <h3 className="font-semibold text-sm sm:text-base line-clamp-2 mb-2">
+        {discountPercent > 0 && (
+          <div className="absolute top-2 right-2 bg-red-100 text-red-700 text-xs font-semibold px-2 py-1 rounded">
+            -{discountPercent}%
+          </div>
+        )}
+      </div>
+
+      {/* Заголовок */}
+      <Link href={`/catalog/${good._id}`}>
+        <h3 className="font-semibold text-sm sm:text-base line-clamp-2 hover:text-primaryAccentColor transition-colors mb-2">
           {good.title}
         </h3>
+      </Link>
 
-        <div className="flex items-center gap-2 mb-2">
-          <div className="flex text-yellow-400">
-            {Array.from({ length: 5 }, (_, i) => (
-              <span key={i}>
-                {i < Math.round(good.averageRating || 0) ? '★' : '☆'}
-              </span>
-            ))}
-          </div>
-          <span className="text-xs text-gray-600">
-            ({good.ratingCount || 0} відгуків)
-          </span>
+      {/* Рейтинг */}
+      <div className="flex items-center gap-2 mb-2">
+        <div className="flex text-yellow-400">
+          {Array.from({ length: 5 }, (_, i) => (
+            <span key={i}>
+              {i < Math.round(good.averageRating || 0) ? '★' : '☆'}
+            </span>
+          ))}
         </div>
+        <span className="text-xs text-gray-600">
+          ({good.ratingCount || 0} відгуків)
+        </span>
+      </div>
 
-        <div className="mb-2 text-sm text-gray-500">
-          {good.isAvailable ? 'В наявності' : 'Немає в наявності'}
-        </div>
+      {/* Наличие и характеристики */}
+      <p className="text-sm text-gray-500 mb-1">
+        {good.isAvailable ? '✅ В наявності' : '❌ Немає в наявності'}
+      </p>
+      <p className="text-sm text-gray-500 mb-1">Артикул: {good.sku}</p>
+      <p className="text-sm text-gray-500 mb-1">
+        Виробник: {good.brand?.name ?? '—'}
+      </p>
+      <p className="text-sm text-gray-500 mb-1">
+        Категорія: {good.category?.name ?? '—'}
+      </p>
 
-        <div className="mb-2 text-sm text-gray-500">Артикул: {good.sku}</div>
+      {/* Цена */}
+      <div className="mt-2 mb-4 text-xl font-bold">
+        {discountPercent > 0 ? (
+          <>
+            <span className="text-red-600">
+              ₴{displayPrice.toLocaleString('uk-UA')}
+            </span>{' '}
+            <span className="line-through text-gray-400 text-base">
+              ₴{good.price.toLocaleString('uk-UA')}
+            </span>
+          </>
+        ) : (
+          <span>₴{displayPrice.toLocaleString('uk-UA')}</span>
+        )}
+      </div>
 
-        <div className="text-xl font-bold mb-4">
-          {discountPercent > 0 ? (
-            <>
-              <span className="text-red-600">
-                ₴{good.discountPrice?.toLocaleString()}
-              </span>{' '}
-              <span className="line-through text-gray-400">
-                ₴{good.price.toLocaleString()}
-              </span>
-            </>
-          ) : (
-            <span>₴{good.price.toLocaleString()}</span>
-          )}
-        </div>
-
-        {good.isCompatible && (good.compatibleGoods?.length ?? 0) > 0 && (
-          <p className="text-sm text-gray-500 mb-2">
+      {/* Сумісні товари */}
+      {Array.isArray(good.compatibleGoods) &&
+        good.compatibleGoods.length > 0 && (
+          <p className="text-xs text-gray-500 mb-2">
             Сумісні товари:{' '}
             {good.compatibleGoods
-              ?.map(cg => (typeof cg === 'string' ? cg : cg.model))
+              .map(cg => (typeof cg === 'string' ? cg : cg.model))
               .join(', ')}
           </p>
         )}
 
-        <p className="text-sm text-gray-500 mb-2">
-          Виробник: {good.brand?.name ?? '—'}
-        </p>
+      {/* Нижний блок */}
+      <div className="flex justify-between items-center mt-auto pt-2 border-t border-gray-200">
+        <CartActions
+          isAvailable={good.isAvailable}
+          itemId={good._id}
+          quantity={quantity}
+          increaseCartQuantity={increaseCartQuantity}
+          decreaseCartQuantity={decreaseCartQuantity}
+          removeFromCart={removeFromCart}
+        />
 
-        <p className="text-sm text-gray-500 mb-2">
-          Категорія: {good.category?.name ?? '—'}
-        </p>
-
-        <div className="flex justify-between items-center">
-          <CartActions
-            isAvailable={good.isAvailable}
-            itemId={good._id}
-            quantity={quantity}
-            increaseCartQuantity={increaseCartQuantity}
-            decreaseCartQuantity={decreaseCartQuantity}
-            removeFromCart={removeFromCart}
-          />
-
-          {isAdmin && (
-            <Link href={`/admin/goods/${good._id}`}>
-              <span className="cursor-pointer w-8 h-8 rounded-full bg-orange-600 flex justify-center items-center hover:opacity-80">
-                <FaPen size={12} color="white" />
-              </span>
-            </Link>
-          )}
-        </div>
-      </Link>
+        {isAdmin && (
+          <Link href={`/admin/goods/${good._id}`}>
+            <span className="cursor-pointer w-8 h-8 rounded-full bg-orange-600 flex justify-center items-center hover:opacity-80 transition-opacity">
+              <FaPen size={12} color="white" />
+            </span>
+          </Link>
+        )}
+      </div>
     </li>
   );
 };
@@ -172,7 +177,7 @@ const CartActions: React.FC<CartActionsProps> = ({
           onClick={() => increaseCartQuantity(itemId)}
         />
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 items-center">
           <div className="flex items-center gap-2">
             <Button
               width="32"
@@ -182,7 +187,7 @@ const CartActions: React.FC<CartActionsProps> = ({
               small
               outline
             />
-            <span>{quantity}</span>
+            <span className="w-5 text-center">{quantity}</span>
             <Button
               width="32"
               type="button"

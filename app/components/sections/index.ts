@@ -2,7 +2,7 @@ import Advantages from '@/components/sections/Advantages';
 import BrandFilter from '@/components/sections/BrandFilter';
 import Category from '@/components/sections/Category';
 import Description from '@/components/sections/Description';
-import Footer from '@/components/sections/Footer';
+import Footer from '@/components/sections/FooterServer';
 import Header from '@/components/sections/Header';
 import Heading from '@/components/sections/Heading';
 import ImagesBlock from '@/components/sections/ImagesBlock';

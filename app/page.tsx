@@ -1,10 +1,10 @@
-import { IGoodUI, ISearchParams, ITestimonial } from '@/types/index';
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
 
+import { IGoodUI, ISearchParams, ITestimonial } from '@/types/index';
 import { getAllGoods } from './actions/goods';
 import { getAllSlides, IGetAllSlides } from './actions/slider';
 import {
@@ -106,7 +106,6 @@ export default async function Home({
             </div>
           </section>
         )}
-
         <section>
           <Advantages title="Переваги" />
         </section>

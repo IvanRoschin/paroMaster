@@ -56,7 +56,6 @@ const goodSchema = new Schema(
     },
     dealExpiresAt: {
       type: Date,
-      required: true,
     },
     isCompatible: {
       type: Boolean,

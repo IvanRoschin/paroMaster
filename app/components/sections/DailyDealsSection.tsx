@@ -46,7 +46,7 @@ const DailyDealsSection: React.FC<DailyDealsSectionProps> = ({
   return (
     <section className="my-10 px-4 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="title">{title}</h2>
+        <h2 className="subtitle-main">{title}</h2>
         <div className="text-red-600 font-semibold text-lg">
           ⏰ Закінчення через: {formatTime(timeLeft)}
         </div>
