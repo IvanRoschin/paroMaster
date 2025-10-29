@@ -1,17 +1,17 @@
 import { Suspense } from 'react';
 
-import { getAllBrands } from '@/actions/brands';
-import { getAllCategories } from '@/actions/categories';
-import { getAllGoods } from '@/actions/goods';
-import Breadcrumbs from '@/components/common/Breadcrumbs';
-import { IGoodUI } from '@/types/index';
-import { ISearchParams } from '@/types/searchParams';
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
 
+import { getAllBrands } from '@/actions/brands';
+import { getAllCategories } from '@/actions/categories';
+import { getAllGoods } from '@/actions/goods';
+import Breadcrumbs from '@/components/common/Breadcrumbs';
+import { IGoodUI } from '@/types/index';
+import { ISearchParams } from '@/types/searchParams';
 import { EmptyState, ProductList, ProductListSkeleton } from '../components';
 
 interface GoodsData {
@@ -20,12 +20,15 @@ interface GoodsData {
 
 export const dynamic = 'force-dynamic';
 
+// ✅ Правильная типизация generateMetadata
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: ISearchParams;
+  searchParams: Promise<ISearchParams>;
 }) {
-  const categoriesResponse = await getAllCategories(searchParams);
+  const params = await searchParams;
+
+  const categoriesResponse = await getAllCategories(params);
   const categories = (categoriesResponse.categories ?? []).map(c => ({
     value: String(c._id),
     label: c.name ?? 'Без назви',
@@ -34,36 +37,40 @@ export async function generateMetadata({
   }));
 
   const currentCategory = categories.find(
-    c => c.slug === searchParams.category || c.value === searchParams.category
+    c => c.slug === params.category || c.value === params.category
   );
 
   const categoryName = currentCategory?.name ?? 'Категорія';
 
   return {
-    title: `Купити ${searchParams.category} — ${categoryName} | Назва магазину`,
+    title: `Купити ${params.category} — ${categoryName} | Назва магазину`,
     description: `Категорія ${categoryName}. Оберіть найкращі товари за вигідною ціною.`,
   };
 }
 
+// ✅ Главная страница
 export default async function CategoryPage({
   searchParams,
 }: {
-  searchParams: ISearchParams;
+  searchParams: Promise<ISearchParams>;
 }) {
+  // 👇 обязательно await — в Next.js 15 searchParams это Promise
+  const params = await searchParams;
+
   const queryClient = new QueryClient();
-  const goodsKey = ['goods', searchParams];
+  const goodsKey = ['goods', params];
 
   await queryClient.prefetchQuery({
     queryKey: goodsKey,
-    queryFn: () => getAllGoods(searchParams),
+    queryFn: () => getAllGoods(params),
   });
 
   const queryState = queryClient.getQueryState(goodsKey);
   const goods = (queryState?.data as GoodsData)?.goods || [];
 
   const [categoriesResponse, brandsResponse] = await Promise.all([
-    getAllCategories(searchParams),
-    getAllBrands(searchParams),
+    getAllCategories(params),
+    getAllBrands(params),
   ]);
 
   const categories = (categoriesResponse.categories ?? [])
@@ -83,7 +90,7 @@ export default async function CategoryPage({
     }));
 
   const currentCategory = categories.find(
-    c => c.slug === searchParams.category || c.value === searchParams.category
+    c => c.slug === params.category || c.value === params.category
   );
 
   const categoryName = currentCategory?.name ?? 'Категорія';
@@ -108,7 +115,7 @@ export default async function CategoryPage({
         </h2>
         <Suspense fallback={<ProductListSkeleton />}>
           <ProductList
-            key={searchParams.category}
+            key={params.category}
             goods={goods}
             categories={categories}
             brands={brands}
