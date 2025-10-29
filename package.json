@@ -29,7 +29,6 @@
     "@tanstack/react-query-devtools": "^5.53.1",
     "@types/nodemailer": "^7.0.1",
     "@types/react-star-rating-component": "^1.4.4",
-    "@types/yup": "^0.32.0",
     "axios": "^1.7.2",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.7.0",
@@ -66,7 +65,7 @@
     "use-debounce": "^10.0.1",
     "uuid": "^11.1.0",
     "yarn": "^1.22.22",
-    "yup": "^1.4.0",
+    "yup": "^1.7.1",
     "zustand": "^4.5.2"
   },
   "devDependencies": {

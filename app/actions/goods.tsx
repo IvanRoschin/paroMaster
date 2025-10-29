@@ -1,7 +1,6 @@
 'use server';
 
 import mongoose from 'mongoose';
-import { revalidatePath } from 'next/cache';
 
 import { buildFilter } from '@/helpers/server';
 import Good from '@/models/Good';
@@ -20,7 +19,7 @@ export interface IGetAllGoods {
   count: number;
 }
 
-export type IGoodCreate = Omit<IGoodDB, '_id' | 'compatibleGoods'>;
+export type IGoodCreate = Omit<IGoodDB, '_id'>;
 
 // ======================= Сериализация =======================
 function serializeGood(g: any): IGoodUI {
@@ -29,7 +28,7 @@ function serializeGood(g: any): IGoodUI {
     title: g.title,
     description: g.description,
     price: g.price,
-    discountPrice: g.discountPrice ?? 0, // + discountPrice
+    discountPrice: g.discountPrice ?? 0,
     src: Array.isArray(g.src) ? g.src : g.src ? [g.src] : [],
     category: g.category
       ? {
@@ -53,13 +52,57 @@ function serializeGood(g: any): IGoodUI {
     sku: g.sku ?? '',
     isNew: g.isNew ?? false,
     isAvailable: g.isAvailable ?? true,
+    isDailyDeal: g.isDailyDeal ?? false,
     isCompatible: g.isCompatible ?? false,
-    compatibility: Array.isArray(g.compatibility) ? g.compatibility : [],
+    compatibleGoods: Array.isArray(g.compatibleGoods)
+      ? g.compatibleGoods.map((cg: any) =>
+          typeof cg === 'string' ? cg : cg._id
+        )
+      : [],
     quantity: g.quantity ?? 0,
     averageRating: g.averageRating ?? 0,
     ratingCount: g.ratingCount ?? 0,
-    compatibleGoods: g.compatibleGoods ?? [],
   };
+}
+
+/**
+ * Универсальная функция для синхронизации двусторонней совместимости.
+ * Обеспечивает корректное добавление и удаление связей между товарами.
+ *
+ * @param currentGoodId - ID текущего товара
+ * @param newIds - новые ID совместимых товаров
+ * @param oldIds - старые ID совместимых товаров
+ */
+export async function syncCompatibilityRelations(
+  currentGoodId: string,
+  newIds: string[] = [],
+  oldIds: string[] = []
+) {
+  const added = newIds.filter(id => !oldIds.includes(id));
+  const removed = oldIds.filter(id => !newIds.includes(id));
+
+  await Promise.all([
+    // ➕ Добавленные связи
+    ...added.map(async cgId => {
+      const g = await Good.findById(cgId);
+      if (!g) return;
+      const gIds = g.compatibleGoods.map(String);
+      if (!gIds.includes(currentGoodId)) g.compatibleGoods.push(currentGoodId);
+      g.isCompatible = true;
+      await g.save();
+    }),
+
+    // ➖ Удалённые связи
+    ...removed.map(async cgId => {
+      const g = await Good.findById(cgId);
+      if (!g) return;
+      g.compatibleGoods = g.compatibleGoods
+        .map(String)
+        .filter((id: string) => id !== currentGoodId);
+      g.isCompatible = g.compatibleGoods.length > 0;
+      await g.save();
+    }),
+  ]);
 }
 
 // ======================= ACTIONS =======================
@@ -99,60 +142,94 @@ export async function getAllGoods(
   }
 }
 
-export async function getGoodById(id: string): Promise<IGoodUI | null> {
-  try {
-    await connectToDB();
+export async function getGoodsByBrand(
+  brandId: string,
+  excludeId?: string
+): Promise<IGoodUI[]> {
+  await connectToDB();
 
-    const good = await Good.findById(id)
-      .populate('category', 'title src')
-      .populate('brand', 'name slug src country website createdAt updatedAt');
+  const query: any = { brand: new mongoose.Types.ObjectId(brandId) };
+  if (excludeId) query._id = { $ne: new mongoose.Types.ObjectId(excludeId) };
 
-    if (!good) return null;
+  const goods = await Good.find(query)
+    .populate('brand')
+    .populate('category')
+    .lean();
 
-    const testimonials = await Testimonial.find({
-      product: id,
-      isActive: true,
-    }).sort({ createdAt: -1 });
-
-    const compatibleGoods = await Good.find({
-      isCompatible: true,
-      compatibility: { $regex: good.model, $options: 'i' },
-    });
-
-    const serializedCompatibleGoods: IGoodUI[] =
-      compatibleGoods.map(serializeGood);
-
-    return {
-      ...serializeGood(good),
-      testimonials,
-      compatibleGoods: serializedCompatibleGoods,
-    };
-  } catch (error) {
-    console.error('Error fetching good by id:', error);
-    return null;
-  }
+  return goods.map(serializeGood);
 }
 
+export async function getDailyDeals(maxPrice: number): Promise<IGoodUI[]> {
+  await connectToDB();
+
+  const dailyDeals = await Good.find({
+    discountPrice: { $lt: maxPrice },
+    isAvailable: true,
+  }).limit(4);
+
+  return dailyDeals.map(serializeGood);
+}
+
+export async function getGoodById(id: string): Promise<IGoodUI | null> {
+  await connectToDB();
+
+  // Получаем сам товар с populated brand и category
+  const good = await Good.findById(id)
+    .populate('category', 'name slug src')
+    .populate('brand', 'name slug src country website');
+
+  if (!good) return null;
+
+  // Получаем отзывы
+  const testimonials = await Testimonial.find({
+    product: id,
+    isActive: true,
+  }).sort({ createdAt: -1 });
+
+  // Получаем совместимые товары по их _id
+  const compatibleGoodsRecords = await Good.find({
+    _id: { $in: good.compatibleGoods }, // используем массив ID
+    isCompatible: true,
+  });
+
+  // Преобразуем в plain object
+  const plainGood: IGoodUI = {
+    ...serializeGood(good), // возвращает plain объект
+    testimonials: testimonials.map(t => ({
+      _id: t._id.toString(),
+      name: t.name,
+      text: t.text,
+      rating: t.rating,
+      createdAt: t.createdAt.toISOString(),
+      updatedAt: t.updatedAt.toISOString(),
+      isActive: t.isActive,
+    })),
+    compatibleGoods: compatibleGoodsRecords.map(g => serializeGood(g)), // массив товаров
+  };
+
+  return plainGood;
+}
+
+// 🚀 Основная функция добавления нового товара
 export async function addGood(formData: FormData) {
   const values: Record<string, any> = {};
 
+  // 1️⃣ Преобразуем FormData → объект
   formData.forEach((value, key) => {
+    const cleanKey = key.replace(/\[\]$/, '');
     if (key.endsWith('[]')) {
-      const cleanKey = key.replace('[]', '');
-      if (!values[cleanKey]) values[cleanKey] = [];
+      if (!Array.isArray(values[cleanKey])) values[cleanKey] = [];
       values[cleanKey].push(value);
     } else {
-      values[key] = value;
+      values[cleanKey] = value;
     }
   });
 
+  // 2️⃣ Преобразуем типы
   values.price = Number(values.price);
-  values.discountPrice = Number(values.discountPrice ?? 0); // + discountPrice
+  values.discountPrice = Number(values.discountPrice ?? 0);
 
-  if (isNaN(values.price)) {
-    return { success: false, message: 'Ціна повинна бути числом' };
-  }
-
+  // 3️⃣ Обязательные поля
   const requiredFields = [
     'category',
     'title',
@@ -173,14 +250,31 @@ export async function addGood(formData: FormData) {
     }
   }
 
+  // 4️⃣ Формируем массив совместимых товаров
+  const compatibleGoodsIds: string[] = values.compatibleGoods
+    ? Array.isArray(values.compatibleGoods)
+      ? values.compatibleGoods
+      : [values.compatibleGoods]
+    : [];
+
   try {
     await connectToDB();
 
+    // 5️⃣ Проверка на дубликаты SKU
     const existingGood = await Good.findOne({ sku: values.sku });
-    if (existingGood) {
+    if (existingGood)
       return { success: false, message: 'Товар з таким SKU вже існує' };
-    }
 
+    // 6️⃣ Если isCompatible выключен → совместимые товары очищаем
+    const isCompatibleFlag =
+      values.isCompatible === 'true' || values.isCompatible === true;
+
+    const finalCompatibleGoods =
+      isCompatibleFlag && compatibleGoodsIds.length > 0
+        ? compatibleGoodsIds
+        : [];
+
+    // 7️⃣ Формируем данные для создания
     const newGood: IGoodCreate = {
       category: values.category,
       brand: values.brand,
@@ -188,24 +282,24 @@ export async function addGood(formData: FormData) {
       model: values.model,
       sku: values.sku,
       price: values.price,
-      discountPrice: values.discountPrice, // + discountPrice
+      discountPrice: values.discountPrice,
       description: values.description,
       src: Array.isArray(values.src) ? values.src : [values.src],
-      isNew:
-        values.isNew === 'true' ||
-        values.isNew === true ||
-        values.isNew === undefined,
-      isAvailable:
-        values.isAvailable === 'true' ||
-        values.isAvailable === true ||
-        values.isAvailable === undefined,
-      isCompatible:
-        values.isCompatible === 'true' || values.isCompatible === true
-          ? true
-          : false,
-      compatibility: values.compatibility || [],
+      isNew: values.isNew === 'true' || values.isNew === true,
+      isAvailable: values.isAvailable === 'true' || values.isAvailable === true,
+      isDailyDeal: values.isDailyDeal === 'true' || values.isDailyDeal === true,
+      isCompatible: isCompatibleFlag && finalCompatibleGoods.length > 0,
+      compatibleGoods: finalCompatibleGoods,
     };
-    await Good.create(newGood);
+
+    // 8️⃣ Создаём товар
+    const createdGood = await Good.create(newGood);
+    const currentGoodId = createdGood._id.toString();
+
+    // 9️⃣ Двусторонняя синхронизация совместимости
+    if (isCompatibleFlag && finalCompatibleGoods.length > 0) {
+      await syncCompatibilityRelations(currentGoodId, finalCompatibleGoods, []);
+    }
 
     return { success: true, message: 'Товар додано успішно' };
   } catch (error) {
@@ -215,10 +309,7 @@ export async function addGood(formData: FormData) {
       const fieldErrors = Object.values(error.errors)
         .map(e => e.message)
         .join(', ');
-      return {
-        success: false,
-        message: `Помилка валідації: ${fieldErrors}`,
-      };
+      return { success: false, message: `Помилка валідації: ${fieldErrors}` };
     }
 
     return {
@@ -228,16 +319,22 @@ export async function addGood(formData: FormData) {
   }
 }
 
+/**
+ * Основная функция обновления товара.
+ * Включает обработку флагов, совместимости и синхронизацию связанных товаров.
+ */
 export async function updateGood(formData: FormData) {
   const values: Record<string, any> = {};
 
+  // 1️⃣ Разбор FormData
   formData.forEach((value, key) => {
-    if (!values[key]) values[key] = [];
-    values[key].push(value);
-  });
-
-  Object.keys(values).forEach(key => {
-    if (values[key].length === 1) values[key] = values[key][0];
+    const cleanKey = key.replace(/\[\]$/, '');
+    if (key.endsWith('[]')) {
+      if (!Array.isArray(values[cleanKey])) values[cleanKey] = [];
+      values[cleanKey].push(value);
+    } else {
+      values[cleanKey] = value;
+    }
   });
 
   const {
@@ -250,16 +347,49 @@ export async function updateGood(formData: FormData) {
     title,
     description,
     price,
-    discountPrice, // + discountPrice
+    discountPrice,
     isNew,
     isAvailable,
+    isDailyDeal,
     isCompatible,
-    compatibility,
+    compatibleGoods,
+    dealExpiresAt,
   } = values;
 
   try {
     await connectToDB();
 
+    // 2️⃣ Проверяем, существует ли товар
+    const existingGood = await Good.findById(id);
+    if (!existingGood) {
+      return { success: false, message: 'Товар не знайдено' };
+    }
+
+    const currentGoodId = existingGood._id.toString();
+    const oldCompatibleGoods = (existingGood.compatibleGoods || []).map(String);
+
+    // 3️⃣ Если isCompatible выключен → чистим связи
+    if (isCompatible === 'false' || isCompatible === false) {
+      await Good.updateMany(
+        { compatibleGoods: currentGoodId },
+        { $pull: { compatibleGoods: currentGoodId } }
+      );
+
+      existingGood.compatibleGoods = [];
+      existingGood.isCompatible = false;
+      await existingGood.save();
+
+      return { success: true, message: 'Сумісність вимкнено для товару' };
+    }
+
+    // 4️⃣ Формируем список новых совместимых товаров
+    const newCompatibleGoods = Array.isArray(compatibleGoods)
+      ? compatibleGoods
+      : compatibleGoods
+        ? [compatibleGoods]
+        : [];
+
+    // 5️⃣ Собираем поля для обновления
     const updateFields: Partial<IGoodDB> = {
       category: category || undefined,
       brand: brand || undefined,
@@ -270,57 +400,51 @@ export async function updateGood(formData: FormData) {
       description,
       price: price !== undefined ? Number(price) : undefined,
       discountPrice:
-        discountPrice !== undefined ? Number(discountPrice) : undefined, // + discountPrice
-      isNew: isNew === 'true',
-      isAvailable: isAvailable === 'true',
-      isCompatible: isCompatible === 'true',
-      compatibility: compatibility
-        ? Array.isArray(compatibility)
-          ? compatibility
-          : [compatibility]
-        : [],
+        discountPrice !== undefined ? Number(discountPrice) : undefined,
+      isNew: isNew === 'true' || isNew === true,
+      isAvailable: isAvailable === 'true' || isAvailable === true,
+      isDailyDeal: isDailyDeal === 'true' || isDailyDeal === true,
+      isCompatible: newCompatibleGoods.length > 0,
+      compatibleGoods: newCompatibleGoods,
+      dealExpiresAt: dealExpiresAt
+        ? new Date(dealExpiresAt).toISOString()
+        : undefined,
     };
 
+    // Удаляем undefined / пустые поля
     Object.keys(updateFields).forEach(key => {
-      if (
-        updateFields[key as keyof IGoodDB] === undefined ||
-        updateFields[key as keyof IGoodDB] === ''
-      ) {
+      const val = updateFields[key as keyof IGoodDB];
+      if (val === undefined || val === '') {
         delete updateFields[key as keyof IGoodDB];
       }
     });
 
-    await Good.findByIdAndUpdate(id, updateFields);
+    // 6️⃣ Обновляем сам товар
+    const updatedGood = await Good.findByIdAndUpdate(id, updateFields, {
+      new: true,
+    });
+
+    if (!updatedGood) {
+      return { success: false, message: 'Помилка оновлення товару' };
+    }
+
+    // 7️⃣ Синхронизируем совместимость
+    await syncCompatibilityRelations(
+      currentGoodId,
+      newCompatibleGoods,
+      oldCompatibleGoods
+    );
 
     return { success: true, message: 'Товар оновлено успішно' };
   } catch (error) {
-    console.error('Помилка оновлення Товару:', error);
+    console.error('Помилка оновлення товару:', error);
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'Невідома помилка',
+      message:
+        error instanceof Error
+          ? error.message
+          : 'Невідома помилка при оновленні',
     };
-  }
-}
-
-export async function deleteGood(id: string): Promise<void> {
-  if (!id) return;
-  await connectToDB();
-  await Testimonial.deleteMany({ product: id });
-  await Good.findByIdAndDelete(id);
-}
-
-export async function getMostPopularGoods() {
-  try {
-    await connectToDB();
-    const mostPopularGoods: IGoodDB[] = await Good.find()
-      .sort({ averageRating: -1, ratingCount: -1 })
-      .limit(10);
-    return { success: true, goods: mostPopularGoods.map(serializeGood) };
-  } catch (error) {
-    console.error('Error fetching most popular goods:', error);
-    return { success: false, goods: [] };
-  } finally {
-    revalidatePath('/');
   }
 }
 
@@ -333,15 +457,15 @@ export async function getMinMaxPrice(): Promise<IMinMaxPriceResponse> {
           price: { $toDouble: '$price' },
           discountPrice: { $toDouble: '$discountPrice' },
         },
-      }, // + discountPrice
+      },
       { $match: { price: { $ne: null } } },
       {
         $group: {
           _id: null,
           minPrice: { $min: '$price' },
           maxPrice: { $max: '$price' },
-          minDiscountPrice: { $min: '$discountPrice' }, // + discountPrice
-          maxDiscountPrice: { $max: '$discountPrice' }, // + discountPrice
+          minDiscountPrice: { $min: '$discountPrice' },
+          maxDiscountPrice: { $max: '$discountPrice' },
         },
       },
       {
@@ -352,9 +476,8 @@ export async function getMinMaxPrice(): Promise<IMinMaxPriceResponse> {
           minDiscountPrice: 1,
           maxDiscountPrice: 1,
         },
-      }, // + discountPrice
+      },
     ]).exec();
-
     if (!result.length)
       return {
         success: false,
@@ -364,13 +487,12 @@ export async function getMinMaxPrice(): Promise<IMinMaxPriceResponse> {
         maxDiscountPrice: null,
         message: 'No valid goods found',
       };
-
     return {
       success: true,
       minPrice: result[0].minPrice,
       maxPrice: result[0].maxPrice,
-      minDiscountPrice: result[0].minDiscountPrice, // + discountPrice
-      maxDiscountPrice: result[0].maxDiscountPrice, // + discountPrice
+      minDiscountPrice: result[0].minDiscountPrice,
+      maxDiscountPrice: result[0].maxDiscountPrice,
     };
   } catch (error: any) {
     console.error('Error fetching min/max price:', error);
@@ -383,4 +505,36 @@ export async function getMinMaxPrice(): Promise<IMinMaxPriceResponse> {
       message: error.message,
     };
   }
+}
+
+export async function getMostPopularGoods(limit = 10): Promise<IGoodUI[]> {
+  try {
+    await connectToDB();
+
+    const popularGoods = await Good.find({ isAvailable: true })
+      .sort({ averageRating: -1, ratingCount: -1 }) // сначала по рейтингу, потом по количеству отзывов
+      .limit(limit)
+      .populate('category', 'name slug src')
+      .populate('brand', 'name slug src country website')
+      .exec();
+
+    // Сериализация в plain objects
+    const serializedGoods: IGoodUI[] = popularGoods.map(serializeGood);
+
+    return serializedGoods;
+  } catch (error) {
+    console.error('Error fetching most popular goods:', error);
+    return [];
+  }
+}
+
+/**
+ * Удаляет товар по id вместе с отзывами, связанными с этим товаром
+ * @param id - ID товара
+ */
+export async function deleteGood(id: string): Promise<void> {
+  if (!id) return;
+  await connectToDB();
+  await Testimonial.deleteMany({ product: id });
+  await Good.findByIdAndDelete(id);
 }

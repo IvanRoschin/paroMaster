@@ -1,7 +1,8 @@
+import { useCallback } from 'react';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useCallback } from 'react';
 
 import { useMediaQuery } from '@/hooks/index';
 
@@ -37,7 +38,7 @@ const Category: React.FC<CategoryPage> = ({ categories }) => {
         {categories.map(({ value, label, src, slug }, i) => (
           <li key={i} className="mb-3 nav">
             <Link
-              href={`/category/?${createQueryString('category', value)}`}
+              href={`/category/?${createQueryString('category', slug)}`}
               className="flex justify-start items-start group"
             >
               <Image

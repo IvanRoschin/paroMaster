@@ -2,8 +2,9 @@
 
 import { useShoppingCart } from 'app/context/ShoppingCartContext';
 import { useSession } from 'next-auth/react';
+import Image from 'next/image';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   FaPen,
   FaRegStar,
@@ -13,34 +14,31 @@ import {
 } from 'react-icons/fa';
 
 import { deleteTestimonial, getGoodTestimonials } from '@/actions/testimonials';
-import DeleteConfirmation from '@/components/common/DeleteConfirmation';
 import {
   Breadcrumbs,
+  Button,
+  DeleteConfirmation,
   ErrorMessage,
+  ImagesBlock,
   Loader,
   Modal,
-  ProductList,
   TestimonialForm,
 } from '@/components/index';
-import ImagesBlock from '@/components/sections/ImagesBlock';
-import Button from '@/components/ui/Button';
-import {
-  useDeleteData,
-  useDeleteModal,
-  useFetchData,
-  useTestimonialModal,
-} from '@/hooks/index';
-import { IGoodUI, ITestimonial } from '@/types/index';
+import { useDeleteModal, useTestimonialModal } from '@/hooks/index';
+import useDeleteData from '@/hooks/useDeleteData';
+import useFetchData from '@/hooks/useFetchData';
+import { IGoodUI } from '@/types/IGood';
 
 interface GoodPageClientProps {
-  initialGood: IGoodUI;
+  good: IGoodUI;
 }
 
-export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
+const GoodPageClient: React.FC<GoodPageClientProps> = ({ good }) => {
   const { data: session } = useSession();
   const isAdmin = !!session?.user;
-  const [, setAmount] = useState(0);
+
   const [testimonialToDelete, setTestimonialToDelete] = useState<string>('');
+  const [, setAmount] = useState(0);
 
   const {
     getItemQuantity,
@@ -49,8 +47,11 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
     removeFromCart,
   } = useShoppingCart();
 
-  const productId = initialGood?._id;
+  const productId = good?._id;
+  const testimonialModal = useTestimonialModal();
+  const deleteModal = useDeleteModal();
 
+  // Отзывы
   const {
     data: testimonials,
     isLoading: isTestimonialsLoading,
@@ -60,20 +61,15 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
 
   const { mutate: deleteTestimonialById } = useDeleteData(deleteTestimonial, [
     'testimonials',
+    productId,
   ]);
 
-  const testimonialModal = useTestimonialModal();
-  const deleteModal = useDeleteModal();
-
   useEffect(() => {
-    if (!initialGood) return;
-    const newAmount = initialGood.price * getItemQuantity(initialGood._id);
+    if (!good) return;
+    const newAmount = good.price * getItemQuantity(good._id);
     setAmount(newAmount);
-    localStorage.setItem(
-      `amount-${initialGood._id}`,
-      JSON.stringify(newAmount)
-    );
-  }, [initialGood, getItemQuantity]);
+    localStorage.setItem(`amount-${good._id}`, JSON.stringify(newAmount));
+  }, [good, getItemQuantity]);
 
   const handleDelete = (id: string) => {
     setTestimonialToDelete(id);
@@ -87,26 +83,23 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
       console.error('Error deleting testimonial:', error);
     }
   };
-  if (isTestimonialsLoading || !initialGood || !testimonials) {
-    return <Loader />;
-  }
 
-  if (isTestimonialsError) {
-    return <ErrorMessage error={testimonialsError} />;
-  }
+  if (!good || isTestimonialsLoading || !testimonials) return <Loader />;
+  if (isTestimonialsError) return <ErrorMessage error={testimonialsError} />;
 
-  const quantity = getItemQuantity(initialGood._id);
+  const quantity = getItemQuantity(good._id);
 
   return (
     <div className="m-6">
       <Breadcrumbs />
 
       <div className="flex flex-col justify-evenly lg:flex-row mb-4 lg:mb-0">
-        <ImagesBlock item={initialGood} />
-        <div className="pt-10 relative">
+        <ImagesBlock item={good} />
+
+        <div className="pt-10 relative max-w-xl">
           {isAdmin && (
             <Link
-              href={`/admin/goods/${initialGood._id}`}
+              href={`/admin/goods/${good._id}`}
               className="absolute top-0 right-0 flex items-center justify-center"
             >
               <span className="cursor-pointer w-[30px] h-[30px] rounded-full bg-orange-600 flex justify-center items-center hover:opacity-80">
@@ -114,122 +107,120 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
               </span>
             </Link>
           )}
-          <h2 className="subtitle mb-[40px]">{initialGood.title}</h2>
-          <p className="mb-[20px]">{initialGood.description}</p>
+
+          <h2 className="subtitle mb-[40px]">{good.title}</h2>
+          <p className="mb-[20px]">{good.description}</p>
           <p
-            className={`mb-[30px] ${initialGood.isAvailable ? 'text-green-600' : 'text-red-600'}`}
+            className={`mb-[30px] ${
+              good.isAvailable ? 'text-green-600' : 'text-red-600'
+            }`}
           >
-            {initialGood.isAvailable ? 'В наявності' : 'Немає в наявності'}
-          </p>
-          <p className="mb-[20px]">Артикул: {initialGood.sku}</p>
-          <p className="text-2xl font-bold mb-[30px]">
-            {initialGood.price} грн
+            {good.isAvailable ? 'В наявності' : 'Немає в наявності'}
           </p>
 
+          <p className="mb-[10px]">Артикул: {good.sku}</p>
+          <p className="text-2xl font-bold mb-[30px]">
+            {good.discountPrice ? (
+              <>
+                <span className="line-through text-gray-400 mr-2">
+                  {good.price} грн
+                </span>
+                <span>{good.discountPrice} грн</span>
+              </>
+            ) : (
+              `${good.price} грн`
+            )}
+          </p>
+
+          {/* Кнопки корзины */}
           <div className="mb-4">
             {quantity === 0 ? (
               <Button
                 width="40"
                 type="button"
                 label="Купити"
-                onClick={() => increaseCartQuantity(initialGood._id)}
-                disabled={!initialGood.isAvailable}
+                onClick={() => increaseCartQuantity(good._id)}
+                disabled={!good.isAvailable}
               />
             ) : (
-              <div className="flex items-center flex-col gap-10">
-                <div className="flex items-center justify-center gap-20">
-                  <div className="flex items-center justify-between gap-2">
-                    <Button
-                      width="40"
-                      type="button"
-                      label="-"
-                      onClick={() => decreaseCartQuantity(initialGood._id)}
-                      small
-                      outline
-                    />
-                    <span className="text-xl">{quantity}</span> в корзині
-                    <Button
-                      width="40"
-                      type="button"
-                      label="+"
-                      onClick={() => increaseCartQuantity(initialGood._id)}
-                      small
-                      outline
-                    />
-                  </div>
+              <div className="flex flex-col items-center gap-6">
+                <div className="flex items-center gap-4">
+                  <Button
+                    width="10"
+                    label="-"
+                    onClick={() => decreaseCartQuantity(good._id)}
+                    small
+                    outline
+                  />
+                  <span className="text-xl">{quantity}</span>
+                  <Button
+                    width="10"
+                    label="+"
+                    onClick={() => increaseCartQuantity(good._id)}
+                    small
+                    outline
+                  />
                 </div>
                 <Button
                   width="40"
-                  type="button"
                   label="Видалити"
-                  disabled={!initialGood.isAvailable}
                   onClick={() => {
-                    removeFromCart(initialGood._id);
-                    localStorage.removeItem(`amount-${initialGood._id}`);
+                    removeFromCart(good._id);
+                    localStorage.removeItem(`amount-${good._id}`);
                   }}
                 />
               </div>
             )}
           </div>
 
-          <ItemDetails item={initialGood} />
-
-          <div className="mt-6">
-            <Button
-              width="40"
-              type="button"
-              label="Додати відгук"
-              onClick={() => {
-                testimonialModal.onOpen();
-              }}
-            />
-          </div>
+          <ItemDetails item={good} />
         </div>
       </div>
 
-      {/* Display reviews */}
+      {/* Відгуки */}
       <div className="mt-10">
         <h3 className="subtitle">Відгуки</h3>
-        {testimonials && testimonials.length > 0 ? (
+
+        {testimonials.length > 0 ? (
           <ul className="grid gap-4 md:gap-6">
-            {testimonials.map((review: ITestimonial) => (
+            <div className="my-6">
+              <Button
+                width="40"
+                type="button"
+                label="Додати новий відгук"
+                onClick={() => testimonialModal.onOpen()}
+              />
+            </div>
+            {testimonials.map(review => (
               <div key={review._id} className="relative">
                 {isAdmin && (
-                  <div className="absolute top-0 right-0">
-                    <div className="grid grid-cols-2 gap-2">
-                      <Link
-                        href={`/admin/testimonials/${review._id}`}
-                        className="flex items-center justify-center"
-                      >
-                        <span className="cursor-pointer w-[30px] h-[30px] rounded-full bg-orange-600 flex justify-center items-center hover:opacity-80">
-                          <FaPen size={12} color="white" />
-                        </span>
-                      </Link>
-                      <Button
-                        type="button"
-                        icon={FaTrash}
-                        small
-                        outline
-                        bg="bg"
-                        onClick={() =>
-                          review._id && handleDelete(review._id.toString())
-                        }
-                      />
-                    </div>
+                  <div className="absolute top-0 right-0 flex gap-2">
+                    <Link
+                      href={`/admin/testimonials/${review._id}`}
+                      className="flex items-center justify-center"
+                    >
+                      <span className="cursor-pointer w-[30px] h-[30px] rounded-full bg-orange-600 flex justify-center items-center hover:opacity-80">
+                        <FaPen size={12} color="white" />
+                      </span>
+                    </Link>
+                    <Button
+                      type="button"
+                      icon={FaTrash}
+                      small
+                      outline
+                      onClick={() =>
+                        review._id && handleDelete(review._id.toString())
+                      }
+                    />
                   </div>
                 )}
-                <li
-                  key={review._id}
-                  className="border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200"
-                >
+
+                <li className="border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-lg font-medium">{review.name}</p>
                     {review.rating && <StarDisplay rating={review.rating} />}
-                    {/* <span className="text-yellow-500 font-bold">{review.rating} ★</span> */}
                   </div>
-                  <p className="text-gray-600 italic mb-2">
-                    &ldquo;{review.text}&rdquo;
-                  </p>
+                  <p className="text-gray-600 italic mb-2">“{review.text}”</p>
                   <p className="text-sm text-gray-400">
                     Додано:{' '}
                     {new Date(review.createdAt).toLocaleDateString('uk-UA', {
@@ -248,31 +239,30 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
             ))}
           </ul>
         ) : (
-          <p className="text-gray-500 italic">
-            Цей товар ще не має відгуків. Будь першим!
-          </p>
+          <>
+            <p className="text-gray-500 italic">
+              Цей товар ще не має відгуків. Будь першим!
+            </p>
+            <div className="mt-6">
+              <Button
+                width="40"
+                type="button"
+                label="Додати перший відгук"
+                onClick={() => testimonialModal.onOpen()}
+              />
+            </div>
+          </>
         )}
       </div>
 
-      {/* Display compatibleGoods */}
-
-      {(initialGood.compatibleGoods?.length || 0) > 0 && (
-        <div className="mt-10">
-          <h3 className="subtitle">Сумісні товари</h3>
-
-          <ProductList goods={initialGood.compatibleGoods || []} />
-        </div>
-      )}
-
-      {/* Модалка для відгуку */}
+      {/* Модалки */}
       <Modal
-        body={<TestimonialForm productId={initialGood._id} />}
+        body={<TestimonialForm productId={good._id} />}
         isOpen={testimonialModal.isOpen}
         onClose={testimonialModal.onClose}
         disabled={isTestimonialsLoading}
       />
 
-      {/* Модалка для підтвердження видалення */}
       <Modal
         body={
           <DeleteConfirmation
@@ -293,22 +283,25 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
     </div>
   );
 
+  // ======================== ВНУТРЕННИЕ КОМПОНЕНТЫ ========================
+
   function ItemDetails({ item }: { item: IGoodUI }) {
-    const compatibleGoods = item.compatibleGoods || [];
+    const categoryName =
+      item.category && typeof item.category === 'object'
+        ? item.category.name
+        : '—';
+
+    const brandName =
+      item.brand && typeof item.brand === 'object' ? item.brand.name : '—';
 
     return (
       <div className="space-y-2">
         <p className="font-light text-gray-500">
-          Назва товару: <span className="font-bold">{item.title}</span>
+          Категорія: <span className="font-bold">{categoryName}</span>
         </p>
 
         <p className="font-light text-gray-500">
-          Виробник:{' '}
-          <span className="font-bold">
-            {typeof item.brand === 'string'
-              ? item.brand
-              : (item.brand?.name ?? '—')}
-          </span>{' '}
+          Виробник: <span className="font-bold">{brandName}</span>
         </p>
 
         <p className="font-light text-gray-500">
@@ -319,23 +312,41 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
           Сумісність з іншими моделями:{' '}
           <span className="font-bold">{item.isCompatible ? 'так' : 'ні'}</span>
         </p>
+        {/* Сумісні товари - карусель */}
+        {Array.isArray(good.compatibleGoods) &&
+          good.compatibleGoods.length > 0 && (
+            <div className="mt-10">
+              <h3 className="subtitle mb-2">Сумісні товари</h3>
+              <div className="flex overflow-x-auto gap-4 py-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                {good.compatibleGoods.map((cg, i) => {
+                  const id = typeof cg === 'string' ? cg : cg._id;
+                  const title = typeof cg === 'string' ? cg : cg.title;
+                  const src = typeof cg === 'string' ? undefined : cg.src?.[0];
 
-        {compatibleGoods.length > 0 && (
-          <p className="font-light text-gray-500">
-            Сумісні товари:{' '}
-            {compatibleGoods.map((product: IGoodUI, i: number) => (
-              <React.Fragment key={product._id}>
-                <Link
-                  href={`/catalog/${product._id}`}
-                  className="text-primaryAccentColor hover:underline"
-                >
-                  {product.title}
-                </Link>
-                {i < compatibleGoods.length - 1 ? ', ' : ''}
-              </React.Fragment>
-            ))}
-          </p>
-        )}
+                  return (
+                    <Link
+                      key={id || i}
+                      href={`/catalog/${id}`}
+                      className="flex-shrink-0 w-40 flex flex-col items-center gap-2 p-2 border rounded hover:shadow-lg transition-shadow"
+                    >
+                      {src && (
+                        <Image
+                          src={src}
+                          alt={title}
+                          width={120}
+                          height={120}
+                          className="object-cover rounded"
+                        />
+                      )}
+                      <span className="text-center text-sm font-medium">
+                        {title}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
       </div>
     );
   }
@@ -369,4 +380,6 @@ export default function GoodPageClient({ initialGood }: GoodPageClientProps) {
       </div>
     );
   }
-}
+};
+
+export default GoodPageClient;

@@ -1,54 +1,38 @@
-import { getAllBrands } from '@/actions/brands';
-import { getAllCategories } from '@/actions/categories';
-import { getMinMaxPrice } from '@/actions/goods';
-import { BrandFilter, Category, PriceFilter, Sort } from '@/components/index';
-import { IBrand, ICategory, ISearchParams } from '@/types/index';
+'use client';
 
-interface Categories {
-  value: string;
-  label: string;
-  src: string;
-  slug: string;
-}
+import { IBrand, ICategory, IMinMaxPriceResponse } from '@/types/index';
 
-interface Brands {
-  value: string;
-  label: string;
-}
+import BrandFilter from './BrandFilter';
+import Category from './Category';
+import { PriceFilter } from './PriceFilter';
+import Sort from './Sort';
 
 interface SidebarProps {
-  searchParams?: ISearchParams;
+  pricesData: IMinMaxPriceResponse;
+  categories: ICategory[];
+  brands: IBrand[];
 }
 
-const Sidebar = async ({ searchParams }: SidebarProps) => {
-  const [pricesData, categoriesResponse, brandsResponse] = await Promise.all([
-    getMinMaxPrice(),
-    getAllCategories(searchParams ?? {}),
-    getAllBrands(searchParams ?? {}),
-  ]);
+export default function Sidebar({
+  pricesData,
+  categories,
+  brands,
+}: SidebarProps) {
+  const mappedCategories = categories.map(c => ({
+    value: String(c._id),
+    label: c.name ?? 'Без назви',
+    src: c.src ?? '',
+    slug: c.slug ?? '',
+  }));
 
-  const categories: Categories[] =
-    (categoriesResponse.categories ?? [])
-      .filter((c: ICategory) => c._id)
-      .map((c: ICategory) => ({
-        value: String(c._id),
-        label: c.name ?? 'Без назви',
-        src: c.src ?? '',
-        slug: c.slug ?? '',
-      })) ?? [];
-
-  const brands: Brands[] =
-    (brandsResponse.brands ?? [])
-      .filter((b: IBrand) => b._id)
-      .map((b: IBrand) => ({
-        value: String(b._id),
-        label: b.name ?? 'Без назви',
-      })) ?? [];
+  const mappedBrands = brands.map(b => ({
+    value: String(b._id),
+    label: b.name ?? 'Без назви',
+  }));
 
   return (
     <div>
-      <Category categories={categories} />
-
+      <Category categories={mappedCategories} />
       <div className="hidden md:block">
         <PriceFilter
           minPrice={pricesData.minPrice ?? 0}
@@ -56,10 +40,7 @@ const Sidebar = async ({ searchParams }: SidebarProps) => {
         />
         <Sort />
       </div>
-
-      <BrandFilter brands={brands} />
+      <BrandFilter brands={mappedBrands} />
     </div>
   );
-};
-
-export default Sidebar;
+}

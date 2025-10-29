@@ -1,6 +1,6 @@
-import { IBrand } from './IBrand';
-import { ICategory } from './ICategory';
 import { ITestimonial } from './ITestimonial';
+import { ICategory } from './ICategory';
+import { IBrand } from './IBrand';
 
 export interface IGoodBase {
   _id: string;
@@ -10,11 +10,9 @@ export interface IGoodBase {
   title: string;
   description: string;
   price: number;
-  discountPrice: number;
   isNew: boolean;
   isAvailable: boolean;
   isCompatible: boolean;
-  compatibility: string[];
   quantity?: number;
   averageRating?: number;
   ratingCount?: number;
@@ -23,12 +21,18 @@ export interface IGoodBase {
 export interface IGoodDB extends IGoodBase {
   brand: string;
   category: string;
+  isDailyDeal?: boolean;
+  dealExpiresAt?: string;
+  discountPrice?: number;
   compatibleGoods?: string[];
 }
 
 export interface IGoodUI extends IGoodBase {
   brand: IBrand | null;
   category: ICategory | null;
-  compatibleGoods: IGoodUI[];
+  isDailyDeal?: boolean;
+  dealExpiresAt?: Date | string;
+  discountPrice?: number;
+  compatibleGoods?: (string | IGoodUI)[];
   testimonials?: ITestimonial[];
 }

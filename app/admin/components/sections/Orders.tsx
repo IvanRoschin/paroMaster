@@ -16,6 +16,7 @@ import {
 } from '@/components/index';
 import { formatDate } from '@/helpers/index';
 import { useDeleteData, useFetchData } from '@/hooks/index';
+import { IOrder } from '@/types/IOrder';
 
 export default function Orders() {
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
@@ -116,7 +117,7 @@ export default function Orders() {
 
       {/* Список замовлень */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {data.orders?.map((order, i) => (
+        {data.orders?.map((order: IOrder, i: number) => (
           <div
             key={`${order._id}-${i}`}
             className="bg-white rounded shadow-md p-4 relative"

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FaChevronRight } from 'react-icons/fa';
 
 import { getGoodById } from '@/actions/goods';
@@ -22,7 +22,7 @@ const customNames: Record<string, string> = {
   orders: 'Замовлення',
   goods: 'Товари',
   users: 'Адміни',
-  сategories: 'Категорії',
+  categories: 'Категорії',
   testimonials: 'Відгуки',
   slider: 'Слайди',
   checkout: 'Оформлення Замовлення',
@@ -30,77 +30,96 @@ const customNames: Record<string, string> = {
   publicoffer: 'Публічна Оферта',
   customers: 'Замовник',
   search: 'Пошук',
-  Brands: 'Бренди',
+  brands: 'Бренди',
 };
 
 const Breadcrumbs = () => {
   const pathname = usePathname();
   const [dynamicTitle, setDynamicTitle] = useState<string | null>(null);
-  const [dynamicCategory, setDynamicCategory] = useState<{
+  const [category, setCategory] = useState<{
     name: string;
     slug: string;
   } | null>(null);
 
-  const pathSegments = pathname
-    .split('/')
-    .filter(Boolean)
-    .map(seg => decodeURIComponent(seg));
+  // 1️⃣ Мемоизация сегментов пути
+  const pathSegments = useMemo(
+    () =>
+      pathname
+        .split('/')
+        .filter(Boolean)
+        .map(seg => decodeURIComponent(seg)),
+    [pathname]
+  );
 
+  // 2️⃣ Если последний сегмент — ObjectId, подтягиваем товар
   useEffect(() => {
     const lastSegment = pathSegments[pathSegments.length - 1];
+    if (!/^[0-9a-fA-F]{24}$/.test(lastSegment)) {
+      setDynamicTitle(null);
+      setCategory(null);
+      return;
+    }
 
-    // Проверяем, что это ObjectId
-    if (/^[0-9a-fA-F]{24}$/.test(lastSegment)) {
-      const fetchGood = async () => {
-        try {
-          const good = await getGoodById(lastSegment);
+    let isMounted = true;
 
-          const brandName = good?.brand?.name || '';
-          const modelName = good?.model || '';
-          const categoryName = good?.category?.name || '';
-          const categorySlug = good?.category?.slug || '';
+    (async () => {
+      try {
+        const good = await getGoodById(lastSegment);
+        if (!isMounted || !good) return;
 
-          setDynamicTitle(
-            [brandName, modelName].filter(Boolean).join(' ') || 'Товар'
-          );
+        const brand = typeof good.brand === 'object' ? good.brand?.name : '';
+        const model = good.model || '';
+        const productTitle =
+          [brand, model].filter(Boolean).join(' ') || good.title;
 
-          if (categoryName && categorySlug) {
-            setDynamicCategory({ name: categoryName, slug: categorySlug });
-          } else {
-            setDynamicCategory(null);
-          }
-        } catch (error) {
-          console.error('Error fetching good data:', error);
-          setDynamicTitle('Товар');
-          setDynamicCategory(null);
+        setDynamicTitle(productTitle);
+
+        if (good.category && typeof good.category === 'object') {
+          setCategory({
+            name: good.category.name,
+            slug: good.category.slug,
+          });
+        } else {
+          setCategory(null);
         }
-      };
+      } catch (error) {
+        console.error('❌ Breadcrumbs fetch error:', error);
+        if (isMounted) {
+          setDynamicTitle(null);
+          setCategory(null);
+        }
+      }
+    })();
 
-      fetchGood();
-    }
-  }, [pathname, pathSegments]);
+    return () => {
+      isMounted = false;
+    };
+  }, [pathSegments]);
 
-  let segmentCrumbs = pathSegments.map((segment, index) => {
-    const href = '/' + pathSegments.slice(0, index + 1).join('/');
-    let name;
+  // 3️⃣ Формирование крошек
+  const crumbs = useMemo(() => {
+    let base = pathSegments.map((segment, index) => {
+      const href = '/' + pathSegments.slice(0, index + 1).join('/');
+      const isLast = index === pathSegments.length - 1;
 
-    if (index === pathSegments.length - 1 && dynamicTitle) {
-      name = dynamicTitle;
-    } else {
-      name = customNames[segment] || capitalize(segment.replace(/-/g, ' '));
-    }
+      let name = customNames[segment] || capitalize(segment.replace(/-/g, ' '));
+      if (isLast && dynamicTitle) name = dynamicTitle;
 
-    return { name, href };
-  });
-
-  // Добавляем категорию товара (между "Каталог" и товаром)
-  if (dynamicCategory && segmentCrumbs.length > 1) {
-    segmentCrumbs.splice(segmentCrumbs.length - 1, 0, {
-      name: dynamicCategory.name,
-      href: `/catalog?category=${dynamicCategory.slug}`,
+      return { name, href };
     });
-  }
 
+    // Добавляем категорию между "Каталог" и товаром
+    if (category && base.length > 1) {
+      base.splice(base.length - 1, 0, {
+        name: category.name,
+        href: `/catalog?category=${category.slug}`,
+      });
+    }
+
+    return base;
+  }, [pathSegments, dynamicTitle, category]);
+
+  // 4️⃣ JSX
   return (
     <nav aria-label="breadcrumbs" className="text-sm text-gray-600 mb-4">
       <ol className="flex items-center flex-wrap space-x-2">
@@ -109,16 +128,13 @@ const Breadcrumbs = () => {
             Головна
           </Link>
         </li>
-        {segmentCrumbs.map((crumb, idx) => (
+
+        {crumbs.map((crumb, idx) => (
           <li key={crumb.href} className="flex items-center space-x-2">
             <FaChevronRight className="mx-1 text-gray-400 text-xs" />
             <Link
               href={crumb.href}
-              className={`nav text-gray-800 font-medium hover:text-gray-800 ${
-                idx === segmentCrumbs.length - 1
-                  ? 'text-gray-800 font-medium'
-                  : 'text-blue-600'
-              }`}
+              className="nav text-gray-600 hover:text-gray-600"
             >
               {crumb.name}
             </Link>

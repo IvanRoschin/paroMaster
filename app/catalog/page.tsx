@@ -1,24 +1,20 @@
 import { Metadata } from 'next';
-
-import { getAllBrands } from '@/actions/brands';
-import { getAllCategories } from '@/actions/categories';
-import { getAllGoods } from '@/actions/goods';
-import { Breadcrumbs, InfiniteScroll } from '@/components/index';
-import prefetchData from '@/hooks/usePrefetchData';
-import { IGoodUI, ISearchParams } from '@/types/index';
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
 
-// app/catalog/page.tsx
+import { IGoodUI, ISearchParams } from '@/types/index';
+import prefetchData from '@/hooks/usePrefetchData';
+import { Breadcrumbs, InfiniteScroll } from '@/components/index';
+import { getAllBrands } from '@/actions/brands';
+import { getAllCategories } from '@/actions/categories';
+import { getAllGoods } from '@/actions/goods';
 
 interface GoodsData {
   goods: IGoodUI[];
 }
-
-export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Каталог товарів | ParoMaster',
@@ -48,12 +44,10 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function CatalogPage({
-  searchParams,
-}: {
+export default async function CatalogPage(props: {
   searchParams: Promise<ISearchParams>;
 }) {
-  const params = await searchParams;
+  const params = await props.searchParams;
   const queryClient = new QueryClient();
 
   const goodsKey = ['goods', params];

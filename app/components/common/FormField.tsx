@@ -123,10 +123,10 @@ const FormField: React.FC<FormFieldProps> = ({
             type={item.type}
             disabled={item.disabled}
             value={value}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              const newValue = e.target.value;
-              setFieldValue?.(item.id, newValue);
-            }}
+            // onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            //   const newValue = e.target.value;
+            //   setFieldValue?.(item.id, newValue);
+            // }}
             className={`text-primaryTextColor peer w-full p-4 pt-6 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
   ${meta.error && meta.touched ? 'border-rose-500' : 'border-neutral-300'}
   ${meta.error && meta.touched ? 'focus:border-rose-500' : 'focus:border-green-500'}

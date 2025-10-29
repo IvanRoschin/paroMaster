@@ -107,14 +107,14 @@ const ProductClient = ({ id }: { id: string }) => {
             </p>
             <p className="font-light text-gray-500">Model: {good.model}</p>
             <p className="font-light text-gray-500">
-              Сумісність з брендами: {good.compatibility}
+              Сумісність з брендами: {good.isCompatible}
             </p>
           </div>
           <p className="font-light text-gray-500">
             Сумісність з моделями:{' '}
-            {Array.isArray(good.compatibility)
-              ? good.compatibility.join(', ')
-              : good.compatibility}
+            {Array.isArray(good.compatibleGoods)
+              ? good.compatibleGoods.join(', ')
+              : good.compatibleGoods}
           </p>
         </div>
       </div>

@@ -17,17 +17,19 @@ import {
   storageKeys,
 } from '@/helpers/index';
 import { useAddData, useUpdateData } from '@/hooks/index';
-import { IGoodDB, IGoodUI } from '@/types/IGood';
+import { IGoodUI } from '@/types/IGood';
 import { IBrand, ICategory } from '@/types/index';
 
-interface InitialStateType extends Omit<IGoodDB, '_id' | 'category' | 'brand'> {
+interface InitialStateType extends Omit<IGoodUI, '_id' | 'category' | 'brand'> {
   category: string;
   brand: string;
+  compatibleGoods: string[];
+  dealExpiresAt: string;
 }
 
 interface GoodFormProps {
   good?: IGoodUI;
-  goods?: IGoodUI[];
+  goodsByBrand?: IGoodUI[];
   title?: string;
   allowedCategories: ICategory[];
   allowedBrands: IBrand[];
@@ -40,22 +42,28 @@ const generateSimplesku = () =>
 const GoodFormContent: React.FC<{
   formikProps: FormikProps<InitialStateType>;
   good?: IGoodUI;
-  goods?: IGoodUI[];
+  goodsByBrand?: IGoodUI[];
   allowedCategories: ICategory[];
   allowedBrands: IBrand[];
-}> = ({ formikProps, good, goods, allowedCategories, allowedBrands }) => {
+}> = ({
+  formikProps,
+  good,
+  goodsByBrand,
+  allowedCategories,
+  allowedBrands,
+}) => {
   const { values, setFieldValue, errors } = formikProps;
   const goodId = good?._id ?? '';
 
-  const existingModelsForBrand = useMemo(() => {
-    if (!goods || !values.brand) return [];
-    return goods
-      .filter(g => {
-        const brandId = typeof g.brand === 'string' ? g.brand : g.brand?._id;
-        return brandId === values.brand && g._id !== goodId;
-      })
-      .map(g => g.model);
-  }, [goods, values.brand, goodId]);
+  const existingGoodsForBrand = useMemo(() => {
+    if (!goodsByBrand || !values.brand) return [];
+
+    return goodsByBrand.filter(g => {
+      const brandId =
+        typeof g.brand === 'string' ? g.brand : g.brand?._id?.toString();
+      return brandId === values.brand?.toString() && g._id !== good?._id;
+    });
+  }, [goodsByBrand, values.brand, good?._id]);
 
   useEffect(() => {
     const categoryTitle =
@@ -98,12 +106,25 @@ const GoodFormContent: React.FC<{
     overflowY: 'auto',
   };
 
-  // Рассчёт скидки
-  const discountPercent =
-    values.price && values.discountPrice
-      ? Math.round(((values.price - values.discountPrice) / values.price) * 100)
-      : 0;
+  const discountPriceNum =
+    values.discountPrice !== undefined && values.discountPrice !== null
+      ? Number(values.discountPrice)
+      : undefined;
 
+  const priceNum =
+    values.price !== undefined && values.price !== null
+      ? Number(values.price)
+      : undefined;
+
+  const hasDiscount =
+    discountPriceNum !== undefined &&
+    priceNum !== undefined &&
+    discountPriceNum > 0 &&
+    discountPriceNum < priceNum;
+
+  const discountPercent = hasDiscount
+    ? Math.round(((priceNum! - discountPriceNum!) / priceNum!) * 100)
+    : undefined;
   return (
     <Form className="flex flex-col w-[600px] gap-4">
       {/* Поля */}
@@ -144,7 +165,7 @@ const GoodFormContent: React.FC<{
         />
       ))}
 
-      {values.discountPrice && discountPercent > 0 && (
+      {hasDiscount && discountPercent !== undefined && (
         <p className="text-sm text-green-600 font-medium">
           Знижка: {discountPercent}%
         </p>
@@ -180,35 +201,60 @@ const GoodFormContent: React.FC<{
           />
         </div>
         <div className="flex flex-col items-center">
-          <span className="text-sm font-medium mb-1">Сумісність</span>
+          <span className="text-sm font-medium mb-1">
+            Додати в пропозиції дня
+          </span>
           <Switcher
-            id="isCompatible"
-            checked={values.isCompatible}
-            onChange={checked => setFieldValue('isCompatible', checked)}
+            id="isDailyDeal"
+            checked={!!values.isDailyDeal}
+            onChange={checked => setFieldValue('isDailyDeal', checked)}
             labels={['Ні', 'Так']}
           />
         </div>
       </div>
 
-      {values.isCompatible && existingModelsForBrand.length > 0 && (
+      {values.isDailyDeal && (
+        <FormField
+          item={{
+            id: 'dealExpiresAt',
+            label: 'Дата завершення пропозиції дня',
+            type: 'datetime-local',
+          }}
+          setFieldValue={setFieldValue}
+          errors={errors}
+        />
+      )}
+      <div className="flex flex-col items-center">
+        <span className="text-sm font-medium mb-1">Сумісність</span>
+        <Switcher
+          id="isCompatible"
+          checked={values.isCompatible}
+          onChange={checked => setFieldValue('isCompatible', checked)}
+          labels={['Ні', 'Так']}
+        />
+      </div>
+
+      {values.isCompatible && existingGoodsForBrand.length > 0 && (
         <div className="mb-4">
           <label className="block font-semibold mb-2">
-            Сумісний з моделями:
+            Сумісний з товарами бренду:
           </label>
           <div className="flex flex-col gap-1 max-h-48 overflow-y-auto border rounded p-2">
-            {existingModelsForBrand.map(model => (
-              <label key={model} className="flex items-center gap-2">
+            {existingGoodsForBrand.map(goodItem => (
+              <label key={goodItem._id} className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={values.compatibility.includes(model)}
+                  checked={values.compatibleGoods.includes(goodItem._id)}
                   onChange={e => {
                     const newArr = e.target.checked
-                      ? [...values.compatibility, model]
-                      : values.compatibility.filter(m => m !== model);
-                    setFieldValue('compatibility', newArr);
+                      ? [...values.compatibleGoods, goodItem._id]
+                      : values.compatibleGoods.filter(
+                          id => id !== goodItem._id
+                        );
+                    setFieldValue('compatibleGoods', newArr);
                   }}
                 />
-                {model}
+                {goodItem.model} {/* или title для отображения */}
               </label>
             ))}
           </div>
@@ -226,7 +272,7 @@ const GoodFormContent: React.FC<{
 
 const GoodForm: React.FC<GoodFormProps> = ({
   good,
-  goods,
+  goodsByBrand,
   title,
   allowedCategories,
   allowedBrands,
@@ -253,11 +299,18 @@ const GoodForm: React.FC<GoodFormProps> = ({
     title: good?.title || '',
     description: good?.description || '',
     price: good?.price || 0,
-    discountPrice: good?.discountPrice || 0,
+    discountPrice: good?.discountPrice,
     isNew: good?.isNew || true,
     isAvailable: good?.isAvailable || true,
+    isDailyDeal: good?.isDailyDeal || false,
+    dealExpiresAt: good?.dealExpiresAt
+      ? new Date(good.dealExpiresAt).toISOString().slice(0, 16)
+      : '',
     isCompatible: good?.isCompatible || false,
-    compatibility: good?.compatibility || [],
+    compatibleGoods:
+      good?.compatibleGoods?.map(cg =>
+        typeof cg === 'string' ? cg : cg._id
+      ) || [],
   };
 
   const handleSubmit = async (
@@ -275,6 +328,13 @@ const GoodForm: React.FC<GoodFormProps> = ({
       });
 
       if (good?._id) formData.append('id', good._id);
+
+      if (values.dealExpiresAt) {
+        const date = new Date(values.dealExpiresAt);
+        if (!isNaN(date.getTime())) {
+          formData.append('dealExpiresAt', date.toISOString());
+        }
+      }
 
       const mutation = isUpdating ? updateMutation : addMutation;
       const result = await mutation.mutateAsync(formData);
@@ -312,7 +372,7 @@ const GoodForm: React.FC<GoodFormProps> = ({
           <GoodFormContent
             formikProps={formikProps}
             good={good}
-            goods={goods}
+            goodsByBrand={goodsByBrand}
             allowedCategories={allowedCategories}
             allowedBrands={allowedBrands}
           />
