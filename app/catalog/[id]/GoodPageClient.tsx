@@ -217,7 +217,9 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good }) => {
 
                 <li className="border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-lg font-medium">{review.name}</p>
+                    {Array.isArray(review.author)
+                      ? review.author.join(' ')
+                      : review.author}
                     {review.rating && <StarDisplay rating={review.rating} />}
                   </div>
                   <p className="text-gray-600 italic mb-2">“{review.text}”</p>

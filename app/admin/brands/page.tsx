@@ -1,13 +1,12 @@
+import { getAllBrands } from '@/actions/brands';
+import Brands from '@/admin/components/sections/Brands';
+import prefetchData from '@/hooks/usePrefetchData';
+import { ISearchParams } from '@/types/index';
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
-
-import { getAllBrands } from '@/actions/brands';
-import Brands from '@/admin/components/sections/Brands';
-import prefetchData from '@/hooks/usePrefetchData';
-import { ISearchParams } from '@/types/index';
 
 export type paramsType = Promise<{ id: string }>;
 

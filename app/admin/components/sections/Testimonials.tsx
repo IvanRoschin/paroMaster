@@ -14,17 +14,25 @@ import {
 import {
   Breadcrumbs,
   Button,
+  DeleteConfirmation,
   EmptyState,
   ErrorMessage,
   Loader,
+  Modal,
   Pagination,
   Switcher,
 } from '@/components/index';
-import { useDeleteData, useFetchData } from '@/hooks/index';
+import { useDeleteData, useDeleteModal, useFetchData } from '@/hooks/index';
 import { ITestimonial } from '@/types/index';
 
 export default function Testimonials() {
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [testimonialToDelete, setTestimonialToDelete] = useState<{
+    id: string;
+    author: string[];
+    text: string;
+  } | null>(null);
+
   const searchParams = useSearchParams();
 
   const page = parseInt(searchParams.get('page') || '1');
@@ -37,11 +45,26 @@ export default function Testimonials() {
   );
   const { mutate: deleteTestimonialById } = useDeleteData(deleteTestimonial, [
     'testimonials',
+    testimonialToDelete?.id,
   ]);
 
-  const handleDelete = (id: string) => {
-    deleteTestimonialById(id);
+  const deleteModal = useDeleteModal();
+
+  const handleDelete = (id: string, author: string[], text: string) => {
+    setTestimonialToDelete({ id, author, text });
+    deleteModal.onOpen();
   };
+
+  const handleDeleteConfirm = () => {
+    if (testimonialToDelete?.id) {
+      deleteTestimonialById(testimonialToDelete.id);
+      deleteModal.onClose();
+    }
+  };
+
+  // const handleDelete = (id: string) => {
+  //   deleteTestimonialById(id);
+  // };
 
   const handleStatusToggle = async (
     _id: string | undefined,
@@ -69,10 +92,9 @@ export default function Testimonials() {
   if (!data?.testimonials || data.testimonials.length === 0)
     return (
       <EmptyState
-        showReset
-        onReset={() => {
-          setStatusFilter(null);
-        }}
+        title="Відгуки відсутні"
+        actionLabel="Додати відгук"
+        actionHref="/admin/testimonials/add"
       />
     );
 
@@ -143,7 +165,7 @@ export default function Testimonials() {
             {data.testimonials.map((testimonial, index) => (
               <tr key={`${testimonial._id}-${index}`} className="border-b-2">
                 <td className="p-2 border-r-2 text-center">
-                  {testimonial.name}
+                  {testimonial.author}
                 </td>
                 <td className="p-2 border-r-2 text-start">
                   {testimonial.text}
@@ -183,7 +205,11 @@ export default function Testimonials() {
                     color="border-red-400"
                     onClick={() =>
                       testimonial._id &&
-                      handleDelete(testimonial._id.toString())
+                      handleDelete(
+                        testimonial._id.toString(),
+                        testimonial.author,
+                        testimonial.text
+                      )
                     }
                   />
                 </td>
@@ -195,6 +221,18 @@ export default function Testimonials() {
       {totalPages > 1 && (
         <Pagination count={testimonialsCount} pageNumbers={pageNumbers} />
       )}
+      {/* Модалка для підтвердження видалення */}
+      <Modal
+        body={
+          <DeleteConfirmation
+            onConfirm={handleDeleteConfirm}
+            onCancel={() => deleteModal.onClose()}
+            title={`відгук aвтора ${testimonialToDelete?.author} &nbsp; текст: ${testimonialToDelete?.text} `}
+          />
+        }
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.onClose}
+      />
     </div>
   );
 }

@@ -4,7 +4,6 @@ import { Form, Formik, FormikState } from 'formik';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
-import Rating from 'react-rating';
 import ReactStars from 'react-stars';
 import { toast } from 'sonner';
 
@@ -13,7 +12,10 @@ import { testimonialFormSchema } from '@/helpers/index';
 import { useAddData, useUpdateData } from '@/hooks/index';
 import { ITestimonial } from '@/types/index';
 
-interface InitialStateType extends Omit<ITestimonial, '_id'> {}
+interface InitialStateType extends Omit<ITestimonial, '_id' | 'author'> {
+  name: string;
+  surname: string;
+}
 
 interface ResetFormProps {
   resetForm: (nextState?: Partial<FormikState<InitialStateType>>) => void;
@@ -32,35 +34,28 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({
   title,
   action,
 }) => {
-  const ReactRating = Rating as unknown as React.FC<any>;
   const [isLoading, setIsLoading] = useState(false);
   const { push } = useRouter();
   const { data: session } = useSession();
+
   const addTestimonialMutation = useAddData(action, ['testimonials']);
   const updateTestimonialMutation = useUpdateData(action, ['testimonials']);
-  const [name, surname] = testimonial?.name?.split(' ') || ['', ''];
+
   const isUpdating = Boolean(testimonial?._id);
+  const isAdmin = !!session?.user;
+
+  const [name = '', surname = ''] = Array.isArray(testimonial?.author)
+    ? testimonial.author
+    : ['', ''];
 
   const textareaStyles: React.CSSProperties = {
     height: '100px',
     overflowY: 'auto',
   };
 
-  const isAdmin = !!session?.user;
-
   const inputs = [
-    {
-      id: 'name',
-      label: 'Ваше Ім`я',
-      type: 'text',
-      required: true,
-    },
-    {
-      id: 'surname',
-      label: 'Ваше Прізвище',
-      type: 'text',
-      required: true,
-    },
+    { id: 'name', label: 'Ваше Ім’я', type: 'text', required: true },
+    { id: 'surname', label: 'Ваше Прізвище', type: 'text', required: true },
     {
       id: 'text',
       label: 'Відгук',
@@ -80,8 +75,8 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({
   }
 
   const initialValues: InitialStateType = {
-    name: name || '',
-    surname: surname || '',
+    name,
+    surname,
     text: testimonial?.text || '',
     rating: testimonial?.rating || 0,
     createdAt: testimonial?.createdAt || '',
@@ -90,42 +85,43 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({
   };
 
   const handleSubmit = async (
-    values: ITestimonial,
+    values: InitialStateType,
     { resetForm }: ResetFormProps
   ) => {
     try {
       if (isLoading) return;
       setIsLoading(true);
 
-      const fullName = `${values.name} ${values.surname}`.trim();
-      const newestimonialData = {
+      // Собираем автора в массив строк
+      const author = [values.name.trim(), values.surname.trim()].filter(
+        Boolean
+      );
+
+      const payload: ITestimonial = {
+        ...testimonial,
         ...values,
-        name: fullName,
+        author,
       };
 
-      const updateTestimonialData = isUpdating
-        ? { ...newestimonialData, _id: testimonial?._id }
-        : {};
+      delete (payload as any).name;
+      delete (payload as any).surname;
 
       const result = isUpdating
-        ? await updateTestimonialMutation.mutateAsync(updateTestimonialData)
-        : await addTestimonialMutation.mutateAsync(values);
+        ? await updateTestimonialMutation.mutateAsync(payload)
+        : await addTestimonialMutation.mutateAsync(payload);
 
-      if (result?.success === false) {
-        toast.error('Something went wrong');
+      if (!result?.success) {
+        toast.error('Щось пішло не так');
         return;
       }
+
       resetForm();
       toast.success(isUpdating ? 'Відгук оновлено!' : 'Новий відгук додано!');
       push('/admin/testimonials');
     } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-        console.error(error.message);
-      } else {
-        toast.error('An unknown error occurred');
-        console.error(error);
-      }
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(message);
+      console.error(error);
     } finally {
       setIsLoading(false);
     }
@@ -168,6 +164,7 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({
                   )}
                 </div>
               ))}
+
               <div className="mb-4">
                 <label htmlFor="rating" className="block mb-2">
                   Ваша оцінка
@@ -175,23 +172,13 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({
                 <ReactStars
                   count={5}
                   value={values.rating ?? undefined}
-                  onChange={(value: number) => {
-                    if (value !== values.rating) {
-                      setFieldValue('rating', value);
-                    }
-                  }}
+                  onChange={(value: number) => setFieldValue('rating', value)}
                   size={24}
                   color2={'#ffd700'}
                 />
-                {/* <ReactRating
-									emptySymbol={<FaStar size={24} color='#ccc' />}
-									fullSymbol={<FaStar size={24} color='#ffd700' />}
-									initialRating={values.rating}
-									onChange={(value: number) => setFieldValue('rating', value)}
-								/> */}
               </div>
             </div>
-            <CustomButton label={'Зберегти'} disabled={isLoading} />
+            <CustomButton label="Зберегти" disabled={isLoading} />
           </Form>
         )}
       </Formik>

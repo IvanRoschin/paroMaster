@@ -1,14 +1,12 @@
 import { getSlideById, updateSlide } from '@/actions/slider';
 import { SlideForm } from '@/admin/components';
-import { ISearchParams } from '@/types/searchParams';
 
 const SingleSlidePage = async ({
-  searchParams,
+  params,
 }: {
-  searchParams: Promise<ISearchParams>;
+  params: Promise<{ id: string }>;
 }) => {
-  const params = await searchParams;
-  const { id } = params;
+  const { id } = await params;
   const slide = await getSlideById(id);
   return (
     <div className="mb-20">

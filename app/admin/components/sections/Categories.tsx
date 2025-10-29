@@ -1,7 +1,6 @@
 'use client';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { FaPen, FaSortAlphaDown, FaSortAlphaUp, FaTrash } from 'react-icons/fa';
 
@@ -9,12 +8,14 @@ import { deleteCategory, getAllCategories } from '@/actions/categories';
 import {
   Breadcrumbs,
   Button,
+  DeleteConfirmation,
   EmptyState,
   ErrorMessage,
   Loader,
+  Modal,
   Pagination,
 } from '@/components/index';
-import { useDeleteData, useFetchData } from '@/hooks/index';
+import { useDeleteData, useDeleteModal, useFetchData } from '@/hooks/index';
 import { ISearchParams } from '@/types/index';
 
 export default function Categories({
@@ -22,7 +23,11 @@ export default function Categories({
 }: {
   searchParams: ISearchParams;
 }) {
-  const { push } = useRouter();
+  const [categoryToDelete, setCategoryToDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   const { data, isLoading, isError, error } = useFetchData(
@@ -31,12 +36,23 @@ export default function Categories({
     searchParams
   );
 
+  const deleteModal = useDeleteModal();
+
   const { mutate: deleteCategoryById } = useDeleteData(deleteCategory, [
     'categories',
+    categoryToDelete?.id,
   ]);
 
-  const handleDelete = (id: string) => {
-    deleteCategoryById(id);
+  const handleDelete = (id: string, name: string) => {
+    setCategoryToDelete({ id, name });
+    deleteModal.onOpen();
+  };
+
+  const handleDeleteConfirm = () => {
+    if (categoryToDelete?.id) {
+      deleteCategoryById(categoryToDelete.id);
+      deleteModal.onClose();
+    }
   };
 
   if (!data || isLoading) {
@@ -161,7 +177,8 @@ export default function Categories({
                   outline
                   color="border-red-400"
                   onClick={() =>
-                    category?._id && handleDelete(category?._id.toString())
+                    category?._id &&
+                    handleDelete(category?._id.toString(), category.name)
                   }
                 />
               </td>
@@ -172,6 +189,18 @@ export default function Categories({
       {totalPages > 1 && (
         <Pagination count={categoriesCount} pageNumbers={pageNumbers} />
       )}
+      {/* Модалка для підтвердження видалення */}
+      <Modal
+        body={
+          <DeleteConfirmation
+            onConfirm={handleDeleteConfirm}
+            onCancel={() => deleteModal.onClose()}
+            title={`категорію: ${categoryToDelete?.name}`}
+          />
+        }
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.onClose}
+      />
     </div>
   );
 }

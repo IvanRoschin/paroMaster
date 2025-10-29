@@ -9,13 +9,15 @@ import { deleteUser, getAllUsers, updateUser } from '@/actions/users';
 import {
   Breadcrumbs,
   Button,
+  DeleteConfirmation,
   EmptyState,
   ErrorMessage,
   Loader,
+  Modal,
   Pagination,
   Switcher,
 } from '@/components/index';
-import { useDeleteData, useFetchData } from '@/hooks/index';
+import { useDeleteData, useDeleteModal, useFetchData } from '@/hooks/index';
 import { ISearchParams, IUser } from '@/types/index';
 
 export default function Users({
@@ -24,6 +26,11 @@ export default function Users({
   searchParams: ISearchParams;
 }) {
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [userToDelete, setUserToDelete] = useState<{
+    id: string;
+    name: string;
+    surname: string;
+  } | null>(null);
   const { data, isLoading, isError, error, refetch } = useFetchData(
     getAllUsers,
     ['users'],
@@ -32,10 +39,23 @@ export default function Users({
     }
   );
 
-  const { mutate: deleteUserById } = useDeleteData(deleteUser, ['users']);
+  const { mutate: deleteUserById } = useDeleteData(deleteUser, [
+    'users',
+    userToDelete?.id,
+  ]);
 
-  const handleDelete = (id: string) => {
-    deleteUserById(id);
+  const deleteModal = useDeleteModal();
+
+  const handleDelete = (id: string, name: string, surname: string) => {
+    setUserToDelete({ id, name, surname });
+    deleteModal.onOpen();
+  };
+
+  const handleDeleteConfirm = () => {
+    if (userToDelete?.id) {
+      deleteUserById(userToDelete.id);
+      deleteModal.onClose();
+    }
   };
 
   const handleStatusToggle = async (
@@ -68,10 +88,9 @@ export default function Users({
   if (!data?.users || data.users.length === 0) {
     return (
       <EmptyState
-        showReset
-        onReset={() => {
-          setStatusFilter(null);
-        }}
+        title="Адміни відсутні"
+        actionLabel="Додати першого адміна"
+        actionHref="/admin/users/add"
       />
     );
   }
@@ -170,7 +189,8 @@ export default function Users({
                     outline
                     color="border-red-400"
                     onClick={() =>
-                      user._id && handleDelete(user._id.toString())
+                      user._id &&
+                      handleDelete(user._id.toString(), user.name, user.surname)
                     }
                   />
                 </td>
@@ -182,6 +202,18 @@ export default function Users({
       {totalPages > 1 && (
         <Pagination count={usersCount} pageNumbers={pageNumbers} />
       )}
+      {/* Модалка для підтвердження видалення */}
+      <Modal
+        body={
+          <DeleteConfirmation
+            onConfirm={handleDeleteConfirm}
+            onCancel={() => deleteModal.onClose()}
+            title={`адміна: ${userToDelete?.name} &nbsp; ${userToDelete?.surname}`}
+          />
+        }
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.onClose}
+      />
     </div>
   );
 }

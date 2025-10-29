@@ -6,20 +6,27 @@ import { useState } from 'react';
 import { FaPen, FaTrash } from 'react-icons/fa';
 
 import { deleteOrder, getAllOrders } from '@/actions/orders';
+import DeleteConfirmation from '@/components/common/DeleteConfirmation';
 import {
   Breadcrumbs,
   Button,
   EmptyState,
   ErrorMessage,
   Loader,
+  Modal,
   Pagination,
 } from '@/components/index';
 import { formatDate } from '@/helpers/index';
-import { useDeleteData, useFetchData } from '@/hooks/index';
+import { useDeleteData, useDeleteModal, useFetchData } from '@/hooks/index';
 import { IOrder } from '@/types/IOrder';
 
 export default function Orders() {
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [orderToDelete, setOrderToDelete] = useState<{
+    id: string;
+    number: string;
+  } | null>(null);
+
   const searchParams = useSearchParams();
 
   const page = parseInt(searchParams.get('page') || '1');
@@ -29,8 +36,22 @@ export default function Orders() {
     async (id: string) => {
       await deleteOrder(id);
     },
-    ['orders']
+    ['orders', orderToDelete?.id]
   );
+
+  const deleteModal = useDeleteModal();
+
+  const handleDelete = (id: string, number: string) => {
+    setOrderToDelete({ id, number });
+    deleteModal.onOpen();
+  };
+
+  const handleDeleteConfirm = () => {
+    if (orderToDelete?.id) {
+      deleteOrderById(orderToDelete.id);
+      deleteModal.onClose();
+    }
+  };
   const { data, isLoading, isError, error } = useFetchData(
     getAllOrders,
     ['orders'],
@@ -50,6 +71,9 @@ export default function Orders() {
       <EmptyState
         showReset
         title="Відсутні замовлення 🤷‍♂️"
+        subtitle="Додайте перше замовлення"
+        actionLabel="Додати замовлення"
+        actionHref="/admin/orders/add"
         onReset={() => setStatusFilter(null)}
       />
     );
@@ -79,10 +103,6 @@ export default function Orders() {
       default:
         return 'bg-gray-100 text-gray-600';
     }
-  };
-
-  const handleDelete = (id: string) => {
-    deleteOrderById(id);
   };
 
   return (
@@ -189,7 +209,9 @@ export default function Orders() {
                   small
                   outline
                   color="border-red-400"
-                  onClick={() => order?._id && handleDelete(order._id)}
+                  onClick={() =>
+                    order?._id && handleDelete(order._id, order.number)
+                  }
                 />
               </div>
             </div>
@@ -202,6 +224,19 @@ export default function Orders() {
           <Pagination count={ordersCount} pageNumbers={pageNumbers} />
         </div>
       )}
+
+      {/* Модалка для підтвердження видалення */}
+      <Modal
+        body={
+          <DeleteConfirmation
+            onConfirm={handleDeleteConfirm}
+            onCancel={() => deleteModal.onClose()}
+            title={`замовлення: ${orderToDelete?.number}`}
+          />
+        }
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.onClose}
+      />
     </div>
   );
 }

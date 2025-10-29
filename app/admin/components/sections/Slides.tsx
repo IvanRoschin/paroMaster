@@ -10,13 +10,15 @@ import { deleteSlide, getAllSlides, updateSlide } from '@/actions/slider';
 import {
   Breadcrumbs,
   Button,
+  DeleteConfirmation,
   EmptyState,
   ErrorMessage,
   Loader,
+  Modal,
   Pagination,
   Switcher,
 } from '@/components/index';
-import { useDeleteData, useFetchData } from '@/hooks/index';
+import { useDeleteData, useDeleteModal, useFetchData } from '@/hooks/index';
 import { ISlider } from '@/types/index';
 import { ISearchParams } from '@/types/searchParams';
 
@@ -26,6 +28,10 @@ export default function Slides({
   searchParams: ISearchParams;
 }) {
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [slideToDelete, setSlideToDelete] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
 
   const page = Number(searchParams.page) || 1;
   const limit = Number(searchParams.limit) || 10;
@@ -41,8 +47,18 @@ export default function Slides({
 
   const { mutate: deleteSliderById } = useDeleteData(deleteSlide, ['slides']);
 
-  const handleDelete = (id: string) => {
-    deleteSliderById(id);
+  const deleteModal = useDeleteModal();
+
+  const handleDelete = (id: string, title: string) => {
+    setSlideToDelete({ id, title });
+    deleteModal.onOpen();
+  };
+
+  const handleDeleteConfirm = () => {
+    if (slideToDelete?.id) {
+      deleteSliderById(slideToDelete.id);
+      deleteModal.onClose();
+    }
   };
 
   const handleStatusToggle = async (
@@ -66,10 +82,9 @@ export default function Slides({
   if (!data?.slides || data.slides.length === 0)
     return (
       <EmptyState
-        showReset
-        onReset={() => {
-          setStatusFilter(null);
-        }}
+        title="Слайди відсутні"
+        actionLabel="Додати слайд"
+        actionHref="/admin/slider/add"
       />
     );
 
@@ -173,7 +188,7 @@ export default function Slides({
                   outline
                   color="border-red-400"
                   onClick={() =>
-                    slide._id && handleDelete(slide._id.toString())
+                    slide._id && handleDelete(slide._id.toString(), slide.title)
                   }
                 />
               </td>
@@ -182,6 +197,18 @@ export default function Slides({
         </tbody>
       </table>
       <Pagination count={slidesCount} pageNumbers={pageNumbers} />
+      {/* Модалка для підтвердження видалення */}
+      <Modal
+        body={
+          <DeleteConfirmation
+            onConfirm={handleDeleteConfirm}
+            onCancel={() => deleteModal.onClose()}
+            title={`слайд: ${slideToDelete?.title}`}
+          />
+        }
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.onClose}
+      />
     </div>
   );
 }

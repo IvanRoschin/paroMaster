@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+
 const { Schema } = mongoose;
 
 const testimonialsSchema = new Schema(
@@ -8,8 +9,8 @@ const testimonialsSchema = new Schema(
       ref: 'Good',
       required: false,
     },
-    name: {
-      type: String,
+    author: {
+      type: [String],
       required: true,
     },
     text: {

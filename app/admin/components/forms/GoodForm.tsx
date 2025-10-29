@@ -53,7 +53,6 @@ const GoodFormContent: React.FC<{
   allowedBrands,
 }) => {
   const { values, setFieldValue, errors } = formikProps;
-  const goodId = good?._id ?? '';
 
   const existingGoodsForBrand = useMemo(() => {
     if (!goodsByBrand || !values.brand) return [];

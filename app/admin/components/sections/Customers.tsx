@@ -1,20 +1,29 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { FaPen, FaTrash } from 'react-icons/fa';
 
 import { deleteCustomer, getAllCustomers } from '@/actions/customers';
 import {
   Button,
+  DeleteConfirmation,
   EmptyState,
   ErrorMessage,
   Loader,
+  Modal,
   Pagination,
 } from '@/components/index';
-import { useDeleteData, useFetchData } from '@/hooks/index';
+import { useDeleteData, useDeleteModal, useFetchData } from '@/hooks/index';
 import { ISearchParams } from '@/types/searchParams';
 
 export default function Customers({ params }: { params: ISearchParams }) {
+  const [сustomerToDelete, setCustomerToDelete] = useState<{
+    id: string;
+    name: string;
+    surname: string;
+  } | null>(null);
+
   const { data, isLoading, isError, error } = useFetchData(
     getAllCustomers,
     ['customers'],
@@ -22,10 +31,21 @@ export default function Customers({ params }: { params: ISearchParams }) {
   );
   const { mutate: deleteCustomerById } = useDeleteData(deleteCustomer, [
     'customers',
+    сustomerToDelete?.id,
   ]);
 
-  const handleDelete = (id: string) => {
-    deleteCustomerById(id);
+  const deleteModal = useDeleteModal();
+
+  const handleDelete = (id: string, name: string, surname: string) => {
+    setCustomerToDelete({ id, name, surname });
+    deleteModal.onOpen();
+  };
+
+  const handleDeleteConfirm = () => {
+    if (сustomerToDelete?.id) {
+      deleteCustomerById(сustomerToDelete.id);
+      deleteModal.onClose();
+    }
   };
 
   if (!data || isLoading) {
@@ -37,7 +57,14 @@ export default function Customers({ params }: { params: ISearchParams }) {
   }
 
   if (!data?.customers || data.customers.length === 0) {
-    return <EmptyState showReset />;
+    return (
+      <EmptyState
+        title="Замовники відсутні"
+        subtitle="Додайте замовника"
+        actionLabel="Додати замовника"
+        actionHref="/admin/customers/add"
+      />
+    );
   }
 
   const customersCount = data?.count || 0;
@@ -124,7 +151,12 @@ export default function Customers({ params }: { params: ISearchParams }) {
                   outline
                   color="border-red-400"
                   onClick={() =>
-                    customer._id && handleDelete(customer._id.toString())
+                    customer._id &&
+                    handleDelete(
+                      customer._id.toString(),
+                      customer.name,
+                      customer.surname
+                    )
                   }
                 />
               </td>
@@ -135,6 +167,18 @@ export default function Customers({ params }: { params: ISearchParams }) {
       {totalPages > 1 && (
         <Pagination count={customersCount} pageNumbers={pageNumbers} />
       )}
+      {/* Модалка для підтвердження видалення */}
+      <Modal
+        body={
+          <DeleteConfirmation
+            onConfirm={handleDeleteConfirm}
+            onCancel={() => deleteModal.onClose()}
+            title={`замовника: ${сustomerToDelete?.name} &nbsp; ${сustomerToDelete?.surname}`}
+          />
+        }
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.onClose}
+      />
     </div>
   );
 }
