@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react';
 import { FaPen, FaPlus, FaTrash } from 'react-icons/fa';
 
 import { deleteGood, getAllGoods, IGetAllGoods } from '@/actions/goods';
+import { EmptyState } from '@/components/common';
 import DeleteConfirmation from '@/components/common/DeleteConfirmation';
 import { Button, Modal } from '@/components/ui';
 import useDeleteData from '@/hooks/useDeleteData';
@@ -43,7 +44,10 @@ export default function Goods({
   const [selectedCondition, setSelectedCondition] = useState('all'); // ✅ новый фильтр
   const [sortPrice, setSortPrice] = useState<'asc' | 'desc' | 'none'>('none');
   const [search, setSearch] = useState('');
-  const [goodToDelete, setGoodToDelete] = useState<string>('');
+  const [goodToDelete, setGoodToDelete] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
 
   const { data, isLoading, isError } = useFetchData<IGetAllGoods>(
     getAllGoods,
@@ -51,22 +55,25 @@ export default function Goods({
     searchParams
   );
 
-  const { mutate: mutateDeleteGood } = useDeleteData(deleteGood, ['goods']);
+  const { mutate: deleteGoodById } = useDeleteData(deleteGood, [
+    'goods',
+    goodToDelete?.id,
+  ]);
 
   const deleteModal = useDeleteModal();
 
-  const handleDelete = (id: string) => {
-    setGoodToDelete(id);
+  const handleDelete = (id: string, title: string) => {
+    setGoodToDelete({ id, title });
     deleteModal.onOpen();
   };
 
-  const handleDeleteGood = (id: string) => {
-    try {
-      mutateDeleteGood(id);
-    } catch (error) {
-      console.error('Error deleting testimonial:', error);
+  const handleDeleteConfirm = () => {
+    if (goodToDelete?.id) {
+      deleteGoodById(goodToDelete.id);
+      deleteModal.onClose();
     }
   };
+
   const goods = data?.goods || [];
 
   const normalizedGoods = goods.map(g => ({
@@ -125,6 +132,16 @@ export default function Goods({
     return (
       <p className="text-center mt-10 text-red-500">Помилка завантаження</p>
     );
+  if (!goods || goods.length === 0) {
+    return (
+      <EmptyState
+        title="Товари відсутні"
+        subtitle="Додайте перший товар"
+        actionLabel="Додати товар"
+        actionHref="/admin/goods/add"
+      />
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -284,7 +301,10 @@ export default function Goods({
                       icon={FaTrash}
                       outline
                       className="text-red-500 border-red-300 hover:bg-red-50"
-                      onClick={() => handleDelete(good._id)}
+                      onClick={() =>
+                        good._id &&
+                        handleDelete(good._id.toString(), good.title)
+                      }
                     />
                   </div>
                 </div>
@@ -297,14 +317,9 @@ export default function Goods({
       <Modal
         body={
           <DeleteConfirmation
-            onConfirm={() => {
-              if (goodToDelete) {
-                handleDeleteGood(goodToDelete);
-                deleteModal.onClose();
-              }
-            }}
+            onConfirm={handleDeleteConfirm}
             onCancel={() => deleteModal.onClose()}
-            title={`товар: ${goodToDelete}`}
+            title={`товар: ${goodToDelete?.title}`}
           />
         }
         isOpen={deleteModal.isOpen}

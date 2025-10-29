@@ -14,8 +14,8 @@ export interface IGetAllTestimonials {
 }
 
 export async function addTestimonial(values: Partial<ITestimonial>) {
-  if (!values.name) {
-    throw new Error('Name is required.');
+  if (!values.author) {
+    throw new Error('Name and Surname is required.');
   }
   if (!values.text || typeof values.text !== 'string') {
     throw new Error('Text is required and must be a string');
@@ -28,7 +28,7 @@ export async function addTestimonial(values: Partial<ITestimonial>) {
     await connectToDB();
 
     const existingTestimonial = await Testimonial.findOne({
-      name: values.name,
+      name: values.author,
       text: values.text,
     });
 
@@ -37,7 +37,7 @@ export async function addTestimonial(values: Partial<ITestimonial>) {
     }
 
     const testimonialData: Partial<ITestimonial> = {
-      name: values.name,
+      author: values.author,
       text: values.text,
       isActive: values.isActive,
       ...(values.product && { product: values.product }),

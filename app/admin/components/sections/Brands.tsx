@@ -8,12 +8,14 @@ import { deleteBrand, getAllBrands } from '@/actions/brands';
 import {
   Breadcrumbs,
   Button,
+  DeleteConfirmation,
   EmptyState,
   ErrorMessage,
   Loader,
+  Modal,
   Pagination,
 } from '@/components/index';
-import { useDeleteData, useFetchData } from '@/hooks/index';
+import { useDeleteData, useDeleteModal, useFetchData } from '@/hooks/index';
 import { ISearchParams } from '@/types/index';
 
 export default function Brands({
@@ -21,6 +23,11 @@ export default function Brands({
 }: {
   searchParams: ISearchParams;
 }) {
+  const [brandToDelete, setBrandToDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   const { data, isLoading, isError, error } = useFetchData(
@@ -29,10 +36,23 @@ export default function Brands({
     searchParams
   );
 
-  const { mutate: deleteBrandById } = useDeleteData(deleteBrand, ['brands']);
+  const deleteModal = useDeleteModal();
 
-  const handleDelete = (id: string) => {
-    deleteBrandById(id);
+  const { mutate: deleteBrandById } = useDeleteData(deleteBrand, [
+    'brands',
+    brandToDelete?.id,
+  ]);
+
+  const handleDelete = (id: string, name: string) => {
+    setBrandToDelete({ id, name });
+    deleteModal.onOpen();
+  };
+
+  const handleDeleteConfirm = () => {
+    if (brandToDelete?.id) {
+      deleteBrandById(brandToDelete.id);
+      deleteModal.onClose();
+    }
   };
 
   if (!data || isLoading) {
@@ -157,7 +177,7 @@ export default function Brands({
                   outline
                   color="border-red-400"
                   onClick={() =>
-                    brand._id && handleDelete(brand._id.toString())
+                    brand._id && handleDelete(brand._id.toString(), brand.name)
                   }
                 />
               </td>
@@ -169,6 +189,19 @@ export default function Brands({
       {totalPages > 1 && (
         <Pagination count={brandsCount} pageNumbers={pageNumbers} />
       )}
+
+      {/* Модалка для підтвердження видалення */}
+      <Modal
+        body={
+          <DeleteConfirmation
+            onConfirm={handleDeleteConfirm}
+            onCancel={() => deleteModal.onClose()}
+            title={`бренд: ${brandToDelete?.name}`}
+          />
+        }
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.onClose}
+      />
     </div>
   );
 }

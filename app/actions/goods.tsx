@@ -197,7 +197,7 @@ export async function getGoodById(id: string): Promise<IGoodUI | null> {
     ...serializeGood(good), // возвращает plain объект
     testimonials: testimonials.map(t => ({
       _id: t._id.toString(),
-      name: t.name,
+      author: t.athor,
       text: t.text,
       rating: t.rating,
       createdAt: t.createdAt.toISOString(),

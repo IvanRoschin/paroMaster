@@ -25,6 +25,8 @@ const ImageUploadCloudinary: React.FC<ImageUploadCloudinaryProps> = ({
       const url = result?.info?.secure_url;
       if (!url) return;
 
+      console.log('✅ Uploaded URL:', url);
+
       if (multiple) {
         const updated = Array.isArray(values) ? [...values, url] : [url];
         setFieldValue('src', updated);
@@ -39,26 +41,29 @@ const ImageUploadCloudinary: React.FC<ImageUploadCloudinaryProps> = ({
     if (multiple && Array.isArray(values)) {
       setFieldValue(
         'src',
-        values.filter(img => img !== url)
+        values.filter(img => img && img !== url)
       );
     } else {
       setFieldValue('src', '');
     }
   };
 
-  const images = multiple
-    ? Array.isArray(values)
-      ? values
-      : []
-    : values
-      ? [values]
-      : [];
+  // безопасно формируем список картинок
+  const images: string[] = (() => {
+    if (multiple) {
+      return Array.isArray(values) ? values.filter(Boolean) : [];
+    }
+    if (typeof values === 'string' && values.trim() !== '') {
+      return [values];
+    }
+    return [];
+  })();
 
   return (
     <div>
       <CldUploadWidget
         uploadPreset={uploadPreset}
-        onUpload={handleUpload}
+        onSuccess={handleUpload} // <-- заменили onUpload
         options={{ multiple }}
       >
         {({ open }) => (
@@ -73,25 +78,27 @@ const ImageUploadCloudinary: React.FC<ImageUploadCloudinaryProps> = ({
       </CldUploadWidget>
 
       {/* превью */}
-      <div className="flex gap-2 mt-3 flex-wrap">
-        {images.map((url, idx) => (
-          <div key={idx} className="relative w-28 h-28">
-            <Image
-              fill
-              src={url as string}
-              alt="uploaded"
-              className="object-cover rounded-md"
-            />
-            <button
-              type="button"
-              onClick={() => handleRemove(url as string)}
-              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 text-xs"
-            >
-              ✕
-            </button>
-          </div>
-        ))}
-      </div>
+      {images.length > 0 && (
+        <div className="flex gap-2 mt-3 flex-wrap">
+          {images.map((url, idx) => (
+            <div key={idx} className="relative w-28 h-28">
+              <Image
+                fill
+                src={url}
+                alt="uploaded"
+                className="object-cover rounded-md"
+              />
+              <button
+                type="button"
+                onClick={() => handleRemove(url)}
+                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 text-xs"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
       {errors?.src && <p className="text-red-500 text-sm mt-1">{errors.src}</p>}
     </div>

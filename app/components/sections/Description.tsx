@@ -1,8 +1,7 @@
-import { ReactNode } from 'react';
-
 import { motion } from 'framer-motion';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { ReactNode } from 'react';
 import { FaPen } from 'react-icons/fa';
 
 import { Button } from '@/components/index';
@@ -61,7 +60,7 @@ const Description = ({ activeImage, clickNext, clickPrev, slides }: Props) => {
                 <div className="font-medium text-base tracking-wide italic text-gray-600 whitespace-pre-wrap break-words">
                   {elem.desc}
                 </div>
-                <div>
+                <div className="my-4">
                   <Link href="/#footer" className="inline-block">
                     <Button type="button" label="Замовити" />
                   </Link>

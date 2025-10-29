@@ -78,7 +78,11 @@ const ReviewList = ({ data, isAdmin = false, handleDelete }: Props) => {
               )}
               <li className="border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-lg font-medium">{review.name}</p>
+                  <p className="text-lg font-medium">
+                    {Array.isArray(review.author)
+                      ? review.author.join(' ')
+                      : review.author}
+                  </p>
                   <StarDisplay rating={review?.rating ?? undefined} />
                 </div>
                 <p className="text-gray-600 italic mb-2">

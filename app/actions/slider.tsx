@@ -80,8 +80,8 @@ export async function getAllSlides(
 export async function getSlideById(id: string) {
   try {
     await connectToDB();
-    const category = await Slider.findById({ _id: id });
-    return JSON.parse(JSON.stringify(category));
+    const slide = await Slider.findById({ _id: id });
+    return JSON.parse(JSON.stringify(slide));
   } catch (error) {
     if (error instanceof Error) {
       console.error('Error getting Slide:', error);
@@ -113,6 +113,8 @@ export async function updateSlide(values: any) {
   }
   try {
     await connectToDB();
+
+    console.log('updateFields:', updateFields);
 
     const updatedSlide = await Slider.findByIdAndUpdate(
       values._id,
