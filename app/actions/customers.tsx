@@ -6,6 +6,8 @@ import Customer from '@/models/Customer';
 import { ICustomer } from '@/types/ICustomer';
 import { connectToDB } from '@/utils/dbConnect';
 
+import { serializeDoc } from '../lib';
+
 interface IGetAllCostomers {
   success: boolean;
   customers: ICustomer[];
@@ -38,9 +40,7 @@ export async function addCustomer(values: {
       return {
         success: true,
         message: 'Customer updated successfully',
-        customer: JSON.parse(
-          JSON.stringify(existingCustomer.toObject({ getters: true }))
-        ),
+        customer: serializeDoc<ICustomer>(existingCustomer),
       };
     }
 
@@ -56,9 +56,7 @@ export async function addCustomer(values: {
     return {
       success: true,
       message: 'New customer created successfully',
-      customer: JSON.parse(
-        JSON.stringify(newCustomer.toObject({ getters: true }))
-      ),
+      customer: serializeDoc<ICustomer>(newCustomer),
     };
   } catch (error) {
     console.error('Error adding customer:', error);

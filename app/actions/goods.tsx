@@ -192,20 +192,23 @@ export async function getGoodById(id: string): Promise<IGoodUI | null> {
   });
 
   // Преобразуем в plain object
-  const plainGood: IGoodUI = {
-    ...serializeGood(good), // возвращает plain объект
-    testimonials: testimonials.map(t => ({
-      _id: t._id.toString(),
-      author: t.athor,
-      text: t.text,
-      rating: t.rating,
-      createdAt: t.createdAt.toISOString(),
-      updatedAt: t.updatedAt.toISOString(),
-      isActive: t.isActive,
-    })),
-    compatibleGoods: compatibleGoodsRecords.map(g => serializeGood(g)), // массив товаров
-  };
+  // const plainGood: IGoodUI = {
+  //   ...serializeGood(good), // возвращает plain объект
+  //   testimonials: testimonials.map(t => ({
+  //     _id: t._id.toString(),
+  //     author: t.athor,
+  //     text: t.text,
+  //     rating: t.rating,
+  //     createdAt: t.createdAt.toISOString(),
+  //     updatedAt: t.updatedAt.toISOString(),
+  //     isActive: t.isActive,
+  //   })),
+  //   compatibleGoods: compatibleGoodsRecords.map(g => serializeGood(g)), // массив товаров
+  // };
 
+  const plainGood = JSON.parse(
+    JSON.stringify(good.toObject({ getters: true }))
+  );
   return plainGood;
 }
 

@@ -35,40 +35,6 @@ export interface ICustomerFormValues {
   payment: PaymentMethod;
 }
 
-// export function userToPlain(user: IUser | any) {
-//   const plain = user?.toObject ? user.toObject() : { ...user };
-//   return {
-//     ...plain,
-//     _id: plain._id?.toString(),
-//   };
-// }
-
-// export function customerToPlain(customer: any) {
-//   const plain = customer.toObject ? customer.toObject() : customer;
-//   plain._id = plain._id.toString();
-//   plain.user = plain.user?.toString();
-//   return plain;
-// }
-
-function goodToPlain(good: any) {
-  return {
-    ...good.toObject?.(),
-    _id: good._id?.toString(),
-    brand: good.brand
-      ? { ...good.brand, _id: good.brand._id?.toString() }
-      : null,
-    category: good.category
-      ? { ...good.category, _id: good.category._id?.toString() }
-      : null,
-    dealExpiresAt: good.dealExpiresAt
-      ? good.dealExpiresAt.toString()
-      : undefined,
-    compatibleGoods: good.compatibleGoods?.map((g: any) =>
-      typeof g === 'string' ? g : goodToPlain(g)
-    ),
-  };
-}
-
 const OrderPage = () => {
   const { data: session } = useSession();
   const { push } = useRouter();
@@ -76,6 +42,8 @@ const OrderPage = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckboxChecked, setIsCheckboxChecked] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
   const [initialValues, setInitialValues] = useState<ICustomerFormValues>({
     name: '',
     surname: '',
@@ -86,9 +54,12 @@ const OrderPage = () => {
     payment: PaymentMethod.CASH_ON_DELIVERY,
   });
 
-  const generatedNumber = `ORD-${Date.now()}`;
+  const [generatedNumber, setGeneratedNumber] = useState<string | null>(null);
 
   useEffect(() => {
+    setIsClient(true);
+    setGeneratedNumber(`ORD-${Date.now()}`);
+
     try {
       const saved = sessionStorage.getItem(storageKeys.customer);
       if (saved) setInitialValues(JSON.parse(saved));
@@ -106,6 +77,8 @@ const OrderPage = () => {
       ),
     [cart]
   );
+
+  if (!isClient) return null;
 
   const handleSubmit = async (values: ICustomerFormValues) => {
     if (!isCheckboxChecked)
@@ -149,7 +122,7 @@ const OrderPage = () => {
       }));
 
       const orderData: IOrder = {
-        number: generatedNumber,
+        number: generatedNumber || `ORD-${Date.now()}`,
         customer: customerRes.customer._id,
         customerSnapshot: {
           user: {

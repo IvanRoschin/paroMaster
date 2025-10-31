@@ -24,15 +24,20 @@
     "baseUrl": ".",
     "paths": {
       "@/components/*": ["./app/components/*"],
+      "@/components": ["./app/components/index"],
       "@/actions/*": ["./app/actions/*"],
       "@/api/*": ["./app/api/*"],
       "@/utils/*": ["./app/utils/*"],
       "@/types/*": ["./types/*"],
       "@/models/*": ["./models/*"],
+      "@/models/": ["./models/index"],
       "@/helpers/*": ["./app/helpers/*"],
+      "@/helpers/": ["./app/helpers/index*"],
       "@/hooks/*": ["./app/hooks/*"],
+      "@/hooks/": ["./app/hooks/index"],
       "@/config/*": ["./app/config/*"],
       "@/lib/*": ["./app/lib/*"],
+      "@/lib": ["./app/lib/index"],
       "@/admin/*": ["./app/admin/*"]
     },
     "skipLibCheck": true

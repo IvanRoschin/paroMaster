@@ -8,6 +8,7 @@ import Order from '@/models/Order';
 import { IOrder } from '@/types/index';
 import { connectToDB } from '@/utils/dbConnect';
 
+import { serializeDoc } from '../lib';
 import { addCustomer } from './customers';
 import { addUser } from './users';
 
@@ -32,7 +33,7 @@ export async function addOrder(values: IOrder) {
 
     // 2️⃣ Проверяем/создаём Customer через Mongoose документ
     const { success: custOk, customer: customerDoc } = await addCustomer({
-      user: new mongoose.Types.ObjectId(userId), // обязательно ObjectId
+      user: new mongoose.Types.ObjectId(userId),
       city: values.customerSnapshot.city,
       warehouse: values.customerSnapshot.warehouse,
       payment: values.customerSnapshot.payment,
@@ -58,10 +59,10 @@ export async function addOrder(values: IOrder) {
       customer: customer._id,
       customerSnapshot: {
         user: {
-          name: user.name,
-          surname: user.surname,
-          email: user.email,
-          phone: user.phone,
+          name: values.customerSnapshot.user.name,
+          surname: values.customerSnapshot.user.surname,
+          email: values.customerSnapshot.user.email,
+          phone: values.customerSnapshot.user.phone,
         },
         city: values.customerSnapshot.city,
         warehouse: values.customerSnapshot.warehouse,
@@ -86,7 +87,7 @@ export async function addOrder(values: IOrder) {
     return {
       success: true,
       message: 'Order created successfully',
-      order: JSON.parse(JSON.stringify(order.toObject({ getters: true }))),
+      order: serializeDoc<IOrder>(order),
     };
   } catch (error) {
     console.error('Error adding order:', error);

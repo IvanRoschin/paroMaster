@@ -5,9 +5,9 @@ export function generateEmailContent(order: IOrder) {
 
   if (
     !number ||
-    !customerSnapshot.name ||
-    !customerSnapshot.email ||
-    !customerSnapshot.phone ||
+    !customerSnapshot.user.name ||
+    !customerSnapshot.user.email ||
+    !customerSnapshot.user.phone ||
     !customerSnapshot.city ||
     !customerSnapshot.warehouse ||
     !customerSnapshot.payment ||
@@ -52,9 +52,9 @@ export function generateEmailContent(order: IOrder) {
 
       <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
         <h2 style="margin-bottom: 10px;">👤 Клієнт:</h2>
-        <p><strong>Ім'я:</strong> ${customerSnapshot.name} ${customerSnapshot.surname}</p>
-        <p><strong>Телефон:</strong> ${customerSnapshot.phone}</p>
-        <p><strong>Email:</strong> ${customerSnapshot.email}</p>
+        <p><strong>Ім'я:</strong> ${customerSnapshot.user.name} ${customerSnapshot.user.surname}</p>
+        <p><strong>Телефон:</strong> ${customerSnapshot.user.phone}</p>
+        <p><strong>Email:</strong> ${customerSnapshot.user.email}</p>
         <p><strong>Спосіб оплати:</strong> ${customerSnapshot.payment}</p>
         <p><strong>Місто:</strong> ${customerSnapshot.city}</p>
         <p><strong>Відділення НП:</strong> ${customerSnapshot.warehouse}</p>

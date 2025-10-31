@@ -23,9 +23,9 @@ function validateOrderData(data: IOrder) {
 
   if (
     !data.number ||
-    !customer?.name ||
-    !customer?.email ||
-    !customer?.phone ||
+    !customer?.user.name ||
+    !customer?.user.email ||
+    !customer?.user.phone ||
     !customer?.city ||
     !customer?.warehouse ||
     !customer?.payment ||
@@ -59,8 +59,8 @@ export async function sendAdminEmail(data: IOrder) {
     await sendMail({
       to: fromEmail!,
       name: 'ParoMaster Admin',
-      subject: `Нове замовлення №${data.number} від ${customer.name}${
-        customer.surname ? ` ${customer.surname}` : ''
+      subject: `Нове замовлення №${data.number} від ${customer.user.name}${
+        customer.user.surname ? ` ${customer.user.surname}` : ''
       }`,
       body: emailContent,
     });
@@ -90,13 +90,13 @@ export async function sendCustomerEmail(data: IOrder) {
       return { success: false, error: emailContent.error };
     }
 
-    if (!customer.email) {
+    if (!customer.user.email) {
       return { success: false, error: 'Missing recipient email address.' };
     }
 
     await sendMail({
-      to: customer.email,
-      name: customer.name,
+      to: customer.user.email,
+      name: customer.user.name,
       subject: `Ваше замовлення на сайті ParoMaster`,
       body: emailContent,
     });

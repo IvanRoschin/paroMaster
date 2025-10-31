@@ -7,6 +7,8 @@ import { IUser } from '@/types/index';
 import { UserRole } from '@/types/IUser';
 import { connectToDB } from '@/utils/dbConnect';
 
+import { serializeDoc } from '../lib';
+
 export async function addUser(
   values: Partial<IUser>
 ): Promise<{ success: boolean; message: string; user: IUser }> {
@@ -23,7 +25,7 @@ export async function addUser(
       return {
         success: true,
         message: 'Користувач вже існує',
-        user: existingUser, // возвращаем Mongoose документ для сервера
+        user: serializeDoc<IUser>(existingUser),
       };
     }
 
@@ -49,7 +51,7 @@ export async function addUser(
     return {
       success: true,
       message: 'Користувача успішно створено!',
-      user: JSON.parse(JSON.stringify(newUser.toObject({ getters: true }))),
+      user: serializeDoc<IUser>(newUser),
     };
   } catch (error) {
     console.error('Error adding user:', error);
