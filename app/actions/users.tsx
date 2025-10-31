@@ -1,18 +1,19 @@
 'use server';
 
-import bcrypt from 'bcrypt';
-
+import Token, { TokenType } from '@/models/Token';
 import User from '@/models/User';
 import { IUser } from '@/types/index';
 import { UserRole } from '@/types/IUser';
 import { connectToDB } from '@/utils/dbConnect';
 
 import { generateRandomPassword, serializeDoc } from '../lib';
-import { sendUserCredentialsEmail } from './sendNodeMailer';
+import { sendVerificationLetter } from './sendNodeMailer';
 
-export async function addUser(
-  values: Partial<IUser>
-): Promise<{ success: boolean; message: string; user: IUser }> {
+export async function addUser(values: Partial<IUser>): Promise<{
+  success: boolean;
+  message: string;
+  user: IUser;
+}> {
   try {
     await connectToDB();
 
@@ -30,9 +31,6 @@ export async function addUser(
       };
     }
 
-    // 2️⃣ Генерируем временный пароль
-    const tempPassword = generateRandomPassword();
-
     // 3️⃣ Создаём нового пользователя
     const newUser = new User({
       name: values.name,
@@ -41,19 +39,22 @@ export async function addUser(
       phone,
       role: UserRole.CUSTOMER,
       isActive: true,
-      password: bcrypt.hashSync(tempPassword, bcrypt.genSaltSync(10)),
     });
 
     await newUser.save();
 
-    // 4️⃣ Отправляем данные учетной записи пользователю
-    await sendUserCredentialsEmail({
-      email: newUser.email!,
-      name: newUser.name!,
-      login: newUser.email!,
-      password: tempPassword,
+    const verificationToken = await Token.create({
+      userId: newUser._id,
+      token: generateRandomPassword(32),
+      type: TokenType.VERIFICATION,
+      used: false,
     });
 
+    await sendVerificationLetter({
+      email: newUser.email!,
+      name: newUser.name!,
+      token: verificationToken.token,
+    });
     return {
       success: true,
       message:

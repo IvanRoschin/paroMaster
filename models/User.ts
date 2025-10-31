@@ -12,13 +12,13 @@ const userSchema = new Schema(
     surname: { type: String, required: true },
     email: { type: String, unique: true, required: true },
     phone: { type: String, required: true },
-    password: { type: String, required: true },
+    password: { type: String, required: false },
     role: {
       type: String,
       enum: Object.values(UserRole),
       default: UserRole.CUSTOMER,
     },
-    isActive: { type: Boolean, default: true },
+    isActive: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

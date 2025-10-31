@@ -1,3 +1,4 @@
+import brandSchema from '@/helpers/validationSchemas/addBrandSсhema';
 import categoryFormSchema from '@/helpers/validationSchemas/addCategorySchema';
 import customerFormSchema from '@/helpers/validationSchemas/addCustomerSchema';
 import goodFormSchema from '@/helpers/validationSchemas/addGoodSchema';
@@ -5,11 +6,14 @@ import orderFormSchema from '@/helpers/validationSchemas/addOrderSchema';
 import sliderFormSchema from '@/helpers/validationSchemas/addSliderSchema';
 import testimonialFormSchema from '@/helpers/validationSchemas/addTestimonial';
 import userFormSchema from '@/helpers/validationSchemas/addUserSchema';
+import changePassValidationSchema from '@/helpers/validationSchemas/changePassFormSchema';
 import contactFormSchema from '@/helpers/validationSchemas/contactForm';
 import userLoginSchema from '@/helpers/validationSchemas/userLoginSchema';
 
 export {
+  brandSchema,
   categoryFormSchema,
+  changePassValidationSchema,
   contactFormSchema,
   customerFormSchema,
   goodFormSchema,

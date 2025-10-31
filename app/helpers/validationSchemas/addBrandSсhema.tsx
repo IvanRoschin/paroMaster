@@ -1,6 +1,6 @@
 import * as yup from 'yup';
 
-export const brandSchema = yup.object().shape({
+const brandSchema = yup.object().shape({
   name: yup
     .string()
     .required('Назва бренду є обовʼязковою')
@@ -18,3 +18,5 @@ export const brandSchema = yup.object().shape({
     .notRequired(),
   website: yup.string().url('Має бути валідним URL').nullable().notRequired(),
 });
+
+export default brandSchema;

@@ -11,6 +11,7 @@ import {
   Pagination,
   Search,
   Socials,
+  TextField,
 } from '@/components/common';
 import { LeadForm, LoginForm, TestimonialForm } from '@/components/forms';
 import {
@@ -100,4 +101,5 @@ export {
   Testimonial,
   TestimonialForm,
   TestimonialsList,
+  TextField,
 };

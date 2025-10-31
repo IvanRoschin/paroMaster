@@ -7,6 +7,8 @@ import {
 import { generateEmailContent } from 'app/templates/email/NewOrderTemplate';
 import { FieldValues } from 'react-hook-form';
 
+import { baseUrl, routes } from '@/helpers/routes';
+import { TokenType } from '@/models/Token';
 import { IOrder } from '@/types/index';
 
 import { sendMail } from '../lib/sendMail';
@@ -36,6 +38,12 @@ export interface IUserCredentials {
   password: string;
 }
 
+export interface IUserVerificationCredentials {
+  email: string;
+  name: string;
+  token: TokenType;
+}
+
 function validateOrderData(order: IOrder) {
   const customer = order.customerSnapshot;
 
@@ -60,6 +68,56 @@ function validateOrderData(order: IOrder) {
   return { success: true };
 }
 
+export async function sendVerificationLetter({
+  email,
+  name,
+  token,
+}: IUserVerificationCredentials) {
+  if (!email || !name || !token) {
+    return {
+      success: false,
+      error: 'sendVerificationLetter Error: Missing required user credentials.',
+    };
+  }
+
+  const verificationUrl = `${baseUrl}${routes.customerProfile.verifyEmail}?token=${token}`;
+
+  try {
+    const emailContent = `
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif; background-color: #f9f9f9; border-radius: 10px; color: #333;">
+        <h2>Привіт, ${name}!</h2>
+        <p>Ви зробили замовлення на сайті магазину запчастин <strong>ParoMaster</strong>.</p>
+        <p>Щоб активувати особистий кабінет та отримувати спеціальні пропозиції, перейдіть за посиланням:</p>
+        <p><strong><a href="${verificationUrl}" style="color: #2196F3; text-decoration: none;">Підтвердити реєстрацію</a></strong></p>
+        <p>Бажаємо приємних покупок 🚀</p>
+      </div>
+    `;
+
+    await sendMail({
+      to: email,
+      from: {
+        email: 'no-reply@paromaster.com',
+        name: 'Магазин запчастин ParoMaster',
+      },
+      name,
+      subject: 'Підтвердження реєстрації на ParoMaster',
+      body: emailContent,
+    });
+
+    console.log('✅ Verification letter successfully sent.');
+    return { success: true };
+  } catch (error: any) {
+    console.error(
+      '❌ Error sending user credentials email:',
+      error.message || error
+    );
+    return {
+      success: false,
+      error: error.message || 'Unknown error occurred.',
+    };
+  }
+}
+
 export async function sendUserCredentialsEmail({
   email,
   name,
@@ -73,14 +131,19 @@ export async function sendUserCredentialsEmail({
     };
   }
 
+  const resetPasswordUrl = `${baseUrl}${routes.customerProfile.changePassword}`;
+
   try {
     const emailContent = `
       <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif; background-color: #f9f9f9; border-radius: 10px; color: #333;">
         <h2>Привіт, ${name}!</h2>
-        <p>Ваш обліковий запис створена на сайті магазину запчастин <strong>ParoMaster</strong>.</p>
+        <p>Дякуюємо за довіру! <br> 
+        Ваш особистий кабінет активовано на сайті магазину запчастин <strong>ParoMaster</strong>.</p>
         <p><strong>Логін:</strong> ${login}</p>
         <p><strong>Пароль:</strong> ${password}</p>
-        <p>Радимо змінити пароль після першого входу.</p>
+        <p>Радимо змінити пароль після першого входу в особистому кабінеті або за посиланням
+         <a href="${resetPasswordUrl}" style="color: #2196F3; text-decoration: none;">змінити пароль</a>
+</p>
         <p>Бажаємо приємних покупок 🚀</p>
       </div>
     `;

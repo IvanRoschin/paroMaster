@@ -12,7 +12,7 @@ import {
   FormField,
   ImageUploadCloudinary,
 } from '@/components/index';
-import { brandSchema } from '@/helpers/validationSchemas/addBrandShema';
+import { brandSchema } from '@/helpers/validationSchemas/index';
 import { useAddData, useUpdateData } from '@/hooks/index';
 import { IBrand } from '@/types/IBrand';
 

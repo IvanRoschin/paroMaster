@@ -17,7 +17,7 @@ declare module 'next-auth' {
   }
 
   interface User {
-    id: string; // 👈 NextAuth требует `id`, не `_id`
+    id: string;
     role?: string;
     phone?: string;
   }
@@ -103,6 +103,8 @@ export const authOptions: NextAuthOptions = {
         token.id = (user as any).id?.toString();
         token.role = (user as any).role;
         token.phone = (user as any).phone;
+        const dbUser = await User.findById((user as any).id);
+        token.token = dbUser?.token;
       }
       return token;
     },
@@ -110,6 +112,7 @@ export const authOptions: NextAuthOptions = {
       if (token?.id) (session.user as any)._id = token.id.toString();
       if (token?.role) (session.user as any).role = token.role as string;
       if (token?.phone) (session.user as any).phone = token.phone as string;
+      if (token?.token) (session.user as any).token = token.token as string;
       return session;
     },
     async redirect({ baseUrl }) {
