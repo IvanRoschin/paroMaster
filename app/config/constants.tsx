@@ -1,18 +1,21 @@
 ///paymentMethods///
 
+import { OrderStatus } from '@/types/orderStatus';
+import { PaymentMethod } from '@/types/paymentMethod';
+
 export const paymentMethods = [
-  { id: 'CASH_ON_DELIVERY', label: 'Оплата після отримання' },
-  { id: 'CREDIT_CARD', label: 'Оплата на карту' },
-  { id: 'INVOICE_FOR_SPD', label: 'Рахунок для СПД' },
-  { id: 'WAY_FOR_PAY', label: 'Оплата через WayForPay' },
+  { id: PaymentMethod.CASH_ON_DELIVERY, label: 'Оплата після отримання' },
+  { id: PaymentMethod.CREDIT_CARD, label: 'Оплата на карту' },
+  { id: PaymentMethod.INVOICE_FOR_SPD, label: 'Рахунок для СПД' },
+  { id: PaymentMethod.WAY_FOR_PAY, label: 'Оплата через WayForPay' },
 ];
 
 export const orderStatus = [
-  { id: 'NEW', label: 'Новий' },
-  { id: 'PROCESSING', label: 'Опрацьовується' },
-  { id: 'PAID', label: 'Оплачено' },
-  { id: 'READY_TO_SHIP', label: 'На відправку' },
-  { id: 'CLOSED', label: 'Закритий' },
+  { id: OrderStatus.NEW, label: 'Новий' },
+  { id: OrderStatus.PROCESSING, label: 'Опрацьовується' },
+  { id: OrderStatus.PAID, label: 'Оплачено' },
+  { id: OrderStatus.READY_TO_SHIP, label: 'На відправку' },
+  { id: OrderStatus.CLOSED, label: 'Закритий' },
 ];
 
 ///Menu///

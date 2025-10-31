@@ -12,10 +12,12 @@ const orderSchema = new Schema(
     },
     customer: { type: Schema.Types.ObjectId, ref: 'Customer' },
     customerSnapshot: {
-      name: { type: String, required: true },
-      surname: { type: String, required: true },
-      phone: { type: String, required: true },
-      email: { type: String },
+      user: {
+        name: { type: String, required: true },
+        surname: { type: String, required: true },
+        phone: { type: String, required: true },
+        email: { type: String },
+      },
       city: { type: String, required: true },
       warehouse: { type: String, required: true },
       payment: { type: String, required: true },

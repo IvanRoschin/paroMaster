@@ -1,45 +1,48 @@
 'use client';
-
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
+import { IWarehouse } from '@/types/index';
+
 const useWarehouses = (city: string) => {
-  const [warehouses, setWarehouses] = useState<
-    { Ref: string; Description: string }[]
-  >([]);
-  const [isWarehousesLoading, setIsWarehousesLoading] = useState(false);
+  const [warehouses, setWarehouses] = useState<IWarehouse[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  const fetchWarehouses = async (c: string) => {
+    if (!c.trim()) {
+      setWarehouses([]);
+      return;
+    }
+    try {
+      setIsLoading(true);
+      const res = await fetch('/api/warehouses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ city: c.trim() }),
+      });
+      const result = await res.json();
+      if (!result.success) throw new Error(result.message || 'Failed');
+      setWarehouses(result.data || []);
+    } catch (err) {
+      console.error(err);
+      toast.error('Не вдалося завантажити відділення');
+      setWarehouses([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // fetch с debounce для ручного ввода
   useEffect(() => {
-    const fetchWarehouses = async () => {
-      if (!city.trim()) return;
-      try {
-        setIsWarehousesLoading(true);
-        const response = await fetch('/api/warehouses', {
-          method: 'POST',
-          body: JSON.stringify({ city }),
-          headers: { 'Content-Type': 'application/json' },
-        });
-        const result = await response.json();
-        if (!result.success)
-          throw new Error(result.message || 'Failed to fetch warehouses');
-        setWarehouses(result.data || []);
-      } catch (error) {
-        console.error('Failed to fetch warehouses:', error);
-        toast.error('Не вдалося завантажити відділення');
-        setWarehouses([]);
-      } finally {
-        setIsWarehousesLoading(false);
-      }
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => fetchWarehouses(city), 300);
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
     };
-
-    const debounceTimer = setTimeout(() => {
-      fetchWarehouses();
-    }, 400);
-
-    return () => clearTimeout(debounceTimer);
   }, [city]);
 
-  return { warehouses, isWarehousesLoading };
+  return { warehouses, isLoading, fetchWarehouses };
 };
 
 export default useWarehouses;

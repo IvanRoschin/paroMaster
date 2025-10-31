@@ -1,3 +1,8 @@
+export enum UserRole {
+  ADMIN = 'admin',
+  CUSTOMER = 'customer',
+}
+
 export interface IUser {
   _id?: string;
   name: string;
@@ -5,7 +10,7 @@ export interface IUser {
   email: string;
   phone: string;
   password?: string;
-  isAdmin: boolean;
+  role: UserRole;
   isActive: boolean;
   createdAt?: Date | string;
   updatedAt?: Date | string;

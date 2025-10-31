@@ -1,50 +1,41 @@
 'use client';
-
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-const useCities = (cityQuery: string) => {
-  const [allCities, setCities] = useState<
-    { Ref: string; Description: string }[]
-  >([]);
-  const [isCitiesLoading, setIsCitiesLoading] = useState(false);
+import { ICity } from '@/types/index';
+
+const useCities = (query: string) => {
+  const [allCities, setCities] = useState<ICity[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const fetchCities = async () => {
-      if (!cityQuery.trim()) return;
+    if (!query.trim()) return;
+
+    const timer = setTimeout(async () => {
       try {
-        setIsCitiesLoading(true);
-        const response = await fetch('/api/cities', {
+        setIsLoading(true);
+        const res = await fetch('/api/cities', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            city: cityQuery, // Передаємо динамічне значення
-          }),
+          body: JSON.stringify({ city: query.trim() }),
         });
-        const result = await response.json();
-
-        if (!result.success)
-          throw new Error(result.message || 'Failed to fetch cities');
+        const result = await res.json();
+        if (!result.success) throw new Error(result.message || 'Failed');
 
         setCities(result.data || []);
-      } catch (error) {
-        console.error('Failed to fetch cities:', error);
+      } catch (err) {
+        console.error(err);
         toast.error('Не вдалося завантажити міста');
         setCities([]);
       } finally {
-        setIsCitiesLoading(false);
+        setIsLoading(false);
       }
-    };
+    }, 300);
 
-    // Дебаунс для пошуку
-    const debounceTimer = setTimeout(() => {
-      fetchCities();
-    }, 400);
+    return () => clearTimeout(timer);
+  }, [query]);
 
-    return () => clearTimeout(debounceTimer);
-  }, [cityQuery]);
-
-  return { allCities, isCitiesLoading };
+  return { allCities, isLoading };
 };
 
 export default useCities;

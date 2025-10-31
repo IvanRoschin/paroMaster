@@ -1,4 +1,4 @@
-import { ErrorMessage, Field, FormikErrors, useField } from 'formik';
+import { Field, FormikErrors, useField } from 'formik';
 
 interface Option {
   value: string;
@@ -18,6 +18,7 @@ interface FormFieldProps {
     style?: React.CSSProperties;
   };
   errors?: FormikErrors<any>;
+  touched?: any;
   setFieldValue?: (field: string, value: any, shouldValidate?: boolean) => void;
 }
 
@@ -61,7 +62,9 @@ const FormField: React.FC<FormFieldProps> = ({
         </label>
         {meta.touched && meta.error && (
           <div className="text-rose-500 text-sm mt-1">
-            <ErrorMessage name={item.id} />
+            {typeof meta.error === 'string'
+              ? meta.error
+              : (meta.error as any).message || 'Помилка'}
           </div>
         )}
       </div>
@@ -143,7 +146,9 @@ const FormField: React.FC<FormFieldProps> = ({
       {/* Error message handling */}
       {meta.touched && meta.error && (
         <div className="text-rose-500 text-sm mt-1">
-          <ErrorMessage name={item.id} />
+          {typeof meta.error === 'string'
+            ? meta.error
+            : (meta.error as any).message || 'Помилка'}
         </div>
       )}
     </div>

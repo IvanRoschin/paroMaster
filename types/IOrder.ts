@@ -1,19 +1,29 @@
-import { ICustomer, ICustomerSnapshot } from './ICustomer';
-import { IGoodBase } from './IGood';
-import { OrderStatus } from './orderStatus';
+import { PaymentMethod } from './paymentMethod';
+
+export interface IOrderGood {
+  good: string;
+  quantity: number;
+  price: number;
+}
 
 export interface IOrder {
   _id?: string;
-  number: string;
-  customer?: string | ICustomer;
-  customerSnapshot: ICustomerSnapshot;
-  orderedGoods: Array<{
-    good: string | IGoodBase;
-    quantity: number;
-    price: number;
-  }>;
+  number?: string;
+  customer: string;
+  customerSnapshot: {
+    user: {
+      name: string;
+      surname: string;
+      phone: string;
+      email?: string;
+    };
+    city: string;
+    warehouse: string;
+    payment: PaymentMethod;
+  };
+  orderedGoods: IOrderGood[];
   totalPrice: number;
-  status: OrderStatus;
+  status?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -1,16 +1,23 @@
+// models/User.ts
 import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
+
+import { UserRole } from '@/types/IUser';
 
 const { Schema } = mongoose;
 
 const userSchema = new Schema(
   {
-    name: String,
-    surname: String,
-    email: { type: String, unique: true },
-    phone: String,
-    password: String,
-    isAdmin: { type: Boolean, default: false },
+    name: { type: String, required: true },
+    surname: { type: String, required: true },
+    email: { type: String, unique: true, required: true },
+    phone: { type: String, required: true },
+    password: { type: String, required: true },
+    role: {
+      type: String,
+      enum: Object.values(UserRole),
+      default: UserRole.CUSTOMER,
+    },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
@@ -25,4 +32,5 @@ userSchema.methods.setPassword = function (password: string) {
 userSchema.methods.comparePassword = function (password: string) {
   return bcrypt.compareSync(password, this.password);
 };
+
 export default mongoose.models.User || mongoose.model('User', userSchema);

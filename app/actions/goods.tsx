@@ -173,7 +173,6 @@ export async function getDailyDeals(maxPrice: number): Promise<IGoodUI[]> {
 export async function getGoodById(id: string): Promise<IGoodUI | null> {
   await connectToDB();
 
-  // Получаем сам товар с populated brand и category
   const good = await Good.findById(id)
     .populate('category', 'name slug src')
     .populate('brand', 'name slug src country website');

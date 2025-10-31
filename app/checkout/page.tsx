@@ -3,35 +3,99 @@
 import { useShoppingCart } from 'app/context/ShoppingCartContext';
 import { createWayForPayInvoice } from 'app/lib/wayforpay';
 import PublicOfferSummary from 'app/publicoffer/PublicOfferSummary';
-import { ErrorMessage, Field, Form, Formik, useFormikContext } from 'formik';
+import { Field, Form, Formik } from 'formik';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { addCustomer } from '@/actions/customers';
 import { addOrder } from '@/actions/orders';
 import { sendAdminEmail, sendCustomerEmail } from '@/actions/sendNodeMailer';
+import { addUser } from '@/actions/users';
+import { WarehouseSelect } from '@/components/common/WarehouseSelect';
 import { Breadcrumbs, Button, FormField } from '@/components/index';
+import { paymentMethods } from '@/config/constants';
 import { customerFormSchema, storageKeys } from '@/helpers/index';
 import { useCities, useWarehouses } from '@/hooks/index';
-import { IGoodBase } from '@/types/IGood';
-import { ICartItem, ICustomerSnapshot, IOrder } from '@/types/index';
+import { ICartItem, IOrder } from '@/types/index';
+import { UserRole } from '@/types/IUser';
 import { OrderStatus } from '@/types/orderStatus';
 import { PaymentMethod } from '@/types/paymentMethod';
 
 import OrderGood from './orderGood';
 
-interface FormikCustomerValues extends ICustomerSnapshot {
-  _id?: string;
+export interface ICustomerFormValues {
+  name: string;
+  surname: string;
+  email: string;
+  phone: string;
+  city: string;
+  warehouse: string;
+  payment: PaymentMethod;
+}
+
+// export function userToPlain(user: IUser | any) {
+//   const plain = user?.toObject ? user.toObject() : { ...user };
+//   return {
+//     ...plain,
+//     _id: plain._id?.toString(),
+//   };
+// }
+
+// export function customerToPlain(customer: any) {
+//   const plain = customer.toObject ? customer.toObject() : customer;
+//   plain._id = plain._id.toString();
+//   plain.user = plain.user?.toString();
+//   return plain;
+// }
+
+function goodToPlain(good: any) {
+  return {
+    ...good.toObject?.(),
+    _id: good._id?.toString(),
+    brand: good.brand
+      ? { ...good.brand, _id: good.brand._id?.toString() }
+      : null,
+    category: good.category
+      ? { ...good.category, _id: good.category._id?.toString() }
+      : null,
+    dealExpiresAt: good.dealExpiresAt
+      ? good.dealExpiresAt.toString()
+      : undefined,
+    compatibleGoods: good.compatibleGoods?.map((g: any) =>
+      typeof g === 'string' ? g : goodToPlain(g)
+    ),
+  };
 }
 
 const OrderPage = () => {
+  const { data: session } = useSession();
+  const { push } = useRouter();
+  const { cart, resetCart } = useShoppingCart();
+
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckboxChecked, setIsCheckboxChecked] = useState(false);
-  const { cart, resetCart } = useShoppingCart();
-  const { push } = useRouter();
+  const [initialValues, setInitialValues] = useState<ICustomerFormValues>({
+    name: '',
+    surname: '',
+    email: '',
+    phone: '+380',
+    city: '',
+    warehouse: '',
+    payment: PaymentMethod.CASH_ON_DELIVERY,
+  });
 
   const generatedNumber = `ORD-${Date.now()}`;
+
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(storageKeys.customer);
+      if (saved) setInitialValues(JSON.parse(saved));
+    } catch (err) {
+      console.error(err);
+    }
+  }, []);
 
   const totalPrice = useMemo(
     () =>
@@ -43,127 +107,85 @@ const OrderPage = () => {
     [cart]
   );
 
-  const getSavedFormData = (): FormikCustomerValues | null => {
-    try {
-      const savedData = sessionStorage.getItem(storageKeys.customer);
-      if (savedData) return JSON.parse(savedData) as FormikCustomerValues;
-      return null;
-    } catch (error) {
-      console.error('Помилка при читанні даних форми:', error);
-      return null;
-    }
-  };
-
-  const savedFormData = getSavedFormData();
-
-  const initialValues: FormikCustomerValues = savedFormData || {
-    name: '',
-    surname: '',
-    email: '',
-    phone: '',
-    city: '',
-    warehouse: '',
-    payment: PaymentMethod.CASH_ON_DELIVERY,
-  };
-
-  const handleSubmit = async (customerValues: FormikCustomerValues) => {
-    if (!isCheckboxChecked) {
-      toast.error('Будь ласка, погодьтесь із публічною офертою');
-      return;
-    }
-
-    if (!customerValues.city || !customerValues.warehouse) {
-      toast.error('Будь ласка, виберіть місто та відділення');
-      return;
-    }
-
-    if (cart.length === 0) {
-      toast.error(
-        'Кошик порожній. Додайте товари перед оформленням замовлення.'
-      );
-      return;
-    }
-
-    // Сформувати список товарів для замовлення
-    const orderedGoods = cart.map(item => ({
-      good: item.good as IGoodBase,
-      quantity: item.quantity,
-      price: item.good.price,
-    }));
-
-    // Знімок покупця
-    const customerSnapshot: ICustomerSnapshot = {
-      name: customerValues.name,
-      surname: customerValues.surname,
-      phone: customerValues.phone,
-      email: customerValues.email,
-      city: customerValues.city,
-      warehouse: customerValues.warehouse,
-      payment: customerValues.payment,
-    };
-
-    const orderData: IOrder = {
-      number: generatedNumber,
-      customer: customerValues._id,
-      customerSnapshot,
-      orderedGoods,
-      totalPrice,
-      status: OrderStatus.NEW,
-    };
+  const handleSubmit = async (values: ICustomerFormValues) => {
+    if (!isCheckboxChecked)
+      return toast.error('Будь ласка, погодьтесь із публічною офертою');
+    if (!values.city || !values.warehouse)
+      return toast.error('Будь ласка, виберіть місто та відділення');
+    if (cart.length === 0) return toast.error('Кошик порожній.');
 
     try {
       setIsLoading(true);
 
-      const [
-        customerResult,
-        orderResult,
-        adminEmailResult,
-        customerEmailResult,
-      ] = await Promise.all([
-        customerValues._id
-          ? Promise.resolve({ success: true })
-          : addCustomer(customerSnapshot),
-        addOrder(orderData),
+      let userId: string;
+
+      // === 1. Пользователь ===
+      if (session?.user?._id) {
+        userId = session.user._id;
+      } else {
+        const userRes = await addUser({
+          name: values.name,
+          surname: values.surname,
+          email: values.email,
+          phone: values.phone,
+          password: 'autoGenerated',
+          role: UserRole.CUSTOMER,
+        });
+        if (!userRes.success || !userRes.user?._id)
+          throw new Error('Не вдалося створити користувача');
+        userId = userRes.user._id;
+      }
+
+      // === 2. Customer ===
+      const customerRes = await addCustomer({ ...values, user: userId });
+      if (!customerRes.success || !customerRes.customer?._id)
+        throw new Error('Не вдалося створити замовника');
+
+      // === 3. Order ===
+      const orderedGoods = cart.map(item => ({
+        good: item.good._id,
+        quantity: item.quantity,
+        price: item.good.price,
+      }));
+
+      const orderData: IOrder = {
+        number: generatedNumber,
+        customer: customerRes.customer._id,
+        customerSnapshot: {
+          user: {
+            name: values.name,
+            surname: values.surname,
+            phone: values.phone,
+            email: values.email,
+          },
+          city: values.city,
+          warehouse: values.warehouse,
+          payment: values.payment,
+        },
+        orderedGoods,
+        totalPrice,
+        status: OrderStatus.NEW,
+      };
+
+      const orderRes = await addOrder(orderData);
+      if (!orderRes.success) throw new Error('Не вдалося створити замовлення');
+
+      await Promise.all([
         sendAdminEmail(orderData),
         sendCustomerEmail(orderData),
       ]);
 
-      const allSuccessful =
-        customerResult?.success &&
-        orderResult?.success &&
-        adminEmailResult?.success &&
-        customerEmailResult?.success;
-
-      if (!allSuccessful) {
-        toast.error('Помилка при створенні замовлення. Спробуйте ще раз.');
-        return;
-      }
-
-      toast.success('Замовлення успішно створено! 🚀', { duration: 3000 });
-
-      // Очищення кошика та форми
+      toast.success('Замовлення успішно створено! 🚀');
       resetCart();
       sessionStorage.removeItem(storageKeys.customer);
       localStorage.clear();
 
-      // WayForPay
-      if (customerSnapshot.payment === PaymentMethod.WAY_FOR_PAY) {
-        try {
-          const result = await createWayForPayInvoice(orderData);
-          if (result.url) {
-            window.location.href = result.url;
-          } else {
-            toast.error('Не вдалося створити рахунок. Спробуйте ще раз.');
-          }
-        } catch (error) {
-          console.error('WayForPay error:', error);
-          toast.error('Помилка при створенні платежу');
-        }
-      } else {
-        push('/');
-      }
-    } catch (error) {
-      console.error('🔁 Загальна помилка в сабміті:', error);
+      if (values.payment === PaymentMethod.WAY_FOR_PAY) {
+        const invoice = await createWayForPayInvoice(orderData);
+        if (invoice.url) window.location.href = invoice.url;
+      } else push('/');
+    } catch (err) {
+      console.error('Error in handleSubmit:', err);
       toast.error('Сталася помилка. Спробуйте ще раз.');
     } finally {
       setIsLoading(false);
@@ -182,25 +204,58 @@ const OrderPage = () => {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Форма замовника */}
           <div className="w-full lg:w-2/3">
-            <Formik<FormikCustomerValues>
+            <Formik<ICustomerFormValues>
               initialValues={initialValues}
-              onSubmit={handleSubmit}
+              enableReinitialize
               validationSchema={customerFormSchema}
+              onSubmit={handleSubmit}
             >
-              {({ values, errors, touched }) => (
+              {({ values, errors, touched, setFieldValue }) => (
                 <Form className="flex flex-col space-y-6">
-                  <FormEffects />
-                  <CustomerFields errors={errors} touched={touched} />
-                  <div className="flex items-center">
-                    <input
-                      id="termsCheckbox"
-                      type="checkbox"
-                      checked={isCheckboxChecked}
-                      onChange={e => setIsCheckboxChecked(e.target.checked)}
-                      className="mr-2"
-                    />
-                    <label htmlFor="termsCheckbox">
-                      <PublicOfferSummary />
+                  <FormEffects values={values} setFieldValue={setFieldValue} />
+                  <CustomerFields
+                    values={values}
+                    errors={errors}
+                    touched={touched}
+                    setFieldValue={setFieldValue}
+                  />
+                  <div className="flex items-center space-x-2">
+                    <label className="relative flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={isCheckboxChecked}
+                        onChange={e => setIsCheckboxChecked(e.target.checked)}
+                        className="peer absolute w-0 h-0 opacity-0"
+                        id="termsCheckbox"
+                      />
+                      <span
+                        className="
+        w-5 h-5 rounded border-2 border-neutral-300
+        peer-checked:border-[rgb(var(--color-primaryAccentColor))]
+        peer-checked:bg-[rgb(var(--color-primaryAccentColor))]
+        flex-shrink-0
+        transition-colors duration-200
+        flex items-center justify-center
+      "
+                      >
+                        {/* Галочка */}
+                        <svg
+                          className="w-3 h-3 text-white"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth={3}
+                        >
+                          <path
+                            d="M5 13l4 4L19 7"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </span>
+                      <span className="ml-2 text-[rgb(var(--color-primaryTextColor))] select-none">
+                        <PublicOfferSummary />
+                      </span>
                     </label>
                   </div>
                   <Button
@@ -217,13 +272,15 @@ const OrderPage = () => {
           <div className="w-full lg:w-1/3 flex flex-col gap-4">
             <h3 className="text-2xl font-semibold mb-4">Ваші товари</h3>
             {cart.length > 0 ? (
-              cart.map((item: ICartItem, i) => (
-                <OrderGood
-                  key={item.good._id || i}
-                  good={item.good as IGoodBase}
-                  quantity={item.quantity}
-                />
-              ))
+              cart.map((item: ICartItem, i) => {
+                return (
+                  <OrderGood
+                    key={item.good._id || i}
+                    good={item.good}
+                    quantity={item.quantity}
+                  />
+                );
+              })
             ) : (
               <div>Кошик порожній...</div>
             )}
@@ -244,89 +301,135 @@ const OrderPage = () => {
 
 /* -------------------- HOOKS & COMPONENTS -------------------- */
 
-const useCitySelection = (
-  fieldValue: string,
-  setFieldValue: (field: string, value: any) => void
+export const useCitySelection = (
+  value: string,
+  setFieldValue: (field: string, value: any) => void,
+  fetchWarehouses: (city: string) => void
 ) => {
+  const [search, setSearch] = useState(value || '');
+  const { allCities } = useCities(search);
+
   const [filteredCities, setFilteredCities] = useState<string[]>([]);
-  const [searchQuery, setSearchQuery] = useState(fieldValue || '');
-  const { allCities } = useCities(searchQuery);
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (!Array.isArray(allCities)) {
-        setFilteredCities([]);
-        return;
-      }
+    const query = search.trim().toLowerCase();
+    const filtered = allCities
+      .filter(c => (query ? c.description.toLowerCase().includes(query) : true))
+      .map(c => c.description);
+    setFilteredCities(filtered);
+  }, [search, allCities]);
 
-      const normalizedQuery = (searchQuery || '').trim().toLowerCase();
-      const filtered = allCities
-        .filter((city: any) =>
-          (city.description || '').toLowerCase().includes(normalizedQuery)
-        )
-        .map((city: any) => city.description || '');
-
-      setFilteredCities(filtered);
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery, allCities]);
-
-  const handleSelectCity = (city: string) => {
+  const handleSelect = (city: string) => {
     setFieldValue('city', city);
-    setSearchQuery(city);
-    setTimeout(() => setFilteredCities([]), 0);
+    setSearch(city);
+    setFilteredCities([]);
+    fetchWarehouses(city); // сразу подгружаем отделения
   };
 
-  return { filteredCities, searchQuery, setSearchQuery, handleSelectCity };
+  useEffect(() => {
+    setSearch(value || '');
+  }, [value]);
+
+  return { search, setSearch, filteredCities, handleSelect };
 };
 
-const FormEffects = () => {
-  const { values, setValues } = useFormikContext<FormikCustomerValues>();
+const FormEffects = ({
+  values,
+  setFieldValue,
+}: {
+  values: ICustomerFormValues;
+  setFieldValue: (field: string, value: any) => void;
+}) => {
   const { warehouses } = useWarehouses(values?.city);
   const prevWarehouseRef = useRef<string | null>(null);
+  const { data: session } = useSession();
 
   useEffect(() => {
     const firstDescription = warehouses[0]?.Description || '';
-
     if (!values.city && values.warehouse) {
-      setValues({ ...values, warehouse: '' });
+      setFieldValue('warehouse', '');
       prevWarehouseRef.current = '';
       return;
     }
-
     if (
       values.city &&
       firstDescription &&
       values.warehouse !== firstDescription &&
       prevWarehouseRef.current !== firstDescription
     ) {
-      setValues({ ...values, warehouse: firstDescription });
+      setFieldValue('warehouse', firstDescription);
       prevWarehouseRef.current = firstDescription;
     }
-  }, [values.city, values, setValues, warehouses]);
+  }, [values.city, values.warehouse, warehouses, setFieldValue]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
+      const plainValues = {
+        ...values,
+        user: session?.user?._id || undefined,
+      };
       try {
-        sessionStorage.setItem(storageKeys.customer, JSON.stringify(values));
+        sessionStorage.setItem(
+          storageKeys.customer,
+          JSON.stringify(plainValues)
+        );
       } catch (error) {
-        console.error('Error saving form data to sessionStorage:', error);
+        console.error(error);
       }
     }, 300);
-
     return () => clearTimeout(timeoutId);
-  }, [values]);
+  }, [values, session]);
 
   return null;
 };
 
-const CustomerFields = ({ touched, errors }: { touched: any; errors: any }) => {
-  const { values, setFieldValue } = useFormikContext<FormikCustomerValues>();
-  const { warehouses, isWarehousesLoading } = useWarehouses(values?.city);
+const CustomerFields = ({
+  values,
+  errors,
+  touched,
+  setFieldValue,
+}: {
+  values: ICustomerFormValues;
+  errors: any;
+  touched: any;
+  setFieldValue: (field: string, value: any) => void;
+}) => {
+  const {
+    warehouses,
+    isLoading: isWarehousesLoading,
+    fetchWarehouses,
+  } = useWarehouses(values.city);
+
+  const { search, setSearch, filteredCities, handleSelect } = useCitySelection(
+    values.city,
+    setFieldValue,
+    fetchWarehouses
+  );
+
   const [showDropdown, setShowDropdown] = useState(false);
-  const { filteredCities, searchQuery, setSearchQuery, handleSelectCity } =
-    useCitySelection(values?.city, setFieldValue);
+
+  useEffect(() => {
+    if (!values.phone.startsWith('+380')) {
+      setFieldValue('phone', '+380');
+    }
+  }, [values.phone, setFieldValue]);
+
+  useEffect(() => {
+    setFieldValue('warehouse', '');
+  }, [values.city, setFieldValue]);
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value;
+
+    if (!val.startsWith('+380')) {
+      val = '+380' + val.replace(/^\+?0*/, '');
+    }
+
+    // Убираем все нецифровые символы кроме +
+    val = '+380' + val.slice(4).replace(/\D/g, '');
+
+    setFieldValue('phone', val);
+  };
 
   const customerInputs = [
     { name: 'name', type: 'text', id: 'name', label: "Ім'я" },
@@ -336,9 +439,9 @@ const CustomerFields = ({ touched, errors }: { touched: any; errors: any }) => {
     {
       id: 'payment',
       label: 'Оберіть спосіб оплати',
-      options: Object.values(PaymentMethod).map(method => ({
-        value: method,
-        label: method,
+      options: Object.values(paymentMethods).map(pm => ({
+        value: pm.id,
+        label: pm.label,
       })),
       type: 'select',
     },
@@ -346,13 +449,13 @@ const CustomerFields = ({ touched, errors }: { touched: any; errors: any }) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
     const value = e.target.value;
-    setSearchQuery(value);
+    setSearch(value);
     setFieldValue(field.name, value);
     setShowDropdown(true);
   };
 
   const handleCityClick = (city: string) => {
-    handleSelectCity(city);
+    handleSelect(city);
     setShowDropdown(false);
   };
 
@@ -360,16 +463,29 @@ const CustomerFields = ({ touched, errors }: { touched: any; errors: any }) => {
     <>
       <h3 className="text-xl font-semibold">Замовник</h3>
       {customerInputs.map((input, i) => (
-        <FormField key={i} item={input} setFieldValue={setFieldValue} />
+        <FormField
+          key={i}
+          item={input}
+          setFieldValue={(field, value) => {
+            if (field === 'phone')
+              handlePhoneChange({ target: { value } } as any);
+            else setFieldValue(field, value);
+          }}
+          errors={errors}
+          touched={touched}
+        />
       ))}
 
+      {/* City input */}
       <div className="relative mb-4">
-        <Field name="city">
+        <Field name="city" id="city">
           {({ field }: any) => (
             <input
               {...field}
-              value={searchQuery}
+              value={search}
               onChange={e => handleChange(e, field)}
+              onFocus={() => setShowDropdown(true)}
+              onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
               placeholder=" "
               className={`peer w-full p-4 pt-6 border-2 rounded-md outline-none
                 ${errors?.city && touched?.city ? 'border-rose-500' : 'border-neutral-300'}
@@ -383,16 +499,17 @@ const CustomerFields = ({ touched, errors }: { touched: any; errors: any }) => {
         </label>
         {touched?.city && errors?.city && (
           <div className="text-rose-500 text-sm mt-1">
-            <ErrorMessage name="city" />
+            {typeof errors.city === 'string'
+              ? errors?.city
+              : (errors?.city as any).message || 'Помилка'}
           </div>
         )}
-
         {showDropdown && filteredCities.length > 0 && (
           <div className="absolute z-10 w-full bg-white border rounded-md max-h-60 overflow-y-auto">
-            {filteredCities.map(city => (
+            {filteredCities.map((city, i) => (
               <div
-                key={city}
-                onClick={() => handleCityClick(city)}
+                key={i}
+                onMouseDown={() => handleCityClick(city)}
                 className="p-2 hover:bg-gray-200 cursor-pointer"
               >
                 {city}
@@ -402,30 +519,40 @@ const CustomerFields = ({ touched, errors }: { touched: any; errors: any }) => {
         )}
       </div>
 
+      {/* Warehouse select */}
       <div className="relative w-full mb-4">
-        <Field
+        <WarehouseSelect
+          name="warehouse"
+          warehouses={warehouses}
+          value={values.warehouse}
+          setFieldValue={setFieldValue}
+          disabled={isWarehousesLoading || warehouses.length === 0}
+          errors={errors}
+          touched={touched}
+        />
+        {/* <Field
           name="warehouse"
           as="select"
-          disabled={isWarehousesLoading}
+          disabled={isWarehousesLoading || warehouses.length === 0}
           className={`w-full p-4 pt-6 border-2 rounded-md outline-none
             ${errors?.warehouse && touched?.warehouse ? 'border-rose-500' : 'border-neutral-300'}
             ${errors?.warehouse && touched?.warehouse ? 'focus:border-rose-500' : 'focus:border-green-500'}
           `}
         >
           {warehouses.map((wh, i) => (
-            <option key={i} value={wh.Description}>
+            <option key={i} value={wh.Description} className="mx-4 my-4">
               {wh.Description}
             </option>
           ))}
         </Field>
-        <label className="absolute left-3 top-3 text-md z-9">
+        <label className="absolute left-3 top-0 text-md z-9">
           Оберіть відділення
         </label>
         {touched?.warehouse && errors?.warehouse && (
           <div className="text-rose-500 text-sm mt-1">
             <ErrorMessage name="warehouse" />
           </div>
-        )}
+        )} */}
       </div>
     </>
   );
