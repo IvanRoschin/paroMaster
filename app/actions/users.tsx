@@ -7,7 +7,8 @@ import { IUser } from '@/types/index';
 import { UserRole } from '@/types/IUser';
 import { connectToDB } from '@/utils/dbConnect';
 
-import { serializeDoc } from '../lib';
+import { generateRandomPassword, serializeDoc } from '../lib';
+import { sendUserCredentialsEmail } from './sendNodeMailer';
 
 export async function addUser(
   values: Partial<IUser>
@@ -29,7 +30,10 @@ export async function addUser(
       };
     }
 
-    // 2️⃣ Создаём нового
+    // 2️⃣ Генерируем временный пароль
+    const tempPassword = generateRandomPassword();
+
+    // 3️⃣ Создаём нового пользователя
     const newUser = new User({
       name: values.name,
       surname: values.surname,
@@ -37,23 +41,26 @@ export async function addUser(
       phone,
       role: UserRole.CUSTOMER,
       isActive: true,
+      password: bcrypt.hashSync(tempPassword, bcrypt.genSaltSync(10)),
     });
-
-    if (values.password) {
-      newUser.password = bcrypt.hashSync(
-        values.password,
-        bcrypt.genSaltSync(10)
-      );
-    }
 
     await newUser.save();
 
+    // 4️⃣ Отправляем данные учетной записи пользователю
+    await sendUserCredentialsEmail({
+      email: newUser.email!,
+      name: newUser.name!,
+      login: newUser.email!,
+      password: tempPassword,
+    });
+
     return {
       success: true,
-      message: 'Користувача успішно створено!',
+      message:
+        'Користувача успішно створено! Дані для входу відправлені на email.',
       user: serializeDoc<IUser>(newUser),
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error adding user:', error);
     throw new Error(
       'Failed to add user: ' +

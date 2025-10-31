@@ -11,7 +11,11 @@ import { toast } from 'sonner';
 
 import { addCustomer } from '@/actions/customers';
 import { addOrder } from '@/actions/orders';
-import { sendAdminEmail, sendCustomerEmail } from '@/actions/sendNodeMailer';
+import {
+  IOrderedGoodSnapshot,
+  sendAdminEmail,
+  sendCustomerEmail,
+} from '@/actions/sendNodeMailer';
 import { addUser } from '@/actions/users';
 import { WarehouseSelect } from '@/components/common/WarehouseSelect';
 import { Breadcrumbs, Button, FormField } from '@/components/index';
@@ -143,9 +147,21 @@ const OrderPage = () => {
       const orderRes = await addOrder(orderData);
       if (!orderRes.success) throw new Error('Не вдалося створити замовлення');
 
+      const orderedGoodsSnapshot: IOrderedGoodSnapshot[] = cart.map(item => ({
+        good: {
+          _id: item.good._id,
+          title: item.good.title,
+          brand: item.good.brand?.name || '-',
+          model: item.good.model,
+          sku: item.good.sku,
+        },
+        quantity: item.quantity,
+        price: item.good.price,
+      }));
+
       await Promise.all([
-        sendAdminEmail(orderData),
-        sendCustomerEmail(orderData),
+        sendAdminEmail(orderData, orderedGoodsSnapshot),
+        sendCustomerEmail(orderData, orderedGoodsSnapshot),
       ]);
 
       toast.success('Замовлення успішно створено! 🚀');

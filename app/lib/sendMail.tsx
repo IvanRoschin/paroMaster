@@ -24,18 +24,25 @@ transporter
 
 export async function sendMail({
   to,
+  from,
   name,
   subject,
   body,
 }: {
   to: string;
+  from?: { name: string; email: string };
   name: string;
   subject: string;
   body: string;
 }) {
   try {
+    const fromField =
+      from?.email && from?.name
+        ? { name: from.name, address: from.email }
+        : `"ParoMaster" <${SMTP_EMAIL}>`;
+
     const result = await transporter.sendMail({
-      from: `"${name}" <${SMTP_EMAIL}>`, // корректный формат from
+      from: fromField,
       to,
       subject,
       html: body,

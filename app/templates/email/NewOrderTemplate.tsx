@@ -1,16 +1,27 @@
+import { IOrderedGoodSnapshot } from '@/actions/sendNodeMailer';
+import { paymentMethods } from '@/config/constants';
 import { IOrder } from '@/types/index';
 
-export function generateEmailContent(order: IOrder) {
+export function generateEmailContent(
+  order: IOrder,
+  orderedGoodsSnapshot: IOrderedGoodSnapshot[]
+) {
   const { number, customerSnapshot, orderedGoods, totalPrice } = order;
+
+  const customer = order.customerSnapshot;
+
+  const paymentLabel =
+    paymentMethods.find(pm => pm.id === customerSnapshot.payment)?.label ??
+    'Невідомий спосіб оплати';
 
   if (
     !number ||
-    !customerSnapshot.user.name ||
-    !customerSnapshot.user.email ||
-    !customerSnapshot.user.phone ||
-    !customerSnapshot.city ||
-    !customerSnapshot.warehouse ||
-    !customerSnapshot.payment ||
+    !customer.user.name ||
+    !customer.user.email ||
+    !customer.user.phone ||
+    !customer.city ||
+    !customer.warehouse ||
+    !customer.payment ||
     !Array.isArray(orderedGoods) ||
     orderedGoods.length === 0 ||
     totalPrice <= 0
@@ -21,9 +32,8 @@ export function generateEmailContent(order: IOrder) {
     };
   }
 
-  const itemsContent = orderedGoods
+  const itemsContent = orderedGoodsSnapshot
     .map(({ good, quantity, price }, index) => {
-      // good может быть ObjectId или объект товара
       const item =
         typeof good === 'object' && good !== null
           ? good
@@ -55,7 +65,7 @@ export function generateEmailContent(order: IOrder) {
         <p><strong>Ім'я:</strong> ${customerSnapshot.user.name} ${customerSnapshot.user.surname}</p>
         <p><strong>Телефон:</strong> ${customerSnapshot.user.phone}</p>
         <p><strong>Email:</strong> ${customerSnapshot.user.email}</p>
-        <p><strong>Спосіб оплати:</strong> ${customerSnapshot.payment}</p>
+        <p><strong>Спосіб оплати:</strong> ${paymentLabel}</p>
         <p><strong>Місто:</strong> ${customerSnapshot.city}</p>
         <p><strong>Відділення НП:</strong> ${customerSnapshot.warehouse}</p>
       </div>

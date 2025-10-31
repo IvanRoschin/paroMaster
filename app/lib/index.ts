@@ -1,5 +1,6 @@
 import { cn } from './cn';
 import { generateCloudinarySignature } from './generateCloudinarySignature';
+import { generateRandomPassword } from './generateRandomPassword';
 import { generateSignature } from './generateSignature';
 import { getData } from './novaPoshta';
 import { sendMail } from './sendMail';
@@ -12,6 +13,7 @@ export {
   cn,
   createWayForPayInvoice,
   generateCloudinarySignature,
+  generateRandomPassword,
   generateSignature,
   getData,
   sendMail,
