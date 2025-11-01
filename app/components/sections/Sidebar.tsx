@@ -1,11 +1,10 @@
 'use client';
 
+import { BrandFilter, PriceFilter, Sort } from '@/components/index';
+import { Option } from '@/context/FiltersContext';
 import { IBrand, ICategory, IMinMaxPriceResponse } from '@/types/index';
 
-import BrandFilter from './BrandFilter';
 import Category from './Category';
-import { PriceFilter } from './PriceFilter';
-import Sort from './Sort';
 
 interface SidebarProps {
   pricesData: IMinMaxPriceResponse;
@@ -18,16 +17,18 @@ export default function Sidebar({
   categories,
   brands,
 }: SidebarProps) {
-  const mappedCategories = categories.map(c => ({
-    value: String(c._id),
-    label: c.name ?? 'Без назви',
-    src: c.src ?? '',
-    slug: c.slug ?? '',
+  const mappedBrands: Option[] = brands.map(b => ({
+    value: String(b._id),
+    label: b.name,
+    slug: b.slug,
   }));
 
-  const mappedBrands = brands.map(b => ({
-    value: String(b._id),
-    label: b.name ?? 'Без назви',
+  // Маппим категории на Option[] (если нужно для контекста)
+  const mappedCategories: Option[] = categories.map(c => ({
+    value: String(c._id),
+    label: c.name,
+    slug: c.slug,
+    src: c.src,
   }));
 
   return (
@@ -35,8 +36,8 @@ export default function Sidebar({
       <Category categories={mappedCategories} />
       <div className="hidden md:block">
         <PriceFilter
-          minPrice={pricesData.minPrice ?? 0}
-          maxPrice={pricesData.maxPrice ?? 100}
+          minPriceFromDB={pricesData.minPrice ?? 0}
+          maxPriceFromDB={pricesData.maxPrice ?? 100}
         />
         <Sort />
       </div>

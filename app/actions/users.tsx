@@ -38,7 +38,7 @@ export async function addUser(values: Partial<IUser>): Promise<{
       email,
       phone,
       role: UserRole.CUSTOMER,
-      isActive: true,
+      isActive: false,
     });
 
     await newUser.save();

@@ -4,16 +4,17 @@ import { useRouter } from 'next/navigation';
 
 import { Heading } from '@/components/sections';
 import { Button } from '@/components/ui';
+import { useFilter } from '@/context/FiltersContext';
 
 interface EmptyStateProps {
   title?: string;
   subtitle?: string;
   showReset?: boolean;
   category?: string;
-  onReset?: () => void;
   actionLabel?: string; // текст кнопки действия
   actionHref?: string; // путь для перехода
   onAction?: () => void; // колбек вместо перехода
+  goHomeAfterReset?: boolean; // если true, после сброса идём на главную
 }
 
 const EmptyState: React.FC<EmptyStateProps> = ({
@@ -21,14 +22,26 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   subtitle = 'Спробуйте змінити фільтри ⚙️',
   showReset,
   category,
-  onReset,
   actionLabel,
   actionHref,
   onAction,
+  goHomeAfterReset = false,
 }) => {
   const router = useRouter();
+  const { setMinPrice, setMaxPrice, setSelectedBrands, setCategory, setSort } =
+    useFilter();
+
+  const handleResetFilters = () => {
+    setMinPrice(null);
+    setMaxPrice(null);
+    setSelectedBrands([]);
+    setCategory('');
+    setSort('');
+    if (goHomeAfterReset) router.push('/');
+  };
+
   return (
-    <div className="h-[60vh] flex flex-col gap-2 justify-center items-center">
+    <div className="h-[60vh] flex flex-col gap-2 justify-center items-center text-center">
       <Heading center title={title} subtitle={subtitle} category={category} />
       <div className="flex flex-col gap-2 mt-4 w-48">
         {showReset && (
@@ -36,9 +49,10 @@ const EmptyState: React.FC<EmptyStateProps> = ({
             type="button"
             outline
             label="Видалити фільтри"
-            onClick={() => (onReset ? onReset() : router.push('/'))}
+            onClick={handleResetFilters}
           />
         )}
+
         {actionLabel && (actionHref || onAction) && (
           <Button
             type="button"

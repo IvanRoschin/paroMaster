@@ -1,35 +1,19 @@
 'use client';
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-
+import { Option, useFilter } from '@/context/FiltersContext';
 import { useMediaQuery } from '@/hooks/index';
 
-interface Option {
-  value: string;
-  label: string;
-}
 const BrandFilter = ({ brands }: { brands: Option[] }) => {
   const isMobile = useMediaQuery('(max-width: 767px)');
+  const { selectedBrands, setSelectedBrands } = useFilter();
 
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const { push } = useRouter();
-
-  const selectedBrands = searchParams.getAll('brand');
-
-  const handleBrandCheckboxClick = (brand: string) => {
-    let updatedBrands: string[];
-    if (selectedBrands.includes(brand)) {
-      updatedBrands = selectedBrands.filter(b => b !== brand);
+  const handleBrandClick = (brand: Option) => {
+    const exists = selectedBrands.some(b => b.slug === brand.slug);
+    if (exists) {
+      setSelectedBrands(selectedBrands.filter(b => b.slug !== brand.slug));
     } else {
-      updatedBrands = [...selectedBrands, brand];
+      setSelectedBrands([...selectedBrands, brand]);
     }
-
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete('brand');
-    updatedBrands.forEach(b => params.append('brand', b));
-
-    push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   return (
@@ -37,20 +21,17 @@ const BrandFilter = ({ brands }: { brands: Option[] }) => {
       <h2 className="subtitle-main">Бренди</h2>
       <ul className={`p-4 ${isMobile ? 'grid grid-cols-3 gap-3' : ''}`}>
         {brands.map((brand, i) => {
-          const isChecked = selectedBrands.includes(brand.label);
+          const isChecked = selectedBrands.some(b => b.slug === brand.slug);
           return (
             <li key={i} className="flex items-center space-x-2">
               <input
                 type="checkbox"
                 checked={isChecked}
-                onChange={() => handleBrandCheckboxClick(brand.label)}
+                onChange={() => handleBrandClick(brand)}
                 className="custom-checkbox"
                 id={`checkbox-${i}`}
               />
-              <label
-                htmlFor={`checkbox-${i}`}
-                className="text-primaryTextColor cursor-pointer"
-              >
+              <label htmlFor={`checkbox-${i}`} className="cursor-pointer">
                 {brand.label}
               </label>
             </li>

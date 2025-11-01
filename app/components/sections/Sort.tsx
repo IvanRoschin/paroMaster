@@ -1,38 +1,20 @@
 'use client';
+import { useFilter } from '@/context/FiltersContext';
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
-
-const Sort = () => {
-  const [sort, setSort] = useState('');
-  const searchParams = useSearchParams();
-  const pathName = usePathname();
-  const { push } = useRouter();
+export const Sort = () => {
+  const { sort, setSort } = useFilter();
 
   return (
-    <div className="mb-4">
-      <h2 className="subtitle-main">Сортувати за ціною</h2>{' '}
+    <div>
+      <h2>Сортування</h2>
       <select
         value={sort}
-        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-          const params = new URLSearchParams(searchParams);
-          if (e.target.value) {
-            params.set('sort', e.target.value);
-          } else {
-            params.delete('sort');
-          }
-          setSort(e.target.value);
-          push(`${pathName}?${params.toString()}`, { scroll: false });
-        }}
+        onChange={e => setSort(e.target.value as 'asc' | 'desc')}
       >
-        <option value="" disabled>
-          Вибрати
-        </option>
-        <option value="asc">Найдешевші</option>
-        <option value="desc">Найдорожчі</option>
+        <option value="">За замовчуванням</option>
+        <option value="asc">Дешеві → Дорогі</option>
+        <option value="desc">Дорогі → Дешеві</option>
       </select>
     </div>
   );
 };
-
-export default Sort;

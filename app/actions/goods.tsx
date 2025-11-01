@@ -121,10 +121,14 @@ export async function getAllGoods(
 
     const count = await Good.countDocuments(filter);
 
+    let sortOption: any = { createdAt: -1 }; // дефолт
+    if (searchParams.sort === 'asc') sortOption = { price: 1 };
+    if (searchParams.sort === 'desc') sortOption = { price: -1 };
+
     const goods = await Good.find(filter)
       .populate('category', 'name slug src')
       .populate('brand', 'name slug src country website')
-      .sort({ createdAt: -1 })
+      .sort(sortOption)
       .skip(skip)
       .limit(limit)
       .exec();

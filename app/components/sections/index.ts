@@ -13,7 +13,7 @@ import { PriceFilter } from '@/components/sections/PriceFilter';
 import ReviewList from '@/components/sections/ReviewList';
 import Sidebar from '@/components/sections/Sidebar';
 import Slider from '@/components/sections/Slider';
-import Sort from '@/components/sections/Sort';
+import { Sort } from '@/components/sections/Sort';
 import Testimonial from '@/components/sections/Testimonial';
 import TestimonialsList from '@/components/sections/TestimonialsList';
 

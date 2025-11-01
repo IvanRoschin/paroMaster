@@ -23,6 +23,7 @@
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
+      "@/context/*": ["./app/context/*"],
       "@/components/*": ["./app/components/*"],
       "@/components": ["./app/components/index"],
       "@/actions/*": ["./app/actions/*"],

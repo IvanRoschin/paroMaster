@@ -80,7 +80,7 @@ export async function sendVerificationLetter({
     };
   }
 
-  const verificationUrl = `${baseUrl}${routes.customerProfile.verifyEmail}?token=${token}`;
+  const verificationUrl = `${baseUrl}${routes.customerProfile.verifyEmail}?token=${encodeURIComponent(token)}`;
 
   try {
     const emailContent = `
