@@ -1,6 +1,12 @@
 'use client';
 
 import {
+  BrandFilter,
+  Category,
+  PriceFilter,
+  Sort,
+} from '@/app/(public)/components/filters';
+import {
   Breadcrumbs,
   DeleteConfirmation,
   EmptyState,
@@ -16,8 +22,6 @@ import {
 import { LeadForm, LoginForm, TestimonialForm } from '@/components/forms';
 import {
   Advantages,
-  BrandFilter,
-  Category,
   Description,
   Footer,
   Header,
@@ -26,11 +30,9 @@ import {
   ImageUploadCloudinary,
   Menu,
   MobileMenu,
-  PriceFilter,
   ReviewList,
   Sidebar,
   Slider,
-  Sort,
   Testimonial,
   TestimonialsList,
 } from '@/components/sections';

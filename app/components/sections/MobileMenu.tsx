@@ -7,11 +7,12 @@ import { MdMenu, MdMenuOpen } from 'react-icons/md';
 
 import { Socials } from '@/components/index';
 import { Icon, SingOutButton } from '@/components/ui';
+import { SessionUser } from '@/types/IUser';
 
-interface MenuProps {
-  session?: any;
+interface MobileMenuProps {
+  user?: SessionUser | null;
 }
-const MobileMenu = ({ session }: MenuProps) => {
+const MobileMenu = ({ user }: MobileMenuProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleNavbar = () => {
@@ -56,7 +57,7 @@ const MobileMenu = ({ session }: MenuProps) => {
                 </li>
               ))}
             </ul>
-            {session && <SingOutButton />}
+            {user && <SingOutButton />}
           </div>
         )}
       </nav>

@@ -1,9 +1,11 @@
+import { Types } from 'mongoose';
+
 import { IOrder } from './IOrder';
 import { PaymentMethod } from './paymentMethod';
 
 export interface ICustomer {
   _id?: string;
-  user: string;
+  user: Types.ObjectId;
   city: string;
   warehouse: string;
   payment: PaymentMethod;

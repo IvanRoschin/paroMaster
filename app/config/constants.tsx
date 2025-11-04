@@ -26,6 +26,7 @@ export const menu = [
   { menuItemName: 'Доставка', menuItemLink: '/delivery' },
   { menuItemName: 'Гарантія', menuItemLink: '/guarantee' },
   { menuItemName: 'Контакти', menuItemLink: '/contact' },
+  { menuItemName: 'Кабінет', menuItemLink: '/dashboard' },
 ];
 
 ///categoryList///

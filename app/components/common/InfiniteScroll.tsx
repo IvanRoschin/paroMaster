@@ -3,16 +3,18 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { TailSpin } from 'react-loader-spinner';
+import { useContextSelector } from 'use-context-selector';
 
 import { getAllGoods } from '@/actions/goods';
 import { ProductList } from '@/components/ui';
-import { useFilter } from '@/context/FiltersContext';
+import { FiltersContext } from '@/context/FiltersContext';
 import { IGoodUI } from '@/types/IGood';
 import { ISearchParams } from '@/types/searchParams';
 
 interface Option {
   value: string;
   label: string;
+  slug?: string;
 }
 
 interface InfiniteScrollProps {
@@ -34,18 +36,27 @@ export default function InfiniteScroll({
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const { ref, inView } = useInView({ threshold: 0.5 });
 
-  const { minPrice, maxPrice, selectedBrands, selectedCategory, sort } =
-    useFilter();
+  // ✅ подписываемся выборочно
+  const minPrice = useContextSelector(FiltersContext, ctx => ctx?.minPrice);
+  const maxPrice = useContextSelector(FiltersContext, ctx => ctx?.maxPrice);
+  const selectedBrands = useContextSelector(
+    FiltersContext,
+    ctx => ctx?.selectedBrands
+  );
+  const selectedCategory = useContextSelector(
+    FiltersContext,
+    ctx => ctx?.selectedCategory
+  );
+  const sort = useContextSelector(FiltersContext, ctx => ctx?.sort);
 
   const brandsSlugs = useMemo(
-    () => selectedBrands.map(b => b.slug),
+    () => selectedBrands?.map(b => b.slug) || [],
     [selectedBrands]
   );
-  console.log('brandsSlugs', brandsSlugs);
-  const sortParam = sort === 'asc' || sort === 'desc' ? sort : undefined;
-  console.log('sortParam', sortParam);
 
-  // ✅ Debounced fetch при изменении фильтров
+  const sortParam = sort === 'asc' || sort === 'desc' ? sort : undefined;
+
+  // ✅ Дебаунс при изменении фильтров
   useEffect(() => {
     const handler = setTimeout(async () => {
       setIsFetchingMore(true);
@@ -70,9 +81,9 @@ export default function InfiniteScroll({
       }
 
       setIsFetchingMore(false);
-    }, 300); // ⏳ задержка 300 мс
+    }, 300);
 
-    return () => clearTimeout(handler); // очистка при каждом изменении
+    return () => clearTimeout(handler);
   }, [
     minPrice,
     maxPrice,
@@ -82,7 +93,7 @@ export default function InfiniteScroll({
     searchParams,
   ]);
 
-  // Подгрузка следующей страницы
+  // ✅ Подгрузка следующих страниц
   const loadMoreGoods = useCallback(async () => {
     if (isFetchingMore || allGoodsLoaded) return;
     setIsFetchingMore(true);
@@ -116,7 +127,7 @@ export default function InfiniteScroll({
     brandsSlugs,
   ]);
 
-  // Триггер подгрузки при скролле
+  // ✅ Автоподгрузка при скролле
   useEffect(() => {
     if (inView && !allGoodsLoaded && !isFetchingMore) {
       loadMoreGoods();

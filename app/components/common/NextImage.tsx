@@ -1,7 +1,8 @@
-import Image, { ImageProps } from 'next/image';
 import * as React from 'react';
 
-import { cn } from '@/lib/utils';
+import Image, { ImageProps } from 'next/image';
+
+import { cn } from '@/lib';
 
 type NextImageProps = {
   useSkeleton?: boolean;

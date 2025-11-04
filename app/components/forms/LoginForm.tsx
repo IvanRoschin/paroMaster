@@ -2,7 +2,7 @@
 
 import { Form, Formik, FormikHelpers } from 'formik';
 import { motion } from 'framer-motion';
-import { signIn } from 'next-auth/react';
+import { getSession, signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { FcGoogle } from 'react-icons/fc';
@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { FormField } from '@/components/common';
 import { Button } from '@/components/ui';
 import { userLoginSchema } from '@/helpers/index';
+import { UserRole } from '@/types/IUser';
 
 interface InitialStateType {
   email: string;
@@ -31,21 +32,33 @@ const LoginForm = () => {
     { resetForm }: FormikHelpers<InitialStateType>
   ) => {
     setIsLoading(true);
-    signIn('credentials', {
+
+    const callback = await signIn('credentials', {
       email: values.email.toLowerCase(),
       password: values.password,
-      redirect: false,
-    }).then(callback => {
-      setIsLoading(false);
-      if (callback?.ok) {
-        toast.success('Успішний вхід');
-        resetForm();
-        router.push('/admin');
-        window.location.replace('/admin');
-      }
-      if (callback?.error) {
-        toast.error(callback.error || 'Помилка');
-      }
+      redirect: false, // SPA login
+    });
+
+    setIsLoading(false);
+
+    if (callback?.ok) {
+      toast.success('Успішний вхід');
+      resetForm();
+
+      // Получаем сессию после входа
+      const session = await getSession();
+      const role = session?.user?.role as UserRole;
+
+      if (role === UserRole.ADMIN) router.replace('/admin/dashboard');
+      else router.replace('/customer');
+    } else {
+      toast.error(callback?.error || 'Помилка входу');
+    }
+  };
+
+  const handleGoogleLogin = () => {
+    signIn('google', {
+      callbackUrl: '/auth/redirect',
     });
   };
 
@@ -74,26 +87,24 @@ const LoginForm = () => {
           >
             {({ errors }) => (
               <Form className="flex flex-col gap-5">
-                {inputs.map((item, i) => (
-                  <FormField item={item} key={i} errors={errors} />
+                {inputs.map(item => (
+                  <FormField key={item.id} item={item} errors={errors} />
                 ))}
 
-                {/* Кнопка входа */}
-                <div className="w-full">
-                  <motion.div
-                    whileHover={{
-                      scale: 1.02,
-                      boxShadow: '0px 0px 12px rgba(59,130,246,0.5)',
-                    }}
-                    whileTap={{ scale: 0.97 }}
-                    transition={{ type: 'spring', stiffness: 300 }}
-                  >
-                    <Button
-                      type="submit"
-                      label={isLoading ? 'Завантаження...' : 'Увійти'}
-                    />
-                  </motion.div>
-                </div>
+                <motion.div
+                  whileHover={{
+                    scale: 1.02,
+                    boxShadow: '0px 0px 12px rgba(59,130,246,0.5)',
+                  }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ type: 'spring', stiffness: 300 }}
+                >
+                  <Button
+                    type="submit"
+                    label={isLoading ? 'Завантаження...' : 'Увійти'}
+                    disabled={isLoading}
+                  />
+                </motion.div>
               </Form>
             )}
           </Formik>
@@ -104,7 +115,6 @@ const LoginForm = () => {
             <hr className="flex-grow border-gray-300" />
           </div>
 
-          {/* Google кнопка */}
           <motion.div
             whileHover={{
               scale: 1.02,
@@ -117,20 +127,8 @@ const LoginForm = () => {
               outline
               label="Continue with Google"
               icon={FcGoogle}
-              onClick={() => {
-                setIsLoading(true);
-                signIn('google').then(callback => {
-                  setIsLoading(false);
-                  if (callback?.ok) {
-                    toast.success('Успішний вхід');
-                    router.push('/admin');
-                    window.location.replace('/admin');
-                  }
-                  if (callback?.error) {
-                    toast.error(callback.error || 'Помилка');
-                  }
-                });
-              }}
+              onClick={handleGoogleLogin}
+              disabled={isLoading}
             />
           </motion.div>
 

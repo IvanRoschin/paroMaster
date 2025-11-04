@@ -1,7 +1,9 @@
+import { Types } from 'mongoose';
+
 import { PaymentMethod } from './paymentMethod';
 
 export interface IOrderGood {
-  good: string;
+  good: string | Types.ObjectId;
   quantity: number;
   price: number;
 }
@@ -9,7 +11,7 @@ export interface IOrderGood {
 export interface IOrder {
   _id?: string;
   number?: string;
-  customer: string;
+  customer: string | Types.ObjectId;
   customerSnapshot: {
     user: {
       name: string;

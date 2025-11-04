@@ -23,6 +23,7 @@
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
+      "@/app/*": ["./app/*"],
       "@/context/*": ["./app/context/*"],
       "@/components/*": ["./app/components/*"],
       "@/components": ["./app/components/index"],
@@ -39,7 +40,7 @@
       "@/config/*": ["./app/config/*"],
       "@/lib/*": ["./app/lib/*"],
       "@/lib": ["./app/lib/index"],
-      "@/admin/*": ["./app/admin/*"]
+      "@/admin/*": ["app/(admin)/*"]
     },
     "skipLibCheck": true
   },
@@ -49,7 +50,8 @@
     "auth.js",
     "auth.tjs",
     "next-env.d.ts",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "app/helpers/server/jwt.ts."
   ],
   "exclude": ["node_modules"]
 }

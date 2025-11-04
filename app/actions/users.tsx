@@ -1,5 +1,9 @@
 'use server';
 
+import mongoose from 'mongoose';
+
+import Customer from '@/models/Customer';
+import Order from '@/models/Order';
 import Token, { TokenType } from '@/models/Token';
 import User from '@/models/User';
 import { IUser } from '@/types/index';
@@ -70,104 +74,136 @@ export async function addUser(values: Partial<IUser>): Promise<{
   }
 }
 
-// Функция для клиента
+export async function getAllUsers(): Promise<{
+  success: boolean;
+  users: IUser[];
+  count: number;
+}> {
+  try {
+    await connectToDB();
 
-// export async function getAllUsers(searchParams: ISearchParams) {
-//   const currentPage = Number(searchParams.page) || 1;
+    const users = await User.find({});
+    const count = await User.countDocuments();
 
-//   const { skip, limit } = buildPagination(searchParams, currentPage);
-//   const filter = await buildFilter(searchParams);
-//   const sortOption = buildSort(searchParams);
+    return {
+      success: true,
+      users: users.map(u => serializeDoc<IUser>(u)),
+      count,
+    };
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    throw new Error(
+      'Failed to fetch users: ' +
+        (error instanceof Error ? error.message : 'Unknown error')
+    );
+  }
+}
 
-//   try {
-//     await connectToDB();
-//     const count = await User.countDocuments();
+export async function getUserById(id: string): Promise<IUser | null> {
+  if (!id) throw new Error('No ID provided');
 
-//     const users: IUser[] = await User.find(filter)
-//       .sort(sortOption)
-//       .limit(limit)
-//       .skip(skip);
-//     return {
-//       success: true,
-//       users: JSON.parse(JSON.stringify(users)),
-//       count: count,
-//     };
-//   } catch (error) {
-//     if (error instanceof Error) {
-//       console.error('Error getting users:', error);
-//       throw new Error('Failed to get users: ' + error.message);
-//     } else {
-//       console.error('Unknown error:', error);
-//       throw new Error('Failed to get users: Unknown error');
-//     }
-//   }
-// }
+  try {
+    await connectToDB();
+    const user = await User.findById(id);
+    return user ? serializeDoc<IUser>(user) : null;
+  } catch (error) {
+    console.error('Error fetching user by ID:', error);
+    throw new Error(
+      'Failed to fetch user: ' +
+        (error instanceof Error ? error.message : 'Unknown error')
+    );
+  }
+}
 
-// export async function getUserById(id: string) {
-//   try {
-//     await connectToDB();
-//     const user = await User.findById({ _id: id });
-//     return JSON.parse(JSON.stringify(user));
-//   } catch (error) {
-//     console.log(error);
-//   }
-// }
+export async function updateUser(
+  values: Partial<IUser> & { _id: string }
+): Promise<{
+  success: boolean;
+  message: string;
+  user?: IUser;
+}> {
+  if (!values._id) throw new Error('No ID provided');
 
-// export async function deleteUser(id: string) {
-//   if (!id) {
-//     console.error('No ID provided');
-//     return;
-//   }
-//   try {
-//     await connectToDB();
-//     await User.findByIdAndDelete(id);
-//   } catch (error) {
-//     console.log(error);
-//   }
-//   revalidatePath('/admin/users');
-// }
+  try {
+    await connectToDB();
 
-// export async function updateUser(
-//   values: any
-// ): Promise<{ success: boolean; message: string }> {
-//   try {
-//     await connectToDB();
+    // Убираем _id из обновляемых полей
+    const updateFields = Object.fromEntries(
+      Object.entries(values).filter(
+        ([key, value]) => key !== '_id' && value !== undefined
+      )
+    );
 
-//     const updateFields = Object.fromEntries(
-//       Object.entries(values).filter(
-//         ([key, value]) => key !== '_id' && value !== undefined
-//       )
-//     );
+    if (Object.keys(updateFields).length === 0) {
+      return { success: false, message: 'No valid fields to update.' };
+    }
 
-//     if (Object.keys(updateFields).length === 0) {
-//       return {
-//         success: false,
-//         message: 'No valid fields to update.',
-//       };
-//     }
+    const updatedUser = await User.findByIdAndUpdate(
+      values._id,
+      { $set: updateFields },
+      { new: true }
+    );
 
-//     const updatedUser = await User.findByIdAndUpdate(
-//       values._id,
-//       { $set: updateFields },
-//       { new: true }
-//     );
+    if (!updatedUser) {
+      return { success: false, message: 'User not found.' };
+    }
 
-//     if (!updatedUser) {
-//       return {
-//         success: false,
-//         message: 'User not found.',
-//       };
-//     }
+    return {
+      success: true,
+      message: 'User updated successfully',
+      user: serializeDoc<IUser>(updatedUser),
+    };
+  } catch (error) {
+    console.error('Error updating user:', error);
+    throw new Error(
+      'Failed to update user: ' +
+        (error instanceof Error ? error.message : 'Unknown error')
+    );
+  }
+}
 
-//     return {
-//       success: true,
-//       message: 'Користувача оновлено успішно',
-//     };
-//   } catch (error) {
-//     console.error('Error update user:', error);
-//     throw new Error('Failed to update user');
-//   } finally {
-//     revalidatePath('/admin/users');
-//     redirect('/admin/users');
-//   }
-// }
+export async function deleteUser(
+  id: string
+): Promise<{ success: boolean; message: string }> {
+  if (!id) return { success: false, message: 'No ID provided' };
+
+  await connectToDB();
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    // 1️⃣ Удаляем токены
+    await Token.deleteMany({ id }).session(session);
+
+    // 2️⃣ Находим Customer
+    const customer = await Customer.findOne({ user: id }).session(session);
+
+    if (customer) {
+      // 3️⃣ Обновляем заказы
+      await Order.updateMany(
+        { customer: customer._id },
+        { $set: { customer: null, customerDeleted: true } }
+      ).session(session);
+
+      // 4️⃣ Удаляем Customer
+      await Customer.deleteOne({ _id: customer._id }).session(session);
+    }
+
+    // 5️⃣ Удаляем User
+    await User.deleteOne({ _id: id }).session(session);
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return {
+      success: true,
+      message: 'User and related data deleted successfully',
+    };
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error('Error deleting user cascade:', error);
+    throw new Error('Failed to delete user cascade');
+  }
+}

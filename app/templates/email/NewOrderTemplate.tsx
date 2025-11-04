@@ -33,15 +33,15 @@ export function generateEmailContent(
   }
 
   const itemsContent = orderedGoodsSnapshot
-    .map(({ good, quantity, price }, index) => {
+    .map(({ good, quantity, price }, i) => {
       const item =
         typeof good === 'object' && good !== null
           ? good
           : { title: 'Невідомий товар', brand: '-', model: '-', sku: '-' };
 
       return `
-        <tr key="${index}">
-          <td style="padding: 8px; border: 1px solid #ccc; text-align: center;">${index + 1}</td>
+        <tr key="${i}">
+          <td style="padding: 8px; border: 1px solid #ccc; text-align: center;">${i + 1}</td>
           <td style="padding: 8px; border: 1px solid #ccc;">${item.title}</td>
           <td style="padding: 8px; border: 1px solid #ccc; text-align: center;">${item.model}</td>
           <td style="padding: 8px; border: 1px solid #ccc; text-align: center;">${item.model}</td>

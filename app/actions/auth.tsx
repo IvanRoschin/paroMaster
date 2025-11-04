@@ -1,12 +1,10 @@
-import bcrypt from 'bcrypt';
-import crypto from 'crypto';
 import { HydratedDocument } from 'mongoose';
 
 import Token, { TokenType } from '@/models/Token';
-import User from '@/models/User';
+import User, { IUserMethods } from '@/models/User';
 import { IUser } from '@/types/index';
 import { connectToDB } from '@/utils/dbConnect';
-
+import crypto from 'crypto';
 import { serializeDoc } from '../lib';
 import { sendUserCredentialsEmail } from './sendNodeMailer';
 
@@ -39,11 +37,10 @@ export async function verifyUser(tokenValue: string): Promise<{
     }
 
     // 2️⃣ Находим пользователя
-    const user: HydratedDocument<IUser> | null = tokenDoc.userId
-      ? await User.findById(tokenDoc.userId)
-      : tokenDoc.email
-        ? await User.findOne({ email: tokenDoc.email })
-        : null;
+    const user = (await User.findById(tokenDoc.userId)) as HydratedDocument<
+      IUser,
+      IUserMethods
+    >;
 
     if (!user) {
       return { success: false, message: 'Пользователь не найден' };
@@ -55,7 +52,7 @@ export async function verifyUser(tokenValue: string): Promise<{
 
     // 3️⃣ Генерируем временный пароль
     const tempPassword = generateRandomPassword();
-    user.password = bcrypt.hashSync(tempPassword, bcrypt.genSaltSync(10));
+    user.setPassword(tempPassword);
     user.isActive = true;
 
     await user.save();

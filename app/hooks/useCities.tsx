@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 
 import { ICity } from '@/types/index';
 
-const useCities = (query: string) => {
+export const useCities = (query: string) => {
   const [allCities, setCities] = useState<ICity[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -37,5 +37,3 @@ const useCities = (query: string) => {
 
   return { allCities, isLoading };
 };
-
-export default useCities;

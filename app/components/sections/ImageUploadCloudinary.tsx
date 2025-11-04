@@ -2,7 +2,7 @@
 
 import { CldUploadWidget } from 'next-cloudinary';
 import Image from 'next/image';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { AiOutlineCloudUpload } from 'react-icons/ai';
 
 interface ImageUploadCloudinaryProps {
@@ -28,7 +28,11 @@ const ImageUploadCloudinary: React.FC<ImageUploadCloudinaryProps> = ({
       console.log('✅ Uploaded URL:', url);
 
       if (multiple) {
-        const updated = Array.isArray(values) ? [...values, url] : [url];
+        const updated = Array.isArray(values)
+          ? [...values, url]
+          : values
+            ? [values, url]
+            : [url];
         setFieldValue('src', updated);
       } else {
         setFieldValue('src', url);
@@ -49,15 +53,16 @@ const ImageUploadCloudinary: React.FC<ImageUploadCloudinaryProps> = ({
   };
 
   // безопасно формируем список картинок
-  const images: string[] = (() => {
+  const images: string[] = useMemo(() => {
     if (multiple) {
-      return Array.isArray(values) ? values.filter(Boolean) : [];
+      if (Array.isArray(values)) return values.filter(Boolean);
+      if (values) return [values];
+      return [];
+    } else {
+      if (typeof values === 'string' && values.trim() !== '') return [values];
+      return [];
     }
-    if (typeof values === 'string' && values.trim() !== '') {
-      return [values];
-    }
-    return [];
-  })();
+  }, [values, multiple]);
 
   return (
     <div>
@@ -80,8 +85,8 @@ const ImageUploadCloudinary: React.FC<ImageUploadCloudinaryProps> = ({
       {/* превью */}
       {images.length > 0 && (
         <div className="flex gap-2 mt-3 flex-wrap">
-          {images.map((url, idx) => (
-            <div key={idx} className="relative w-28 h-28">
+          {images.map(url => (
+            <div key={url} className="relative w-28 h-28">
               <Image
                 fill
                 src={url}

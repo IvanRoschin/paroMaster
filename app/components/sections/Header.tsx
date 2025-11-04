@@ -9,12 +9,13 @@ import {
   Socials,
 } from '@/components/index';
 import { useMediaQuery } from '@/hooks/index';
+import { SessionUser } from '@/types/IUser';
 
 interface HeaderProps {
-  session?: any;
+  user?: SessionUser | null;
 }
 
-const Header = ({ session }: HeaderProps) => {
+const Header: React.FC<HeaderProps> = ({ user }) => {
   const isMobile = useMediaQuery('(max-width: 767px)');
   const isTablet = useMediaQuery('(min-width: 768px) and (max-width: 1024px)');
   const isDesktop = useMediaQuery('(min-width: 1025px)');
@@ -23,10 +24,10 @@ const Header = ({ session }: HeaderProps) => {
     <div className="">
       {/* Mobile and desktop styles */}
       {isMobile ? (
-        <MobileMenu session={session} />
+        <MobileMenu user={user} />
       ) : (
         <div className="bg-gray-300 flex p-4 px-8 items-center justify-between">
-          <Socials /> <Menu session={session} />
+          <Socials /> <Menu user={user} />
         </div>
       )}
       <div

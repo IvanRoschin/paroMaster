@@ -26,26 +26,27 @@ const TokenSchema = new Schema<IToken>(
       default: TokenType.REFRESH,
     },
     used: { type: Boolean, default: false },
-    createdAt: { type: Date, default: Date.now },
   },
-
   {
     timestamps: true,
+    autoIndex: false,
   }
 );
 
+// TTL индекс для refresh токенов (30 дней)
 TokenSchema.index(
   { createdAt: 1 },
   {
-    expireAfterSeconds: 60 * 60 * 24 * 30, // по умолчанию 30 дней
+    expireAfterSeconds: 60 * 60 * 24 * 30,
     partialFilterExpression: { type: TokenType.REFRESH },
   }
 );
 
+// TTL индекс для verification токенов (1 день)
 TokenSchema.index(
   { createdAt: 1 },
   {
-    expireAfterSeconds: 60 * 60 * 24, // 1 день
+    expireAfterSeconds: 60 * 60 * 24,
     partialFilterExpression: { type: TokenType.VERIFICATION },
   }
 );

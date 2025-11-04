@@ -1,6 +1,7 @@
 'use client';
 
-import { createContext, ReactNode, useContext, useState } from 'react';
+import { ReactNode, useState } from 'react';
+import { createContext } from 'use-context-selector';
 
 export interface Option {
   value: string;
@@ -25,7 +26,7 @@ interface FiltersContextType {
   setSort: (sort: 'asc' | 'desc' | '') => void;
 }
 
-const FiltersContext = createContext<FiltersContextType | undefined>(undefined);
+export const FiltersContext = createContext<FiltersContextType | null>(null);
 
 export const FiltersProvider = ({ children }: { children: ReactNode }) => {
   const [minPrice, setMinPrice] = useState<number | null>(null);
@@ -34,29 +35,20 @@ export const FiltersProvider = ({ children }: { children: ReactNode }) => {
   const [selectedCategory, setCategory] = useState<string>('');
   const [sort, setSort] = useState<'asc' | 'desc' | ''>('');
 
-  return (
-    <FiltersContext.Provider
-      value={{
-        minPrice,
-        maxPrice,
-        setMinPrice,
-        setMaxPrice,
-        selectedBrands,
-        setSelectedBrands,
-        selectedCategory,
-        setCategory,
-        sort,
-        setSort,
-      }}
-    >
-      {children}
-    </FiltersContext.Provider>
-  );
-};
+  const value: FiltersContextType = {
+    minPrice,
+    maxPrice,
+    setMinPrice,
+    setMaxPrice,
+    selectedBrands,
+    setSelectedBrands,
+    selectedCategory,
+    setCategory,
+    sort,
+    setSort,
+  };
 
-export const useFilter = () => {
-  const context = useContext(FiltersContext);
-  if (!context)
-    throw new Error('useFilter must be used within FiltersProvider');
-  return context;
+  return (
+    <FiltersContext.Provider value={value}>{children}</FiltersContext.Provider>
+  );
 };

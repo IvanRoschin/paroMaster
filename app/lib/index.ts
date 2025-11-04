@@ -3,7 +3,7 @@ import { generateCloudinarySignature } from './generateCloudinarySignature';
 import { generateRandomPassword } from './generateRandomPassword';
 import { generateSignature } from './generateSignature';
 import { getData } from './novaPoshta';
-import { sendMail } from './sendMail';
+import { sendMail } from './sendMail.server';
 import { serializeDoc } from './serialize';
 import { slugify } from './slugify';
 import { sendTelegramMessage } from './telegram';

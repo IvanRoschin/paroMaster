@@ -11,7 +11,7 @@ import { baseUrl, routes } from '@/helpers/routes';
 import { TokenType } from '@/models/Token';
 import { IOrder } from '@/types/index';
 
-import { sendMail } from '../lib/sendMail';
+import { sendMail } from '../lib/sendMail.server';
 
 const fromEmail = process.env.SMTP_EMAIL;
 
@@ -80,7 +80,7 @@ export async function sendVerificationLetter({
     };
   }
 
-  const verificationUrl = `${baseUrl}${routes.customerProfile.verifyEmail}?token=${encodeURIComponent(token)}`;
+  const verificationUrl = `${baseUrl}${routes.publicRoutes.auth.verifyEmail}?token=${encodeURIComponent(token)}`;
 
   try {
     const emailContent = `
@@ -99,7 +99,6 @@ export async function sendVerificationLetter({
         email: 'no-reply@paromaster.com',
         name: 'Магазин запчастин ParoMaster',
       },
-      name,
       subject: 'Підтвердження реєстрації на ParoMaster',
       body: emailContent,
     });
@@ -131,7 +130,7 @@ export async function sendUserCredentialsEmail({
     };
   }
 
-  const resetPasswordUrl = `${baseUrl}${routes.customerProfile.changePassword}`;
+  const resetPasswordUrl = `${baseUrl}${routes.customerRoutes.changePassword}`;
 
   try {
     const emailContent = `
