@@ -51,7 +51,8 @@
     "auth.tjs",
     "next-env.d.ts",
     ".next/types/**/*.ts",
-    "app/helpers/server/jwt.ts."
+    "app/helpers/server/jwt.ts.",
+    "tailwind.config.ts"
   ],
   "exclude": ["node_modules"]
 }
