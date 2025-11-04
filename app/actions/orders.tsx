@@ -3,11 +3,14 @@ import { sendTelegramMessage } from 'app/lib/telegram';
 import mongoose from 'mongoose';
 import { revalidatePath } from 'next/cache';
 
-import { buildPagination, buildSort } from '@/helpers/index';
 import Customer from '@/models/Customer';
 import Order from '@/models/Order';
-import { IOrder, ISearchParams } from '@/types/index';
+import { IOrder } from '@/types/index';
 import { connectToDB } from '@/utils/dbConnect';
+
+import { serializeDoc } from '../lib';
+import { addCustomer } from './customers';
+import { addUser } from './users';
 
 interface IGetAllOrdersResponse {
   success: boolean;
@@ -15,170 +18,218 @@ interface IGetAllOrdersResponse {
   count: number;
 }
 
-export async function getAllOrders(searchParams: ISearchParams) {
-  const currentPage = Number(searchParams.page) || 1;
-  const { skip, limit } = buildPagination(searchParams, currentPage);
-  const sortOption = buildSort(searchParams);
-
-  const filter: any = {};
-
-  if (searchParams.status && searchParams.status !== 'all') {
-    filter.status = searchParams.status;
-  }
-
-  // Исключаем старые заказы с customer не-ObjectId
-  filter.$or = [
-    { customer: { $type: 'objectId' } },
-    { customer: { $exists: false } },
-  ];
-
-  try {
-    await connectToDB();
-
-    const count = await Order.countDocuments(filter);
-
-    const orders = await Order.find(filter)
-      .populate({
-        path: 'customer',
-        select: 'name surname email phone',
-      })
-      .populate({
-        path: 'orderedGoods.good',
-        select: 'title price discountPrice src',
-      })
-      .sort(sortOption)
-      .skip(skip)
-      .limit(limit)
-      .lean();
-
-    return {
-      success: true,
-      orders: JSON.parse(JSON.stringify(orders)),
-      count,
-    };
-  } catch (error) {
-    console.error('❌ Error getting orders:', error);
-    return { success: false, orders: [], count: 0 };
-  }
-}
-
-export const deleteGoodsFromOrder = async (
-  orderId: string,
-  goodsId: string
-) => {
-  try {
-    await connectToDB();
-    const order = await Order.findById(orderId);
-
-    if (!order) {
-      return { success: false, message: 'Order not found' };
-    }
-
-    const updatedGoods = order.orderedGoods.filter(
-      (good: any) => good.good.toString() !== goodsId
-    );
-
-    order.orderedGoods = updatedGoods;
-    order.totalPrice = updatedGoods.reduce(
-      (total: number, good: any) => total + good.price * good.quantity,
-      0
-    );
-
-    await order.save();
-
-    revalidatePath('/admin/orders');
-    return { success: true, message: 'Goods deleted successfully' };
-  } catch (error) {
-    console.error('Error deleting goods:', error);
-    return { success: false, message: 'Failed to delete goods' };
-  }
-};
-
 export async function addOrder(values: IOrder) {
-  if (!values.number) {
-    values.number = `ORD-${Date.now()}`;
-  }
-
   try {
     await connectToDB();
 
-    // 1. Проверяем, есть ли уже такой customer
-    let customer = await Customer.findOne({
-      $or: [
-        { email: values.customerSnapshot.email },
-        { phone: values.customerSnapshot.phone },
-      ],
+    // 1️⃣ Проверяем/создаём User
+    const { success: userOk, user } = await addUser(
+      values.customerSnapshot.user
+    );
+    if (!userOk || !user) throw new Error('Не вдалося створити користувача');
+
+    const userId = user._id;
+    if (!userId) throw new Error('User ID is missing');
+
+    // 2️⃣ Проверяем/создаём Customer через Mongoose документ
+    const { success: custOk, customer: customerDoc } = await addCustomer({
+      user: new mongoose.Types.ObjectId(userId),
+      city: values.customerSnapshot.city,
+      warehouse: values.customerSnapshot.warehouse,
+      payment: values.customerSnapshot.payment,
     });
 
-    // 2. Если нет — создаём
-    if (!customer) {
-      customer = await Customer.create({
-        ...values.customerSnapshot,
-        orders: [], // Будет заполнено после создания заказа
-      });
-    }
+    if (!custOk || !customerDoc)
+      throw new Error('Не вдалося створити кастомера');
 
-    // Подготавливаем orderedGoods с ObjectId
-    const orderedGoodsWithIds = values.orderedGoods.map((good: any) => ({
-      good: good.good._id || good.good, // Поддержка как ID так и полного объекта
-      quantity: good.quantity,
-      price: good.price,
+    // Приводим к документу Mongoose для save
+    const customer = await Customer.findById(customerDoc._id);
+    if (!customer) throw new Error('Customer document not found');
+
+    // 3️⃣ Подготавливаем товары
+    const orderedGoodsWithIds = values.orderedGoods.map((g: any) => ({
+      good: g.good._id || g.good,
+      quantity: g.quantity,
+      price: g.price,
     }));
 
+    // 4️⃣ Создаём заказ
     const order = await Order.create({
-      number: values.number,
+      number: values.number || `ORD-${Date.now()}`,
       customer: customer._id,
-      customerSnapshot: values.customerSnapshot,
+      customerSnapshot: {
+        user: {
+          name: values.customerSnapshot.user.name,
+          surname: values.customerSnapshot.user.surname,
+          email: values.customerSnapshot.user.email,
+          phone: values.customerSnapshot.user.phone,
+        },
+        city: values.customerSnapshot.city,
+        warehouse: values.customerSnapshot.warehouse,
+        payment: values.customerSnapshot.payment,
+      },
       orderedGoods: orderedGoodsWithIds,
       totalPrice: values.totalPrice,
       status: values.status || 'NEW',
     });
 
-    // Добавляем заказ в массив заказов клиента
+    // 5️⃣ Обновляем customer.orders через Mongoose документ
+    customer.orders = customer.orders || [];
     customer.orders.push(order._id);
     await customer.save();
 
-    const msg = `✅ <b>Створено нове замовлення!</b>\n🧾 Замовлення: ${values.number} \n Від замовника ${values.customerSnapshot.name}  ${values.customerSnapshot.surname}\n💰 На суму: ${values.totalPrice}  \n Телефон замовника ${values.customerSnapshot.phone}`;
+    // 6️⃣ Telegram уведомление
+    const msg = `✅ <b>Створено нове замовлення!</b>\n🧾 Замовлення: ${order.number}\n👤 ${user.name} ${user.surname}\n📞 ${user.phone}\n🏙️ ${values.customerSnapshot.city}\n💰 На суму: ${values.totalPrice}`;
     await sendTelegramMessage(msg);
 
     revalidatePath('/admin/orders');
+
     return {
       success: true,
-      message: 'New Order created successfully',
+      message: 'Order created successfully',
+      order: serializeDoc<IOrder>(order),
     };
   } catch (error) {
     console.error('Error adding order:', error);
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'Failed to add order',
+      message:
+        error instanceof Error ? error.message : 'Failed to create order',
+    };
+  }
+}
+/** Получение всех заказов */
+export async function getAllOrders(): Promise<{
+  success: boolean;
+  orders: IOrder[];
+  count: number;
+}> {
+  try {
+    await connectToDB();
+
+    const orders = await Order.find()
+      .populate({
+        path: 'customer',
+        select: 'user city warehouse payment',
+        populate: { path: 'user', select: 'name surname email phone' },
+      })
+      .populate({
+        path: 'orderedGoods.good',
+        select: 'title price discountPrice src',
+      })
+      .lean();
+
+    const count = await Order.countDocuments();
+
+    return {
+      success: true,
+      orders: orders.map(order => serializeDoc<IOrder>(order)),
+      count,
+    };
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    return { success: false, orders: [], count: 0 };
+  }
+}
+
+/** Получение заказа по ID */
+export async function getOrderById(id: string): Promise<IOrder | null> {
+  if (!mongoose.Types.ObjectId.isValid(id)) return null;
+
+  try {
+    await connectToDB();
+    const order = await Order.findById(id)
+      .populate({
+        path: 'customer',
+        select: 'user city warehouse payment',
+        populate: { path: 'user', select: 'name surname email phone' },
+      })
+      .populate('orderedGoods.good')
+      .lean();
+
+    return order ? serializeDoc<IOrder>(order) : null;
+  } catch (error) {
+    console.error('Error getting order:', error);
+    return null;
+  }
+}
+
+/** Обновление заказа */
+export async function updateOrder(values: IOrder): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  const { _id, orderedGoods, customerSnapshot, number, totalPrice, status } =
+    values;
+  if (!_id) return { success: false, message: 'Order ID is required' };
+
+  try {
+    await connectToDB();
+
+    const updatedGoods = orderedGoods?.map(g => ({
+      good: typeof g.good === 'object' && g.good !== null ? g.good._id : g.good,
+      quantity: g.quantity,
+      price: g.price,
+    }));
+
+    const updateFields: Partial<IOrder> = {
+      number,
+      customerSnapshot: customerSnapshot
+        ? {
+            user: customerSnapshot.user,
+            city: customerSnapshot.city,
+            warehouse: customerSnapshot.warehouse,
+            payment: customerSnapshot.payment,
+          }
+        : undefined,
+      orderedGoods: updatedGoods,
+      totalPrice,
+      status,
+    };
+
+    // Убираем пустые поля
+    Object.keys(updateFields).forEach(key => {
+      const value = updateFields[key as keyof typeof updateFields];
+      if (value === undefined || value === null)
+        delete updateFields[key as keyof typeof updateFields];
+    });
+
+    const updatedOrder = await Order.findByIdAndUpdate(_id, updateFields, {
+      new: true,
+    }).lean();
+    if (!updatedOrder) return { success: false, message: 'Order not found' };
+
+    revalidatePath('/admin/orders');
+    return { success: true, message: 'Order updated successfully' };
+  } catch (error) {
+    console.error('Error updating order:', error);
+    return {
+      success: false,
+      message:
+        error instanceof Error ? error.message : 'Failed to update order',
     };
   }
 }
 
-export async function deleteOrder(
-  id: string
-): Promise<{ success: boolean; message: string }> {
-  if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-    return { success: false, message: 'Invalid or missing Order ID' };
-  }
+/** Удаление заказа */
+export async function deleteOrder(id: string): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  if (!id || !mongoose.Types.ObjectId.isValid(id))
+    return { success: false, message: 'Invalid Order ID' };
 
   try {
     await connectToDB();
 
     const order = await Order.findById(id);
-    if (!order) {
-      return { success: false, message: 'Order not found' };
-    }
+    if (!order) return { success: false, message: 'Order not found' };
 
-    // Удаляем заказ из списка заказов клиента, если ссылка валидна
+    // Удаляем ссылку на заказ из Customer.orders
     if (order.customer && mongoose.Types.ObjectId.isValid(order.customer)) {
       await Customer.updateOne(
         { _id: order.customer },
         { $pull: { orders: order._id } }
-      );
-    } else {
-      console.warn(
-        `⚠️ Skipping customer unlink — invalid customer ID: ${order.customer}`
       );
     }
 
@@ -187,98 +238,11 @@ export async function deleteOrder(
     revalidatePath('/admin/orders');
     return { success: true, message: 'Order deleted successfully' };
   } catch (error) {
-    console.error('❌ Error deleting order:', error);
+    console.error('Error deleting order:', error);
     return {
       success: false,
       message:
         error instanceof Error ? error.message : 'Failed to delete order',
-    };
-  }
-}
-
-export async function getOrderById(id: string): Promise<IOrder | null> {
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    console.error('Invalid order ID:', id);
-    return null;
-  }
-
-  try {
-    await connectToDB();
-    const order = await Order.findById(id)
-      .populate('customer')
-      .populate('orderedGoods.good')
-      .lean();
-    return order ? (JSON.parse(JSON.stringify(order)) as IOrder) : null;
-  } catch (error) {
-    console.log('Error getting order:', error);
-    return null;
-  }
-}
-
-export async function updateOrder(values: IOrder) {
-  const id = values._id;
-
-  if (!id) {
-    return { success: false, message: 'Order ID is required' };
-  }
-
-  const { number, customerSnapshot, orderedGoods, totalPrice, status } = values;
-
-  try {
-    await connectToDB();
-
-    // Подготавливаем orderedGoods с ObjectId
-    const orderedGoodsWithIds = orderedGoods.map((good: any) => ({
-      good: good.good._id || good.good,
-      quantity: good.quantity,
-      price: good.price,
-    }));
-
-    const updateFields: Partial<IOrder> = {
-      number,
-      customerSnapshot: customerSnapshot
-        ? {
-            name: customerSnapshot.name || '',
-            surname: customerSnapshot.surname || '',
-            phone: customerSnapshot.phone || '',
-            email: customerSnapshot.email || '',
-            city: customerSnapshot.city || '',
-            warehouse: customerSnapshot.warehouse || '',
-            payment: customerSnapshot.payment || '',
-          }
-        : undefined,
-      orderedGoods: orderedGoodsWithIds,
-      totalPrice,
-      status,
-    };
-
-    // Видаляємо порожні поля
-    Object.keys(updateFields).forEach(key => {
-      const value = updateFields[key as keyof Partial<IOrder>];
-      if (value === '' || value === undefined || value === null) {
-        delete updateFields[key as keyof Partial<IOrder>];
-      }
-    });
-
-    const updatedOrder = await Order.findByIdAndUpdate(id, updateFields, {
-      new: true,
-    }).lean();
-
-    if (!updatedOrder) {
-      return {
-        success: false,
-        message: 'Failed to update order: Order not found',
-      };
-    }
-
-    revalidatePath('/admin/orders');
-    return { success: true, message: 'Замовлення оновлено успішно' };
-  } catch (error) {
-    console.error('Error updating order:', error);
-    return {
-      success: false,
-      message:
-        error instanceof Error ? error.message : 'Failed to update order',
     };
   }
 }

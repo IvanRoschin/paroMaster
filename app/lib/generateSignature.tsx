@@ -3,8 +3,8 @@ import crypto from 'crypto';
 import { IOrder } from '@/types/index';
 
 export function generateSignature(order: IOrder) {
-  const merchantAccount = process.env.NEXT_PUBLIC_WAYFORPAY_MERCHANT_ACCOUNT!;
-  const merchantDomainName = process.env.NEXT_PUBLIC_WAYFORPAY_MERCHANT_DOMAIN!;
+  const merchantAccount = process.env.WAYFORPAY_MERCHANT_ACCOUNT!;
+  const merchantDomainName = process.env.NWAYFORPAY_MERCHANT_DOMAIN!;
   const secretKey = process.env.WAYFORPAY_SECRET_KEY!;
 
   if (!secretKey) {

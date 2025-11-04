@@ -8,6 +8,7 @@ import Logo from '@/components/common/Logo';
 import Pagination from '@/components/common/Pagination';
 import Search from '@/components/common/Search';
 import Socials from '@/components/common/Socials';
+import TextField from './TextField';
 
 export {
   Breadcrumbs,
@@ -20,4 +21,5 @@ export {
   Pagination,
   Search,
   Socials,
+  TextField,
 };

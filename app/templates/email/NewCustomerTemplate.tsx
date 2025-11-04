@@ -1,12 +1,17 @@
+import { IOrderedGoodSnapshot } from '@/app/actions/sendNodeMailer';
 import { IOrder } from '@/types/index';
 
-export function generateCustomerEmailContent(order: IOrder) {
+export function generateCustomerEmailContent(
+  order: IOrder,
+  orderedGoodsSnapshot: IOrderedGoodSnapshot[]
+) {
   const { number, customerSnapshot, orderedGoods, totalPrice } = order;
 
   if (
     !number ||
-    !customerSnapshot.name ||
-    !customerSnapshot.phone ||
+    !customerSnapshot.user.name ||
+    !customerSnapshot.user.surname ||
+    !customerSnapshot.user.phone ||
     !customerSnapshot.city ||
     !customerSnapshot.warehouse ||
     !customerSnapshot.payment ||
@@ -20,12 +25,12 @@ export function generateCustomerEmailContent(order: IOrder) {
     };
   }
 
-  const itemsContent = orderedGoods
+  const itemsContent = orderedGoodsSnapshot
     .map(({ good, quantity, price }, i) => {
       const item =
         typeof good === 'object' && good !== null
           ? good
-          : { title: 'Невідомий товар', brand: '', model: '', sku: '' };
+          : { title: 'Невідомий товар', brand: '-', model: '-', sku: '-' };
 
       return `
         <tr key="${i}">
@@ -43,7 +48,7 @@ export function generateCustomerEmailContent(order: IOrder) {
   return `
     <div style="max-width:700px;margin:0 auto;padding:30px;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;color:#333;background-color:#f9f9f9;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,0.1);">
       <div style="text-align:center;">
-        <h1 style="color:#4CAF50;">Вітаємо, ${customerSnapshot.name} ${customerSnapshot.surname}! 🎉</h1>
+        <h1 style="color:#4CAF50;">Вітаємо, ${customerSnapshot.user.name} ${customerSnapshot.user.surname}! 🎉</h1>
         <p style="font-size:18px;">Ваше замовлення №<strong>${number}</strong> прийнято!</p>
         <p style="font-size:16px;color:#666;">Дякуємо, що обрали ParoMaster. 🚀</p>
       </div>
@@ -70,7 +75,7 @@ export function generateCustomerEmailContent(order: IOrder) {
       <div style="margin-top:40px;">
         <h3>📍 Ваші контактні дані:</h3>
         <ul style="list-style-type:none;padding-left:0;">
-          <li><strong>Телефон:</strong> ${customerSnapshot.phone}</li>
+          <li><strong>Телефон:</strong> ${customerSnapshot.user.phone}</li>
           <li><strong>Місто:</strong> ${customerSnapshot.city}</li>
           <li><strong>Відділення НП:</strong> ${customerSnapshot.warehouse}</li>
           <li><strong>Оплата:</strong> ${customerSnapshot.payment}</li>

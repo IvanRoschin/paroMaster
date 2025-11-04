@@ -29,25 +29,26 @@ export async function buildFilter(searchParams: ISearchParams): Promise<any> {
   }
 
   // ======== Бренд ========
-  if (searchParams.brand) {
+  if (searchParams.brands && searchParams.brands.length > 0) {
     const Brand = (await import('@/models/Brand')).default;
+    const brandIds = [];
 
-    if (mongoose.Types.ObjectId.isValid(searchParams.brand)) {
-      filter.brand = new mongoose.Types.ObjectId(searchParams.brand);
-    } else {
-      const foundBrand = await Brand.findOne({
-        $or: [
-          { name: { $regex: searchParams.brand, $options: 'i' } },
-          { slug: { $regex: searchParams.brand, $options: 'i' } },
-        ],
-      });
-
-      if (foundBrand) {
-        filter.brand = foundBrand._id;
-      } else {
-        return { _id: { $exists: false } };
+    for (const b of searchParams.brands) {
+      if (mongoose.Types.ObjectId.isValid(b))
+        brandIds.push(new mongoose.Types.ObjectId(b));
+      else {
+        const foundBrand = await Brand.findOne({
+          $or: [
+            { name: { $regex: b, $options: 'i' } },
+            { slug: { $regex: b, $options: 'i' } },
+          ],
+        });
+        if (foundBrand) brandIds.push(foundBrand._id);
       }
     }
+
+    if (brandIds.length > 0) filter.brand = { $in: brandIds };
+    else filter._id = { $exists: false };
   }
 
   // ======== Ціна ========

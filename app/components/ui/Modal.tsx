@@ -4,13 +4,19 @@ import { useCallback, useEffect, useState } from 'react';
 import { IoMdClose } from 'react-icons/io';
 
 interface ModalProps {
-  body?: React.ReactElement;
+  body?: React.ReactElement | string;
   isOpen?: boolean;
   onClose: () => void;
   disabled?: boolean;
 }
 
-const Modal = ({ isOpen, onClose, body, disabled }: ModalProps) => {
+const Modal = ({
+  isOpen,
+  onClose,
+  body,
+  disabled,
+  children,
+}: ModalProps & { children?: React.ReactNode }) => {
   const [showModal, setShowModal] = useState(isOpen);
   useEffect(() => {
     setShowModal(isOpen);
@@ -65,14 +71,18 @@ const Modal = ({ isOpen, onClose, body, disabled }: ModalProps) => {
         }`}
         style={{ maxHeight: '90vh', overflowY: 'auto' }}
       >
-        <button
-          onClick={() => handleClose()}
-          className="absolute right-4 top-4 p-1 border rounded-full border-neutral-400 hover:border-primaryAccentColor hover:opacity-70 transition"
-        >
-          <IoMdClose size={18} />
-        </button>
-        {/* Content*/}
+        {children ? (
+          children
+        ) : (
+          <button
+            onClick={() => handleClose()}
+            className="absolute right-4 top-4 p-1 border rounded-full border-neutral-400 hover:border-primaryAccentColor hover:opacity-70 transition"
+          >
+            <IoMdClose size={18} />
+          </button>
+        )}
 
+        {/* Content*/}
         {body}
       </div>
     </div>

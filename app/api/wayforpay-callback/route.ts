@@ -1,13 +1,13 @@
 // app/api/wfp-callback/route.ts
 
-import { sendTelegramMessage } from 'app/lib/telegram';
-import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 
-import Order from '@/models/Order';
+import crypto from 'crypto';
+import { sendTelegramMessage } from 'app/lib/telegram';
 import { connectToDB } from '@/utils/dbConnect';
+import Order from '@/models/Order';
 
-const SECRET_KEY = process.env.NEXT_PUBLIC_WAYFORPAY_SECRET_KEY!;
+const SECRET_KEY = process.env.WAYFORPAY_SECRET_KEY!;
 
 export async function POST(req: NextRequest) {
   try {

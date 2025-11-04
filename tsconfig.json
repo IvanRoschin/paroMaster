@@ -23,17 +23,24 @@
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
+      "@/app/*": ["./app/*"],
+      "@/context/*": ["./app/context/*"],
       "@/components/*": ["./app/components/*"],
+      "@/components": ["./app/components/index"],
       "@/actions/*": ["./app/actions/*"],
       "@/api/*": ["./app/api/*"],
       "@/utils/*": ["./app/utils/*"],
       "@/types/*": ["./types/*"],
       "@/models/*": ["./models/*"],
+      "@/models/": ["./models/index"],
       "@/helpers/*": ["./app/helpers/*"],
+      "@/helpers/": ["./app/helpers/index*"],
       "@/hooks/*": ["./app/hooks/*"],
+      "@/hooks/": ["./app/hooks/index"],
       "@/config/*": ["./app/config/*"],
       "@/lib/*": ["./app/lib/*"],
-      "@/admin/*": ["./app/admin/*"]
+      "@/lib": ["./app/lib/index"],
+      "@/admin/*": ["app/(admin)/*"]
     },
     "skipLibCheck": true
   },
@@ -43,7 +50,9 @@
     "auth.js",
     "auth.tjs",
     "next-env.d.ts",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "app/helpers/server/jwt.ts.",
+    "tailwind.config.ts"
   ],
   "exclude": ["node_modules"]
 }

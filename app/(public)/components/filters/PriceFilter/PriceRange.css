@@ -1,0 +1,85 @@
+/* RangeFilter.css */
+.range-filter {
+  position: relative;
+  width: 100%;
+  max-width: 250px;
+  padding: 1rem;
+  background: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.range-filter[data-disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Полоса диапазона */
+.range-filter .range-slider__range {
+  height: 5px;
+  border-radius: 9999px;
+  background: #d1d5db; /* светло-серый фон */
+  position: relative;
+}
+
+/* Активная часть между ползунками */
+.range-filter .range-slider__range[data-active] {
+  background: linear-gradient(
+    to right,
+    #d1d5db 0%,
+    #ea580c 0%,
+    #ea580c 100%,
+    #d1d5db 100%
+  );
+}
+
+/* Ползунки */
+.range-filter .range-slider__thumb {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  border: 3px solid #ffffff;
+  background: #1f2937;
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  transition: transform 0.1s;
+  z-index: 2;
+}
+
+.range-filter .range-slider__thumb[data-active] {
+  transform: translateY(-50%) scale(1.2);
+}
+
+.range-filter .range-slider__thumb[data-disabled] {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Тултипы */
+.range-filter .range-slider__tooltip {
+  position: absolute;
+  bottom: 130%; /* поднять над ползунком */
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.25rem 0.5rem;
+  background: #1f2937;
+  color: #ffffff;
+  font-size: 0.75rem;
+  border-radius: 0.25rem;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Верхний градиент для активного диапазона между ползунками */
+.range-filter .range-slider__range::after {
+  content: '';
+  position: absolute;
+  height: 5px;
+  background: #ea580c;
+  top: 0;
+  border-radius: 9999px;
+}

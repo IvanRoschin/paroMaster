@@ -121,10 +121,14 @@ export async function getAllGoods(
 
     const count = await Good.countDocuments(filter);
 
+    let sortOption: any = { createdAt: -1 }; // дефолт
+    if (searchParams.sort === 'asc') sortOption = { price: 1 };
+    if (searchParams.sort === 'desc') sortOption = { price: -1 };
+
     const goods = await Good.find(filter)
       .populate('category', 'name slug src')
       .populate('brand', 'name slug src country website')
-      .sort({ createdAt: -1 })
+      .sort(sortOption)
       .skip(skip)
       .limit(limit)
       .exec();
@@ -173,7 +177,6 @@ export async function getDailyDeals(maxPrice: number): Promise<IGoodUI[]> {
 export async function getGoodById(id: string): Promise<IGoodUI | null> {
   await connectToDB();
 
-  // Получаем сам товар с populated brand и category
   const good = await Good.findById(id)
     .populate('category', 'name slug src')
     .populate('brand', 'name slug src country website');
@@ -193,20 +196,23 @@ export async function getGoodById(id: string): Promise<IGoodUI | null> {
   });
 
   // Преобразуем в plain object
-  const plainGood: IGoodUI = {
-    ...serializeGood(good), // возвращает plain объект
-    testimonials: testimonials.map(t => ({
-      _id: t._id.toString(),
-      author: t.athor,
-      text: t.text,
-      rating: t.rating,
-      createdAt: t.createdAt.toISOString(),
-      updatedAt: t.updatedAt.toISOString(),
-      isActive: t.isActive,
-    })),
-    compatibleGoods: compatibleGoodsRecords.map(g => serializeGood(g)), // массив товаров
-  };
+  // const plainGood: IGoodUI = {
+  //   ...serializeGood(good), // возвращает plain объект
+  //   testimonials: testimonials.map(t => ({
+  //     _id: t._id.toString(),
+  //     author: t.athor,
+  //     text: t.text,
+  //     rating: t.rating,
+  //     createdAt: t.createdAt.toISOString(),
+  //     updatedAt: t.updatedAt.toISOString(),
+  //     isActive: t.isActive,
+  //   })),
+  //   compatibleGoods: compatibleGoodsRecords.map(g => serializeGood(g)), // массив товаров
+  // };
 
+  const plainGood = JSON.parse(
+    JSON.stringify(good.toObject({ getters: true }))
+  );
   return plainGood;
 }
 

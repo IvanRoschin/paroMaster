@@ -1,12 +1,26 @@
+export enum UserRole {
+  ADMIN = 'admin',
+  CUSTOMER = 'customer',
+}
+
 export interface IUser {
   _id?: string;
   name: string;
   surname: string;
   email: string;
   phone: string;
+  token?: string;
   password?: string;
-  isAdmin: boolean;
+  role: UserRole;
   isActive: boolean;
+  googleId?: string;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+}
+
+export interface SessionUser {
+  name: string;
+  email: string;
+  image: string;
+  role: UserRole;
 }

@@ -13,6 +13,15 @@ env:
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
   NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
   MONGODB_URI: ${{ secrets.MONGODB_URI }}
+  SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
+  SMTP_PASSWORD:
+    ${{ secrets.SMTP_PASSWORD }}
+
+    # WayForPay secrets
+  WAYFORPAY_MERCHANT_ACCOUNT: ${{ secrets.WAYFORPAY_MERCHANT_ACCOUNT }}
+  WAYFORPAY_MERCHANT_DOMAIN: ${{ secrets.WAYFORPAY_MERCHANT_DOMAIN }}
+  WAYFORPAY_SECRET_KEY: ${{ secrets.WAYFORPAY_SECRET_KEY }}
+  WAYFORPAY_URL: ${{ secrets.WAYFORPAY_URL }}
 
 jobs:
   build:
@@ -66,25 +75,41 @@ jobs:
       - name: 📦 Docker Build & Push
         run: |
           DOCKER_USER=${DOCKER_USER:-ivaros}
-          IMAGE_NAME=$DOCKER_USER/paro-master
+          IMAGE_NAME="$DOCKER_USER/paro-master"
 
           echo "🧹 Removing old container if exists"
-          docker rm -f paro-master || true
+          CONTAINER_ID=$(docker ps -a -q -f name=paro-master)
+          if [ -n "$CONTAINER_ID" ]; then
+            docker rm -f "$CONTAINER_ID"
+            echo "Removed old container $CONTAINER_ID"
+          else
+            echo "No existing container found, skipping removal"
+          fi
 
           echo "🧼 Removing old image if exists"
-          docker rmi -f $IMAGE_NAME:latest || true
+          IMAGE_EXISTS=$(docker images -q "$IMAGE_NAME:latest")
+          if [ -n "$IMAGE_EXISTS" ]; then
+            docker rmi -f "$IMAGE_EXISTS"
+            echo "Removed old image $IMAGE_EXISTS"
+          else
+            echo "No existing image found, skipping removal"
+          fi
 
           echo "🔨 Building Docker image with Buildx and cache"
           docker buildx build \
-            --build-arg MONGODB_URI=${MONGODB_URI} \
+            --secret id=SMTP_PASSWORD,env=SMTP_PASSWORD \
+            --secret id=NEXTAUTH_SECRET,env=NEXTAUTH_SECRET \
+            --secret id=WAYFORPAY_SECRET_KEY,env=WAYFORPAY_SECRET_KEY \
+            --secret id=SMTP_EMAIL,env=SMTP_EMAIL \
+            --secret id=WAYFORPAY_MERCHANT_ACCOUNT,env=WAYFORPAY_MERCHANT_ACCOUNT \
+            --secret id=WAYFORPAY_MERCHANT_DOMAIN,env=WAYFORPAY_MERCHANT_DOMAIN \
+            --secret id=WAYFORPAY_URL,env=WAYFORPAY_URL \
+            --build-arg MONGODB_URI="${MONGODB_URI}" \
             --platform linux/amd64 \
-            --tag $IMAGE_NAME:latest \
-            --tag $IMAGE_NAME:${GITHUB_SHA} \
-            --cache-from=type=registry,ref=$IMAGE_NAME:latest \
-            --push .
-
+            --tag "$IMAGE_NAME:latest" \
+            --push \
+            .
           echo "✅ Docker images pushed successfully"
-
       # ----------------- Run Docker Container -----------------
       - name: 🐳 Run Docker Container
         run: |

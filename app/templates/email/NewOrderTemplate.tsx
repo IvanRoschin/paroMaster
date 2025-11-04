@@ -1,16 +1,27 @@
+import { IOrderedGoodSnapshot } from '@/actions/sendNodeMailer';
+import { paymentMethods } from '@/config/constants';
 import { IOrder } from '@/types/index';
 
-export function generateEmailContent(order: IOrder) {
+export function generateEmailContent(
+  order: IOrder,
+  orderedGoodsSnapshot: IOrderedGoodSnapshot[]
+) {
   const { number, customerSnapshot, orderedGoods, totalPrice } = order;
+
+  const customer = order.customerSnapshot;
+
+  const paymentLabel =
+    paymentMethods.find(pm => pm.id === customerSnapshot.payment)?.label ??
+    'Невідомий спосіб оплати';
 
   if (
     !number ||
-    !customerSnapshot.name ||
-    !customerSnapshot.email ||
-    !customerSnapshot.phone ||
-    !customerSnapshot.city ||
-    !customerSnapshot.warehouse ||
-    !customerSnapshot.payment ||
+    !customer.user.name ||
+    !customer.user.email ||
+    !customer.user.phone ||
+    !customer.city ||
+    !customer.warehouse ||
+    !customer.payment ||
     !Array.isArray(orderedGoods) ||
     orderedGoods.length === 0 ||
     totalPrice <= 0
@@ -21,17 +32,16 @@ export function generateEmailContent(order: IOrder) {
     };
   }
 
-  const itemsContent = orderedGoods
-    .map(({ good, quantity, price }, index) => {
-      // good может быть ObjectId или объект товара
+  const itemsContent = orderedGoodsSnapshot
+    .map(({ good, quantity, price }, i) => {
       const item =
         typeof good === 'object' && good !== null
           ? good
           : { title: 'Невідомий товар', brand: '-', model: '-', sku: '-' };
 
       return `
-        <tr key="${index}">
-          <td style="padding: 8px; border: 1px solid #ccc; text-align: center;">${index + 1}</td>
+        <tr key="${i}">
+          <td style="padding: 8px; border: 1px solid #ccc; text-align: center;">${i + 1}</td>
           <td style="padding: 8px; border: 1px solid #ccc;">${item.title}</td>
           <td style="padding: 8px; border: 1px solid #ccc; text-align: center;">${item.model}</td>
           <td style="padding: 8px; border: 1px solid #ccc; text-align: center;">${item.model}</td>
@@ -52,10 +62,10 @@ export function generateEmailContent(order: IOrder) {
 
       <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
         <h2 style="margin-bottom: 10px;">👤 Клієнт:</h2>
-        <p><strong>Ім'я:</strong> ${customerSnapshot.name} ${customerSnapshot.surname}</p>
-        <p><strong>Телефон:</strong> ${customerSnapshot.phone}</p>
-        <p><strong>Email:</strong> ${customerSnapshot.email}</p>
-        <p><strong>Спосіб оплати:</strong> ${customerSnapshot.payment}</p>
+        <p><strong>Ім'я:</strong> ${customerSnapshot.user.name} ${customerSnapshot.user.surname}</p>
+        <p><strong>Телефон:</strong> ${customerSnapshot.user.phone}</p>
+        <p><strong>Email:</strong> ${customerSnapshot.user.email}</p>
+        <p><strong>Спосіб оплати:</strong> ${paymentLabel}</p>
         <p><strong>Місто:</strong> ${customerSnapshot.city}</p>
         <p><strong>Відділення НП:</strong> ${customerSnapshot.warehouse}</p>
       </div>

@@ -1,122 +1,133 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
+import mongoose from 'mongoose';
 
-import { buildFilter, buildPagination, buildSort } from '@/helpers/index';
+import Customer from '@/models/Customer';
+import Order from '@/models/Order';
+import Token, { TokenType } from '@/models/Token';
 import User from '@/models/User';
-import { ISearchParams, IUser } from '@/types/index';
+import { IUser } from '@/types/index';
+import { UserRole } from '@/types/IUser';
 import { connectToDB } from '@/utils/dbConnect';
 
-export async function addUser(
-  values: any
-): Promise<{ success: boolean; message: string }> {
+import { generateRandomPassword, serializeDoc } from '../lib';
+import { sendVerificationLetter } from './sendNodeMailer';
+
+export async function addUser(values: Partial<IUser>): Promise<{
+  success: boolean;
+  message: string;
+  user: IUser;
+}> {
   try {
     await connectToDB();
-    // Check if email already exists
-    const email = values.email as string;
 
-    const existingUser = await User.findOne({ email });
+    const email = values.email?.trim();
+    const phone = values.phone?.trim();
+
+    // 1️⃣ Проверяем, есть ли пользователь по email или телефону
+    let existingUser = await User.findOne({ $or: [{ email }, { phone }] });
+
     if (existingUser) {
-      throw new Error('Email already exists');
+      return {
+        success: true,
+        message: 'Користувач вже існує',
+        user: serializeDoc<IUser>(existingUser),
+      };
     }
 
-    const name = values.name as string;
-    const phone = values.phone as string;
-    const isAdmin = values.isAdmin;
-    const isActive = values.isActive;
-    const password = values.password as string;
-
+    // 3️⃣ Создаём нового пользователя
     const newUser = new User({
-      name,
-      phone,
+      name: values.name,
+      surname: values.surname,
       email,
-      isAdmin,
-      isActive,
+      phone,
+      role: UserRole.CUSTOMER,
+      isActive: false,
     });
 
-    newUser.setPassword(password);
-
     await newUser.save();
+
+    const verificationToken = await Token.create({
+      userId: newUser._id,
+      token: generateRandomPassword(32),
+      type: TokenType.VERIFICATION,
+      used: false,
+    });
+
+    await sendVerificationLetter({
+      email: newUser.email!,
+      name: newUser.name!,
+      token: verificationToken.token,
+    });
     return {
       success: true,
-      message: 'Користувача додано успішно!',
+      message:
+        'Користувача успішно створено! Дані для входу відправлені на email.',
+      user: serializeDoc<IUser>(newUser),
     };
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error('Error adding newUser:', error);
-      throw new Error('Failed to add newUser: ' + error.message);
-    } else {
-      console.error('Unknown error:', error);
-      throw new Error('Failed to add newUser: Unknown error');
-    }
-  } finally {
-    revalidatePath('/admin/users');
-    redirect('/admin/users');
+  } catch (error: any) {
+    console.error('Error adding user:', error);
+    throw new Error(
+      'Failed to add user: ' +
+        (error instanceof Error ? error.message : 'Unknown error')
+    );
   }
 }
 
-export async function getAllUsers(searchParams: ISearchParams) {
-  const currentPage = Number(searchParams.page) || 1;
-
-  const { skip, limit } = buildPagination(searchParams, currentPage);
-  const filter = await buildFilter(searchParams);
-  const sortOption = buildSort(searchParams);
-
+export async function getAllUsers(): Promise<{
+  success: boolean;
+  users: IUser[];
+  count: number;
+}> {
   try {
     await connectToDB();
+
+    const users = await User.find({});
     const count = await User.countDocuments();
 
-    const users: IUser[] = await User.find(filter)
-      .sort(sortOption)
-      .limit(limit)
-      .skip(skip);
     return {
       success: true,
-      users: JSON.parse(JSON.stringify(users)),
-      count: count,
+      users: users.map(u => serializeDoc<IUser>(u)),
+      count,
     };
   } catch (error) {
-    if (error instanceof Error) {
-      console.error('Error getting users:', error);
-      throw new Error('Failed to get users: ' + error.message);
-    } else {
-      console.error('Unknown error:', error);
-      throw new Error('Failed to get users: Unknown error');
-    }
+    console.error('Error fetching users:', error);
+    throw new Error(
+      'Failed to fetch users: ' +
+        (error instanceof Error ? error.message : 'Unknown error')
+    );
   }
 }
 
-export async function getUserById(id: string) {
-  try {
-    await connectToDB();
-    const user = await User.findById({ _id: id });
-    return JSON.parse(JSON.stringify(user));
-  } catch (error) {
-    console.log(error);
-  }
-}
+export async function getUserById(id: string): Promise<IUser | null> {
+  if (!id) throw new Error('No ID provided');
 
-export async function deleteUser(id: string) {
-  if (!id) {
-    console.error('No ID provided');
-    return;
-  }
   try {
     await connectToDB();
-    await User.findByIdAndDelete(id);
+    const user = await User.findById(id);
+    return user ? serializeDoc<IUser>(user) : null;
   } catch (error) {
-    console.log(error);
+    console.error('Error fetching user by ID:', error);
+    throw new Error(
+      'Failed to fetch user: ' +
+        (error instanceof Error ? error.message : 'Unknown error')
+    );
   }
-  revalidatePath('/admin/users');
 }
 
 export async function updateUser(
-  values: any
-): Promise<{ success: boolean; message: string }> {
+  values: Partial<IUser> & { _id: string }
+): Promise<{
+  success: boolean;
+  message: string;
+  user?: IUser;
+}> {
+  if (!values._id) throw new Error('No ID provided');
+
   try {
     await connectToDB();
 
+    // Убираем _id из обновляемых полей
     const updateFields = Object.fromEntries(
       Object.entries(values).filter(
         ([key, value]) => key !== '_id' && value !== undefined
@@ -124,10 +135,7 @@ export async function updateUser(
     );
 
     if (Object.keys(updateFields).length === 0) {
-      return {
-        success: false,
-        message: 'No valid fields to update.',
-      };
+      return { success: false, message: 'No valid fields to update.' };
     }
 
     const updatedUser = await User.findByIdAndUpdate(
@@ -137,21 +145,65 @@ export async function updateUser(
     );
 
     if (!updatedUser) {
-      return {
-        success: false,
-        message: 'User not found.',
-      };
+      return { success: false, message: 'User not found.' };
     }
 
     return {
       success: true,
-      message: 'Користувача оновлено успішно',
+      message: 'User updated successfully',
+      user: serializeDoc<IUser>(updatedUser),
     };
   } catch (error) {
-    console.error('Error update user:', error);
-    throw new Error('Failed to update user');
-  } finally {
-    revalidatePath('/admin/users');
-    redirect('/admin/users');
+    console.error('Error updating user:', error);
+    throw new Error(
+      'Failed to update user: ' +
+        (error instanceof Error ? error.message : 'Unknown error')
+    );
+  }
+}
+
+export async function deleteUser(
+  id: string
+): Promise<{ success: boolean; message: string }> {
+  if (!id) return { success: false, message: 'No ID provided' };
+
+  await connectToDB();
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    // 1️⃣ Удаляем токены
+    await Token.deleteMany({ id }).session(session);
+
+    // 2️⃣ Находим Customer
+    const customer = await Customer.findOne({ user: id }).session(session);
+
+    if (customer) {
+      // 3️⃣ Обновляем заказы
+      await Order.updateMany(
+        { customer: customer._id },
+        { $set: { customer: null, customerDeleted: true } }
+      ).session(session);
+
+      // 4️⃣ Удаляем Customer
+      await Customer.deleteOne({ _id: customer._id }).session(session);
+    }
+
+    // 5️⃣ Удаляем User
+    await User.deleteOne({ _id: id }).session(session);
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return {
+      success: true,
+      message: 'User and related data deleted successfully',
+    };
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error('Error deleting user cascade:', error);
+    throw new Error('Failed to delete user cascade');
   }
 }

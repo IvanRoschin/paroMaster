@@ -1,26 +1,24 @@
+// models/Customer.ts
 import mongoose from 'mongoose';
 
-import { paymentMethods } from '@/config/constants';
+import { ICustomer } from '@/types/ICustomer';
+import { PaymentMethod } from '@/types/paymentMethod';
 
 const { Schema } = mongoose;
 
-const customerSchema = new Schema(
+const customerSchema = new Schema<ICustomer>(
   {
-    name: { type: String, required: true },
-    surname: { type: String, required: true },
-    email: { type: String, required: true },
-    phone: { type: String, required: true },
+    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     city: { type: String, required: true },
     warehouse: { type: String, required: true },
     payment: {
       type: String,
-      enum: paymentMethods.map(p => p.id),
+      enum: Object.values(PaymentMethod),
+      required: true,
     },
-    orders: [{ type: Schema.Types.ObjectId, ref: 'Order', required: true }],
-    user: { type: Schema.Types.ObjectId, ref: 'User' },
+    orders: [{ type: Schema.Types.ObjectId, ref: 'Order', default: [] }],
   },
-
-  { versionKey: false, timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
 customerSchema.index({ '$**': 'text' });
