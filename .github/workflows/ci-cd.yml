@@ -14,7 +14,14 @@ env:
   NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
   MONGODB_URI: ${{ secrets.MONGODB_URI }}
   SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
-  SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+  SMTP_PASSWORD:
+    ${{ secrets.SMTP_PASSWORD }}
+
+    # WayForPay secrets
+  WAYFORPAY_MERCHANT_ACCOUNT: ${{ secrets.WAYFORPAY_MERCHANT_ACCOUNT }}
+  WAYFORPAY_MERCHANT_DOMAIN: ${{ secrets.WAYFORPAY_MERCHANT_DOMAIN }}
+  WAYFORPAY_SECRET_KEY: ${{ secrets.WAYFORPAY_SECRET_KEY }}
+  WAYFORPAY_URL: ${{ secrets.WAYFORPAY_URL }}
 
 jobs:
   build:
