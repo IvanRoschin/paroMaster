@@ -1,12 +1,12 @@
 'use server';
 
-import mongoose from 'mongoose';
-import { revalidatePath } from 'next/cache';
+import mongoose, { HydratedDocument } from 'mongoose';
 
-import { buildPagination } from '@/helpers/index';
 import Customer from '@/models/Customer';
-import { ICustomer, ICustomerSnapshot, ISearchParams } from '@/types/index';
+import { ICustomer } from '@/types/ICustomer';
 import { connectToDB } from '@/utils/dbConnect';
+
+import { serializeDoc } from '../lib';
 
 interface IGetAllCostomers {
   success: boolean;
@@ -14,177 +14,162 @@ interface IGetAllCostomers {
   count: number;
 }
 
-export async function getAllCustomers(
-  searchParams: ISearchParams
-): Promise<IGetAllCostomers> {
-  const currentPage = Number(searchParams.page) || 1;
-  const { skip, limit } = buildPagination(searchParams, currentPage);
-
+export async function addCustomer(values: {
+  user: mongoose.Types.ObjectId | string;
+  city: string;
+  warehouse: string;
+  payment: string;
+}): Promise<{
+  success: boolean;
+  message: string;
+  customer: ICustomer | HydratedDocument<ICustomer>;
+}> {
   try {
     await connectToDB();
 
-    const count = await Customer.countDocuments();
+    // Проверяем, есть ли Customer с таким user
+    let existingCustomer = await Customer.findOne({ user: values.user });
 
-    const customers: ICustomer[] = await Customer.find()
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .exec();
-
-    return {
-      success: true,
-      customers: JSON.parse(JSON.stringify(customers)),
-      count: count,
-    };
-  } catch (error) {
-    console.log(error);
-    return { success: false, customers: [], count: 0 };
-  }
-}
-
-export async function addCustomer(values: string | ICustomerSnapshot) {
-  try {
-    await connectToDB();
-
-    // --- 1️⃣ Если передан ObjectId (строка) ---
-    if (typeof values === 'string' && mongoose.Types.ObjectId.isValid(values)) {
-      const existingCustomer = await Customer.findById(values);
-      if (existingCustomer) {
-        return {
-          success: true,
-          message: 'Customer already exists by ID',
-          customer: existingCustomer,
-        };
-      } else {
-        return {
-          success: false,
-          message: 'Customer ID not found in database',
-        };
-      }
-    }
-
-    // --- 2️⃣ Если передан объект (снапшот клиента) ---
-    const snapshot = values as ICustomerSnapshot;
-
-    if (!snapshot?.phone) {
-      return {
-        success: false,
-        message: 'Missing phone number in customer snapshot',
-      };
-    }
-
-    // Проверяем, есть ли уже клиент с таким телефоном
-    const existingCustomer = await Customer.findOne({ phone: snapshot.phone });
     if (existingCustomer) {
+      // Обновляем актуальные данные
+      existingCustomer.city = values.city;
+      existingCustomer.warehouse = values.warehouse;
+      existingCustomer.payment = values.payment;
+      await existingCustomer.save();
+
       return {
         success: true,
-        message: 'Customer already exists (by phone)',
-        customer: existingCustomer,
+        message: 'Customer updated successfully',
+        customer: serializeDoc<ICustomer>(existingCustomer),
       };
     }
 
-    // Создаём нового клиента
+    // Создаём нового
     const newCustomer = await Customer.create({
-      name: snapshot.name,
-      surname: snapshot.surname,
-      phone: snapshot.phone,
-      email: snapshot.email,
-      city: snapshot.city,
-      warehouse: snapshot.warehouse,
-      payment: snapshot.payment,
+      user: values.user,
+      city: values.city,
+      warehouse: values.warehouse,
+      payment: values.payment,
+      orders: [],
     });
 
     return {
       success: true,
       message: 'New customer created successfully',
-      customer: newCustomer,
+      customer: serializeDoc<ICustomer>(newCustomer),
     };
   } catch (error) {
     console.error('Error adding customer:', error);
-    if (error instanceof Error) {
-      throw new Error('Failed to add customer: ' + error.message);
-    } else {
-      throw new Error('Failed to add customer: Unknown error');
-    }
-  } finally {
-    revalidatePath('/admin/customers');
-  }
-}
-
-export async function deleteCustomer(id: string): Promise<void> {
-  if (!id) return;
-  await connectToDB();
-  await Customer.findByIdAndDelete(id);
-}
-
-export async function getCustomerById(id: string) {
-  try {
-    await connectToDB();
-    const customer = await Customer.findById({ _id: id }).lean();
-    return JSON.parse(JSON.stringify(customer));
-  } catch (error) {
-    console.log(error);
-  }
-}
-
-export async function updateCustomer(values: ICustomer) {
-  function serializeCustomer(customer: any) {
-    return {
-      ...customer,
-      _id: customer._id.toString(),
-      createdAt: customer.createdAt?.toISOString(),
-      updatedAt: customer.updatedAt?.toISOString(),
-      orders: customer.orders?.map((order: any) => ({
-        ...order,
-        _id: order._id.toString(),
-        createdAt: order.createdAt?.toISOString(),
-        updatedAt: order.updatedAt?.toISOString(),
-      })),
-    };
-  }
-
-  if (!values._id) {
-    throw new Error('Customer ID is required for update');
-  }
-
-  const { _id, name, phone, email, city, warehouse, payment } = values;
-
-  try {
-    await connectToDB();
-
-    // Створюємо тільки ті поля, які не пусті
-    const updateFields: Partial<ICustomer> = {
-      name,
-      phone,
-      email,
-      city,
-      warehouse,
-      payment,
-    };
-    Object.keys(updateFields).forEach(
-      key =>
-        (updateFields[key as keyof ICustomer] === '' ||
-          updateFields[key as keyof ICustomer] === undefined) &&
-        delete updateFields[key as keyof ICustomer]
+    throw new Error(
+      'Failed to add customer: ' +
+        (error instanceof Error ? error.message : 'Unknown error')
     );
+  }
+}
 
-    // Оновлюємо документ
-    const updatedCustomer = await Customer.findByIdAndUpdate(
-      _id,
-      updateFields,
-      {
-        new: true, // повертає оновлений документ
-      }
-    ).lean();
+export async function getAllCustomers(): Promise<{
+  success: boolean;
+  customers: ICustomer[];
+  count: number;
+}> {
+  try {
+    await connectToDB();
 
-    if (!updatedCustomer) {
-      throw new Error(`Customer with ID ${_id} not found`);
+    const customers = await Customer.find({}).populate('user');
+    const count = await Customer.countDocuments();
+
+    return {
+      success: true,
+      customers: customers.map(c => serializeDoc<ICustomer>(c)),
+      count,
+    };
+  } catch (error) {
+    console.error('Error fetching customers:', error);
+    throw new Error(
+      'Failed to fetch customers: ' +
+        (error instanceof Error ? error.message : 'Unknown error')
+    );
+  }
+}
+
+export async function deleteCustomer(id: string): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  try {
+    await connectToDB();
+
+    const deleted = await Customer.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return { success: false, message: 'Customer not found' };
     }
+
+    return { success: true, message: 'Customer deleted successfully' };
+  } catch (error) {
+    console.error('Error deleting customer:', error);
+    throw new Error(
+      'Failed to delete customer: ' +
+        (error instanceof Error ? error.message : 'Unknown error')
+    );
+  }
+}
+
+export async function getCustomerById(id: string): Promise<{
+  success: boolean;
+  customer?: ICustomer;
+  message?: string;
+}> {
+  try {
+    await connectToDB();
+
+    const customer = await Customer.findById(id).populate('user');
+
+    if (!customer) {
+      return { success: false, message: 'Customer not found' };
+    }
+
+    return { success: true, customer: serializeDoc(customer) };
+  } catch (error) {
+    console.error('Error fetching customer:', error);
+    throw new Error(
+      'Failed to fetch customer: ' +
+        (error instanceof Error ? error.message : 'Unknown error')
+    );
+  }
+}
+
+export async function updateCustomer(
+  id: string,
+  values: {
+    city?: string;
+    warehouse?: string;
+    payment?: string;
+  }
+): Promise<{
+  success: boolean;
+  message: string;
+  customer?: ICustomer;
+}> {
+  try {
+    await connectToDB();
+
+    const customer = await Customer.findById(id);
+
+    if (!customer) {
+      return { success: false, message: 'Customer not found' };
+    }
+
+    if (values.city !== undefined) customer.city = values.city;
+    if (values.warehouse !== undefined) customer.warehouse = values.warehouse;
+    if (values.payment !== undefined) customer.payment = values.payment;
+
+    await customer.save();
 
     return {
       success: true,
       message: 'Customer updated successfully',
-      data: serializeCustomer(updatedCustomer),
+      customer: serializeDoc(customer),
     };
   } catch (error) {
     console.error('Error updating customer:', error);

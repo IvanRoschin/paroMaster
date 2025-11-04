@@ -1,6 +1,6 @@
 import { ICartItem } from '@/types/ICartItem';
 import { ICategory } from '@/types/ICategory';
-import { ICustomer, ICustomerSnapshot } from '@/types/ICustomer';
+import { ICustomer } from '@/types/ICustomer';
 import { IGoodDB, IGoodUI } from '@/types/IGood';
 import { ILead } from '@/types/ILead';
 import { IOrder } from '@/types/IOrder';
@@ -11,14 +11,16 @@ import { IUser } from '@/types/IUser';
 import { ISearchParams } from '@/types/searchParams';
 
 import { IBrand } from './IBrand';
+import { ICity } from './ICity';
 import { IMinMaxPriceResponse } from './IPrices';
+import { IWarehouse } from './IWarehouse';
 
 export type {
   IBrand,
   ICartItem,
   ICategory,
+  ICity,
   ICustomer,
-  ICustomerSnapshot,
   IGoodDB,
   IGoodUI,
   ILead,
@@ -29,4 +31,5 @@ export type {
   ISlider,
   ITestimonial,
   IUser,
+  IWarehouse,
 };

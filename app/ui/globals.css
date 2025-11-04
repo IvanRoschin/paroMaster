@@ -1,0 +1,241 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*HEX => RGB*/
+/*
+primaryBackground #ffffff => 255 255 255
+secondaryBackground #d1d5db => 209 213 219
+#767676 => 118 118 118
+primaryTextColor #282828 => 40 40 40
+primaryAccentColor #ea580c => 234 88 12
+#FFFD84 => 255 255 216
+container sizes: xsm: max-480px sm: 480px md: 768px lg: 1280px  
+*/
+
+@layer base {
+  :root {
+    --color-primaryBackground: 255 255 255;
+    --color-secondaryBackground: 209 213 219;
+
+    --color-primaryTextColor: 40 40 40;
+    --color-secondaryTextColor: 118 118 118;
+    --color-thirdTextColor: 118 118 118;
+
+    --color-primaryAccentColor: 234 88 12;
+    --color-secondaryAccentColor: 255 255 216;
+
+    --color-sectionTitleColor: 255 255 255;
+    --color-iconColor: 255 255 255;
+
+    --color-primaryScrollbarTrack: 40 40 40;
+    --color-primaryScrollbarThumb: 255 255 50;
+
+    --swiper-pagination-color: #ea580c;
+    /* --swiper-navigation-color: #ea580c; */
+
+    --font-mono:
+      ui-monospace, Melno, Monaco, Consolas, 'Coscadia Mono', 'Roboto Mono',
+      'Oxygen Mono', 'Ubuntu Monosapce', 'Fira Mono', 'Droid Sans Mono',
+      'Courier Nem' monospace;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+}
+.input-field {
+  @apply text-primaryTextColor w-full p-4 pt-6 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed;
+}
+
+.input-field-error {
+  @apply border-rose-500 focus:border-rose-500;
+}
+
+.input-field-valid {
+  @apply border-neutral-300 focus:border-green-500;
+}
+
+.input-field {
+  width: 100%;
+  padding: 1rem;
+  padding-top: 1.5rem;
+  font-weight: 300;
+  background-color: white;
+  border: 2px solid #d1d5db; /* neutral-300 */
+  border-radius: 0.375rem;
+  outline: none;
+  transition: all 0.2s;
+  color: var(
+    --color-primaryTextColor
+  ); /* заміни на потрібну змінну або значення */
+}
+
+.input-field:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.input-field:focus {
+  border-color: #10b981; /* green-500 */
+}
+
+.input-field-error {
+  border-color: #f43f5e; /* rose-500 */
+}
+
+.input-field-error:focus {
+  border-color: #f43f5e;
+}
+
+.clip-half {
+  clip-path: inset(0 50% 0 0);
+}
+@layer components {
+  .suggestion-title {
+    background-color: #f9f9f9;
+  }
+
+  .suggestion-model {
+    background-color: #e9f7fa;
+  }
+
+  .suggestion-sku {
+    background-color: #fff3cd;
+  }
+
+  .suggestion-brand {
+    background-color: #d4edda;
+  }
+
+  .suggestion-default {
+    background-color: #ffffff;
+  }
+
+  .custom-checkbox {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background-color: white;
+    border: 2px solid #ea580c;
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .custom-checkbox:checked {
+    background-color: #ea580c;
+    border-color: #ea580c;
+  }
+
+  .custom-checkbox:checked::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 5px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  .custom-checkbox:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5); /* Adjust as needed */
+  }
+
+  .nav {
+    @apply relative 
+		hover:text-white hover:fill-orange-600
+		focus:text-white focus:fill-orange-600
+		transition-all
+		duration-300;
+  }
+  .nav::after {
+    @apply content-[''] 
+		bg-orange-600 
+		h-[3px] 
+		w-0 
+		left-0 
+		-bottom-1 
+		rounded-xl 
+		absolute 
+		transition-all
+		duration-300;
+  }
+  .nav:hover::after {
+    @apply w-full;
+  }
+  .nav:focus::after {
+    @apply w-full;
+  }
+  .filter-primary {
+    filter: invert(39%) sepia(95%) saturate(3935%) hue-rotate(350deg)
+      brightness(94%) contrast(91%);
+  }
+  .filter-white {
+    filter: invert(100%) brightness(100%);
+  }
+
+  .swiper {
+    @apply mx-0
+			!important;
+  }
+  .swiper-slide {
+    @apply mr-0
+      !important;
+  }
+  .swiper-container {
+    @apply relative;
+  }
+  /* button arrangment	 */
+
+  .swiper-button-prev,
+  .swiper-button-next {
+    width: 32px !important;
+    height: 32px !important;
+    color: #ea580c !important;
+  }
+
+  .swiper-button-prev:hover,
+  .swiper-button-next:hover {
+    color: #d1d5db !important;
+    transition: all 1s ease-out;
+  }
+
+  .swiper-button-prev:focus,
+  .swiper-button-next:focus {
+    color: #d1d5db !important;
+    transition: all 1s ease-out;
+  }
+
+  .swiper-button-next::after,
+  .swiper-button-prev::after {
+    display: none;
+  }
+
+  .title {
+    color: #ea580c;
+    font-size: 36px;
+    text-align: center;
+    font-weight: 700;
+  }
+
+  .subtitle {
+    color: #ea580c;
+    font-size: 24px;
+    text-align: left;
+    font-weight: 700;
+  }
+
+  .subtitle-main {
+    color: #ea580c;
+    font-size: 24px;
+    text-align: left;
+    font-weight: 700;
+    margin: 16px 0 16px 0;
+  }
+}

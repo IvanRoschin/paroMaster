@@ -1,6 +1,6 @@
 export enum PaymentMethod {
-  CASH_ON_DELIVERY = 'Оплата після отримання',
-  CREDIT_CARD = 'Оплата на карту',
-  INVOICE_FOR_SPD = 'Рахунок для СПД',
-  WAY_FOR_PAY = 'Оплата через WayForPay',
+  CASH_ON_DELIVERY = 'CASH_ON_DELIVERY',
+  CREDIT_CARD = 'CREDIT_CARD',
+  INVOICE_FOR_SPD = 'INVOICE_FOR_SPD',
+  WAY_FOR_PAY = 'WAY_FOR_PAY',
 }

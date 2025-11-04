@@ -9,7 +9,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/admin/components/ui';
+} from '@/app/(admin)/components/ui';
 
 interface Option {
   value: string;

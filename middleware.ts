@@ -12,7 +12,7 @@ const publicPages = [
   '/guarantee',
   '/contact',
   '/login',
-  '/404',
+  '/not-found',
 ];
 
 // Настраиваем authMiddleware
@@ -40,4 +40,6 @@ export function middleware(req: NextRequest, ev: NextFetchEvent) {
 
 export { default } from 'next-auth/middleware';
 
-export const config = { matcher: ['/admin', '/protected/:path'] };
+export const config = {
+  matcher: ['/admin/:path*', '/customer/:path*'],
+};

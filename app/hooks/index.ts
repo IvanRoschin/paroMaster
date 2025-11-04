@@ -1,7 +1,8 @@
 import useAddData from '@/hooks/useAddData';
 import useCartModal from '@/hooks/useCartModal';
 import useCategoriesEnum from '@/hooks/useCategoriesEnum';
-import useCities from '@/hooks/useCities';
+import { useCities } from '@/hooks/useCities';
+import { useCitySelection } from '@/hooks/useCitySelection';
 import useDeleteData from '@/hooks/useDeleteData';
 import useFetchData from '@/hooks/useFetchData';
 import useFetchDataById from '@/hooks/useFetchDataById';
@@ -19,6 +20,7 @@ export {
   useCartModal,
   useCategoriesEnum,
   useCities,
+  useCitySelection,
   useDeleteData,
   useDeleteModal,
   useFetchData,

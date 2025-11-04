@@ -7,9 +7,11 @@ import {
 import { generateEmailContent } from 'app/templates/email/NewOrderTemplate';
 import { FieldValues } from 'react-hook-form';
 
+import { baseUrl, routes } from '@/helpers/routes';
+import { TokenType } from '@/models/Token';
 import { IOrder } from '@/types/index';
 
-import { sendMail } from '../lib/sendMail';
+import { sendMail } from '../lib/sendMail.server';
 
 const fromEmail = process.env.SMTP_EMAIL;
 
@@ -17,21 +19,45 @@ if (!fromEmail) {
   throw new Error('SMTP_EMAIL is not defined in the environment variables');
 }
 
-function validateOrderData(data: IOrder) {
-  // Используем customerSnapshot вместо customer
-  const customer = data.customerSnapshot;
+export interface IOrderedGoodSnapshot {
+  good: {
+    _id: string;
+    title: string;
+    brand: string | null;
+    model: string;
+    sku: string;
+  };
+  quantity: number;
+  price: number;
+}
+
+export interface IUserCredentials {
+  email: string;
+  name: string;
+  login: string;
+  password: string;
+}
+
+export interface IUserVerificationCredentials {
+  email: string;
+  name: string;
+  token: TokenType;
+}
+
+function validateOrderData(order: IOrder) {
+  const customer = order.customerSnapshot;
 
   if (
-    !data.number ||
-    !customer?.name ||
-    !customer?.email ||
-    !customer?.phone ||
+    !order.number ||
+    !customer?.user.name ||
+    !customer?.user.email ||
+    !customer?.user.phone ||
     !customer?.city ||
     !customer?.warehouse ||
     !customer?.payment ||
-    !Array.isArray(data.orderedGoods) ||
-    data.orderedGoods.length === 0 ||
-    data.totalPrice <= 0
+    !Array.isArray(order.orderedGoods) ||
+    order.orderedGoods.length === 0 ||
+    order.totalPrice <= 0
   ) {
     return {
       success: false,
@@ -42,14 +68,121 @@ function validateOrderData(data: IOrder) {
   return { success: true };
 }
 
-export async function sendAdminEmail(data: IOrder) {
-  const validation = validateOrderData(data);
-  if (!validation.success) return validation;
+export async function sendVerificationLetter({
+  email,
+  name,
+  token,
+}: IUserVerificationCredentials) {
+  if (!email || !name || !token) {
+    return {
+      success: false,
+      error: 'sendVerificationLetter Error: Missing required user credentials.',
+    };
+  }
 
-  const customer = data.customerSnapshot;
+  const verificationUrl = `${baseUrl}${routes.publicRoutes.auth.verifyEmail}?token=${encodeURIComponent(token)}`;
 
   try {
-    const emailContent = generateEmailContent(data);
+    const emailContent = `
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif; background-color: #f9f9f9; border-radius: 10px; color: #333;">
+        <h2>Привіт, ${name}!</h2>
+        <p>Ви зробили замовлення на сайті магазину запчастин <strong>ParoMaster</strong>.</p>
+        <p>Щоб активувати особистий кабінет та отримувати спеціальні пропозиції, перейдіть за посиланням:</p>
+        <p><strong><a href="${verificationUrl}" style="color: #2196F3; text-decoration: none;">Підтвердити реєстрацію</a></strong></p>
+        <p>Бажаємо приємних покупок 🚀</p>
+      </div>
+    `;
+
+    await sendMail({
+      to: email,
+      from: {
+        email: 'no-reply@paromaster.com',
+        name: 'Магазин запчастин ParoMaster',
+      },
+      subject: 'Підтвердження реєстрації на ParoMaster',
+      body: emailContent,
+    });
+
+    console.log('✅ Verification letter successfully sent.');
+    return { success: true };
+  } catch (error: any) {
+    console.error(
+      '❌ Error sending user credentials email:',
+      error.message || error
+    );
+    return {
+      success: false,
+      error: error.message || 'Unknown error occurred.',
+    };
+  }
+}
+
+export async function sendUserCredentialsEmail({
+  email,
+  name,
+  login,
+  password,
+}: IUserCredentials) {
+  if (!email || !login || !password) {
+    return {
+      success: false,
+      error: 'Validation Error: Missing required user credentials.',
+    };
+  }
+
+  const resetPasswordUrl = `${baseUrl}${routes.customerRoutes.changePassword}`;
+
+  try {
+    const emailContent = `
+      <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif; background-color: #f9f9f9; border-radius: 10px; color: #333;">
+        <h2>Привіт, ${name}!</h2>
+        <p>Дякуюємо за довіру! <br> 
+        Ваш особистий кабінет активовано на сайті магазину запчастин <strong>ParoMaster</strong>.</p>
+        <p><strong>Логін:</strong> ${login}</p>
+        <p><strong>Пароль:</strong> ${password}</p>
+        <p>Радимо змінити пароль після першого входу в особистому кабінеті або за посиланням
+         <a href="${resetPasswordUrl}" style="color: #2196F3; text-decoration: none;">змінити пароль</a>
+</p>
+        <p>Бажаємо приємних покупок 🚀</p>
+      </div>
+    `;
+
+    await sendMail({
+      to: email,
+      from: {
+        email: 'no-reply@paromaster.com',
+        name: 'Магазин запчастин ParoMaster',
+      },
+      name,
+      subject: 'Ваші дані для входу на ParoMaster',
+      body: emailContent,
+    });
+
+    console.log('✅ User credentials email successfully sent.');
+    return { success: true };
+  } catch (error: any) {
+    console.error(
+      '❌ Error sending user credentials email:',
+      error.message || error
+    );
+    return {
+      success: false,
+      error: error.message || 'Unknown error occurred.',
+    };
+  }
+}
+
+export async function sendAdminEmail(
+  order: IOrder,
+  orderedGoodsSnapshot: IOrderedGoodSnapshot[]
+) {
+  const validation = validateOrderData(order);
+  if (!validation.success) return validation;
+
+  const customer = order.customerSnapshot;
+
+  try {
+    const emailContent = generateEmailContent(order, orderedGoodsSnapshot);
 
     if (typeof emailContent !== 'string') {
       console.error('Помилка генерації контенту листа:', emailContent.error);
@@ -58,9 +191,13 @@ export async function sendAdminEmail(data: IOrder) {
 
     await sendMail({
       to: fromEmail!,
+      from: {
+        email: 'no-reply@paromaster.com',
+        name: 'Магазин запчастин ParoMaster',
+      },
       name: 'ParoMaster Admin',
-      subject: `Нове замовлення №${data.number} від ${customer.name}${
-        customer.surname ? ` ${customer.surname}` : ''
+      subject: `Нове замовлення №${order.number} від ${customer.user.name}${
+        customer.user.surname ? ` ${customer.user.surname}` : ''
       }`,
       body: emailContent,
     });
@@ -76,27 +213,34 @@ export async function sendAdminEmail(data: IOrder) {
   }
 }
 
-export async function sendCustomerEmail(data: IOrder) {
-  const validation = validateOrderData(data);
+export async function sendCustomerEmail(
+  order: IOrder,
+  orderedGoodsSnapshot: IOrderedGoodSnapshot[]
+) {
+  const validation = validateOrderData(order);
   if (!validation.success) return validation;
 
-  const customer = data.customerSnapshot;
+  const customer = order.customerSnapshot;
 
   try {
-    const emailContent = generateEmailContent(data);
+    const emailContent = generateEmailContent(order, orderedGoodsSnapshot);
 
     if (typeof emailContent !== 'string') {
       console.error('Помилка генерації контенту листа:', emailContent.error);
       return { success: false, error: emailContent.error };
     }
 
-    if (!customer.email) {
+    if (!customer.user.email) {
       return { success: false, error: 'Missing recipient email address.' };
     }
 
     await sendMail({
-      to: customer.email,
-      name: customer.name,
+      to: customer.user.email,
+      from: {
+        email: 'no-reply@paromaster.com',
+        name: 'Магазин запчастин ParoMaster',
+      },
+      name: customer.user.name,
       subject: `Ваше замовлення на сайті ParoMaster`,
       body: emailContent,
     });

@@ -1,3 +1,4 @@
+'use client';
 import { FormikErrors } from 'formik';
 import { useState } from 'react';
 import { FaStar } from 'react-icons/fa';

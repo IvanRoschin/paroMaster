@@ -1,3 +1,4 @@
+'use client';
 import Image from 'next/image';
 import { useCallback, useEffect, useState } from 'react';
 import { IoIosArrowDropleft, IoIosArrowDropright } from 'react-icons/io';
