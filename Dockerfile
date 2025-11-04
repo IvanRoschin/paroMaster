@@ -10,8 +10,13 @@ RUN npm ci
 COPY . .
 
 # Указываем build-time ARG для Next.js
+ARG SMTP_EMAIL
+ARG SMTP_PASSWORD
 ARG MONGODB_URI
+ENV SMTP_EMAIL=$SMTP_EMAIL
+ENV SMTP_PASSWORD=$SMTP_PASSWORD
 ENV MONGODB_URI=$MONGODB_URI
+
 
 # Сборка production версии
 RUN npm run build

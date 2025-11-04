@@ -5,19 +5,12 @@ import {
   NewLidTemplateProps,
 } from 'app/templates/email/NewLeadTemplate';
 import { generateEmailContent } from 'app/templates/email/NewOrderTemplate';
+import nodemailer from 'nodemailer';
 import { FieldValues } from 'react-hook-form';
 
 import { baseUrl, routes } from '@/helpers/routes';
 import { TokenType } from '@/models/Token';
 import { IOrder } from '@/types/index';
-
-import { sendMail } from '../lib/sendMail.server';
-
-const fromEmail = process.env.SMTP_EMAIL;
-
-if (!fromEmail) {
-  throw new Error('SMTP_EMAIL is not defined in the environment variables');
-}
 
 export interface IOrderedGoodSnapshot {
   good: {
@@ -68,6 +61,61 @@ function validateOrderData(order: IOrder) {
   return { success: true };
 }
 
+// Универсальная функция отправки письма
+export async function sendMail({
+  to,
+  from,
+  name,
+  subject,
+  body,
+}: {
+  to: string;
+  from?: { name: string; email: string };
+  name?: string;
+  subject: string;
+  body: string;
+}) {
+  const { SMTP_EMAIL, SMTP_PASSWORD } = process.env;
+
+  if (!SMTP_EMAIL || !SMTP_PASSWORD) {
+    throw new Error(
+      '❌ SMTP_EMAIL and SMTP_PASSWORD must be set in environment variables'
+    );
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+      user: SMTP_EMAIL,
+      pass: SMTP_PASSWORD,
+    },
+  });
+
+  try {
+    await transporter.verify();
+    console.log('✅ SMTP connection verified');
+  } catch (err) {
+    console.error('❌ SMTP connection failed:', err);
+  }
+
+  const fromField =
+    from?.email && from?.name
+      ? { name: from.name, address: from.email }
+      : `"ParoMaster" <${SMTP_EMAIL}>`;
+
+  const result = await transporter.sendMail({
+    from: fromField,
+    to,
+    name,
+    subject,
+    html: body,
+  });
+
+  console.log('✅ Email sent:', result.messageId);
+  return result;
+}
+
+// Отправка письма для верификации пользователя
 export async function sendVerificationLetter({
   email,
   name,
@@ -82,17 +130,17 @@ export async function sendVerificationLetter({
 
   const verificationUrl = `${baseUrl}${routes.publicRoutes.auth.verifyEmail}?token=${encodeURIComponent(token)}`;
 
-  try {
-    const emailContent = `
+  const emailContent = `
     <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif; background-color: #f9f9f9; border-radius: 10px; color: #333;">
-        <h2>Привіт, ${name}!</h2>
-        <p>Ви зробили замовлення на сайті магазину запчастин <strong>ParoMaster</strong>.</p>
-        <p>Щоб активувати особистий кабінет та отримувати спеціальні пропозиції, перейдіть за посиланням:</p>
-        <p><strong><a href="${verificationUrl}" style="color: #2196F3; text-decoration: none;">Підтвердити реєстрацію</a></strong></p>
-        <p>Бажаємо приємних покупок 🚀</p>
-      </div>
-    `;
+      <h2>Привіт, ${name}!</h2>
+      <p>Ви зробили замовлення на сайті магазину запчастин <strong>ParoMaster</strong>.</p>
+      <p>Щоб активувати особистий кабінет та отримувати спеціальні пропозиції, перейдіть за посиланням:</p>
+      <p><strong><a href="${verificationUrl}" style="color: #2196F3; text-decoration: none;">Підтвердити реєстрацію</a></strong></p>
+      <p>Бажаємо приємних покупок 🚀</p>
+    </div>
+  `;
 
+  try {
     await sendMail({
       to: email,
       from: {
@@ -107,7 +155,7 @@ export async function sendVerificationLetter({
     return { success: true };
   } catch (error: any) {
     console.error(
-      '❌ Error sending user credentials email:',
+      '❌ Error sending verification email:',
       error.message || error
     );
     return {
@@ -117,6 +165,7 @@ export async function sendVerificationLetter({
   }
 }
 
+// Отправка письма с данными пользователя
 export async function sendUserCredentialsEmail({
   email,
   name,
@@ -131,22 +180,19 @@ export async function sendUserCredentialsEmail({
   }
 
   const resetPasswordUrl = `${baseUrl}${routes.customerRoutes.changePassword}`;
+  const emailContent = `
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif; background-color: #f9f9f9; border-radius: 10px; color: #333;">
+      <h2>Привіт, ${name}!</h2>
+      <p>Ваш особистий кабінет активовано на сайті магазину запчастин <strong>ParoMaster</strong>.</p>
+      <p><strong>Логін:</strong> ${login}</p>
+      <p><strong>Пароль:</strong> ${password}</p>
+      <p>Радимо змінити пароль після першого входу або за посиланням 
+      <a href="${resetPasswordUrl}" style="color: #2196F3; text-decoration: none;">змінити пароль</a></p>
+      <p>Бажаємо приємних покупок 🚀</p>
+    </div>
+  `;
 
   try {
-    const emailContent = `
-      <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif; background-color: #f9f9f9; border-radius: 10px; color: #333;">
-        <h2>Привіт, ${name}!</h2>
-        <p>Дякуюємо за довіру! <br> 
-        Ваш особистий кабінет активовано на сайті магазину запчастин <strong>ParoMaster</strong>.</p>
-        <p><strong>Логін:</strong> ${login}</p>
-        <p><strong>Пароль:</strong> ${password}</p>
-        <p>Радимо змінити пароль після першого входу в особистому кабінеті або за посиланням
-         <a href="${resetPasswordUrl}" style="color: #2196F3; text-decoration: none;">змінити пароль</a>
-</p>
-        <p>Бажаємо приємних покупок 🚀</p>
-      </div>
-    `;
-
     await sendMail({
       to: email,
       from: {
@@ -172,6 +218,7 @@ export async function sendUserCredentialsEmail({
   }
 }
 
+// Отправка письма для администратора
 export async function sendAdminEmail(
   order: IOrder,
   orderedGoodsSnapshot: IOrderedGoodSnapshot[]
@@ -180,25 +227,19 @@ export async function sendAdminEmail(
   if (!validation.success) return validation;
 
   const customer = order.customerSnapshot;
+  const fromEmail = process.env.SMTP_EMAIL!;
+  const emailContent = generateEmailContent(order, orderedGoodsSnapshot);
+
+  if (typeof emailContent !== 'string') {
+    return { success: false, error: emailContent.error };
+  }
 
   try {
-    const emailContent = generateEmailContent(order, orderedGoodsSnapshot);
-
-    if (typeof emailContent !== 'string') {
-      console.error('Помилка генерації контенту листа:', emailContent.error);
-      return { success: false, error: emailContent.error };
-    }
-
     await sendMail({
-      to: fromEmail!,
-      from: {
-        email: 'no-reply@paromaster.com',
-        name: 'Магазин запчастин ParoMaster',
-      },
+      to: fromEmail,
+      from: { email: 'no-reply@paromaster.com', name: 'ParoMaster Admin' },
       name: 'ParoMaster Admin',
-      subject: `Нове замовлення №${order.number} від ${customer.user.name}${
-        customer.user.surname ? ` ${customer.user.surname}` : ''
-      }`,
+      subject: `Нове замовлення №${order.number} від ${customer.user.name}`,
       body: emailContent,
     });
 
@@ -213,6 +254,7 @@ export async function sendAdminEmail(
   }
 }
 
+// Отправка письма клиенту
 export async function sendCustomerEmail(
   order: IOrder,
   orderedGoodsSnapshot: IOrderedGoodSnapshot[]
@@ -221,19 +263,14 @@ export async function sendCustomerEmail(
   if (!validation.success) return validation;
 
   const customer = order.customerSnapshot;
+  if (!customer.user.email)
+    return { success: false, error: 'Missing recipient email address.' };
+
+  const emailContent = generateEmailContent(order, orderedGoodsSnapshot);
+  if (typeof emailContent !== 'string')
+    return { success: false, error: emailContent.error };
 
   try {
-    const emailContent = generateEmailContent(order, orderedGoodsSnapshot);
-
-    if (typeof emailContent !== 'string') {
-      console.error('Помилка генерації контенту листа:', emailContent.error);
-      return { success: false, error: emailContent.error };
-    }
-
-    if (!customer.user.email) {
-      return { success: false, error: 'Missing recipient email address.' };
-    }
-
     await sendMail({
       to: customer.user.email,
       from: {
@@ -256,34 +293,30 @@ export async function sendCustomerEmail(
   }
 }
 
+// Отправка письма с лидом
 export async function sendEmailToLid(data: FieldValues) {
   const { email, name, phone } = data;
+  if (!email || !name || !phone)
+    return { success: false, error: 'Error: not all data passed' };
 
-  if (!email || !name || !phone) {
-    return {
-      success: false,
-      error: 'Error: not all data passed',
-    };
-  }
+  const emailContent = generateLidEmailContent({
+    email,
+    name,
+    phone,
+  } as NewLidTemplateProps);
 
   try {
-    const emailContent = generateLidEmailContent({
-      email,
-      name,
-      phone,
-    } as NewLidTemplateProps);
-
     await sendMail({
-      to: fromEmail!,
+      to: process.env.SMTP_EMAIL!,
       name,
       subject: `Заповнена форма зв'язку на сайті від ${name}, контактний email: ${email}`,
       body: emailContent,
     });
 
-    console.log('✅ Lid email successfully sent.');
+    console.log('✅ Lead email successfully sent.');
     return { success: true };
   } catch (error: any) {
-    console.error('❌ Error sending lid email:', error.message || error);
+    console.error('❌ Error sending lead email:', error.message || error);
     return {
       success: false,
       error: error.message || 'Unknown error occurred.',
