@@ -13,6 +13,8 @@ env:
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
   NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
   MONGODB_URI: ${{ secrets.MONGODB_URI }}
+  SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
+  SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
 
 jobs:
   build:
