@@ -96,17 +96,17 @@ jobs:
           fi
 
           echo "🔨 Building Docker image with Buildx and cache"
-          docker buildx build --platform linux/amd64 \
+          docker buildx build \
+            --secret id=SMTP_PASSWORD,env=SMTP_PASSWORD \
+            --secret id=NEXTAUTH_SECRET,env=NEXTAUTH_SECRET \
+            --secret id=WAYFORPAY_SECRET_KEY,env=WAYFORPAY_SECRET_KEY \
+            --secret id=SMTP_EMAIL,env=SMTP_EMAIL \
+            --secret id=WAYFORPAY_MERCHANT_ACCOUNT,env=WAYFORPAY_MERCHANT_ACCOUNT \
+            --secret id=WAYFORPAY_MERCHANT_DOMAIN,env=WAYFORPAY_MERCHANT_DOMAIN \
+            --secret id=WAYFORPAY_URL,env=WAYFORPAY_URL \
             --build-arg MONGODB_URI="${MONGODB_URI}" \
-            --build-arg SMTP_EMAIL="${SMTP_EMAIL}" \
-            --build-arg SMTP_PASSWORD="${SMTP_PASSWORD}" \
-            --build-arg WAYFORPAY_MERCHANT_ACCOUNT="${WAYFORPAY_MERCHANT_ACCOUNT}" \
-            --build-arg WAYFORPAY_MERCHANT_DOMAIN="${WAYFORPAY_MERCHANT_DOMAIN}" \
-            --build-arg WAYFORPAY_SECRET_KEY="${WAYFORPAY_SECRET_KEY}" \
-            --build-arg WAYFORPAY_URL="${WAYFORPAY_URL}" \
+            --platform linux/amd64 \
             --tag "$IMAGE_NAME:latest" \
-            --tag "$IMAGE_NAME:${GITHUB_SHA}" \
-            --cache-from=type=registry,ref="$IMAGE_NAME:latest" \
             --push \
             .
           echo "✅ Docker images pushed successfully"
