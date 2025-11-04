@@ -78,20 +78,35 @@ jobs:
           IMAGE_NAME=$DOCKER_USER/paro-master
 
           echo "🧹 Removing old container if exists"
-          docker rm -f paro-master || true
+          CONTAINER_ID=$(docker ps -a -q -f name=paro-master)
+          if [ ! -z "$CONTAINER_ID" ]; then
+            docker rm -f $CONTAINER_ID
+            echo "Removed old container $CONTAINER_ID"
+          else
+            echo "No existing container found, skipping removal"
+          fi
 
           echo "🧼 Removing old image if exists"
-          docker rmi -f $IMAGE_NAME:latest || true
+          if [ -n "$IMAGE_ID" ]; then
+            docker rmi -f "$IMAGE_ID"
+            echo "Removed old image $IMAGE_ID"
+          else
+            echo "No existing image found, skipping removal"
+          fi
 
           echo "🔨 Building Docker image with Buildx and cache"
           docker buildx build \
-            --build-arg MONGODB_URI=${MONGODB_URI} \
-            --build-arg SMTP_EMAIL=${{ secrets.SMTP_EMAIL }} \
-            --build-arg SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }} \
+            --build-arg MONGODB_URI="${MONGODB_URI}" \
+            --build-arg SMTP_EMAIL="${{ secrets.SMTP_EMAIL }}" \
+            --build-arg SMTP_PASSWORD="${{ secrets.SMTP_PASSWORD }}" \
+            --build-arg WAYFORPAY_MERCHANT_ACCOUNT="${{ secrets.WAYFORPAY_MERCHANT_ACCOUNT }}" \
+            --build-arg WAYFORPAY_MERCHANT_DOMAIN="${{ secrets.WAYFORPAY_MERCHANT_DOMAIN }}" \
+            --build-arg WAYFORPAY_SECRET_KEY="${{ secrets.WAYFORPAY_SECRET_KEY }}" \
+            --build-arg WAYFORPAY_URL="${{ secrets.WAYFORPAY_URL }}" \
             --platform linux/amd64 \
-            --tag $IMAGE_NAME:latest \
-            --tag $IMAGE_NAME:${GITHUB_SHA} \
-            --cache-from=type=registry,ref=$IMAGE_NAME:latest \
+            --tag "$IMAGE_NAME:latest" \
+            --tag "$IMAGE_NAME:${GITHUB_SHA}" \
+            --cache-from=type=registry,ref="$IMAGE_NAME:latest" \
             --push .
 
           echo "✅ Docker images pushed successfully"
