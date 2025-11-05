@@ -2,6 +2,7 @@
 import Link from 'next/link';
 
 import { useGoodDelete } from '@/app/hooks';
+import { formatCurrency } from '@/app/utils/formatCurrency';
 import {
   Button,
   DeleteConfirmation,
@@ -49,7 +50,7 @@ export const CardView = ({ goods, role }: ListViewProps) => {
                   </span>
                 </div>
                 <div className="mt-2 text-primaryAccentColor font-bold text-lg">
-                  {good.price} ₴
+                  {formatCurrency(good.price)}
                 </div>
               </div>
 

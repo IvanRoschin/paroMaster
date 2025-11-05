@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { FaPen, FaTrash } from 'react-icons/fa';
 
 import { useGoodDelete } from '@/app/hooks';
+import { formatCurrency } from '@/app/utils/formatCurrency';
 import { Button, DeleteConfirmation, Modal } from '@/components';
 import { IGoodUI } from '@/types';
 import { UserRole } from '@/types/IUser';
@@ -64,7 +65,7 @@ export const TableView = ({ goods, role }: TableViewProps) => {
 
               {/* Ціна */}
               <td className="p-3 text-right font-semibold">
-                {good.price.toLocaleString('uk-UA')} ₴
+                {formatCurrency(good.price)}
               </td>
 
               {/* Наявність */}

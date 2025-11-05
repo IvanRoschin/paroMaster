@@ -6,6 +6,7 @@ import { FaPen, FaTrash } from 'react-icons/fa';
 
 import { Button, DeleteConfirmation, Modal, NextImage } from '@/app/components';
 import { useGoodDelete } from '@/app/hooks';
+import { formatCurrency } from '@/app/utils/formatCurrency';
 import { IGoodUI } from '@/types';
 import { UserRole } from '@/types/IUser';
 
@@ -42,7 +43,10 @@ export const ListView = ({ goods, role }: ListViewProps) => {
               <div className="font-medium">{good.title},</div>
               <div className="text-gray-500 text-sm">{good.brand?.name}</div>
             </div>
-            <div className="text-right font-semibold">{good.price} ₴</div>
+            <div className="text-right font-semibold">
+              {' '}
+              {formatCurrency(good.price)}
+            </div>
             <div></div>
             <div className="p-2 border-r-2 text-center">
               <Link
