@@ -18,6 +18,14 @@ import {
   TestimonialsList,
 } from '../components';
 import DailyDealsSection from '../components/sections/DailyDealsSection';
+import { generateMetadata } from '../helpers/generateMetadata';
+
+export const metadata = generateMetadata({
+  title: 'Головна | ParoMaster',
+  description: 'Головна сторінка ParoMaster – продаж і ремонт парогенераторів.',
+  url: process.env.PUBLIC_URL,
+  imageUrl: '/services/01.webp',
+});
 
 // Константы для ключей React Query
 const GOODS_QUERY_KEY = (limit: number) => ['goods', { limit }];

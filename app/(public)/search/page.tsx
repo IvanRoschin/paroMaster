@@ -1,15 +1,17 @@
+import { Metadata } from 'next';
+
+import { getAllBrands } from '@/actions/brands';
+import { getAllCategories } from '@/actions/categories';
+import { getAllGoods } from '@/actions/goods';
+import { generateMetadata } from '@/app/helpers/generateMetadata';
+import { Breadcrumbs, EmptyState, InfiniteScroll } from '@/components/index';
+import { IGoodUI } from '@/types/index';
+import { ISearchParams } from '@/types/searchParams';
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
-
-import { getAllBrands } from '@/actions/brands';
-import { getAllCategories } from '@/actions/categories';
-import { getAllGoods } from '@/actions/goods';
-import { Breadcrumbs, EmptyState, InfiniteScroll } from '@/components/index';
-import { IGoodUI } from '@/types/index';
-import { ISearchParams } from '@/types/searchParams';
 
 interface GoodsData {
   goods: IGoodUI[];
@@ -17,6 +19,32 @@ interface GoodsData {
 
 export const dynamic = 'force-dynamic';
 
+export async function generateCatalogMetadata(
+  searchParams: ISearchParams
+): Promise<Metadata> {
+  const searchQuery = searchParams.search
+    ? `Результати пошуку: ${searchParams.search}`
+    : '';
+
+  return generateMetadata({
+    title: searchQuery
+      ? `${searchQuery} | ParoMaster`
+      : 'Каталог товарів | ParoMaster',
+    description: searchQuery
+      ? `Результати пошуку для "${searchParams.search}" у каталозі ParoMaster. Великий вибір запчастин та обладнання.`
+      : 'Великий каталог товарів для парогенераторів: запчастини, аксесуари, обладнання. Доставка по Україні. ParoMaster – надійний партнер у ремонті та сервісі.',
+    keywords: [
+      'каталог товарів',
+      'запчастини для парогенератора',
+      'купити парогенератор',
+      'ремонт парогенератора',
+      'ParoMaster',
+    ],
+    url: `${process.env.PUBLIC_URL}/catalog`,
+    imageUrl: '/services/03.webp',
+    imageAlt: 'Каталог товарів ParoMaster',
+  });
+}
 export default async function SearchPage({
   searchParams,
 }: {

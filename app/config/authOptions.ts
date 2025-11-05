@@ -5,6 +5,7 @@ import Google from 'next-auth/providers/google';
 
 import User from '@/models/User';
 import { connectToDB } from '@/utils/dbConnect';
+
 import { routes } from '../helpers/routes';
 
 // ---------- TYPE AUGMENTATION ----------
@@ -128,13 +129,27 @@ export const authOptions: NextAuthOptions = {
   // ----------- CALLBACKS -----------
   callbacks: {
     async jwt({ token, user }) {
+      // 1️⃣ Если юзер только что залогинился — сохраняем данные
       if (user) {
         token.id = (user as any).id?.toString();
         token.role = (user as any).role;
         token.phone = (user as any).phone;
+
         const dbUser = await User.findById((user as any).id);
         token.token = dbUser?.token;
+        return token;
       }
+
+      // 2️⃣ Если это не первый вызов (user undefined) — подтягиваем актуальные данные из БД
+      if (token?.id) {
+        const dbUser = await User.findById(token.id).select('role phone token');
+        if (dbUser) {
+          token.role = dbUser.role;
+          token.phone = dbUser.phone;
+          token.token = dbUser.token;
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {

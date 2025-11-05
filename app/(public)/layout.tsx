@@ -70,9 +70,14 @@ export default async function PublicRootLayout({
         name: session.user.name ?? 'Guest',
         email: session.user.email ?? '',
         image: session.user.image ?? `${process.env.PUBLIC_URL}/noavatar.png`,
-        role: (session.user.role as UserRole) ?? UserRole.CUSTOMER,
+        role: session.user.role as UserRole,
       }
-    : null;
+    : {
+        name: 'Guest',
+        email: '',
+        image: '/noavatar.png',
+        role: UserRole.GUEST,
+      };
 
   return (
     <html

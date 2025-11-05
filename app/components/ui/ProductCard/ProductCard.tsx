@@ -2,12 +2,11 @@
 
 import { useShoppingCart } from 'app/context/ShoppingCartContext';
 import { useSession } from 'next-auth/react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { FaPen } from 'react-icons/fa';
 
-import { Button } from '@/components/index';
+import { Button, NextImage } from '@/components/index';
 import { getCloudinaryUrl } from '@/helpers/getCloudinaryUrl';
 import { IGoodUI } from '@/types/IGood';
 
@@ -46,13 +45,18 @@ const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
   return (
     <li className="flex flex-col justify-between border border-gray-200 rounded-2xl p-4 hover:shadow-lg transition-all relative bg-white">
       {/* Верх: изображение и бейджи */}
-      <div className="relative w-full h-[200px] mb-4">
+      <div className="relative w-full h-[200px] mb-4 overflow-hidden rounded-lg z-0">
         <Link href={`/catalog/${good._id}`}>
-          <Image
+          <NextImage
             src={getCloudinaryUrl(good.src?.[0], 300, 300)}
             alt={good.title}
+            useSkeleton
             fill
-            className="object-contain bg-gray-50 p-2 rounded-lg"
+            className="bg-gray-50 rounded-lg"
+            classNames={{
+              wrapper: 'w-full h-full bg-gray-100 rounded-lg overflow-hidden',
+              image: 'object-contain p-2',
+            }}
           />
         </Link>
 
@@ -128,7 +132,7 @@ const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
         )}
 
       {/* Нижний блок */}
-      <div className="flex justify-between items-center mt-auto pt-2 border-t border-gray-200">
+      <div className="flex  items-center justify-center mt-auto pt-2 border-t border-gray-200">
         <CartActions
           isAvailable={good.isAvailable}
           itemId={good._id}

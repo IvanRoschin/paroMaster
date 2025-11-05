@@ -1,57 +1,60 @@
+import Image, { ImageProps } from 'next/image';
 import * as React from 'react';
 
-import Image, { ImageProps } from 'next/image';
-
+import { Skeleton } from '@/components/common';
 import { cn } from '@/lib';
 
 type NextImageProps = {
   useSkeleton?: boolean;
   classNames?: {
     image?: string;
-    blur?: string;
+    wrapper?: string;
   };
   alt: string;
-} & (
-  | { width: string | number; height: string | number }
-  | { layout: 'fill'; width?: string | number; height?: string | number }
-) &
-  ImageProps;
+  fill?: boolean;
+} & ImageProps;
 
-/**
- *
- * @description Must set width using `w-` className
- * @param useSkeleton add background with pulse animation, don't use it if image is transparent
- */
 export default function NextImage({
   useSkeleton = false,
   src,
   width,
   height,
   alt,
+  fill,
   className,
   classNames,
   ...rest
 }: NextImageProps) {
-  const [status, setStatus] = React.useState(
-    useSkeleton ? 'loading' : 'complete'
-  );
+  const [isLoading, setIsLoading] = React.useState(useSkeleton);
   const widthIsSet = className?.includes('w-') ?? false;
 
   return (
     <figure
-      style={!widthIsSet ? { width: `${width}px` } : undefined}
-      className={className}
+      style={
+        !fill && !widthIsSet
+          ? { width: `${width}px`, height: `${height}px` }
+          : undefined
+      }
+      className={cn('relative overflow-hidden', classNames?.wrapper, className)}
     >
+      {useSkeleton && isLoading && (
+        <Skeleton
+          className={cn(
+            'absolute inset-0 z-0 w-full h-full rounded-md animate-pulse'
+          )}
+        />
+      )}
+
       <Image
+        {...(fill ? { fill: true } : { width, height })}
         className={cn(
-          classNames?.image,
-          status === 'loading' && cn('animate-pulse', classNames?.blur)
+          'transition-opacity duration-500 object-contain',
+          isLoading ? 'opacity-0' : 'opacity-100',
+          classNames?.image
         )}
         src={src}
-        width={width}
-        height={height}
         alt={alt}
-        onLoadingComplete={() => setStatus('complete')}
+        onLoadingComplete={() => setIsLoading(false)}
         {...rest}
       />
     </figure>

@@ -1,12 +1,10 @@
-import '../ui/globals.css';
+import { ReactNode } from 'react';
 
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import Script from 'next/script';
-import { ReactNode } from 'react';
 
 import { SessionUser, UserRole } from '@/types/IUser';
-
 import { Header, Sidebar } from '../components';
 import AdminLayout from '../components/layouts/AdminLayout';
 import FooterServer from '../components/sections/FooterServer';
@@ -21,6 +19,8 @@ import {
   manrope,
 } from '../ui/fonts/index';
 
+import '../ui/globals.css';
+
 export default async function AdminRootLayout({
   children,
 }: {
@@ -33,12 +33,16 @@ export default async function AdminRootLayout({
         name: session.user.name ?? 'Guest',
         email: session.user.email ?? '',
         image: session.user.image ?? `${process.env.PUBLIC_URL}/noavatar.png`,
-        role: (session.user.role as UserRole) ?? UserRole.CUSTOMER,
+        role: session.user.role as UserRole,
       }
-    : null;
+    : {
+        name: 'Guest',
+        email: '',
+        image: `${process.env.PUBLIC_URL}/noavatar.png`,
+        role: UserRole.GUEST,
+      };
 
-  if (!user || user.role !== UserRole.ADMIN)
-    redirect(routes.publicRoutes.auth.signIn);
+  if (user.role !== UserRole.ADMIN) redirect(routes.publicRoutes.auth.signIn);
 
   return (
     <html

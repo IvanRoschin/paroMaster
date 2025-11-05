@@ -2,6 +2,9 @@
 
 import { useMemo, useState } from 'react';
 
+import ProductFilters, {
+  ProductFiltersState,
+} from '@/app/components/ui/ProductFilters';
 import {
   CardView,
   EmptyState,
@@ -11,18 +14,16 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components';
-import ProductFilters, {
-  ProductFiltersState,
-} from '@/components/ui/ProductFilters';
-import { IGoodUI, ISearchParams } from '@/types/index';
+import { IGoodUI } from '@/types';
 import { UserRole } from '@/types/IUser';
+import { ISearchParams } from '@/types/searchParams';
 
 interface Option {
   value: string;
   label: string;
 }
 
-interface ProductListProps {
+interface GoodsSectionProps {
   goods: IGoodUI[];
   title?: string;
   searchParams: ISearchParams;
@@ -32,15 +33,17 @@ interface ProductListProps {
   role: UserRole;
 }
 
-export default function ProductList({
+export default function GoodsSection({
   goods,
   title,
   initialCategory,
+  searchParams,
   categories = [],
   brands = [],
   role,
-}: ProductListProps) {
+}: GoodsSectionProps) {
   const [view, setView] = useState<'table' | 'card' | 'list'>('table');
+
   const [filters, setFilters] = useState<ProductFiltersState>({
     category: initialCategory ?? 'all',
     brand: 'all',
@@ -92,6 +95,7 @@ export default function ProductList({
   return (
     <div className="space-y-6">
       {title && <h2 className="subtitle-main">{title}</h2>}
+      {/* 🔹 Верхняя панель с табами */}
       <div className="flex justify-between items-center my-4">
         <span></span>{' '}
         <Tabs
@@ -105,12 +109,13 @@ export default function ProductList({
           </TabsList>
         </Tabs>
       </div>
+
+      {/* 🔹 Фильтры */}
       <ProductFilters
-        categories={categories}
-        brands={brands}
+        categories={categories ?? []}
+        brands={brands ?? []}
         onChange={setFilters}
       />
-
       {filteredGoods.length === 0 ? (
         <EmptyState showReset />
       ) : (

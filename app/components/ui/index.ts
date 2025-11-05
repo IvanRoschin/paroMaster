@@ -1,39 +1,21 @@
-import Button from '@/components/ui/Button';
-import {
+export { default as Button } from '@/components/ui/Button';
+export {
   CartButton,
   CartClient,
   CartItem,
   ShoppingCart,
 } from '@/components/ui/Cart';
-import CustomButton from '@/components/ui/CustomFormikButton';
-import ErrorMessage from '@/components/ui/ErrorMessage';
-import Icon from '@/components/ui/Icon';
-import Modal from '@/components/ui/Modal';
-import {
+export { default as CustomButton } from '@/components/ui/CustomFormikButton';
+export { default as ErrorMessage } from '@/components/ui/ErrorMessage';
+export { default as Icon } from '@/components/ui/Icon';
+export { default as Modal } from '@/components/ui/Modal';
+export {
   ProductCard,
   ProductClient,
   ProductList,
   ProductListSkeleton,
 } from '@/components/ui/ProductCard';
-import Rating from '@/components/ui/Rating';
-import SingOutButton from '@/components/ui/SingOutButton';
-import Switcher from '@/components/ui/Switcher';
-
-export {
-  Button,
-  CartButton,
-  CartClient,
-  CartItem,
-  CustomButton,
-  ErrorMessage,
-  Icon,
-  Modal,
-  ProductCard,
-  ProductClient,
-  ProductList,
-  ProductListSkeleton,
-  Rating,
-  ShoppingCart,
-  SingOutButton,
-  Switcher,
-};
+export { default as Rating } from '@/components/ui/Rating';
+export { default as SingOutButton } from '@/components/ui/SingOutButton';
+export { default as Switcher } from '@/components/ui/Switcher';
+export { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';

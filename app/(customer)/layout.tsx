@@ -1,12 +1,10 @@
-import '../ui/globals.css';
+import { ReactNode } from 'react';
 
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import Script from 'next/script';
-import { ReactNode } from 'react';
 
 import { SessionUser, UserRole } from '@/types/IUser';
-
 import { Header, Sidebar } from '../components';
 import CustomerLayout from '../components/layouts/CustomerLayout';
 import FooterServer from '../components/sections/FooterServer';
@@ -21,7 +19,9 @@ import {
   manrope,
 } from '../ui/fonts/index';
 
-export default async function AdminRootLayout({
+import '../ui/globals.css';
+
+export default async function CustomerRootLayout({
   children,
 }: {
   children: ReactNode;
@@ -33,11 +33,16 @@ export default async function AdminRootLayout({
         name: session.user.name ?? 'Guest',
         email: session.user.email ?? '',
         image: session.user.image ?? `${process.env.PUBLIC_URL}/noavatar.png`,
-        role: (session.user.role as UserRole) ?? UserRole.CUSTOMER,
+        role: session.user.role as UserRole,
       }
-    : null;
+    : {
+        name: 'Guest',
+        email: '',
+        image: '/noavatar.png',
+        role: UserRole.GUEST,
+      };
 
-  if (!user || user.role !== UserRole.CUSTOMER)
+  if (user.role !== UserRole.CUSTOMER)
     redirect(routes.publicRoutes.auth.signIn);
 
   return (

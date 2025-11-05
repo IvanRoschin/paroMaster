@@ -6,9 +6,10 @@ import { TailSpin } from 'react-loader-spinner';
 import { useContextSelector } from 'use-context-selector';
 
 import { getAllGoods } from '@/actions/goods';
-import { ProductList } from '@/components/ui';
+import { GoodsSection } from '@/app/(admin)/components';
 import { FiltersContext } from '@/context/FiltersContext';
 import { IGoodUI } from '@/types/IGood';
+import { UserRole } from '@/types/IUser';
 import { ISearchParams } from '@/types/searchParams';
 
 interface Option {
@@ -22,6 +23,7 @@ interface InfiniteScrollProps {
   brands?: Option[];
   initialGoods: IGoodUI[];
   searchParams: ISearchParams;
+  role: UserRole;
 }
 
 export default function InfiniteScroll({
@@ -29,6 +31,7 @@ export default function InfiniteScroll({
   searchParams,
   categories,
   brands,
+  role,
 }: InfiniteScrollProps) {
   const [goods, setGoods] = useState<IGoodUI[]>(initialGoods || []);
   const [pagesLoaded, setPagesLoaded] = useState(1);
@@ -137,7 +140,13 @@ export default function InfiniteScroll({
   return (
     <>
       <section>
-        <ProductList goods={goods} categories={categories} brands={brands} />
+        <GoodsSection
+          goods={goods}
+          searchParams={searchParams}
+          categories={categories}
+          brands={brands}
+          role={role}
+        />
       </section>
 
       <section className="flex flex-col items-center justify-center py-10 gap-4">

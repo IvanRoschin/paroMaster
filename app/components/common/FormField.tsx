@@ -1,3 +1,5 @@
+'use client';
+
 import { Field, FormikErrors, useField } from 'formik';
 
 interface Option {

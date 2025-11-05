@@ -1,33 +1,16 @@
-import useAddData from '@/hooks/useAddData';
-import useCartModal from '@/hooks/useCartModal';
-import useCategoriesEnum from '@/hooks/useCategoriesEnum';
-import { useCities } from '@/hooks/useCities';
-import { useCitySelection } from '@/hooks/useCitySelection';
-import useDeleteData from '@/hooks/useDeleteData';
-import useFetchData from '@/hooks/useFetchData';
-import useFetchDataById from '@/hooks/useFetchDataById';
-import useMediaQuery from '@/hooks/useMediaQuery';
-import usePrefetchData from '@/hooks/usePrefetchData';
-import useUpdateData from '@/hooks/useUpdateData';
-import useWarehouses from '@/hooks/useWarehouses';
-import useBrandsEnum from './useBrandsEnum';
-import useDeleteModal from './useDeleteModal';
-import useTestimonialModal from './useTestimonialsModal';
-
-export {
-  useAddData,
-  useBrandsEnum,
-  useCartModal,
-  useCategoriesEnum,
-  useCities,
-  useCitySelection,
-  useDeleteData,
-  useDeleteModal,
-  useFetchData,
-  useFetchDataById,
-  useMediaQuery,
-  usePrefetchData,
-  useTestimonialModal,
-  useUpdateData,
-  useWarehouses,
-};
+export { default as useAddData } from '@/hooks/useAddData';
+export { default as useBrandsEnum } from '@/hooks/useBrandsEnum';
+export { default as useCartModal } from '@/hooks/useCartModal';
+export { default as useCategoriesEnum } from '@/hooks/useCategoriesEnum';
+export { useCities } from '@/hooks/useCities';
+export { useCitySelection } from '@/hooks/useCitySelection';
+export { default as useDeleteData } from '@/hooks/useDeleteData';
+export { useGoodDelete } from '@/hooks/useDeleteGood';
+export { default as useDeleteModal } from '@/hooks/useDeleteModal';
+export { default as useFetchData } from '@/hooks/useFetchData';
+export { default as useFetchDataById } from '@/hooks/useFetchDataById';
+export { default as useMediaQuery } from '@/hooks/useMediaQuery';
+export { default as usePrefetchData } from '@/hooks/usePrefetchData';
+export { default as useTestimonialModal } from '@/hooks/useTestimonialsModal';
+export { default as useUpdateData } from '@/hooks/useUpdateData';
+export { default as useWarehouses } from '@/hooks/useWarehouses';

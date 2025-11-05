@@ -9,7 +9,7 @@ import { SessionUser, UserRole } from '@/types/IUser';
 const Sidebar = ({ user }: { user: SessionUser }) => {
   const isCustomer = user.role === UserRole.CUSTOMER;
   const menuItems = getMenuItemsByRole(
-    isCustomer ? UserRole.CUSTOMER : UserRole.CUSTOMER
+    isCustomer ? UserRole.CUSTOMER : UserRole.ADMIN
   );
 
   return (

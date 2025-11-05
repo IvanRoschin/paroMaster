@@ -31,8 +31,8 @@
       "@/api/*": ["./app/api/*"],
       "@/utils/*": ["./app/utils/*"],
       "@/types/*": ["./types/*"],
+      "@/types*": ["./types/index"],
       "@/models/*": ["./models/*"],
-      "@/models/": ["./models/index"],
       "@/helpers/*": ["./app/helpers/*"],
       "@/helpers/": ["./app/helpers/index*"],
       "@/hooks/*": ["./app/hooks/*"],
@@ -40,7 +40,8 @@
       "@/config/*": ["./app/config/*"],
       "@/lib/*": ["./app/lib/*"],
       "@/lib": ["./app/lib/index"],
-      "@/admin/*": ["app/(admin)/*"]
+      "@/admin/*": ["app/(admin)/*"],
+      "@/customer/*": ["app/(customer)/*"]
     },
     "skipLibCheck": true
   },
