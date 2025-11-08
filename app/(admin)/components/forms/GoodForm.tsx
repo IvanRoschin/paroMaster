@@ -3,8 +3,7 @@
 import { Form, Formik, FormikHelpers, FormikProps } from 'formik';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import {
@@ -13,7 +12,11 @@ import {
   ImageUploadCloudinary,
   Switcher,
 } from '@/components/index';
-import { getReadableGoodTitle, storageKeys } from '@/helpers/index';
+import {
+  getReadableGoodTitle,
+  goodFormSchema,
+  storageKeys,
+} from '@/helpers/index';
 import { useAddData, useUpdateData } from '@/hooks/index';
 import { IGoodUI } from '@/types/IGood';
 import { IBrand, ICategory } from '@/types/index';
@@ -53,15 +56,25 @@ const GoodFormContent: React.FC<{
   disableSessionSave,
 }) => {
   const { values, setFieldValue, errors } = formikProps;
+  const [existingGoodsForBrand, setExistingGoodsForBrand] = useState<IGoodUI[]>(
+    []
+  );
 
-  const existingGoodsForBrand = useMemo(() => {
-    if (!goodsByBrand || !values.brand) return [];
-    return goodsByBrand.filter(g => {
+  useEffect(() => {
+    if (!values.brand || !goodsByBrand) {
+      setExistingGoodsForBrand([]);
+      return;
+    }
+
+    const filtered = goodsByBrand.filter(g => {
       const brandId =
         typeof g.brand === 'string' ? g.brand : g.brand?._id?.toString();
-      return brandId === values.brand?.toString() && g._id !== good?._id;
+      // исключаем только сам редактируемый товар
+      return g._id !== good?._id && brandId === values.brand?.toString();
     });
-  }, [goodsByBrand, values.brand, good?._id]);
+
+    setExistingGoodsForBrand(filtered);
+  }, [values.brand, goodsByBrand, good?._id]);
 
   useEffect(() => {
     if (good) return;
@@ -152,6 +165,8 @@ const GoodFormContent: React.FC<{
       style: textareaStyles,
     },
   ];
+
+  console.log('existingGoodsForBrand:', existingGoodsForBrand);
 
   return (
     <Form className="relative flex flex-col w-[600px] gap-5 bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
@@ -246,19 +261,21 @@ const GoodFormContent: React.FC<{
         )}
       </AnimatePresence>
 
-      <motion.div
-        layout
-        transition={{ type: 'spring', stiffness: 250, damping: 20 }}
-        className="flex flex-col items-center"
-      >
-        <span className="text-sm font-medium mb-1">Сумісність</span>
-        <Switcher
-          id="isCompatible"
-          checked={values.isCompatible}
-          onChange={checked => setFieldValue('isCompatible', checked)}
-          labels={['Ні', 'Так']}
-        />
-      </motion.div>
+      {values.brand && goodsByBrand && goodsByBrand.length > 0 && (
+        <motion.div
+          layout
+          transition={{ type: 'spring', stiffness: 250, damping: 20 }}
+          className="flex flex-col items-center"
+        >
+          <span className="text-sm font-medium mb-1">Сумісність</span>
+          <Switcher
+            id="isCompatible"
+            checked={values.isCompatible}
+            onChange={checked => setFieldValue('isCompatible', checked)}
+            labels={['Ні', 'Так']}
+          />
+        </motion.div>
+      )}
 
       <AnimatePresence>
         {values.isCompatible && existingGoodsForBrand.length > 0 && (
@@ -317,7 +334,6 @@ const GoodForm: React.FC<GoodFormProps> = ({
   allowedBrands,
   action,
 }) => {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [disableSessionSave, setDisableSessionSave] = useState(false);
   const [initialValues, setInitialValues] = useState<InitialStateType | null>(
@@ -373,63 +389,12 @@ const GoodForm: React.FC<GoodFormProps> = ({
     });
   }, [good, allowedCategories, allowedBrands]);
 
-  const prepareGoodFormData = (values: InitialStateType, goodId?: string) => {
-    const formData = new FormData();
-
-    Object.entries(values).forEach(([key, value]) => {
-      if (key === 'discountPrice') {
-        if (value != null && value !== '') {
-          const num = Number(value);
-          if (!isNaN(num)) formData.append(key, num.toString());
-        }
-        return;
-      }
-
-      // ✅ Обработка массивов (в частности src)
-      if (Array.isArray(value)) {
-        if (key === 'src') {
-          // JSON-строка — это лучший формат для бекенда
-          formData.append(key, JSON.stringify(value));
-        } else {
-          // Для других массивов (например compatibleGoods)
-          value.forEach(v => formData.append(`${key}[]`, v));
-        }
-        return;
-      }
-
-      // ✅ Булевые
-      if (typeof value === 'boolean') {
-        formData.append(key, value ? 'true' : 'false');
-        return;
-      }
-
-      // ✅ Дата
-      if (key === 'dealExpiresAt' && value) {
-        const date = new Date(value);
-        if (!isNaN(date.getTime())) {
-          formData.append('dealExpiresAt', date.toISOString());
-        }
-        return;
-      }
-
-      // ✅ Строки и числа
-      if (value != null) {
-        formData.append(key, String(value));
-      }
-    });
-
-    if (goodId) formData.append('id', goodId);
-
-    return formData;
-  };
-
   const handleSubmit = async (
     values: InitialStateType,
     { resetForm }: FormikHelpers<InitialStateType>
   ) => {
     try {
       setIsLoading(true);
-      console.log('🧠 values перед отправкой:', values);
 
       const payload = {
         ...values,
@@ -474,7 +439,7 @@ const GoodForm: React.FC<GoodFormProps> = ({
         initialValues={initialValues}
         onSubmit={handleSubmit}
         enableReinitialize
-        // validationSchema={goodFormSchema}
+        validationSchema={goodFormSchema}
       >
         {formikProps => (
           <GoodFormContent
