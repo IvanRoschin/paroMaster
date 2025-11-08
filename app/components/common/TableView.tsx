@@ -29,7 +29,6 @@ export const TableView = ({ goods, role }: TableViewProps) => {
 
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
-  // Обновляем количество при изменении списка товаров
   useEffect(() => {
     const newQuantities: Record<string, number> = {};
     goods.forEach(good => {
@@ -78,7 +77,14 @@ export const TableView = ({ goods, role }: TableViewProps) => {
                 </td>
 
                 {/* Назва */}
-                <td className="p-3 font-medium text-gray-800">{good.title}</td>
+                <td className="p-3 font-medium text-gray-800">
+                  <Link
+                    className="nav text-gray-600 hover:text-gray-600"
+                    href={`/catalog/${good._id}`}
+                  >
+                    {good.title}
+                  </Link>
+                </td>
 
                 {/* Категорія */}
                 <td className="p-3 text-gray-600">

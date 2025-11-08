@@ -62,8 +62,16 @@ export const ListView = ({ goods, role }: ListViewProps) => {
               />
 
               {/* Название и бренд */}
+
               <div className="flex-1 min-w-0">
-                <div className="font-medium truncate">{good.title}</div>
+                <div className="font-medium truncate">
+                  <Link
+                    className="nav text-gray-600 hover:text-gray-600"
+                    href={`/catalog/${good._id}`}
+                  >
+                    {good.title}{' '}
+                  </Link>
+                </div>
                 <div className="text-gray-500 text-sm truncate">
                   {good.brand?.name ?? '—'}
                 </div>
