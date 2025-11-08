@@ -15,7 +15,7 @@ interface ButtonProps {
   bg?: string;
   children?: React.ReactNode;
   className?: string;
-  variant?: 'solid' | 'outline' | 'ghost'; // ✅ добавили
+  variant?: 'solid' | 'outline' | 'ghost';
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -31,16 +31,19 @@ const Button: React.FC<ButtonProps> = ({
   bg,
   children,
   className,
-  variant = 'solid', // ✅ дефолт
+  variant = 'solid',
 }) => {
-  // Если variant передан, игнорируем старый outline
   const isOutline = variant === 'outline' || outline;
 
-  const baseClasses = `flex items-center justify-center rounded-lg transition disabled:opacity-70 disabled:cursor-not-allowed ${
+  const hasText = Boolean(label || children);
+
+  const baseClasses = `flex items-center justify-center transition disabled:opacity-70 disabled:cursor-not-allowed rounded-lg ${
     small ? 'text-sm py-1 px-2 border' : 'text-md py-2 px-4 border-2'
   }`;
 
-  const widthClass = width ? `w-[${width}px]` : 'w-full';
+  // ⚡ Если width передан, используем Tailwind, иначе убираем w-full для маленьких кнопок
+  const widthClass = width ? `w-[${width}px]` : small ? '' : 'w-full';
+
   const bgClass = isOutline ? 'bg-white' : bg ? bg : 'bg-orange-600 text-white';
   const borderClass = isOutline
     ? color || 'border-orange-600'
@@ -56,7 +59,9 @@ const Button: React.FC<ButtonProps> = ({
       disabled={disabled}
       className={`${baseClasses} ${widthClass} ${bgClass} ${borderClass} ${textClass} ${className || ''} hover:opacity-80`}
     >
-      {Icon && <Icon size={small ? 14 : 18} className="mr-2" />}
+      {Icon && (
+        <Icon size={small ? 14 : 18} className={hasText ? 'mr-2' : 'mx-auto'} />
+      )}
       {label || children}
     </button>
   );

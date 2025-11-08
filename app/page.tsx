@@ -5,20 +5,20 @@ import {
   QueryClient,
 } from '@tanstack/react-query';
 
-import { getAllGoods } from '../actions/goods';
-import { getAllSlides, IGetAllSlides } from '../actions/slider';
+import { getAllGoods } from './actions/goods';
+import { getAllSlides, IGetAllSlides } from './actions/slider';
 import {
   getAllTestimonials,
   IGetAllTestimonials,
-} from '../actions/testimonials';
+} from './actions/testimonials';
 import {
   Advantages,
   Description,
   Slider,
   TestimonialsList,
-} from '../components';
-import DailyDealsSection from '../components/sections/DailyDealsSection';
-import { generateMetadata } from '../helpers/generateMetadata';
+} from './components';
+import DailyDealsSection from './components/sections/DailyDealsSection';
+import { generateMetadata } from './helpers/generateMetadata';
 
 export const metadata = generateMetadata({
   title: 'Головна | ParoMaster',

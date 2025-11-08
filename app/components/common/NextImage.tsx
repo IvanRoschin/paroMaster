@@ -1,5 +1,6 @@
-import Image, { ImageProps } from 'next/image';
 import * as React from 'react';
+
+import Image, { ImageProps } from 'next/image';
 
 import { Skeleton } from '@/components/common';
 import { cn } from '@/lib';
@@ -54,7 +55,7 @@ export default function NextImage({
         )}
         src={src}
         alt={alt}
-        onLoadingComplete={() => setIsLoading(false)}
+        onLoad={() => setIsLoading(false)}
         {...rest}
       />
     </figure>

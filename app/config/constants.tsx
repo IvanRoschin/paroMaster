@@ -2,7 +2,6 @@
 
 import { OrderStatus } from '@/types/orderStatus';
 import { PaymentMethod } from '@/types/paymentMethod';
-
 import { routes } from '../helpers/routes';
 
 export const paymentMethods = [
@@ -27,7 +26,7 @@ export const menu = [
     menuItemName: 'Наші роботи',
     menuItemLink: `${routes.publicRoutes.ourworks}`,
   },
-  { menuItemName: 'Послуги', menuItemLink: `${routes.publicRoutes.ourworks}` },
+  { menuItemName: 'Послуги', menuItemLink: `${routes.publicRoutes.services}` },
   { menuItemName: 'Доставка', menuItemLink: `${routes.publicRoutes.delivery}` },
   {
     menuItemName: 'Гарантія',

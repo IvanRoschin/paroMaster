@@ -1,14 +1,44 @@
-import Breadcrumbs from '@/components/common/Breadcrumbs';
+import { generateMetadata } from '@/app/helpers/generateMetadata';
+import { Breadcrumbs } from '@/components';
 
-type Props = {};
+export const metadata = generateMetadata({
+  title: 'Оплата та доставка | ParoMaster',
+  description:
+    'Детальна інформація про оплату та доставку товарів і послуг ParoMaster. Оплата готівкою, безготівково або при отриманні. Безкоштовна доставка при замовленні від 1000 грн.',
+  keywords: [
+    'доставка ParoMaster',
+    'оплата ParoMaster',
+    'умови доставки',
+    'оплата при отриманні',
+    'безготівковий розрахунок',
+    'Нова Пошта доставка',
+    'Укрпошта доставка',
+    'безкоштовна доставка',
+    'як оформити замовлення',
+  ],
+  url: process.env.PUBLIC_URL,
+  extra: {
+    openGraph: {
+      url: `${process.env.PUBLIC_URL}/delivery`,
+      title: 'Оплата та доставка | Умови замовлення ParoMaster',
+      description:
+        'Дізнайтесь, як оплатити замовлення та отримати доставку від ParoMaster. Зручні способи оплати та швидка доставка по Україні від Нової Пошти та Укрпошти.',
+    },
+    alternates: {
+      canonical: `${process.env.PUBLIC_URL}/delivery`,
+    },
+  },
+  imageUrl: '/services/04.webp',
+  imageAlt: 'Інформація про оплату та доставку ParoMaster',
+});
 
-const DeliveryPage = (props: Props) => {
+const DeliveryPage = () => {
   return (
     <div className="max-w-6xl mx-auto py-3 container">
       <Breadcrumbs />
 
       <h2 className="subtitle mb-4 text-center">Оплата та Доставка</h2>
-      <section className="mb-8">
+      <section className="border-b border-gray-200 pb-6 mb-6">
         <h3 className="subtitle">Оплата</h3>
         <ul className="list-disc pl-5 space-y-2">
           <li className="text-lg text-gray-700">
@@ -26,7 +56,7 @@ const DeliveryPage = (props: Props) => {
         </ul>
       </section>
 
-      <section className="mb-8">
+      <section className="border-b border-gray-200 pb-6 mb-6">
         <h3 className="subtitle">Доставка</h3>
         <p className="text-lg text-gray-700 mb-4">
           Доставка здійснюється надійними операторами:
@@ -41,7 +71,7 @@ const DeliveryPage = (props: Props) => {
         </p>
       </section>
 
-      <section className="mt-8">
+      <section className="border-b border-gray-200 pb-6 mb-6">
         <h3 className="subtitle">Як оформити замовлення</h3>
         <ol className="list-decimal pl-5 space-y-2">
           <li className="text-lg text-gray-700">

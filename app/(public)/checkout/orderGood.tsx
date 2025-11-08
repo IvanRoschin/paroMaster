@@ -1,6 +1,7 @@
-import Image from 'next/image';
+'use client';
 import React from 'react';
 
+import { NextImage } from '@/app/components';
 import { IGoodBase } from '@/types/IGood';
 
 type CartItemProps = {
@@ -20,7 +21,8 @@ const OrderGood: React.FC<CartItemProps> = ({ good, quantity }) => {
       <li className="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-2 hover:shadow-sm transition-all mb-2">
         <div className="flex items-center gap-2 w-2/3">
           {/* Product Image */}
-          <Image
+          <NextImage
+            useSkeleton
             src={good.src[0]}
             alt={good.title}
             width={40}

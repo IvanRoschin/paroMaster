@@ -6,6 +6,7 @@ import ProductFilters, {
   ProductFiltersState,
 } from '@/app/components/ui/ProductFilters';
 import {
+  ButtonAddGood,
   CardView,
   EmptyState,
   ListView,
@@ -97,7 +98,8 @@ export default function GoodsSection({
       {title && <h2 className="subtitle-main">{title}</h2>}
       {/* 🔹 Верхняя панель с табами */}
       <div className="flex justify-between items-center my-4">
-        <span></span>{' '}
+        {role === UserRole.ADMIN && <ButtonAddGood role={role} />}
+        <span> </span>{' '}
         <Tabs
           value={view}
           onValueChange={val => setView(val as 'table' | 'card' | 'list')}

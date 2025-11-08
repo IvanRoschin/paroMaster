@@ -1,6 +1,8 @@
 'use client';
 
 import { Form, Formik, FormikHelpers, FormikProps } from 'formik';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -11,11 +13,7 @@ import {
   ImageUploadCloudinary,
   Switcher,
 } from '@/components/index';
-import {
-  getReadableGoodTitle,
-  goodFormSchema,
-  storageKeys,
-} from '@/helpers/index';
+import { getReadableGoodTitle, storageKeys } from '@/helpers/index';
 import { useAddData, useUpdateData } from '@/hooks/index';
 import { IGoodUI } from '@/types/IGood';
 import { IBrand, ICategory } from '@/types/index';
@@ -58,7 +56,6 @@ const GoodFormContent: React.FC<{
 
   const existingGoodsForBrand = useMemo(() => {
     if (!goodsByBrand || !values.brand) return [];
-
     return goodsByBrand.filter(g => {
       const brandId =
         typeof g.brand === 'string' ? g.brand : g.brand?._id?.toString();
@@ -67,11 +64,11 @@ const GoodFormContent: React.FC<{
   }, [goodsByBrand, values.brand, good?._id]);
 
   useEffect(() => {
+    if (good) return;
     const categoryTitle =
       allowedCategories.find(c => c._id === values.category)?.name || '';
     const brandName =
       allowedBrands.find(b => b._id === values.brand)?.name || '';
-
     setFieldValue(
       'title',
       getReadableGoodTitle({
@@ -88,10 +85,12 @@ const GoodFormContent: React.FC<{
     allowedCategories,
     allowedBrands,
     setFieldValue,
+    good,
   ]);
 
+  // Сохранение в sessionStorage только для нового товара
   useEffect(() => {
-    if (disableSessionSave) return;
+    if (disableSessionSave || good) return;
     const timeout = setTimeout(() => {
       try {
         sessionStorage.setItem(storageKeys.good, JSON.stringify(values));
@@ -99,9 +98,8 @@ const GoodFormContent: React.FC<{
         console.error('Error saving form data:', err);
       }
     }, 300);
-
     return () => clearTimeout(timeout);
-  }, [values, disableSessionSave]);
+  }, [values, disableSessionSave, good]);
 
   const textareaStyles: React.CSSProperties = {
     height: 100,
@@ -112,122 +110,147 @@ const GoodFormContent: React.FC<{
     values.discountPrice !== undefined && values.discountPrice !== null
       ? Number(values.discountPrice)
       : undefined;
-
   const priceNum =
     values.price !== undefined && values.price !== null
       ? Number(values.price)
       : undefined;
-
   const hasDiscount =
     discountPriceNum !== undefined &&
     priceNum !== undefined &&
     discountPriceNum > 0 &&
     discountPriceNum < priceNum;
-
   const discountPercent = hasDiscount
     ? Math.round(((priceNum! - discountPriceNum!) / priceNum!) * 100)
     : undefined;
+
+  const fields = [
+    {
+      id: 'category',
+      label: 'Оберіть категорію товара',
+      type: 'select',
+      options: allowedCategories.map(cat => ({
+        value: cat._id ?? '',
+        label: cat.name,
+      })),
+    },
+    {
+      id: 'brand',
+      label: 'Оберіть бренд товара',
+      type: 'select',
+      options: allowedBrands.map(brand => ({
+        value: brand._id ?? '',
+        label: brand.name,
+      })),
+    },
+    { id: 'model', type: 'text', label: 'Модель' },
+    { id: 'price', type: 'number', label: 'Ціна' },
+    { id: 'discountPrice', type: 'number', label: 'Ціна зі знижкою' },
+    {
+      id: 'description',
+      type: 'textarea',
+      label: 'Опис',
+      style: textareaStyles,
+    },
+  ];
+
   return (
-    <Form className="flex flex-col w-[600px] gap-4">
-      {/* Поля */}
-      {[
-        {
-          id: 'category',
-          label: 'Оберіть категорію товара',
-          type: 'select',
-          options: allowedCategories.map(cat => ({
-            value: cat._id ?? '',
-            label: cat.name,
-          })),
-        },
-        {
-          id: 'brand',
-          label: 'Оберіть бренд товара',
-          type: 'select',
-          options: allowedBrands.map(brand => ({
-            value: brand._id ?? '',
-            label: brand.name,
-          })),
-        },
-        { id: 'model', type: 'text', label: 'Модель' },
-        { id: 'price', type: 'number', label: 'Ціна' },
-        { id: 'discountPrice', type: 'number', label: 'Ціна зі знижкою' },
-        {
-          id: 'description',
-          type: 'textarea',
-          label: 'Опис',
-          style: textareaStyles,
-        },
-      ].map((input, i) => (
-        <FormField
-          key={i}
-          item={input}
-          setFieldValue={setFieldValue}
-          errors={errors}
-        />
+    <Form className="relative flex flex-col w-[600px] gap-5 bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+      {fields.map((input, i) => (
+        <motion.div
+          key={input.id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: i * 0.05, duration: 0.3 }}
+        >
+          <FormField
+            item={input}
+            setFieldValue={setFieldValue}
+            errors={errors}
+          />
+        </motion.div>
       ))}
 
       {hasDiscount && discountPercent !== undefined && (
-        <p className="text-sm text-green-600 font-medium">
-          Знижка: {discountPercent}%
-        </p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-sm text-green-600 font-semibold text-right"
+        >
+          🎉 Знижка: {discountPercent}%
+        </motion.p>
       )}
 
       <input type="hidden" name="title" value={values.title} readOnly />
 
-      <ImageUploadCloudinary
-        setFieldValue={setFieldValue}
-        values={values.src}
-        errors={errors.src as any}
-        uploadPreset="preset_good"
-        multiple
-      />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+      >
+        <ImageUploadCloudinary
+          setFieldValue={setFieldValue}
+          values={values.src}
+          errors={errors.src as any}
+          uploadPreset="preset_good"
+          multiple
+        />
+      </motion.div>
 
       {/* Свитчи */}
-      <div className="flex justify-around items-center w-full max-w-md mx-auto mb-6">
-        <div className="flex flex-col items-center">
-          <span className="text-sm font-medium mb-1">Стан</span>
-          <Switcher
-            id="isNew"
-            checked={values.isNew}
-            onChange={checked => setFieldValue('isNew', checked)}
-            labels={['Б/У', 'Новий']}
-          />
-        </div>
-        <div className="flex flex-col items-center">
-          <span className="text-sm font-medium mb-1">Наявність</span>
-          <Switcher
-            id="isAvailable"
-            checked={values.isAvailable}
-            onChange={checked => setFieldValue('isAvailable', checked)}
-            labels={['Немає', 'Є']}
-          />
-        </div>
-        <div className="flex flex-col items-center">
-          <span className="text-sm font-medium mb-1">
-            Додати в пропозиції дня
-          </span>
-          <Switcher
-            id="isDailyDeal"
-            checked={!!values.isDailyDeal}
-            onChange={checked => setFieldValue('isDailyDeal', checked)}
-            labels={['Ні', 'Так']}
-          />
-        </div>
-      </div>
+      <motion.div
+        layout
+        className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-3xl mx-auto mb-8"
+      >
+        {[
+          { id: 'isNew', label: 'Стан товару', labels: ['Б/У', 'Новий'] },
+          { id: 'isAvailable', label: 'Наявність', labels: ['Немає', 'Є'] },
+          { id: 'isDailyDeal', label: 'Пропозиція дня', labels: ['Ні', 'Так'] },
+        ].map(sw => (
+          <motion.div
+            key={sw.id}
+            layout
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            className="flex flex-col justify-center items-center p-4 bg-white/70 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300"
+          >
+            <span className="text-sm font-medium text-gray-700 mb-2 text-center">
+              {sw.label}
+            </span>
+            <Switcher
+              id={sw.id}
+              checked={values[sw.id as keyof typeof values] as boolean}
+              onChange={checked => setFieldValue(sw.id, checked)}
+              labels={sw.labels as [string, string]}
+            />
+          </motion.div>
+        ))}
+      </motion.div>
 
-      {values.isDailyDeal && (
-        <FormField
-          item={{
-            id: 'dealExpiresAt',
-            label: 'Дата завершення пропозиції дня',
-            type: 'datetime-local',
-          }}
-          setFieldValue={setFieldValue}
-          errors={errors}
-        />
-      )}
-      <div className="flex flex-col items-center">
+      <AnimatePresence>
+        {values.isDailyDeal && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.25 }}
+          >
+            <FormField
+              item={{
+                id: 'dealExpiresAt',
+                label: 'Дата завершення пропозиції дня',
+                type: 'datetime-local',
+              }}
+              setFieldValue={setFieldValue}
+              errors={errors}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <motion.div
+        layout
+        transition={{ type: 'spring', stiffness: 250, damping: 20 }}
+        className="flex flex-col items-center"
+      >
         <span className="text-sm font-medium mb-1">Сумісність</span>
         <Switcher
           id="isCompatible"
@@ -235,40 +258,53 @@ const GoodFormContent: React.FC<{
           onChange={checked => setFieldValue('isCompatible', checked)}
           labels={['Ні', 'Так']}
         />
-      </div>
+      </motion.div>
 
-      {values.isCompatible && existingGoodsForBrand.length > 0 && (
-        <div className="mb-4">
-          <label className="block font-semibold mb-2">
-            Сумісний з товарами бренду:
-          </label>
-          <div className="flex flex-col gap-1 max-h-48 overflow-y-auto border rounded p-2">
-            {existingGoodsForBrand.map(goodItem => (
-              <label key={goodItem._id} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={values.compatibleGoods.includes(goodItem._id)}
-                  onChange={e => {
-                    const newArr = e.target.checked
-                      ? [...values.compatibleGoods, goodItem._id]
-                      : values.compatibleGoods.filter(
-                          id => id !== goodItem._id
-                        );
-                    setFieldValue('compatibleGoods', newArr);
-                  }}
-                />
-                {goodItem.model} {/* или title для отображения */}
-              </label>
-            ))}
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {values.isCompatible && existingGoodsForBrand.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mb-4"
+          >
+            <label className="block font-semibold mb-2">
+              Сумісний з товарами бренду:
+            </label>
+            <div className="flex flex-col gap-1 max-h-48 overflow-y-auto border rounded p-2">
+              {existingGoodsForBrand.map(goodItem => (
+                <label
+                  key={goodItem._id}
+                  className="flex items-center gap-2 hover:bg-gray-50 px-1 py-1 rounded"
+                >
+                  <input
+                    type="checkbox"
+                    checked={values.compatibleGoods.includes(goodItem._id)}
+                    onChange={e => {
+                      const newArr = e.target.checked
+                        ? [...values.compatibleGoods, goodItem._id]
+                        : values.compatibleGoods.filter(
+                            id => id !== goodItem._id
+                          );
+                      setFieldValue('compatibleGoods', newArr);
+                    }}
+                  />
+                  {goodItem.model}
+                </label>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      <CustomButton
-        label="Зберегти"
-        type="submit"
-        disabled={formikProps.isSubmitting}
-      />
+      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
+        <CustomButton
+          label="Зберегти"
+          type="submit"
+          disabled={formikProps.isSubmitting}
+        />
+      </motion.div>
     </Form>
   );
 };
@@ -283,30 +319,27 @@ const GoodForm: React.FC<GoodFormProps> = ({
 }) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [disableSessionSave, setDisableSessionSave] = useState(false); // <- тут
+  const [disableSessionSave, setDisableSessionSave] = useState(false);
+  const [initialValues, setInitialValues] = useState<InitialStateType | null>(
+    null
+  );
 
-  const addMutation = useAddData(action, ['goods']);
-  const updateMutation = useUpdateData(action, ['goods']);
+  const addMutation = useAddData(action, ['good']);
+  const updateMutation = useUpdateData(action, ['good', good?._id]);
   const isUpdating = Boolean(good?._id);
 
   useEffect(() => {
-    if (!good?._id) {
-      sessionStorage.removeItem(storageKeys.good);
-    }
-  }, [good?._id]);
+    if (typeof window === 'undefined') return;
 
-  const initialValues: InitialStateType = useMemo(() => {
     let savedValues: Partial<InitialStateType> = {};
-    if (typeof window !== 'undefined') {
+    if (!good) {
       try {
         const saved = sessionStorage.getItem(storageKeys.good);
         if (saved) savedValues = JSON.parse(saved);
-      } catch (err) {
-        console.error('Failed to parse saved good from sessionStorage', err);
-      }
+      } catch {}
     }
 
-    return {
+    setInitialValues({
       category:
         typeof good?.category === 'string'
           ? good.category
@@ -320,8 +353,11 @@ const GoodForm: React.FC<GoodFormProps> = ({
       sku: good?.sku || generateSimplesku(),
       title: good?.title || '',
       description: good?.description || '',
-      price: good?.price || 0,
-      discountPrice: good?.discountPrice || good?.price,
+      price: good?.price ?? 0,
+      discountPrice:
+        good?.discountPrice !== undefined && good?.discountPrice !== null
+          ? good.discountPrice
+          : (good?.price ?? 0),
       isNew: good?.isNew ?? true,
       isAvailable: good?.isAvailable ?? true,
       isDailyDeal: good?.isDailyDeal ?? false,
@@ -334,7 +370,7 @@ const GoodForm: React.FC<GoodFormProps> = ({
           typeof cg === 'string' ? cg : cg._id
         ) || [],
       ...savedValues,
-    };
+    });
   }, [good, allowedCategories, allowedBrands]);
 
   const prepareGoodFormData = (values: InitialStateType, goodId?: string) => {
@@ -349,21 +385,40 @@ const GoodForm: React.FC<GoodFormProps> = ({
         return;
       }
 
+      // ✅ Обработка массивов (в частности src)
       if (Array.isArray(value)) {
-        value.forEach(v => formData.append(`${key}[]`, v));
-      } else if (value != null) {
-        formData.append(key, value as string | Blob);
+        if (key === 'src') {
+          // JSON-строка — это лучший формат для бекенда
+          formData.append(key, JSON.stringify(value));
+        } else {
+          // Для других массивов (например compatibleGoods)
+          value.forEach(v => formData.append(`${key}[]`, v));
+        }
+        return;
+      }
+
+      // ✅ Булевые
+      if (typeof value === 'boolean') {
+        formData.append(key, value ? 'true' : 'false');
+        return;
+      }
+
+      // ✅ Дата
+      if (key === 'dealExpiresAt' && value) {
+        const date = new Date(value);
+        if (!isNaN(date.getTime())) {
+          formData.append('dealExpiresAt', date.toISOString());
+        }
+        return;
+      }
+
+      // ✅ Строки и числа
+      if (value != null) {
+        formData.append(key, String(value));
       }
     });
 
     if (goodId) formData.append('id', goodId);
-
-    if (values.dealExpiresAt) {
-      const date = new Date(values.dealExpiresAt);
-      if (!isNaN(date.getTime())) {
-        formData.append('dealExpiresAt', date.toISOString());
-      }
-    }
 
     return formData;
   };
@@ -374,38 +429,52 @@ const GoodForm: React.FC<GoodFormProps> = ({
   ) => {
     try {
       setIsLoading(true);
-      const formData = prepareGoodFormData(values, good?._id);
+      console.log('🧠 values перед отправкой:', values);
+
+      const payload = {
+        ...values,
+        id: good?._id,
+        dealExpiresAt: values.dealExpiresAt
+          ? new Date(values.dealExpiresAt).toISOString()
+          : '',
+      };
+
       const mutation = isUpdating ? updateMutation : addMutation;
-      const result = await mutation.mutateAsync(formData);
-      console.log('result:', result);
+      const result = await mutation.mutateAsync(payload);
+
       if (!result.success) throw new Error('Помилка додавання чи оновлення');
 
       toast.success(
         result.message ||
-          (isUpdating ? 'Товар оновлено!' : 'Новий товар додано!')
+          (isUpdating ? '✅ Товар оновлено!' : '🆕 Новий товар додано!')
       );
-      setDisableSessionSave(true);
-      sessionStorage.removeItem(storageKeys.good);
-      router.push('/admin/goods');
 
-      resetForm({ values: initialValues });
+      resetForm({ values: initialValues! });
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : 'An unknown error occurred'
-      );
+      toast.error(error instanceof Error ? error.message : 'Невідома помилка');
     } finally {
       setIsLoading(false);
     }
   };
 
+  if (!initialValues) return null; // Ждем инициализации initialValues на клиенте
+
   return (
-    <div className="flex flex-col justify-center items-center">
-      <h2 className="title mb-4">{title}</h2>
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+      className="relative flex flex-col justify-center items-center mt-6"
+    >
+      <h2 className="text-2xl font-semibold mb-6 text-primaryAccentColor">
+        {title}
+      </h2>
+
       <Formik
         initialValues={initialValues}
         onSubmit={handleSubmit}
         enableReinitialize
-        validationSchema={goodFormSchema}
+        // validationSchema={goodFormSchema}
       >
         {formikProps => (
           <GoodFormContent
@@ -418,7 +487,20 @@ const GoodForm: React.FC<GoodFormProps> = ({
           />
         )}
       </Formik>
-    </div>
+
+      <AnimatePresence>
+        {isLoading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 flex justify-center items-center bg-white/60 backdrop-blur-sm rounded-xl"
+          >
+            <Loader2 className="w-8 h-8 animate-spin text-primaryAccentColor" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };
 

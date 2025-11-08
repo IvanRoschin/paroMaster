@@ -102,14 +102,14 @@ const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
           {discountPercent > 0 ? (
             <>
               <span className="text-red-600">
-                {formatCurrency(displayPrice)}
+                {formatCurrency(displayPrice, 'uk-UA', 'UAH')}
               </span>{' '}
               <span className="line-through text-gray-400 text-base">
-                {formatCurrency(good.price)}
+                {formatCurrency(good.price, 'uk-UA', 'UAH')}
               </span>
             </>
           ) : (
-            <span>{formatCurrency(displayPrice)}</span>
+            <span>{formatCurrency(displayPrice, 'uk-UA', 'UAH')}</span>
           )}
         </div>
 

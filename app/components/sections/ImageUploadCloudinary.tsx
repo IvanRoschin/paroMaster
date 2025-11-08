@@ -1,13 +1,15 @@
 'use client';
 
-import { CldUploadWidget } from 'next-cloudinary';
-import Image from 'next/image';
-import { useCallback, useMemo } from 'react';
+import { CldUploadWidget, CloudinaryUploadWidgetInfo } from 'next-cloudinary';
+import React, { useCallback, useEffect, useState } from 'react';
 import { AiOutlineCloudUpload } from 'react-icons/ai';
+
+import { NextImage } from '../common';
+import { Button } from '../ui';
 
 interface ImageUploadCloudinaryProps {
   setFieldValue: (field: string, value: any) => void;
-  values: string | string[];
+  values: string[];
   errors?: Record<string, any>;
   uploadPreset?: string;
   multiple?: boolean;
@@ -20,88 +22,116 @@ const ImageUploadCloudinary: React.FC<ImageUploadCloudinaryProps> = ({
   uploadPreset = 'default',
   multiple = true,
 }) => {
-  const handleUpload = useCallback(
-    (result: any) => {
-      const url = result?.info?.secure_url;
-      if (!url) return;
-
-      console.log('✅ Uploaded URL:', url);
-
-      if (multiple) {
-        const updated = Array.isArray(values)
-          ? [...values, url]
-          : values
-            ? [values, url]
-            : [url];
-        setFieldValue('src', updated);
-      } else {
-        setFieldValue('src', url);
-      }
-    },
-    [setFieldValue, values, multiple]
+  const [previews, setPreviews] = useState<string[]>(() =>
+    Array.isArray(values) ? [...values] : []
   );
 
-  const handleRemove = (url: string) => {
-    if (multiple && Array.isArray(values)) {
-      setFieldValue(
-        'src',
-        values.filter(img => img && img !== url)
-      );
-    } else {
-      setFieldValue('src', '');
-    }
-  };
+  useEffect(() => {
+    setFieldValue('src', previews);
+  }, [previews, setFieldValue]);
 
-  // безопасно формируем список картинок
-  const images: string[] = useMemo(() => {
-    if (multiple) {
-      if (Array.isArray(values)) return values.filter(Boolean);
-      if (values) return [values];
-      return [];
-    } else {
-      if (typeof values === 'string' && values.trim() !== '') return [values];
-      return [];
-    }
-  }, [values, multiple]);
+  const handleUpload = useCallback(
+    (url: string) => {
+      if (!url) return;
+      setPreviews(prev => {
+        const isEditing = prev.length > 0;
+        let next: string[];
+        if (multiple) {
+          next = isEditing ? [...prev, url] : [url];
+        } else {
+          next = [url];
+        }
+        const unique = Array.from(new Set(next));
+        return unique;
+      });
+    },
+    [multiple]
+  );
+
+  const handleRemove = useCallback((url: string) => {
+    setPreviews(prev => prev.filter(img => img !== url));
+  }, []);
 
   return (
     <div>
+      {/* Зона открытия Cloudinary */}
       <CldUploadWidget
         uploadPreset={uploadPreset}
-        onSuccess={handleUpload} // <-- заменили onUpload
         options={{ multiple }}
+        onSuccess={result => {
+          const info = result?.info;
+          if (!info) return;
+
+          const url =
+            typeof info === 'string'
+              ? info
+              : ((info as CloudinaryUploadWidgetInfo)?.secure_url ??
+                (info as CloudinaryUploadWidgetInfo)?.url);
+
+          if (url) handleUpload(url);
+        }}
       >
         {({ open }) => (
           <div
             onClick={() => open?.()}
-            className="relative cursor-pointer hover:opacity-70 transition border-dashed border-2 p-4 rounded-md flex flex-col items-center justify-center gap-2 text-neutral-600"
+            className="relative cursor-pointer hover:opacity-80 transition border-dashed border-2 p-4 rounded-md flex flex-col items-center justify-center gap-2 text-neutral-600"
           >
-            <AiOutlineCloudUpload size={30} />
-            <span>Завантажити {multiple ? 'фото' : 'лого'}</span>
+            <AiOutlineCloudUpload size={28} />
+            <span className="text-center text-sm">
+              Завантажити {multiple ? 'фото' : 'лого'}
+            </span>
           </div>
         )}
       </CldUploadWidget>
 
-      {/* превью */}
-      {images.length > 0 && (
-        <div className="flex gap-2 mt-3 flex-wrap">
-          {images.map(url => (
-            <div key={url} className="relative w-28 h-28">
-              <Image
-                fill
-                src={url}
-                alt="uploaded"
-                className="object-cover rounded-md"
-              />
-              <button
-                type="button"
-                onClick={() => handleRemove(url)}
-                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 text-xs"
+      {/* Превью */}
+      {previews.length > 0 && (
+        <div className="mt-4">
+          <p className="text-sm text-gray-600 text-center mb-3">
+            Прев&apos;ю завантажених зображень
+          </p>
+          <div
+            className="
+        grid 
+        gap-3 
+        sm:grid-cols-2 
+        md:grid-cols-3 
+        justify-items-center
+      "
+          >
+            {previews.map(url => (
+              <div
+                key={url}
+                className="
+            relative 
+            w-28 h-28 
+            rounded-xl 
+            overflow-hidden 
+            border border-gray-200 
+            shadow-sm
+            transition-transform 
+            hover:scale-105
+          "
               >
-                ✕
-              </button>
-            </div>
-          ))}
+                <NextImage
+                  useSkeleton
+                  width={120}
+                  height={120}
+                  src={url}
+                  alt="uploaded"
+                  className="object-cover w-full h-full"
+                />
+                <Button
+                  type="button"
+                  onClick={() => handleRemove(url)}
+                  small
+                  className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 text-white p-0 flex items-center justify-center shadow-md transition-transform hover:scale-110"
+                >
+                  ✕
+                </Button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

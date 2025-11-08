@@ -1,4 +1,5 @@
 export { default as Button } from '@/components/ui/Button';
+export { ButtonAddGood } from '@/components/ui/ButtonAddGood';
 export {
   CartButton,
   CartClient,

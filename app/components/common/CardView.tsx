@@ -26,7 +26,7 @@ export const CardView = ({ goods, role }: ListViewProps) => {
       {goods.map((good, i) => (
         <div key={good._id || i}>
           {role === UserRole.ADMIN ? (
-            <div className="p-3 border rounded-xl flex flex-col hover:shadow-md transition-shadow bg-white">
+            <div className="p-3 border rounded-xl flex flex-col hover:shadow-md transition-shadow bg-white h-full min-h-[420px]">
               {/* Изображение */}
               <div className="aspect-square flex items-center justify-center bg-gray-50 rounded-lg overflow-hidden">
                 <NextImage
@@ -50,7 +50,7 @@ export const CardView = ({ goods, role }: ListViewProps) => {
                   </span>
                 </div>
                 <div className="mt-2 text-primaryAccentColor font-bold text-lg">
-                  {formatCurrency(good.price)}
+                  {formatCurrency(good.price, 'uk-UA', 'UAH')}
                 </div>
               </div>
 

@@ -22,12 +22,14 @@ interface FormFieldProps {
   errors?: FormikErrors<any>;
   touched?: any;
   setFieldValue?: (field: string, value: any, shouldValidate?: boolean) => void;
+  className?: string;
 }
 
 const FormField: React.FC<FormFieldProps> = ({
   item,
   errors,
   setFieldValue,
+  className = '',
 }) => {
   const [, meta] = useField(item.id);
 
@@ -74,7 +76,7 @@ const FormField: React.FC<FormFieldProps> = ({
   }
 
   return (
-    <div className="relative w-full mb-4">
+    <div className={`relative w-full mb-4 ${className}`}>
       {item.options ? (
         <>
           <Field

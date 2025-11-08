@@ -1,18 +1,16 @@
-import { Metadata } from 'next';
-
-import { getAllBrands } from '@/actions/brands';
-import { getAllCategories } from '@/actions/categories';
-import { getAllGoods } from '@/actions/goods';
-import { generateMetadata } from '@/app/helpers/generateMetadata';
-import { Breadcrumbs, GoodsSection, InfiniteScroll } from '@/components';
-import prefetchData from '@/hooks/usePrefetchData';
-import { IGoodUI, ISearchParams } from '@/types/index';
-import { UserRole } from '@/types/IUser';
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
+
+import { getAllBrands } from '@/actions/brands';
+import { getAllCategories } from '@/actions/categories';
+import { getAllGoods } from '@/actions/goods';
+import { Breadcrumbs, GoodsSection, InfiniteScroll } from '@/components';
+import prefetchData from '@/hooks/usePrefetchData';
+import { IGoodUI, ISearchParams } from '@/types/index';
+import { UserRole } from '@/types/IUser';
 
 interface GoodsData {
   goods: IGoodUI[];
@@ -23,30 +21,6 @@ interface CatalogPageProps {
   role: UserRole;
 }
 
-export async function generateCatalogMetadata(
-  searchParams: ISearchParams
-): Promise<Metadata> {
-  const searchQuery = searchParams.search
-    ? `Результати пошуку: ${searchParams.search}`
-    : '';
-
-  return generateMetadata({
-    title: 'Каталог товарів | ParoMaster',
-    description:
-      'Великий каталог товарів для парогенераторів: запчастини, аксесуари, обладнання. Доставка по Україні. ParoMaster – надійний партнер у ремонті та сервісі.',
-    keywords: [
-      'каталог товарів',
-      'запчастини для парогенератора',
-      'купити парогенератор',
-      'ремонт парогенератора',
-      'ParoMaster',
-    ],
-    url: `${process.env.PUBLIC_URL}/catalog`,
-    imageUrl: '/services/02.webp',
-    imageAlt: 'Каталог товарів ParoMaster',
-  });
-}
-
 export default async function CatalogPage({
   searchParams,
   role,
@@ -55,9 +29,11 @@ export default async function CatalogPage({
   const queryClient = new QueryClient();
   const goodsKey = ['goods', params];
 
+  const limit = role === UserRole.ADMIN ? undefined : 8;
+
   await prefetchData(queryClient, getAllGoods, goodsKey, {
     ...params,
-    limit: 4,
+    limit,
   });
 
   const goodsData = queryClient.getQueryData<GoodsData>(goodsKey);
@@ -78,7 +54,7 @@ export default async function CatalogPage({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <div className="max-w-6xl mx-auto py-3 container">
+      <div className="max-w-6xl mx-auto py-3 container mb-20">
         <Breadcrumbs />
         <h2 className="subtitle text-center">Каталог товарів</h2>
 

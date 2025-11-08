@@ -8,6 +8,8 @@ import * as TabsPrimitive from '@radix-ui/react-tabs';
 
 export const Tabs = TabsPrimitive.Root;
 
+const isClient = typeof window !== 'undefined';
+
 export const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
@@ -50,11 +52,11 @@ export const TabsContent = React.forwardRef<
   <TabsPrimitive.Content
     ref={ref}
     value={value}
-    asChild={animated}
+    asChild={animated && isClient}
     className={cn('mt-3', className)}
     {...props}
   >
-    {animated ? (
+    {animated && isClient ? (
       <AnimatePresence mode="wait">
         <motion.div
           key={value}
