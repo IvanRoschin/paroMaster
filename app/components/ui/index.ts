@@ -13,7 +13,6 @@ export { default as Modal } from '@/components/ui/Modal';
 export {
   ProductCard,
   ProductClient,
-  ProductList,
   ProductListSkeleton,
 } from '@/components/ui/ProductCard';
 export { default as Rating } from '@/components/ui/Rating';

@@ -84,6 +84,9 @@ const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
         <p className="text-xs text-gray-500 line-clamp-1">
           Категорія: {good.category?.name ?? '—'}
         </p>
+        <p className="text-xs text-gray-500 line-clamp-1">
+          SKU: {good.sku ?? '—'}
+        </p>
 
         {Array.isArray(good.compatibleGoods) &&
           good.compatibleGoods.length > 0 && (

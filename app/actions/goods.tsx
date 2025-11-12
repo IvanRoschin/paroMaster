@@ -3,6 +3,8 @@
 import mongoose from 'mongoose';
 
 import { buildFilter } from '@/helpers/server';
+import Brand from '@/models/Brand';
+import Category from '@/models/Category';
 import Good from '@/models/Good';
 import Testimonial from '@/models/Testimonial';
 import {
@@ -24,6 +26,19 @@ export interface IGetAllGoods {
 }
 
 export type IGoodCreate = Omit<IGoodDB, '_id'>;
+
+interface ICategoryLean {
+  _id: string;
+  slug: string;
+  name: string;
+  src?: string;
+}
+
+interface IBrandLean {
+  _id: string;
+  slug: string;
+  name: string;
+}
 
 interface IAddGoodResponse {
   success: boolean;
@@ -157,19 +172,61 @@ export async function getAllGoods(
 }
 
 export async function getGoodsByBrand(
-  brandId: string,
+  brandSlug: string,
   excludeId?: string
 ): Promise<IGoodUI[]> {
   await connectToDB();
 
-  const query: any = { brand: new mongoose.Types.ObjectId(brandId) };
-  if (excludeId) query._id = { $ne: new mongoose.Types.ObjectId(excludeId) };
+  // Находим бренд по slug
+  const brand = await Brand.findOne({ slug: brandSlug }).lean<IBrandLean>();
+  if (!brand?._id) return [];
 
+  // Формируем запрос по ObjectId бренда
+
+  const query: Record<string, unknown> = {
+    brand: new mongoose.Types.ObjectId(String(brand._id)),
+  };
+  if (excludeId)
+    query._id = { $ne: new mongoose.Types.ObjectId(String(excludeId)) };
+
+  // Ищем товары с этим брендом
   const goods = await Good.find(query)
     .populate('brand')
     .populate('category')
     .lean<IGoodUI[]>();
 
+  // Сериализуем, чтобы избежать Mongoose-specific свойств
+  const serializedGoods = goods.map(g => toPlain<IGoodUI>(g));
+
+  return serializedGoods;
+}
+
+export async function getGoodsByCategory(
+  categorySlug: string,
+  excludeId?: string
+): Promise<IGoodUI[]> {
+  await connectToDB();
+
+  // Находим категорию по slug
+  const category = await Category.findOne({
+    slug: categorySlug,
+  }).lean<ICategoryLean>();
+  if (!category?._id) return [];
+
+  // Формируем запрос по ObjectId категории
+  const query: Record<string, unknown> = {
+    category: new mongoose.Types.ObjectId(String(category._id)),
+  };
+  if (excludeId)
+    query._id = { $ne: new mongoose.Types.ObjectId(String(excludeId)) };
+
+  // Ищем товары с этой категорией
+  const goods = await Good.find(query)
+    .populate('brand')
+    .populate('category')
+    .lean<IGoodUI[]>();
+
+  // Сериализуем результаты
   const serializedGoods = goods.map(g => toPlain<IGoodUI>(g));
 
   return serializedGoods;

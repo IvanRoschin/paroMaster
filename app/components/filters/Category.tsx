@@ -1,40 +1,32 @@
 'use client';
-import { usePathname, useRouter } from 'next/navigation';
-import { useContextSelector } from 'use-context-selector';
 
-import { FiltersContext, Option } from '@/context/FiltersContext';
-import { useMediaQuery } from '@/hooks/index';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+import { useMediaQuery } from '@/app/hooks';
 
 import { NextImage } from '../common';
 
-interface CategoryPage {
-  categories: Option[];
+interface CategoryProps {
+  categories: {
+    value: string;
+    slug: string;
+    label: string;
+    src?: string;
+  }[];
 }
 
-const Category: React.FC<CategoryPage> = ({ categories }) => {
+const Category: React.FC<CategoryProps> = ({ categories }) => {
   const isMobile = useMediaQuery('(max-width: 767px)');
-  const router = useRouter();
   const pathname = usePathname();
 
-  const selectedCategory = useContextSelector(
-    FiltersContext,
-    ctx => ctx?.selectedCategory
-  );
-  const setCategory = useContextSelector(
-    FiltersContext,
-    ctx => ctx?.setCategory
-  );
-
-  const handleCategoryClick = (slug: string) => {
-    if (pathname === '/catalog') {
-      setCategory?.(slug);
-    } else {
-      router.push(`/catalog?category=${slug}`);
-    }
-  };
+  // Определяем активную категорию по URL
+  const activeCategorySlug = pathname.startsWith('/catalog/')
+    ? pathname.split('/catalog/')[1]
+    : '';
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-3 container md:w-[250px]">
+    <aside className="max-w-6xl mx-auto px-4 py-3 container md:w-[250px]">
       <h2 className="subtitle mb-4">Категорії товарів</h2>
       <ul
         className={`bg-secondaryBackground p-4 rounded-lg text-sm ${
@@ -42,10 +34,10 @@ const Category: React.FC<CategoryPage> = ({ categories }) => {
         }`}
       >
         <li className="mb-3 nav">
-          <button
-            onClick={() => handleCategoryClick('')}
+          <Link
+            href="/catalog"
             className={`flex items-center w-full text-left ${
-              !selectedCategory ? 'font-bold text-primary' : ''
+              !activeCategorySlug ? 'font-bold text-primary' : ''
             }`}
           >
             <NextImage
@@ -58,15 +50,15 @@ const Category: React.FC<CategoryPage> = ({ categories }) => {
               priority
             />
             Всі товари
-          </button>
+          </Link>
         </li>
-        {categories.map(({ label, src, slug }) => {
-          const isActive = selectedCategory === slug;
 
+        {categories.map(({ label, src, slug }) => {
+          const isActive = activeCategorySlug === slug;
           return (
             <li key={slug} className="mb-3 nav">
-              <button
-                onClick={() => handleCategoryClick(isActive ? '' : slug || '')}
+              <Link
+                href={`/category/${slug}`}
                 className={`flex items-center w-full text-left ${
                   isActive ? 'font-bold text-primary' : ''
                 }`}
@@ -81,12 +73,12 @@ const Category: React.FC<CategoryPage> = ({ categories }) => {
                   priority
                 />
                 {label}
-              </button>
+              </Link>
             </li>
           );
         })}
       </ul>
-    </div>
+    </aside>
   );
 };
 

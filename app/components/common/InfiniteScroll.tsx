@@ -19,8 +19,6 @@ interface Option {
 }
 
 interface InfiniteScrollProps {
-  categories?: Option[];
-  brands?: Option[];
   initialGoods: IGoodUI[];
   searchParams: ISearchParams;
   role: UserRole;
@@ -29,8 +27,6 @@ interface InfiniteScrollProps {
 export default function InfiniteScroll({
   initialGoods,
   searchParams,
-  categories,
-  brands,
   role,
 }: InfiniteScrollProps) {
   const [goods, setGoods] = useState<IGoodUI[]>(initialGoods || []);
@@ -140,13 +136,7 @@ export default function InfiniteScroll({
   return (
     <>
       <section>
-        <GoodsSection
-          goods={goods}
-          categories={categories}
-          brands={brands}
-          role={role}
-          searchParams={searchParams}
-        />
+        <GoodsSection goods={goods} role={role} searchParams={searchParams} />
       </section>
 
       <section className="flex flex-col items-center justify-center py-10 gap-4">

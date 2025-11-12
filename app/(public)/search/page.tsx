@@ -6,8 +6,6 @@ import {
 import { Metadata, ResolvingMetadata } from 'next';
 import { getServerSession } from 'next-auth';
 
-import { getAllBrands } from '@/actions/brands';
-import { getAllCategories } from '@/actions/categories';
 import { getAllGoods } from '@/actions/goods';
 import { authOptions } from '@/app/config/authOptions';
 import prefetchData from '@/app/hooks/usePrefetchData';
@@ -83,19 +81,6 @@ export default async function SearchPage({
   const queryState = queryClient.getQueryState(goodsKey);
   const goods = (queryState?.data as { goods: IGoodUI[] })?.goods || [];
 
-  const [categoriesResponse, brandsResponse] = await Promise.all([
-    getAllCategories(params),
-    getAllBrands(params),
-  ]);
-
-  const categories = (categoriesResponse.categories ?? [])
-    .filter(c => c._id)
-    .map(c => ({ value: String(c._id), label: c.name ?? 'Без назви' }));
-
-  const brands = (brandsResponse.brands ?? [])
-    .filter(b => b._id)
-    .map(b => ({ value: String(b._id), label: b.name ?? 'Без назви' }));
-
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="container">
@@ -105,8 +90,6 @@ export default async function SearchPage({
           <InfiniteScroll
             initialGoods={goods}
             searchParams={params}
-            categories={categories}
-            brands={brands}
             role={role}
           />
         ) : (

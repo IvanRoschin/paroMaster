@@ -22,11 +22,11 @@ export default function PublicSidebar({
   }));
 
   // Маппим категории на Option[] (если нужно для контекста)
-  const mappedCategories: Option[] = categories.map(c => ({
+  const mappedCategories = categories.map(c => ({
     value: String(c._id),
-    label: c.name,
     slug: c.slug,
-    src: c.src,
+    label: c.name,
+    src: c.src || '/placeholder.svg', // дефолтная картинка
   }));
 
   return (

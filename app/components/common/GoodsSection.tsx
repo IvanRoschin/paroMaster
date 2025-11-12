@@ -2,14 +2,18 @@
 
 import { useMemo, useState } from 'react';
 
+import { getAllBrands } from '@/app/actions/brands';
+import { getAllCategories } from '@/app/actions/categories';
 import ProductFilters, {
   ProductFiltersState,
 } from '@/app/components/ui/ProductFilters';
+import { useFetchData } from '@/app/hooks';
 import {
   ButtonAddGood,
   CardView,
   EmptyState,
   ListView,
+  Loader,
   TableView,
   Tabs,
   TabsList,
@@ -28,8 +32,6 @@ interface GoodsSectionProps {
   goods: IGoodUI[];
   title?: string;
   searchParams: ISearchParams;
-  categories?: Option[];
-  brands?: Option[];
   initialCategory?: string;
   role: UserRole;
 }
@@ -39,11 +41,19 @@ export default function GoodsSection({
   title,
   initialCategory,
   searchParams,
-  categories = [],
-  brands = [],
   role,
 }: GoodsSectionProps) {
-  const [view, setView] = useState<'table' | 'card' | 'list'>('table');
+  const { data: categoriesData, isLoading: catLoading } = useFetchData(
+    getAllCategories,
+    ['categories']
+  );
+
+  const { data: brandsData, isLoading: brandLoading } = useFetchData(
+    getAllBrands,
+    ['brands']
+  );
+
+  const [view, setView] = useState<'table' | 'card' | 'list'>('card');
 
   const [filters, setFilters] = useState<ProductFiltersState>({
     category: initialCategory ?? 'all',
@@ -53,6 +63,25 @@ export default function GoodsSection({
     sortPrice: 'none',
     search: '',
   });
+
+  const categoriesResponse = categoriesData?.categories ?? [];
+  const brandsResponse = brandsData?.brands ?? [];
+
+  const categories = (categoriesResponse ?? [])
+    .filter(c => c._id)
+    .map(c => ({
+      value: String(c._id),
+      label: c.name ?? 'Без назви',
+      slug: c.slug,
+      name: c.name,
+    }));
+
+  const brands = (brandsResponse ?? [])
+    .filter(b => b._id)
+    .map(b => ({
+      value: String(b._id),
+      label: b.name ?? 'Без назви',
+    }));
 
   const filteredGoods = useMemo(() => {
     let result = [...goods];
@@ -93,6 +122,10 @@ export default function GoodsSection({
     return result;
   }, [goods, filters]);
 
+  if (catLoading || brandLoading) {
+    return <Loader />;
+  }
+
   return (
     <div className="space-y-6">
       {title && <h2 className="subtitle-main">{title}</h2>}
@@ -106,8 +139,8 @@ export default function GoodsSection({
         >
           <TabsList>
             <TabsTrigger value="table">Таблиця</TabsTrigger>
-            <TabsTrigger value="list">Список</TabsTrigger>
             <TabsTrigger value="card">Картки</TabsTrigger>
+            <TabsTrigger value="list">Список</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
@@ -122,6 +155,13 @@ export default function GoodsSection({
         <EmptyState showReset />
       ) : (
         <>
+          {view === 'card' && (
+            <CardView
+              goods={filteredGoods}
+              role={role}
+              searchParams={searchParams}
+            />
+          )}
           {view === 'table' && (
             <TableView
               goods={filteredGoods}
@@ -131,13 +171,6 @@ export default function GoodsSection({
           )}
           {view === 'list' && (
             <ListView
-              goods={filteredGoods}
-              role={role}
-              searchParams={searchParams}
-            />
-          )}
-          {view === 'card' && (
-            <CardView
               goods={filteredGoods}
               role={role}
               searchParams={searchParams}
