@@ -1,8 +1,6 @@
 'use client';
 
 import { useShoppingCart } from 'app/context/ShoppingCartContext';
-import { useSession } from 'next-auth/react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import {
@@ -22,21 +20,21 @@ import {
   ImagesBlock,
   Loader,
   Modal,
+  NextImage,
   TestimonialForm,
 } from '@/components/index';
 import { useDeleteModal, useTestimonialModal } from '@/hooks/index';
 import useDeleteData from '@/hooks/useDeleteData';
 import useFetchData from '@/hooks/useFetchData';
 import { IGoodUI } from '@/types/IGood';
+import { UserRole } from '@/types/IUser';
 
 interface GoodPageClientProps {
   good: IGoodUI;
+  role: UserRole;
 }
 
-const GoodPageClient: React.FC<GoodPageClientProps> = ({ good }) => {
-  const { data: session } = useSession();
-  const isAdmin = !!session?.user;
-
+const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
   const [testimonialToDelete, setTestimonialToDelete] = useState<string>('');
   const [, setAmount] = useState(0);
 
@@ -97,7 +95,7 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good }) => {
         <ImagesBlock item={good} />
 
         <div className="pt-10 relative max-w-xl">
-          {isAdmin && (
+          {role === UserRole.ADMIN && (
             <Link
               href={`/admin/goods/${good._id}`}
               className="absolute top-0 right-0 flex items-center justify-center"
@@ -193,7 +191,7 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good }) => {
             </div>
             {testimonials.map(review => (
               <div key={review._id} className="relative">
-                {isAdmin && (
+                {role === UserRole.ADMIN && (
                   <div className="absolute top-0 right-0 flex gap-2">
                     <Link
                       href={`/admin/testimonials/${review._id}`}
@@ -321,18 +319,29 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good }) => {
               <h3 className="subtitle mb-2">Сумісні товари</h3>
               <div className="flex overflow-x-auto gap-4 py-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                 {good.compatibleGoods.map((cg, i) => {
-                  const id = typeof cg === 'string' ? cg : cg._id;
-                  const title = typeof cg === 'string' ? cg : cg.title;
+                  // Если cg - объект, приводим _id к строке
+                  const id =
+                    typeof cg === 'string'
+                      ? cg
+                      : cg && cg._id
+                        ? cg._id.toString()
+                        : null;
+
+                  if (!id) return null; // если id нет — не рендерим
+
+                  const title =
+                    typeof cg === 'string' ? cg : cg.title || 'Без назви';
                   const src = typeof cg === 'string' ? undefined : cg.src?.[0];
 
                   return (
                     <Link
-                      key={id || i}
+                      key={id}
                       href={`/catalog/${id}`}
                       className="flex-shrink-0 w-40 flex flex-col items-center gap-2 p-2 border rounded hover:shadow-lg transition-shadow"
                     >
                       {src && (
-                        <Image
+                        <NextImage
+                          useSkeleton
                           src={src}
                           alt={title}
                           width={120}

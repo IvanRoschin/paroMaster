@@ -7,7 +7,7 @@ import { ISearchParams } from '@/types/index';
 import { UserRole } from '@/types/IUser';
 
 interface CustomerGoodsPageProps {
-  searchParams: ISearchParams;
+  searchParams: Promise<ISearchParams>;
 }
 
 export const metadata = generateMetadata({
@@ -34,12 +34,11 @@ export const metadata = generateMetadata({
 export default async function CustomerGoodsPage({
   searchParams,
 }: CustomerGoodsPageProps) {
+  const params = await searchParams;
   const session = await getServerSession(authOptions);
   const role = session?.user?.role
     ? (session.user.role as UserRole)
     : UserRole.GUEST;
 
-  return (
-    <CatalogPage searchParams={Promise.resolve(searchParams)} role={role} />
-  );
+  return <CatalogPage searchParams={Promise.resolve(params)} role={role} />;
 }

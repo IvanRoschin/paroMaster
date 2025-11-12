@@ -34,7 +34,9 @@ export function generateMetadata({
   extra = {},
 }: MetadataProps): Metadata {
   return {
-    metadataBase: new URL(url), // 🔥 добавлено
+    metadataBase: url?.startsWith('http')
+      ? new URL(url)
+      : new URL('https://paromaster.com'),
     title,
     description,
     keywords,

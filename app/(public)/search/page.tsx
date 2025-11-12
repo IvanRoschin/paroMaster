@@ -1,37 +1,48 @@
-import { Metadata } from 'next';
-
-import { getAllBrands } from '@/actions/brands';
-import { getAllCategories } from '@/actions/categories';
-import { getAllGoods } from '@/actions/goods';
-import { generateMetadata } from '@/app/helpers/generateMetadata';
-import { Breadcrumbs, EmptyState, InfiniteScroll } from '@/components/index';
-import { IGoodUI } from '@/types/index';
-import { ISearchParams } from '@/types/searchParams';
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
+import { Metadata, ResolvingMetadata } from 'next';
+import { getServerSession } from 'next-auth';
+
+import { getAllBrands } from '@/actions/brands';
+import { getAllCategories } from '@/actions/categories';
+import { getAllGoods } from '@/actions/goods';
+import { authOptions } from '@/app/config/authOptions';
+import prefetchData from '@/app/hooks/usePrefetchData';
+import { Breadcrumbs, EmptyState, InfiniteScroll } from '@/components/index';
+import { IGoodUI } from '@/types/index';
+import { UserRole } from '@/types/IUser';
 
 interface GoodsData {
   goods: IGoodUI[];
 }
 
+type Props = {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
 export const dynamic = 'force-dynamic';
 
-export async function generateCatalogMetadata(
-  searchParams: ISearchParams
+export async function generateMetadata(
+  { params, searchParams }: Props,
+  parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const searchQuery = searchParams.search
-    ? `Результати пошуку: ${searchParams.search}`
-    : '';
+  const resolvedSearchParams = await searchParams;
 
-  return generateMetadata({
+  const q = Array.isArray(resolvedSearchParams?.q)
+    ? resolvedSearchParams.q[0]
+    : resolvedSearchParams?.q;
+  const searchQuery = q ? `Результати пошуку: ${q}` : '';
+
+  return {
     title: searchQuery
       ? `${searchQuery} | ParoMaster`
       : 'Каталог товарів | ParoMaster',
     description: searchQuery
-      ? `Результати пошуку для "${searchParams.search}" у каталозі ParoMaster. Великий вибір запчастин та обладнання.`
+      ? `Результати пошуку для "${q}" у каталозі ParoMaster. Великий вибір запчастин та обладнання.`
       : 'Великий каталог товарів для парогенераторів: запчастини, аксесуари, обладнання. Доставка по Україні. ParoMaster – надійний партнер у ремонті та сервісі.',
     keywords: [
       'каталог товарів',
@@ -40,28 +51,37 @@ export async function generateCatalogMetadata(
       'ремонт парогенератора',
       'ParoMaster',
     ],
-    url: `${process.env.PUBLIC_URL}/catalog`,
-    imageUrl: '/services/03.webp',
-    imageAlt: 'Каталог товарів ParoMaster',
-  });
+    openGraph: {
+      title: searchQuery
+        ? `${searchQuery} | ParoMaster`
+        : 'Каталог товарів | ParoMaster',
+      description: searchQuery
+        ? `Результати пошуку для "${q}" у каталозі ParoMaster. Великий вибір запчастин та обладнання.`
+        : 'Великий каталог товарів для парогенераторів: запчастини, аксесуари, обладнання. Доставка по Україні. ParoMaster – надійний партнер у ремонті та сервісі.',
+      url: `${process.env.PUBLIC_URL}/search`,
+      images: [{ url: '/services/03.webp', alt: 'Каталог товарів ParoMaster' }],
+    },
+  };
 }
+
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: Promise<ISearchParams>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
+  const session = await getServerSession(authOptions);
+  const role = session?.user?.role
+    ? (session.user.role as UserRole)
+    : UserRole.GUEST;
+
   const queryClient = new QueryClient();
-
   const goodsKey = ['goods', params];
+  const limit = role === UserRole.ADMIN ? 16 : 8;
 
-  await queryClient.prefetchQuery({
-    queryKey: goodsKey,
-    queryFn: () => getAllGoods(params),
-  });
+  await prefetchData(queryClient, getAllGoods, goodsKey, { ...params, limit });
   const queryState = queryClient.getQueryState(goodsKey);
-
-  const goods = (queryState?.data as GoodsData)?.goods || [];
+  const goods = (queryState?.data as { goods: IGoodUI[] })?.goods || [];
 
   const [categoriesResponse, brandsResponse] = await Promise.all([
     getAllCategories(params),
@@ -70,33 +90,25 @@ export default async function SearchPage({
 
   const categories = (categoriesResponse.categories ?? [])
     .filter(c => c._id)
-    .map(c => ({
-      value: String(c._id),
-      label: c.name ?? 'Без назви',
-    }));
+    .map(c => ({ value: String(c._id), label: c.name ?? 'Без назви' }));
 
   const brands = (brandsResponse.brands ?? [])
     .filter(b => b._id)
-    .map(b => ({
-      value: String(b._id),
-      label: b.name ?? 'Без назви',
-    }));
+    .map(b => ({ value: String(b._id), label: b.name ?? 'Без назви' }));
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="container">
         <Breadcrumbs />
-
         <h2 className="title mb-1">Результати пошуку:</h2>
         {goods.length > 0 ? (
-          <div key={Math.random()}>
-            <InfiniteScroll
-              initialGoods={goods}
-              searchParams={searchParams}
-              categories={categories}
-              brands={brands}
-            />
-          </div>
+          <InfiniteScroll
+            initialGoods={goods}
+            searchParams={params}
+            categories={categories}
+            brands={brands}
+            role={role}
+          />
         ) : (
           <EmptyState showReset />
         )}

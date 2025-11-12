@@ -11,16 +11,23 @@ import {
   NextImage,
   ProductCard,
 } from '@/components';
-import { IGoodUI } from '@/types';
+import { IGoodUI, ISearchParams } from '@/types';
 import { UserRole } from '@/types/IUser';
 
-type ListViewProps = {
+type CardViewProps = {
   goods: IGoodUI[];
   role: UserRole;
+  refetch?: () => void;
+  searchParams: ISearchParams;
 };
-export const CardView = ({ goods, role }: ListViewProps) => {
+export const CardView = ({
+  goods,
+  role,
+  refetch,
+  searchParams,
+}: CardViewProps) => {
   const { goodToDelete, handleDelete, handleDeleteConfirm, deleteModal } =
-    useGoodDelete();
+    useGoodDelete(refetch, ['goods', searchParams]);
 
   return (
     <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -103,7 +110,7 @@ export const CardView = ({ goods, role }: ListViewProps) => {
       <Modal
         body={
           <DeleteConfirmation
-            onConfirm={handleDeleteConfirm}
+            onConfirm={() => handleDeleteConfirm(goodToDelete?.title || '')}
             onCancel={() => deleteModal.onClose()}
             title={`товар: ${goodToDelete?.title}`}
           />

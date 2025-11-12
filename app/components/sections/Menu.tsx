@@ -1,4 +1,3 @@
-import { menu } from 'app/config/constants';
 import { signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { MdLogout } from 'react-icons/md';
@@ -6,6 +5,7 @@ import { MdLogout } from 'react-icons/md';
 import { routes } from '@/app/helpers/routes';
 import { Button, Icon } from '@/components/ui';
 import { SessionUser, UserRole } from '@/types/IUser';
+import { menu } from 'app/config/constants';
 
 interface MenuProps {
   user?: SessionUser | null;

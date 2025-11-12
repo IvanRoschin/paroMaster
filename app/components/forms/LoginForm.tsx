@@ -52,6 +52,8 @@ const LoginForm = () => {
 
       if (role === UserRole.ADMIN) router.replace('/admin');
       else router.replace('/customer');
+
+      router.refresh();
     } else {
       toast.error(callback?.error || 'Помилка входу');
     }

@@ -142,10 +142,10 @@ export default function InfiniteScroll({
       <section>
         <GoodsSection
           goods={goods}
-          searchParams={searchParams}
           categories={categories}
           brands={brands}
           role={role}
+          searchParams={searchParams}
         />
       </section>
 

@@ -2,10 +2,10 @@
 
 import { useShoppingCart } from 'app/context/ShoppingCartContext';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
-import { Button, Icon } from '@/components/index';
+import { formatCurrency } from '@/app/utils/formatCurrency';
+import { Button, Icon, NextImage } from '@/components/index';
 import { IGoodUI } from '@/types/index';
 
 type CartItemProps = {
@@ -16,84 +16,89 @@ type CartItemProps = {
 const CartItem: React.FC<CartItemProps> = ({ good, quantity }) => {
   const { increaseCartQuantity, decreaseCartQuantity, removeFromCart } =
     useShoppingCart();
-  const [amount, setAmount] = useState(0);
+  const { _id, price, discountPrice, src } = good;
+
+  const effectivePrice = useMemo(
+    () => (discountPrice && discountPrice < price ? discountPrice : price),
+    [price, discountPrice]
+  );
+
+  const [amount, setAmount] = useState<number>(effectivePrice * quantity);
 
   useEffect(() => {
-    if (good) {
-      const newAmount = good.price * quantity;
-      setAmount(newAmount);
-      sessionStorage.setItem(`amount-${good._id}`, JSON.stringify(newAmount));
+    const newAmount = effectivePrice * quantity;
+    setAmount(newAmount);
+    if (_id) {
+      sessionStorage.setItem(`amount-${_id}`, JSON.stringify(newAmount));
     }
-  }, [good, quantity]);
-
-  const { _id, price, src } = good;
+  }, [_id, effectivePrice, quantity]);
 
   return (
-    <div className="relative flex items-center gap-6 rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all duration-300 p-4">
+    <div className="flex flex-col items-center gap-2 rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all duration-300 p-3 w-full max-w-[160px]">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.25 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.2 }}
+        className="w-full flex flex-col items-center gap-2 relative"
       >
         {/* Image */}
-        <div className="relative w-[120px] h-[120px] flex-shrink-0 rounded-lg overflow-hidden bg-gray-50">
-          <Image
-            src={src[0]}
+        <div className="relative w-[120px] h-[120px] rounded-lg overflow-hidden bg-gray-50">
+          <NextImage
+            useSkeleton
+            src={src[0] ?? '/placeholder.png'}
             alt={good.title}
+            classNames={{
+              wrapper: 'w-full h-full bg-gray-50 rounded-lg overflow-hidden',
+              image: 'object-contain p-2',
+            }}
             fill
-            className="object-contain p-2"
-            priority
           />
         </div>
 
-        {/* Right content */}
-        <div className="flex flex-1 flex-col justify-between min-w-0">
-          {/* Title + remove */}
-          <div className="flex items-start justify-between mb-3">
-            <h3 className="text-base font-semibold text-gray-800 line-clamp-2 pr-6">
-              {good.title}
-            </h3>
-            <button
-              onClick={() => {
-                _id && removeFromCart(_id);
-                _id && sessionStorage.removeItem(`amount-${_id}`);
-              }}
-              className="text-gray-400 hover:text-red-500 transition-colors absolute top-2 right-2"
-            >
-              <Icon name="icon_trash" className="w-5 h-5" />
-            </button>
-          </div>
+        {/* Title + remove */}
+        <div className=" w-full text-center">
+          <h3 className="text-xs font-semibold text-gray-800 line-clamp-2">
+            {good.title}
+          </h3>
+          <button
+            onClick={() => {
+              _id && removeFromCart(_id);
+              _id && sessionStorage.removeItem(`amount-${_id}`);
+            }}
+            className="absolute top-0 right-0 text-gray-400 hover:text-red-500 transition-colors"
+          >
+            <Icon name="icon_trash" className="w-4 h-4" />
+          </button>
+        </div>
 
-          {/* Controls + price */}
-          <div className="flex items-center justify-between">
-            {/* Buttons */}
-            <div className="flex items-center gap-2">
-              <Button
-                label="-"
-                onClick={() => _id && decreaseCartQuantity(_id)}
-                small
-                outline
-              />
-              <span className="text-lg font-medium">{quantity}</span>
-              <Button
-                label="+"
-                onClick={() => _id && increaseCartQuantity(_id)}
-                small
-                outline
-              />
-            </div>
+        {/* Buttons */}
+        <div className="flex items-center justify-center gap-1 w-full">
+          <Button
+            label="-"
+            onClick={() => _id && decreaseCartQuantity(_id)}
+            small
+            outline
+          />
+          <span className="text-sm font-medium w-5 text-center">
+            {quantity}
+          </span>
+          <Button
+            label="+"
+            onClick={() => _id && increaseCartQuantity(_id)}
+            small
+            outline
+          />
+        </div>
 
-            {/* Price */}
-            <div className="text-right text-gray-700 text-sm whitespace-nowrap">
-              <span>
-                {price} ₴ × {quantity}
-              </span>
-              <div className="font-semibold text-primaryAccentColor text-base">
-                {amount} ₴
-              </div>
-            </div>
-          </div>
+        {/* Price */}
+        <div className="flex flex-col items-center text-center">
+          <span className="font-semibold text-primaryAccentColor text-sm">
+            {formatCurrency(amount, 'uk-UA', 'UAH')}
+          </span>
+          <span className="text-[10px] text-gray-500">
+            {quantity} × {formatCurrency(price, 'uk-UA', 'UAH')} за шт.
+          </span>
         </div>
       </motion.div>
     </div>

@@ -3,6 +3,7 @@
 import { useShoppingCart } from 'app/context/ShoppingCartContext';
 import { useEffect, useMemo } from 'react';
 
+import { formatCurrency } from '@/app/utils/formatCurrency';
 import { Button, CartItem } from '@/components/ui';
 import { storageKeys } from '@/helpers/index';
 
@@ -15,6 +16,8 @@ export const CartClient = ({
   title?: string;
 }) => {
   const { cart } = useShoppingCart();
+
+  console.log('cart:', cart);
 
   const totalPrice = useMemo(
     () =>
@@ -44,7 +47,10 @@ export const CartClient = ({
       <div className="border-t pt-6 space-y-2 text-right text-gray-700">
         <p className="text-lg">
           Всього за замовленням:{' '}
-          <span className="font-bold text-gray-900">{totalPrice} грн</span>
+          <span className="font-bold text-gray-900">
+            {' '}
+            {formatCurrency(totalPrice, 'uk-UA', 'UAH')}
+          </span>
         </p>
         <p className="text-sm italic">
           {totalPrice >= 1000

@@ -15,6 +15,8 @@ import { getGoodById } from '@/actions/goods';
 import { storageKeys } from '@/helpers/index';
 import { ICartItem } from '@/types/index';
 
+import toPlain from '../helpers/server/toPlain';
+
 // Динамический импорт компонента корзины без SSR
 const ShoppingCart = dynamic(
   () => import('../components/ui/Cart/ShoppingCart'),
@@ -49,11 +51,24 @@ export function useShoppingCart() {
 }
 
 export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
-  // Инициализация с localStorage, только на клиенте
+  const cleanCartItem = (item: ICartItem): ICartItem => ({
+    good: toPlain(item.good),
+    quantity: item.quantity,
+  });
+
   const [cart, setCart] = useState<ICartItem[]>(() => {
     if (typeof window === 'undefined') return [];
     const storedCart = localStorage.getItem(storageKeys.cart);
-    return storedCart ? JSON.parse(storedCart) : [];
+    if (!storedCart) return [];
+    try {
+      const parsed: ICartItem[] = JSON.parse(storedCart);
+      return parsed.map(item => ({
+        good: toPlain(item.good),
+        quantity: item.quantity,
+      }));
+    } catch {
+      return [];
+    }
   });
 
   // Сохраняем изменения в localStorage
@@ -89,7 +104,9 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
   const setCartQuantity = useCallback((id: string, quantity: number) => {
     setCart(currItems =>
       currItems.map(item =>
-        item.good._id === id ? { ...item, quantity } : item
+        item.good._id === id
+          ? { ...cleanCartItem(item), good: toPlain(item.good), quantity }
+          : cleanCartItem(item)
       )
     );
   }, []);
@@ -102,13 +119,15 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
           toast.error('Товар не знайдено');
           return;
         }
+        const plainGood = toPlain<ICartItem['good']>(newGood);
+
         setCart(currItems => {
           const existing = currItems.find(item => item.good._id === id);
           if (!existing) {
-            toast.success(`Товар "${newGood.title}" додано до корзини`, {
+            toast.success(`Товар "${plainGood.title}" додано до корзини`, {
               id: `add-${id}`,
             });
-            return [...currItems, { good: newGood, quantity: 1 }];
+            return [...currItems, { good: plainGood, quantity: 1 }];
           }
 
           toast.info(`Кількість товару "${existing.good.title}" збільшено`, {
@@ -116,8 +135,8 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
           });
           return currItems.map(item =>
             item.good._id === id
-              ? { ...item, quantity: item.quantity + 1 }
-              : item
+              ? { ...cleanCartItem(item), quantity: item.quantity + 1 }
+              : cleanCartItem(item)
           );
         });
       })
@@ -141,8 +160,15 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
       toast.info(`Кількість товару "${existing.good.title}" зменшено`, {
         id: `decrease-${id}`,
       });
+
       return currItems.map(item =>
-        item.good._id === id ? { ...item, quantity: item.quantity - 1 } : item
+        item.good._id === id
+          ? {
+              ...cleanCartItem(item),
+              good: toPlain(item.good),
+              quantity: item.quantity - 1,
+            }
+          : cleanCartItem(item)
       );
     });
   }, []);

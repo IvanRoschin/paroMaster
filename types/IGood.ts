@@ -1,6 +1,6 @@
-import { ITestimonial } from './ITestimonial';
-import { ICategory } from './ICategory';
 import { IBrand } from './IBrand';
+import { ICategory } from './ICategory';
+import { ITestimonial } from './ITestimonial';
 
 export interface IGoodBase {
   _id: string;
@@ -36,3 +36,18 @@ export interface IGoodUI extends IGoodBase {
   compatibleGoods?: (string | IGoodUI)[];
   testimonials?: ITestimonial[];
 }
+
+export interface IBaseGoodResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface IAddGoodResponse extends IBaseGoodResponse {
+  fieldErrors?: Record<string, string>; // ошибки по полям, опционально
+}
+
+export interface IUpdateGoodResponse extends IBaseGoodResponse {
+  fieldErrors?: Record<string, string>; // опционально, если нужно
+}
+
+export type GoodResponse = IAddGoodResponse | IUpdateGoodResponse;

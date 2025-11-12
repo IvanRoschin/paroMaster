@@ -18,7 +18,7 @@ import {
   storageKeys,
 } from '@/helpers/index';
 import { useAddData, useUpdateData } from '@/hooks/index';
-import { IGoodUI } from '@/types/IGood';
+import { GoodResponse, IGoodUI } from '@/types/IGood';
 import { IBrand, ICategory } from '@/types/index';
 
 interface InitialStateType extends Omit<IGoodUI, '_id' | 'category' | 'brand'> {
@@ -34,11 +34,8 @@ interface GoodFormProps {
   title?: string;
   allowedCategories: ICategory[];
   allowedBrands: IBrand[];
-  action: (data: FormData) => Promise<{ success: boolean; message: string }>;
+  action: (values: InitialStateType) => Promise<GoodResponse>;
 }
-
-const generateSimplesku = () =>
-  Math.floor(100000000 + Math.random() * 900000000).toString();
 
 const GoodFormContent: React.FC<{
   formikProps: FormikProps<InitialStateType>;
@@ -55,7 +52,7 @@ const GoodFormContent: React.FC<{
   allowedBrands,
   disableSessionSave,
 }) => {
-  const { values, setFieldValue, errors } = formikProps;
+  const { values, setFieldValue, errors, setErrors } = formikProps;
   const [existingGoodsForBrand, setExistingGoodsForBrand] = useState<IGoodUI[]>(
     []
   );
@@ -166,8 +163,6 @@ const GoodFormContent: React.FC<{
     },
   ];
 
-  console.log('existingGoodsForBrand:', existingGoodsForBrand);
-
   return (
     <Form className="relative flex flex-col w-[600px] gap-5 bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
       {fields.map((input, i) => (
@@ -182,6 +177,19 @@ const GoodFormContent: React.FC<{
             setFieldValue={setFieldValue}
             errors={errors}
           />
+          {input.id === 'description' && (
+            <div
+              className={`text-xs mt-1 ${
+                values.description.length < 10
+                  ? 'text-red-500'
+                  : 'text-green-500'
+              }`}
+            >
+              {values.description.length < 10
+                ? `Ще потрібно ${10 - values.description.length} символів... ✍️`
+                : 'Достатньо символів! 🚀'}
+            </div>
+          )}
         </motion.div>
       ))}
 
@@ -344,6 +352,24 @@ const GoodForm: React.FC<GoodFormProps> = ({
   const updateMutation = useUpdateData(action, ['good', good?._id]);
   const isUpdating = Boolean(good?._id);
 
+  const emptyValues: InitialStateType = {
+    category: allowedCategories[0]?._id || '',
+    brand: allowedBrands[0]?._id || '',
+    src: [],
+    model: '',
+    sku: '',
+    title: '',
+    description: '',
+    price: 0,
+    discountPrice: 0,
+    isNew: true,
+    isAvailable: true,
+    isDailyDeal: false,
+    dealExpiresAt: '',
+    isCompatible: false,
+    compatibleGoods: [],
+  };
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -366,7 +392,7 @@ const GoodForm: React.FC<GoodFormProps> = ({
           : good?.brand?._id || allowedBrands[0]?._id || '',
       src: good?.src || [],
       model: good?.model || '',
-      sku: good?.sku || generateSimplesku(),
+      sku: good?.sku || '',
       title: good?.title || '',
       description: good?.description || '',
       price: good?.price ?? 0,
@@ -391,7 +417,7 @@ const GoodForm: React.FC<GoodFormProps> = ({
 
   const handleSubmit = async (
     values: InitialStateType,
-    { resetForm }: FormikHelpers<InitialStateType>
+    formikHelpers: FormikHelpers<InitialStateType>
   ) => {
     try {
       setIsLoading(true);
@@ -403,18 +429,32 @@ const GoodForm: React.FC<GoodFormProps> = ({
           ? new Date(values.dealExpiresAt).toISOString()
           : '',
       };
-
       const mutation = isUpdating ? updateMutation : addMutation;
-      const result = await mutation.mutateAsync(payload);
+      const result: GoodResponse = await mutation.mutateAsync(payload);
 
-      if (!result.success) throw new Error('Помилка додавання чи оновлення');
+      if (!result.success) {
+        if (result.fieldErrors) {
+          formikHelpers.setErrors(result.fieldErrors);
+          const firstFieldError = Object.values(result.fieldErrors)[0];
+          toast.error(firstFieldError as string);
+        } else {
+          toast.error(result.message || 'Невідома помилка');
+        }
+        return;
+      }
 
       toast.success(
         result.message ||
           (isUpdating ? '✅ Товар оновлено!' : '🆕 Новий товар додано!')
       );
+      setDisableSessionSave(true);
+      try {
+        sessionStorage.removeItem(storageKeys.good);
+      } catch (err) {
+        console.error('Помилка при очищенні sessionStorage:', err);
+      }
 
-      resetForm({ values: initialValues! });
+      formikHelpers.resetForm({ values: emptyValues });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Невідома помилка');
     } finally {
@@ -422,7 +462,7 @@ const GoodForm: React.FC<GoodFormProps> = ({
     }
   };
 
-  if (!initialValues) return null; // Ждем инициализации initialValues на клиенте
+  if (!initialValues) return null;
 
   return (
     <motion.div

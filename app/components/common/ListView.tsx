@@ -9,17 +9,24 @@ import { Button, DeleteConfirmation, Modal, NextImage } from '@/app/components';
 import { useShoppingCart } from '@/app/context/ShoppingCartContext';
 import { useGoodDelete } from '@/app/hooks';
 import { formatCurrency } from '@/app/utils/formatCurrency';
-import { IGoodUI } from '@/types';
+import { IGoodUI, ISearchParams } from '@/types';
 import { UserRole } from '@/types/IUser';
 
 type ListViewProps = {
   goods: IGoodUI[];
   role: UserRole;
+  refetch?: () => void;
+  searchParams: ISearchParams;
 };
 
-export const ListView = ({ goods, role }: ListViewProps) => {
+export const ListView = ({
+  goods,
+  role,
+  refetch,
+  searchParams,
+}: ListViewProps) => {
   const { goodToDelete, handleDelete, handleDeleteConfirm, deleteModal } =
-    useGoodDelete();
+    useGoodDelete(refetch, ['goods', searchParams]);
 
   const {
     getItemQuantity,
@@ -143,7 +150,7 @@ export const ListView = ({ goods, role }: ListViewProps) => {
       <Modal
         body={
           <DeleteConfirmation
-            onConfirm={handleDeleteConfirm}
+            onConfirm={() => handleDeleteConfirm(goodToDelete?.title || '')}
             onCancel={() => deleteModal.onClose()}
             title={`товар: ${goodToDelete?.title}`}
           />

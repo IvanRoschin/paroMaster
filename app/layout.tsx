@@ -33,6 +33,7 @@ export default async function RootLayout({
   const role = (session?.user?.role as UserRole) ?? UserRole.GUEST;
   // Унифицированный объект пользователя
   const user: SessionUser = {
+    _id: session?.user?._id ?? '',
     name: session?.user?.name ?? 'Guest',
     email: session?.user?.email ?? '',
     image: session?.user?.image ?? `${process.env.PUBLIC_URL}/noavatar.png`,

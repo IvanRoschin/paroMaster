@@ -122,9 +122,27 @@ export default function GoodsSection({
         <EmptyState showReset />
       ) : (
         <>
-          {view === 'table' && <TableView goods={filteredGoods} role={role} />}
-          {view === 'list' && <ListView goods={filteredGoods} role={role} />}
-          {view === 'card' && <CardView goods={filteredGoods} role={role} />}
+          {view === 'table' && (
+            <TableView
+              goods={filteredGoods}
+              role={role}
+              searchParams={searchParams}
+            />
+          )}
+          {view === 'list' && (
+            <ListView
+              goods={filteredGoods}
+              role={role}
+              searchParams={searchParams}
+            />
+          )}
+          {view === 'card' && (
+            <CardView
+              goods={filteredGoods}
+              role={role}
+              searchParams={searchParams}
+            />
+          )}
         </>
       )}
     </div>

@@ -1,10 +1,11 @@
 'use client';
-
-import Image from 'next/image';
+import { usePathname, useRouter } from 'next/navigation';
 import { useContextSelector } from 'use-context-selector';
 
 import { FiltersContext, Option } from '@/context/FiltersContext';
 import { useMediaQuery } from '@/hooks/index';
+
+import { NextImage } from '../common';
 
 interface CategoryPage {
   categories: Option[];
@@ -12,8 +13,9 @@ interface CategoryPage {
 
 const Category: React.FC<CategoryPage> = ({ categories }) => {
   const isMobile = useMediaQuery('(max-width: 767px)');
+  const router = useRouter();
+  const pathname = usePathname();
 
-  // ✅ подписываемся только на нужные части контекста
   const selectedCategory = useContextSelector(
     FiltersContext,
     ctx => ctx?.selectedCategory
@@ -23,6 +25,14 @@ const Category: React.FC<CategoryPage> = ({ categories }) => {
     ctx => ctx?.setCategory
   );
 
+  const handleCategoryClick = (slug: string) => {
+    if (pathname === '/catalog') {
+      setCategory?.(slug);
+    } else {
+      router.push(`/catalog?category=${slug}`);
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-3 container md:w-[250px]">
       <h2 className="subtitle mb-4">Категорії товарів</h2>
@@ -31,15 +41,15 @@ const Category: React.FC<CategoryPage> = ({ categories }) => {
           isMobile ? 'grid grid-cols-2 gap-3' : ''
         }`}
       >
-        {/* ✅ Пункт "Усі товари" */}
         <li className="mb-3 nav">
           <button
-            onClick={() => setCategory?.('')}
+            onClick={() => handleCategoryClick('')}
             className={`flex items-center w-full text-left ${
               !selectedCategory ? 'font-bold text-primary' : ''
             }`}
           >
-            <Image
+            <NextImage
+              useSkeleton
               src="/goods.svg"
               width={20}
               height={20}
@@ -50,18 +60,19 @@ const Category: React.FC<CategoryPage> = ({ categories }) => {
             Всі товари
           </button>
         </li>
-        {categories.map(({ label, src, slug }, i) => {
+        {categories.map(({ label, src, slug }) => {
           const isActive = selectedCategory === slug;
 
           return (
-            <li key={i} className="mb-3 nav">
+            <li key={slug} className="mb-3 nav">
               <button
-                onClick={() => setCategory?.(isActive ? '' : slug || '')}
+                onClick={() => handleCategoryClick(isActive ? '' : slug || '')}
                 className={`flex items-center w-full text-left ${
                   isActive ? 'font-bold text-primary' : ''
                 }`}
               >
-                <Image
+                <NextImage
+                  useSkeleton
                   src={src || '/placeholder.svg'}
                   width={20}
                   height={20}

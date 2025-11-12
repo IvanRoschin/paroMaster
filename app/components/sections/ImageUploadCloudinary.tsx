@@ -9,7 +9,7 @@ import { Button } from '../ui';
 
 interface ImageUploadCloudinaryProps {
   setFieldValue: (field: string, value: any) => void;
-  values: string[];
+  values: string | string[];
   errors?: Record<string, any>;
   uploadPreset?: string;
   multiple?: boolean;
@@ -23,21 +23,61 @@ const ImageUploadCloudinary: React.FC<ImageUploadCloudinaryProps> = ({
   multiple = true,
 }) => {
   const [previews, setPreviews] = useState<string[]>(() =>
-    Array.isArray(values) ? [...values] : []
+    // Array.isArray(values) ? [...values] : []
+    Array.isArray(values) ? [...values] : values ? [values] : []
   );
+  useEffect(() => {
+    const newPreviews = Array.isArray(values)
+      ? [...values]
+      : values
+        ? [values]
+        : [];
+
+    // сравниваем с текущими previews, чтобы не вызывать setPreviews лишний раз
+    const isDifferent =
+      newPreviews.length !== previews.length ||
+      newPreviews.some((v, i) => v !== previews[i]);
+
+    if (isDifferent) {
+      setPreviews(newPreviews);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values]);
 
   useEffect(() => {
-    setFieldValue('src', previews);
-  }, [previews, setFieldValue]);
+    setFieldValue('src', multiple ? previews : (previews[0] ?? ''));
+  }, [previews, setFieldValue, multiple]);
+
+  // useEffect(() => {
+  //   setFieldValue('src', previews);
+  // }, [previews, setFieldValue]);
+
+  // const handleUpload = useCallback(
+  //   (url: string) => {
+  //     if (!url) return;
+  //     setPreviews(prev => {
+  //       const isEditing = prev.length > 0;
+  //       let next: string[];
+  //       if (multiple) {
+  //         next = isEditing ? [...prev, url] : [url];
+  //       } else {
+  //         next = [url];
+  //       }
+  //       const unique = Array.from(new Set(next));
+  //       return unique;
+  //     });
+  //   },
+  //   [multiple]
+  // );
 
   const handleUpload = useCallback(
     (url: string) => {
       if (!url) return;
+
       setPreviews(prev => {
-        const isEditing = prev.length > 0;
         let next: string[];
         if (multiple) {
-          next = isEditing ? [...prev, url] : [url];
+          next = [...prev, url];
         } else {
           next = [url];
         }
