@@ -6,6 +6,7 @@ import { getSession, signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { FcGoogle } from 'react-icons/fc';
+import { FiEye, FiEyeOff } from 'react-icons/fi'; // 👈 добавляем иконки глазика
 import { toast } from 'sonner';
 
 import { FormField } from '@/components/common';
@@ -20,6 +21,7 @@ interface InitialStateType {
 
 const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // 👈 состояние для показа пароля
   const router = useRouter();
 
   const initialValues: InitialStateType = {
@@ -36,7 +38,7 @@ const LoginForm = () => {
     const callback = await signIn('credentials', {
       email: values.email.toLowerCase(),
       password: values.password,
-      redirect: false, // SPA login
+      redirect: false,
     });
 
     setIsLoading(false);
@@ -45,12 +47,13 @@ const LoginForm = () => {
       toast.success('Успішний вхід');
       resetForm();
 
-      // Получаем сессию после входа
       const session = await getSession();
       const role = session?.user?.role as UserRole;
 
-      if (role === UserRole.ADMIN) router.replace('/admin/dashboard');
+      if (role === UserRole.ADMIN) router.replace('/admin');
       else router.replace('/customer');
+
+      router.refresh();
     } else {
       toast.error(callback?.error || 'Помилка входу');
     }
@@ -85,11 +88,33 @@ const LoginForm = () => {
             validationSchema={userLoginSchema}
             enableReinitialize
           >
-            {({ errors }) => (
+            {({ errors, handleChange, values }) => (
               <Form className="flex flex-col gap-5">
-                {inputs.map(item => (
-                  <FormField key={item.id} item={item} errors={errors} />
-                ))}
+                {/* Email */}
+                <FormField item={inputs[0]} errors={errors} />
+
+                {/* Password с глазиком 👇 */}
+                <div className="relative">
+                  <FormField
+                    item={{
+                      ...inputs[1],
+                      type: showPassword ? 'text' : 'password',
+                    }}
+                    errors={errors}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(prev => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? (
+                      <FiEyeOff size={20} />
+                    ) : (
+                      <FiEye size={20} />
+                    )}
+                  </button>
+                </div>
 
                 <motion.div
                   whileHover={{
@@ -136,7 +161,7 @@ const LoginForm = () => {
             Забули пароль?{' '}
             <a
               href="/reset-password"
-              className="text-blue-600 hover:text-blue-700 font-medium"
+              className="nav hover:text-gray-500 font-medium"
             >
               Відновити
             </a>

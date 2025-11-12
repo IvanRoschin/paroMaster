@@ -5,19 +5,27 @@ import {
   QueryClient,
 } from '@tanstack/react-query';
 
-import { getAllGoods } from '../actions/goods';
-import { getAllSlides, IGetAllSlides } from '../actions/slider';
+import { getAllGoods } from './actions/goods';
+import { getAllSlides, IGetAllSlides } from './actions/slider';
 import {
   getAllTestimonials,
   IGetAllTestimonials,
-} from '../actions/testimonials';
+} from './actions/testimonials';
 import {
   Advantages,
   Description,
   Slider,
   TestimonialsList,
-} from '../components';
-import DailyDealsSection from '../components/sections/DailyDealsSection';
+} from './components';
+import DailyDealsSection from './components/sections/DailyDealsSection';
+import { generateMetadata } from './helpers/generateMetadata';
+
+export const metadata = generateMetadata({
+  title: 'Головна | ParoMaster',
+  description: 'Головна сторінка ParoMaster – продаж і ремонт парогенераторів.',
+  url: process.env.PUBLIC_URL,
+  imageUrl: '/services/01.webp',
+});
 
 // Константы для ключей React Query
 const GOODS_QUERY_KEY = (limit: number) => ['goods', { limit }];

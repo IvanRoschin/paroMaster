@@ -102,7 +102,6 @@ export default function Brands({
   return (
     <div className="p-3">
       <Breadcrumbs />
-
       <div className="flex items-center justify-between mb-8">
         <p className="text-lg">
           Всього в базі <span className="subtitle text-lg">{brandsCount}</span>{' '}

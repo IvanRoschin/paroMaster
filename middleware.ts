@@ -1,45 +1,38 @@
-import { withAuth } from 'next-auth/middleware';
-import { NextFetchEvent, NextRequest, NextResponse } from 'next/server';
+import { getToken } from 'next-auth/jwt';
+import { NextRequest, NextResponse } from 'next/server';
 
-// Список публичных страниц
-const publicPages = [
-  '/',
-  '/catalog',
-  '/catalog/[id]',
-  '/ourworks',
-  '/services',
-  '/delivery',
-  '/guarantee',
-  '/contact',
-  '/login',
-  '/not-found',
-];
+import { routes } from './app/helpers/routes';
 
-// Настраиваем authMiddleware
-const authMiddleware = withAuth({
-  callbacks: {
-    authorized: ({ token }) => !!token,
-  },
-});
+export async function middleware(req: NextRequest) {
+  const token = await getToken({ req });
+  const url = req.nextUrl;
 
-// Обёртка для middleware, чтобы корректно обрабатывать публичные страницы
-export function middleware(req: NextRequest, ev: NextFetchEvent) {
-  const isPublic = publicPages.some(path => {
-    const regexPath = path.replace(/\[([^\]]+)\]/g, '[^/]+');
-    const regex = new RegExp(`^${regexPath}/?$`, 'i');
-    return regex.test(req.nextUrl.pathname);
-  });
+  const role = token?.role?.toUpperCase() || 'GUEST';
+  const isAdminRoute = url.pathname.startsWith('/admin');
+  const isCustomerRoute = url.pathname.startsWith('/customer');
 
-  if (isPublic) {
+  // ✅ Админ может везде
+  if (role === 'ADMIN') {
     return NextResponse.next();
   }
 
-  // Принудительно кастуем req к NextRequestWithAuth
-  return authMiddleware(req as any, ev);
+  // ✅ Клиент может на публичные и /customer
+  if (role === 'CUSTOMER' && !isAdminRoute) {
+    return NextResponse.next();
+  }
+
+  // ✅ Гость может только на публичные
+  if (!isAdminRoute && !isCustomerRoute) {
+    return NextResponse.next();
+  }
+
+  // 🚫 Остальные случаи — редирект на вход
+  return NextResponse.redirect(
+    new URL(routes.publicRoutes.auth.signIn, req.url)
+  );
 }
 
-export { default } from 'next-auth/middleware';
-
+// ✅ ограничиваем скоуп
 export const config = {
   matcher: ['/admin/:path*', '/customer/:path*'],
 };

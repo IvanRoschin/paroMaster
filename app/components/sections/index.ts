@@ -1,31 +1,14 @@
-import Advantages from '@/components/sections/Advantages';
-import Description from '@/components/sections/Description';
-import Footer from '@/components/sections/FooterServer';
-import Header from '@/components/sections/Header';
-import Heading from '@/components/sections/Heading';
-import ImagesBlock from '@/components/sections/ImagesBlock';
-import ImageUploadCloudinary from '@/components/sections/ImageUploadCloudinary';
-import Menu from '@/components/sections/Menu';
-import MobileMenu from '@/components/sections/MobileMenu';
-import ReviewList from '@/components/sections/ReviewList';
-import Slider from '@/components/sections/Slider';
-import Testimonial from '@/components/sections/Testimonial';
-import TestimonialsList from '@/components/sections/TestimonialsList';
-import Sidebar from '../common/Sidebar';
-
-export {
-  Advantages,
-  Description,
-  Footer,
-  Header,
-  Heading,
-  ImagesBlock,
-  ImageUploadCloudinary,
-  Menu,
-  MobileMenu,
-  ReviewList,
-  Sidebar,
-  Slider,
-  Testimonial,
-  TestimonialsList,
-};
+export { default as Sidebar } from '@/components/common/Sidebar';
+export { default as Advantages } from '@/components/sections/Advantages';
+export { default as Description } from '@/components/sections/Description';
+export { default as Footer } from '@/components/sections/FooterServer';
+export { default as Header } from '@/components/sections/Header';
+export { default as Heading } from '@/components/sections/Heading';
+export { default as ImagesBlock } from '@/components/sections/ImagesBlock';
+export { default as ImageUploadCloudinary } from '@/components/sections/ImageUploadCloudinary';
+export { default as Menu } from '@/components/sections/Menu';
+export { default as MobileMenu } from '@/components/sections/MobileMenu';
+export { default as ReviewList } from '@/components/sections/ReviewList';
+export { default as Slider } from '@/components/sections/Slider';
+export { default as Testimonial } from '@/components/sections/Testimonial';
+export { default as TestimonialsList } from '@/components/sections/TestimonialsList';

@@ -6,37 +6,48 @@ export async function buildFilter(searchParams: ISearchParams): Promise<any> {
   const filter: any = {};
   const andConditions: any[] = [];
 
-  // ======== Категорія ========
+  // ======== Категории (мультивыбор) ========
   if (searchParams.category) {
     const Category = (await import('@/models/Category')).default;
+    const categories: string[] = Array.isArray(searchParams.category)
+      ? searchParams.category
+      : [searchParams.category];
 
-    if (mongoose.Types.ObjectId.isValid(searchParams.category)) {
-      filter.category = new mongoose.Types.ObjectId(searchParams.category);
-    } else {
-      const foundCategory = await Category.findOne({
-        $or: [
-          { title: { $regex: searchParams.category, $options: 'i' } },
-          { slug: { $regex: searchParams.category, $options: 'i' } },
-        ],
-      });
+    const categoryIds: mongoose.Types.ObjectId[] = [];
 
-      if (foundCategory) {
-        filter.category = foundCategory._id;
+    for (const c of categories.filter(
+      c => typeof c === 'string' && c.trim() !== ''
+    )) {
+      if (mongoose.Types.ObjectId.isValid(c)) {
+        categoryIds.push(new mongoose.Types.ObjectId(c));
       } else {
-        filter.category = { $exists: false };
+        const foundCategory = await Category.findOne({
+          $or: [
+            { title: { $regex: c, $options: 'i' } },
+            { slug: { $regex: c, $options: 'i' } },
+          ],
+        });
+        if (foundCategory) categoryIds.push(foundCategory._id);
       }
     }
+
+    if (categoryIds.length > 0) filter.category = { $in: categoryIds };
+    else filter._id = { $exists: false }; // если ничего не найдено
   }
 
-  // ======== Бренд ========
+  // ======== Бренды (мультивыбор) ========
   if (searchParams.brands && searchParams.brands.length > 0) {
     const Brand = (await import('@/models/Brand')).default;
-    const brandIds = [];
+    const brandIds: mongoose.Types.ObjectId[] = [];
 
-    for (const b of searchParams.brands) {
-      if (mongoose.Types.ObjectId.isValid(b))
+    const brandStrings: string[] = (
+      searchParams.brands as (string | undefined)[]
+    ).filter((b): b is string => typeof b === 'string' && b.trim() !== '');
+
+    for (const b of brandStrings) {
+      if (mongoose.Types.ObjectId.isValid(b)) {
         brandIds.push(new mongoose.Types.ObjectId(b));
-      else {
+      } else {
         const foundBrand = await Brand.findOne({
           $or: [
             { name: { $regex: b, $options: 'i' } },
@@ -51,15 +62,19 @@ export async function buildFilter(searchParams: ISearchParams): Promise<any> {
     else filter._id = { $exists: false };
   }
 
-  // ======== Ціна ========
+  // ======== Цена ========
   const low = Number(searchParams.low);
   const high = Number(searchParams.high);
   if (!isNaN(low) && !isNaN(high)) {
     filter.price = { $gte: low, $lte: high };
   }
 
-  // ======== Пошук ========
-  if (searchParams.q) {
+  // ======== Поиск ========
+  if (
+    searchParams.q &&
+    typeof searchParams.q === 'string' &&
+    searchParams.q.trim() !== ''
+  ) {
     const regex = new RegExp(searchParams.q, 'i');
     andConditions.push({
       $or: [
@@ -73,8 +88,8 @@ export async function buildFilter(searchParams: ISearchParams): Promise<any> {
 
   if (andConditions.length) filter.$and = andConditions;
 
-  // ======== Активність ========
-  if (searchParams.isActive !== undefined) {
+  // ======== Активность ========
+  if (typeof searchParams.isActive !== 'undefined') {
     filter.isActive = searchParams.isActive;
   }
 

@@ -1,5 +1,4 @@
-import { getTestimonialById, updateTestimonial } from '@/actions/testimonials';
-import { TestimonialForm } from '@/app/(admin)/components';
+import { getTestimonialById } from '@/actions/testimonials';
 import { ISearchParams } from '@/types/searchParams';
 
 const SingleTestimonialPage = async ({
@@ -14,11 +13,12 @@ const SingleTestimonialPage = async ({
 
   return (
     <div className="mb-20">
-      <TestimonialForm
+      Update Testimonial Page
+      {/* <TestimonialForm
         testimonial={testimonial}
         title={'Редагувати відгук'}
         action={updateTestimonial}
-      />
+      /> */}
     </div>
   );
 };

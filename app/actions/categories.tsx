@@ -8,10 +8,19 @@ import Category from '@/models/Category';
 import { ICategory, ISearchParams } from '@/types/index';
 import { connectToDB } from '@/utils/dbConnect';
 
+import toPlain from '../helpers/server/toPlain';
+
 export interface IGetAllCategories {
   success: boolean;
   categories: ICategory[];
   count: number;
+}
+
+export interface ICategorySerialized {
+  _id: string;
+  slug: string;
+  name: string;
+  src?: string;
 }
 
 export async function addCategory(formData: FormData) {
@@ -129,4 +138,18 @@ export async function updateCategory(formData: FormData) {
         error instanceof Error ? error.message : 'Error updating Category',
     };
   }
+}
+
+export async function getCategoryBySlug(
+  slug: string
+): Promise<ICategorySerialized | null> {
+  await connectToDB();
+
+  const categoryDoc = await Category.findOne({ slug }).lean();
+  if (!categoryDoc) return null;
+
+  // Сериализация и приведение _id к строке
+  const category: ICategorySerialized = toPlain(categoryDoc);
+
+  return category;
 }

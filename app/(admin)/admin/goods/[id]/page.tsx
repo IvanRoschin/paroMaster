@@ -43,6 +43,7 @@ export default async function SingleGoodPage({
     const rawGoods = await getGoodsByBrand(brandId, goodNotNull._id);
     goodsByBrand = rawGoods as unknown as IGoodUI[];
   }
+  console.log('goodsByBrand:', goodsByBrand);
 
   return (
     <div className="mb-20">
