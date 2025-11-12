@@ -2,13 +2,11 @@
 
 import { useShoppingCart } from 'app/context/ShoppingCartContext';
 import { useSession } from 'next-auth/react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { FaPen } from 'react-icons/fa';
 
-import { Button } from '@/components/index';
-import { getCloudinaryUrl } from '@/helpers/getCloudinaryUrl';
+import { formatCurrency } from '@/app/utils/formatCurrency';
+import { Button, NextImage } from '@/components/index';
 import { IGoodUI } from '@/types/IGood';
 
 interface IProductCardProps {
@@ -44,15 +42,20 @@ const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
   }, [good.price, good.discountPrice]);
 
   return (
-    <li className="flex flex-col justify-between border border-gray-200 rounded-2xl p-4 hover:shadow-lg transition-all relative bg-white">
+    <li className="flex flex-col border border-gray-200 rounded-2xl p-4 hover:shadow-lg transition-all bg-white h-full">
       {/* Верх: изображение и бейджи */}
-      <div className="relative w-full h-[200px] mb-4">
+      <div className="relative w-full h-[200px] mb-3 overflow-hidden rounded-lg flex-shrink-0">
         <Link href={`/catalog/${good._id}`}>
-          <Image
-            src={getCloudinaryUrl(good.src?.[0], 300, 300)}
+          <NextImage
+            src={good.src?.[0] || '/placeholder.png'}
             alt={good.title}
+            useSkeleton
             fill
-            className="object-contain bg-gray-50 p-2 rounded-lg"
+            className="bg-gray-50 rounded-lg"
+            classNames={{
+              wrapper: 'w-full h-full bg-gray-100 rounded-lg overflow-hidden',
+              image: 'object-contain p-2',
+            }}
           />
         </Link>
 
@@ -67,68 +70,52 @@ const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
         )}
       </div>
 
-      {/* Заголовок */}
-      <Link href={`/catalog/${good._id}`}>
-        <h3 className="font-semibold text-sm sm:text-base line-clamp-2 hover:text-primaryAccentColor transition-colors mb-2">
-          {good.title}
-        </h3>
-      </Link>
+      {/* Содержание карточки */}
+      <div className="flex flex-col flex-grow gap-1">
+        <Link href={`/catalog/${good._id}`}>
+          <h3 className="font-semibold text-sm sm:text-base line-clamp-2 hover:text-primaryAccentColor transition-colors">
+            {good.title}
+          </h3>
+        </Link>
 
-      {/* Рейтинг */}
-      <div className="flex items-center gap-2 mb-2">
-        <div className="flex text-yellow-400">
-          {Array.from({ length: 5 }, (_, i) => (
-            <span key={i}>
-              {i < Math.round(good.averageRating || 0) ? '★' : '☆'}
-            </span>
-          ))}
-        </div>
-        <span className="text-xs text-gray-600">
-          ({good.ratingCount || 0} відгуків)
-        </span>
+        <p className="text-xs text-gray-500 line-clamp-2">
+          Виробник: {good.brand?.name ?? '—'}
+        </p>
+        <p className="text-xs text-gray-500 line-clamp-1">
+          Категорія: {good.category?.name ?? '—'}
+        </p>
+        <p className="text-xs text-gray-500 line-clamp-1">
+          SKU: {good.sku ?? '—'}
+        </p>
+
+        {Array.isArray(good.compatibleGoods) &&
+          good.compatibleGoods.length > 0 && (
+            <p className="text-xs text-gray-500 line-clamp-1">
+              Сумісні товари:{' '}
+              {good.compatibleGoods
+                .map(cg => (typeof cg === 'string' ? cg : cg.model))
+                .join(', ')}
+            </p>
+          )}
       </div>
-
-      {/* Наличие и характеристики */}
-      <p className="text-sm text-gray-500 mb-1">
-        {good.isAvailable ? '✅ В наявності' : '❌ Немає в наявності'}
-      </p>
-      <p className="text-sm text-gray-500 mb-1">Артикул: {good.sku}</p>
-      <p className="text-sm text-gray-500 mb-1">
-        Виробник: {good.brand?.name ?? '—'}
-      </p>
-      <p className="text-sm text-gray-500 mb-1">
-        Категорія: {good.category?.name ?? '—'}
-      </p>
-
-      {/* Цена */}
-      <div className="mt-2 mb-4 text-xl font-bold">
-        {discountPercent > 0 ? (
-          <>
-            <span className="text-red-600">
-              ₴{displayPrice.toLocaleString('uk-UA')}
-            </span>{' '}
-            <span className="line-through text-gray-400 text-base">
-              ₴{good.price.toLocaleString('uk-UA')}
-            </span>
-          </>
-        ) : (
-          <span>₴{displayPrice.toLocaleString('uk-UA')}</span>
-        )}
-      </div>
-
-      {/* Сумісні товари */}
-      {Array.isArray(good.compatibleGoods) &&
-        good.compatibleGoods.length > 0 && (
-          <p className="text-xs text-gray-500 mb-2">
-            Сумісні товари:{' '}
-            {good.compatibleGoods
-              .map(cg => (typeof cg === 'string' ? cg : cg.model))
-              .join(', ')}
-          </p>
-        )}
 
       {/* Нижний блок */}
-      <div className="flex justify-between items-center mt-auto pt-2 border-t border-gray-200">
+      <div className="mt-3 pt-3 border-t border-gray-200 flex flex-col gap-2">
+        <div className="text-xl font-bold flex justify-center items-center">
+          {discountPercent > 0 ? (
+            <>
+              <span className="text-red-600">
+                {formatCurrency(displayPrice, 'uk-UA', 'UAH')}
+              </span>{' '}
+              <span className="line-through text-gray-400 text-base">
+                {formatCurrency(good.price, 'uk-UA', 'UAH')}
+              </span>
+            </>
+          ) : (
+            <span>{formatCurrency(displayPrice, 'uk-UA', 'UAH')}</span>
+          )}
+        </div>
+
         <CartActions
           isAvailable={good.isAvailable}
           itemId={good._id}
@@ -137,14 +124,6 @@ const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
           decreaseCartQuantity={decreaseCartQuantity}
           removeFromCart={removeFromCart}
         />
-
-        {isAdmin && (
-          <Link href={`/admin/goods/${good._id}`}>
-            <span className="cursor-pointer w-8 h-8 rounded-full bg-orange-600 flex justify-center items-center hover:opacity-80 transition-opacity">
-              <FaPen size={12} color="white" />
-            </span>
-          </Link>
-        )}
       </div>
     </li>
   );
@@ -168,9 +147,10 @@ const CartActions: React.FC<CartActionsProps> = ({
   removeFromCart,
 }) => {
   return (
-    <div>
+    <div className="flex justify-center items-center">
       {quantity === 0 ? (
         <Button
+          width="32"
           type="button"
           label="Купити"
           disabled={!isAvailable}

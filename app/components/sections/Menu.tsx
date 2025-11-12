@@ -4,7 +4,7 @@ import { MdLogout } from 'react-icons/md';
 
 import { routes } from '@/app/helpers/routes';
 import { Button, Icon } from '@/components/ui';
-import { SessionUser } from '@/types/IUser';
+import { SessionUser, UserRole } from '@/types/IUser';
 import { menu } from 'app/config/constants';
 
 interface MenuProps {
@@ -12,6 +12,13 @@ interface MenuProps {
 }
 
 const Menu = ({ user }: MenuProps) => {
+  const isAuthenticated =
+    user && (user.role === UserRole.ADMIN || user.role === UserRole.CUSTOMER);
+
+  const visibleMenu = isAuthenticated
+    ? menu.filter(item => item.menuItemName !== 'Кабінет')
+    : menu;
+
   return (
     <nav className="text-base flex items-center justify-center font-semibold">
       <Link href="/catalog" className="flex items-center nav mr-2 lg:mr-4">
@@ -19,8 +26,8 @@ const Menu = ({ user }: MenuProps) => {
         Каталог
       </Link>
       <ul className="flex items-center space-x-2 lg:space-x-4 lg:mr-6">
-        {menu.map((item, index) => (
-          <li key={index} className="nav whitespace-nowrap">
+        {visibleMenu.map((item, i) => (
+          <li key={i} className="nav whitespace-nowrap">
             <Link
               href={item.menuItemLink}
               target="_self"
@@ -32,19 +39,20 @@ const Menu = ({ user }: MenuProps) => {
           </li>
         ))}
       </ul>
-      {user && (
-        <Button
-          small
-          onClick={() =>
-            signOut({
-              callbackUrl: `${routes.publicRoutes.auth.signIn}`,
-            })
-          }
-        >
-          <MdLogout />
-          Вихід
-        </Button>
-      )}
+      {user &&
+        (user.role === UserRole.ADMIN || user.role === UserRole.CUSTOMER) && (
+          <Button
+            small
+            onClick={() =>
+              signOut({
+                callbackUrl: routes.publicRoutes.auth.signIn,
+              })
+            }
+          >
+            <MdLogout />
+            Вихід
+          </Button>
+        )}
     </nav>
   );
 };

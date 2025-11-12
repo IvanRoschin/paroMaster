@@ -3,8 +3,10 @@ import { DefaultSession, NextAuthOptions } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 
+import Customer from '@/models/Customer';
 import User from '@/models/User';
 import { connectToDB } from '@/utils/dbConnect';
+
 import { routes } from '../helpers/routes';
 
 // ---------- TYPE AUGMENTATION ----------
@@ -14,6 +16,10 @@ declare module 'next-auth' {
       _id: string;
       role?: string;
       phone?: string;
+      surname?: string;
+      city?: string;
+      warehouse?: string;
+      payment?: string;
     } & DefaultSession['user'];
   }
 
@@ -21,6 +27,10 @@ declare module 'next-auth' {
     id: string;
     role?: string;
     phone?: string;
+    surname?: string;
+    city?: string;
+    warehouse?: string;
+    payment?: string;
   }
 }
 
@@ -29,6 +39,10 @@ declare module 'next-auth/jwt' {
     id?: string;
     role?: string;
     phone?: string;
+    surname?: string;
+    city?: string;
+    warehouse?: string;
+    payment?: string;
   }
 }
 
@@ -68,6 +82,7 @@ export const authOptions: NextAuthOptions = {
         return {
           id: user._id.toString(),
           name: user.name,
+          surname: user.surname,
           email: user.email,
           role: user.role,
           phone: user.phone,
@@ -128,20 +143,50 @@ export const authOptions: NextAuthOptions = {
   // ----------- CALLBACKS -----------
   callbacks: {
     async jwt({ token, user }) {
+      // 1️⃣ Если юзер только что залогинился — сохраняем данные
       if (user) {
         token.id = (user as any).id?.toString();
         token.role = (user as any).role;
         token.phone = (user as any).phone;
-        const dbUser = await User.findById((user as any).id);
-        token.token = dbUser?.token;
+        token.surname = (user as any).surname;
+
+        // Загружаем связанные данные Customer
+        const dbCustomer = await Customer.findOne({ user: token.id });
+        if (dbCustomer) {
+          token.city = dbCustomer.city;
+          token.warehouse = dbCustomer.warehouse;
+          token.payment = dbCustomer.payment;
+        }
       }
+
+      // 2️⃣ Если это не первый вызов (user undefined) — подтягиваем актуальные данные из БД
+      if (token?.id && !user) {
+        const dbUser = await User.findById(token.id);
+        if (dbUser) {
+          token.role = dbUser.role;
+          token.phone = dbUser.phone;
+          token.surname = dbUser.surname;
+        }
+        const dbCustomer = await Customer.findOne({ user: token.id });
+        if (dbCustomer) {
+          token.city = dbCustomer.city;
+          token.warehouse = dbCustomer.warehouse;
+          token.payment = dbCustomer.payment;
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
-      if (token?.id) (session.user as any)._id = token.id.toString();
-      if (token?.role) (session.user as any).role = token.role as string;
-      if (token?.phone) (session.user as any).phone = token.phone as string;
-      if (token?.token) (session.user as any).token = token.token as string;
+      if (token?.id) (session.user as any)._id = token.id;
+      if (token?.role) (session.user as any).role = token.role;
+      if (token?.phone) (session.user as any).phone = token.phone;
+      if (token?.surname) (session.user as any).surname = token.surname;
+
+      if (token?.city) (session.user as any).city = token.city;
+      if (token?.warehouse) (session.user as any).warehouse = token.warehouse;
+      if (token?.payment) (session.user as any).payment = token.payment;
+
       return session;
     },
     async redirect({ url, baseUrl }) {

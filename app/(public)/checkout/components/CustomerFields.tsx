@@ -9,7 +9,7 @@ import { useWarehouses } from '@/app/hooks';
 import { FormField } from '@/components';
 
 import { useCitySelection } from '../../../hooks/useCitySelection';
-import { ICustomerFormValues } from '../page';
+import { ICustomerFormValues } from '../checkoutClient';
 
 interface CustomerFieldsProps {
   values: ICustomerFormValues;

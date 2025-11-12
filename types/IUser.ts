@@ -1,6 +1,7 @@
 export enum UserRole {
   ADMIN = 'admin',
   CUSTOMER = 'customer',
+  GUEST = 'guest',
 }
 
 export interface IUser {
@@ -19,8 +20,14 @@ export interface IUser {
 }
 
 export interface SessionUser {
-  name: string;
-  email: string;
-  image: string;
-  role: UserRole;
+  _id: string;
+  name?: string | null;
+  surname?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  city?: string | null;
+  warehouse?: string | null;
+  payment?: string | null;
+  role?: string | null;
+  image?: string | null;
 }

@@ -6,7 +6,7 @@ import { useEffect, useRef } from 'react';
 import { storageKeys } from '@/app/helpers';
 import { useWarehouses } from '@/app/hooks';
 
-import { ICustomerFormValues } from '../page';
+import { ICustomerFormValues } from '../checkoutClient';
 
 interface FormEffectsProps {
   values: ICustomerFormValues;

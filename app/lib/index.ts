@@ -1,23 +1,10 @@
-import { cn } from './cn';
-import { generateCloudinarySignature } from './generateCloudinarySignature';
-import { generateRandomPassword } from './generateRandomPassword';
-import { generateSignature } from './generateSignature';
-import { getData } from './novaPoshta';
-import { sendMail } from './sendMail.server';
-import { serializeDoc } from './serialize';
-import { slugify } from './slugify';
-import { sendTelegramMessage } from './telegram';
-import { createWayForPayInvoice } from './wayforpay';
-
-export {
-  cn,
-  createWayForPayInvoice,
-  generateCloudinarySignature,
-  generateRandomPassword,
-  generateSignature,
-  getData,
-  sendMail,
-  sendTelegramMessage,
-  serializeDoc,
-  slugify,
-};
+export { cn } from '@/lib/cn';
+export { generateCloudinarySignature } from '@/lib/generateCloudinarySignature';
+export { generateRandomPassword } from '@/lib/generateRandomPassword';
+export { generateSignature } from '@/lib/generateSignature';
+export { getData } from '@/lib/novaPoshta';
+export { sendMail } from '@/lib/sendMail.server';
+export { serializeDoc } from '@/lib/serialize';
+export { slugify } from '@/lib/slugify';
+export { sendTelegramMessage } from '@/lib/telegram';
+export { createWayForPayInvoice } from '@/lib/wayforpay';

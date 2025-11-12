@@ -18,7 +18,7 @@ interface ResetFormProps {
 
 interface TestimonialFormProps {
   productId: string;
-  testimonial?: ITestimonial; // если передан — форма в режиме "редактировать"
+  testimonial?: ITestimonial;
 }
 
 const TestimonialForm = ({ productId, testimonial }: TestimonialFormProps) => {

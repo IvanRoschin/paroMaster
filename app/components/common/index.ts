@@ -1,25 +1,18 @@
-import Breadcrumbs from '@/components/common/Breadcrumbs';
-import DeleteConfirmation from '@/components/common/DeleteConfirmation';
-import EmptyState from '@/components/common/EmptyState';
-import FormField from '@/components/common/FormField';
-import InfiniteScroll from '@/components/common/InfiniteScroll';
-import Loader from '@/components/common/Loader';
-import Logo from '@/components/common/Logo';
-import Pagination from '@/components/common/Pagination';
-import Search from '@/components/common/Search';
-import Socials from '@/components/common/Socials';
-import TextField from './TextField';
-
-export {
-  Breadcrumbs,
-  DeleteConfirmation,
-  EmptyState,
-  FormField,
-  InfiniteScroll,
-  Loader,
-  Logo,
-  Pagination,
-  Search,
-  Socials,
-  TextField,
-};
+export { default as Breadcrumbs } from '@/components/common/Breadcrumbs';
+export { CardView } from '@/components/common/CardView';
+export { default as CatalogPage } from '@/components/common/CatalogPage';
+export { default as DeleteConfirmation } from '@/components/common/DeleteConfirmation';
+export { default as EmptyState } from '@/components/common/EmptyState';
+export { default as FormField } from '@/components/common/FormField';
+export { default as GoodsSection } from '@/components/common/GoodsSection';
+export { default as InfiniteScroll } from '@/components/common/InfiniteScroll';
+export { ListView } from '@/components/common/ListView';
+export { default as Loader } from '@/components/common/Loader';
+export { default as Logo } from '@/components/common/Logo';
+export { default as NextImage } from '@/components/common/NextImage';
+export { default as Pagination } from '@/components/common/Pagination';
+export { default as Search } from '@/components/common/Search';
+export { default as Skeleton } from '@/components/common/Skeleton';
+export { default as Socials } from '@/components/common/Socials';
+export { TableView } from '@/components/common/TableView';
+export { default as TextField } from '@/components/common/TextField';

@@ -2,6 +2,7 @@
 
 import { OrderStatus } from '@/types/orderStatus';
 import { PaymentMethod } from '@/types/paymentMethod';
+import { routes } from '../helpers/routes';
 
 export const paymentMethods = [
   { id: PaymentMethod.CASH_ON_DELIVERY, label: 'Оплата після отримання' },
@@ -21,12 +22,21 @@ export const orderStatus = [
 ///Menu///
 
 export const menu = [
-  { menuItemName: 'Наші роботи', menuItemLink: '/works' },
-  { menuItemName: 'Послуги', menuItemLink: '/services' },
-  { menuItemName: 'Доставка', menuItemLink: '/delivery' },
-  { menuItemName: 'Гарантія', menuItemLink: '/guarantee' },
-  { menuItemName: 'Контакти', menuItemLink: '/contact' },
-  { menuItemName: 'Кабінет', menuItemLink: '/dashboard' },
+  {
+    menuItemName: 'Наші роботи',
+    menuItemLink: `${routes.publicRoutes.ourworks}`,
+  },
+  { menuItemName: 'Послуги', menuItemLink: `${routes.publicRoutes.services}` },
+  { menuItemName: 'Доставка', menuItemLink: `${routes.publicRoutes.delivery}` },
+  {
+    menuItemName: 'Гарантія',
+    menuItemLink: `${routes.publicRoutes.guarantee}`,
+  },
+  { menuItemName: 'Контакти', menuItemLink: `${routes.publicRoutes.contact}` },
+  {
+    menuItemName: 'Кабінет',
+    menuItemLink: `${routes.publicRoutes.auth.signIn}`,
+  },
 ];
 
 ///categoryList///

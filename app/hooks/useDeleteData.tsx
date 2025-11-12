@@ -12,7 +12,6 @@ const useDeleteData = (action: DeleteAction, key: QueryKey) => {
   return useMutation({
     mutationFn: (id: string) => action(id),
     onSuccess: () => {
-      toast.success('Дані видалено!');
       queryClient.invalidateQueries({ queryKey: [key] });
     },
     onError: () => {

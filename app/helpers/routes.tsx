@@ -6,7 +6,7 @@ export const routes = {
       signIn: '/auth/signin',
     },
     catalog: '/catalog',
-    ourworks: '/ourworks',
+    ourworks: '/works',
     services: '/services',
     delivery: '/delivery',
     guarantee: '/guarantee',

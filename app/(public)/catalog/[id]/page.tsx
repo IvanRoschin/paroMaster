@@ -1,14 +1,16 @@
-import { notFound } from 'next/navigation';
-
-import { getGoodById } from '@/actions/goods';
-import { getGoodTestimonials } from '@/actions/testimonials';
-import prefetchData from '@/hooks/usePrefetchData';
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
+import { getServerSession } from 'next-auth';
+import { notFound } from 'next/navigation';
 
+import { getGoodById } from '@/actions/goods';
+import { getGoodTestimonials } from '@/actions/testimonials';
+import { authOptions } from '@/app/config/authOptions';
+import prefetchData from '@/hooks/usePrefetchData';
+import { UserRole } from '@/types/IUser';
 import GoodPageClient from './GoodPageClient';
 
 // app/good/[id]/page.tsx
@@ -28,9 +30,17 @@ export async function generateMetadata(props: { params: paramsType }) {
     };
   }
 
+  const brandName = good.brand?.name || '';
+  const categoryName = good.category?.name || '';
+  const modelName = good.model || '';
+  const keywords = [brandName, categoryName, modelName, 'ParoMaster'].filter(
+    Boolean
+  );
+
   return {
     title: good.title,
     description: good.description || 'Деталі про товар.',
+    keywords: keywords.join(', '),
     openGraph: {
       title: good.title,
       description: good.description,
@@ -46,6 +56,11 @@ export default async function GoodPage(props: { params: paramsType }) {
   const good = await getGoodById(id);
   if (!good) notFound();
 
+  const session = await getServerSession(authOptions);
+  const role = session?.user?.role
+    ? (session.user.role as UserRole)
+    : UserRole.GUEST;
+
   const queryClient = new QueryClient();
   await prefetchData(
     queryClient,
@@ -56,7 +71,7 @@ export default async function GoodPage(props: { params: paramsType }) {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <GoodPageClient good={good} />
+      <GoodPageClient good={good} role={role} />
     </HydrationBoundary>
   );
 }

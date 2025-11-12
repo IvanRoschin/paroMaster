@@ -1,19 +1,7 @@
-import BrandForm from '@/app/(admin)/components/forms/BrandForm';
-import CategoryForm from '@/app/(admin)/components/forms/CategoryForm';
-import CustomerForm from '@/app/(admin)/components/forms/CustromerForm';
-import GoodForm from '@/app/(admin)/components/forms/GoodForm';
-import OrderForm from '@/app/(admin)/components/forms/OrderForm';
-import SlideForm from '@/app/(admin)/components/forms/SlideForm';
-import TestimonialForm from '@/app/(admin)/components/forms/TestimonialForm';
-import UserForm from '@/app/(admin)/components/forms/UserForm';
-
-export {
-  BrandForm,
-  CategoryForm,
-  CustomerForm,
-  GoodForm,
-  OrderForm,
-  SlideForm,
-  TestimonialForm,
-  UserForm,
-};
+export { default as BrandForm } from './BrandForm';
+export { default as CategoryForm } from './CategoryForm';
+export { default as CustomerForm } from './CustromerForm';
+export { default as GoodForm } from './GoodForm';
+export { default as OrderForm } from './OrderForm';
+export { default as SlideForm } from './SlideForm';
+export { default as UserForm } from './UserForm';

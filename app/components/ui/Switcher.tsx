@@ -1,14 +1,15 @@
-import React from 'react';
+'use client';
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
+import React from 'react';
 
 interface SwitcherProps {
   id?: string;
-  label?: string; // ✅ основной заголовок (подпись для свитчера)
-  labels?: [string, string]; // ✅ подписи для состояний
+  label?: string;
+  labels?: [string, string];
   checked: boolean;
   onChange: (checked: boolean) => void;
-  labelPosition?: 'top' | 'left'; // ✅ позиция основного лейбла
+  labelPosition?: 'top' | 'left';
 }
 
 const Switcher: React.FC<SwitcherProps> = ({
@@ -17,62 +18,50 @@ const Switcher: React.FC<SwitcherProps> = ({
   labels = ['Off', 'On'],
   checked,
   onChange,
-  labelPosition = 'top',
+  labelPosition = 'left',
 }) => {
-  const handleToggle = () => {
-    onChange(!checked);
-  };
+  const toggle = () => onChange(!checked);
+
+  const switchBody = (
+    <div
+      onClick={toggle}
+      className={`relative w-12 h-6 flex items-center rounded-full cursor-pointer transition-colors ${
+        checked ? 'bg-green-500' : 'bg-gray-300'
+      }`}
+    >
+      <motion.div
+        layout
+        transition={{ type: 'spring', stiffness: 600, damping: 30 }}
+        className={`absolute w-5 h-5 bg-white rounded-full shadow-md ${
+          checked ? 'left-[calc(100%-1.25rem)]' : 'left-0.5'
+        }`}
+      />
+    </div>
+  );
+
+  const stateLabel = (
+    <span className="text-sm text-gray-600 select-none min-w-[2ch] text-center">
+      {checked ? labels[1] : labels[0]}
+    </span>
+  );
 
   return (
     <div
-      className={`flex ${
-        labelPosition === 'left'
-          ? 'flex-row items-center gap-3'
-          : 'flex-col items-center'
+      className={`flex items-center gap-2 ${
+        labelPosition === 'top' ? 'flex-col items-start' : ''
       }`}
     >
-      {/* Основной label */}
       {label && (
-        <span className="text-sm font-medium text-gray-700">{label}</span>
+        <label
+          htmlFor={id}
+          className="text-sm font-medium text-gray-800 select-none"
+        >
+          {label}
+        </label>
       )}
-
-      {/* Лейбл состояния с анимацией */}
-      <div className="h-5 mb-1 flex justify-center items-center relative w-12">
-        {labels && (
-          <AnimatePresence mode="wait">
-            <div className="absolute text-xs font-medium">
-              <motion.span
-                key={checked ? 'on' : 'off'}
-                initial={{ opacity: 0, x: checked ? 20 : -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: checked ? -20 : 20 }}
-                transition={{ duration: 0.2 }}
-              >
-                {checked ? labels[1] : labels[0]}
-              </motion.span>
-            </div>
-          </AnimatePresence>
-        )}
-      </div>
-
-      {/* Сам переключатель */}
-      <div
-        onClick={handleToggle}
-        className={`relative w-14 h-8 rounded-full cursor-pointer transition-colors duration-300 ${
-          checked ? 'bg-primaryAccentColor' : 'bg-gray-300'
-        }`}
-      >
-        <div className="absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md">
-          <motion.div
-            layout
-            transition={{
-              type: 'spring',
-              stiffness: 400,
-              damping: 25,
-            }}
-            animate={{ x: checked ? 24 : 0 }}
-          />
-        </div>
+      <div className="flex items-center gap-2">
+        {stateLabel}
+        {switchBody}
       </div>
     </div>
   );
