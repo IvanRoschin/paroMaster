@@ -1,7 +1,6 @@
 'use client';
 
 import { useShoppingCart } from 'app/context/ShoppingCartContext';
-import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -14,9 +13,6 @@ interface IProductCardProps {
 }
 
 const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
-  const { data: session } = useSession();
-  const isAdmin = !!session?.user;
-
   const {
     getItemQuantity,
     increaseCartQuantity,

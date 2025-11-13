@@ -62,11 +62,11 @@ export async function getAllBrands(
       query.skip(skip).limit(limit);
     }
 
-    const categories: IBrand[] = await query.exec();
+    const brands: IBrand[] = await query.exec();
 
     return {
       success: true,
-      brands: JSON.parse(JSON.stringify(categories)),
+      brands: JSON.parse(JSON.stringify(brands)),
       count,
     };
   } catch (error) {

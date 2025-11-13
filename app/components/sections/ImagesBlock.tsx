@@ -19,9 +19,9 @@ const ImagesBlock: React.FC<ImagesBlockProps> = ({ item, values }) => {
     const safeIndex = Math.min(index, images.length - 1);
 
     return (
-      <div className="mr-0 sm:mr-[50px] pb-[40px]">
-        {/* Главное изображение */}
-        <div className="w-[400px] h-[400px] mb-6">
+      <div className="mr-0 sm:mr-[40px] pb-[30px] flex flex-col items-center">
+        {/* 🔹 Главное изображение */}
+        <div className="w-full max-w-[400px] sm:max-w-[450px] mb-4">
           <NextImage
             useSkeleton
             src={images[safeIndex]}
@@ -29,22 +29,24 @@ const ImagesBlock: React.FC<ImagesBlockProps> = ({ item, values }) => {
             height={400}
             alt={altText}
             classNames={{
-              wrapper: 'w-full h-full bg-gray-100 rounded-lg overflow-hidden',
-              image: 'object-contain p-2',
+              wrapper:
+                'w-full h-auto aspect-square bg-gray-100 rounded-lg overflow-hidden',
+              image:
+                'object-contain w-full h-full p-2 sm:p-3 max-h-[250px] sm:max-h-[350px] md:max-h-[400px] mx-auto',
             }}
           />
         </div>
 
-        {/* Превьюшки */}
-        <ul className="grid grid-cols-3 gap-3">
+        {/* 🔹 Миниатюры */}
+        <ul className="grid grid-cols-4 sm:grid-cols-5 gap-2 sm:gap-3 justify-center">
           {images.map((img, imgIndex) => (
             <li key={imgIndex}>
               <NextImage
                 useSkeleton
                 src={img}
                 alt={`${altText} ${imgIndex + 1}`}
-                width={120}
-                height={120}
+                width={90}
+                height={90}
                 classNames={{
                   wrapper:
                     'w-full h-full bg-gray-100 rounded-lg overflow-hidden',
@@ -74,7 +76,9 @@ const ImagesBlock: React.FC<ImagesBlockProps> = ({ item, values }) => {
   if (imagesToRender.length === 0) return null;
 
   return (
-    <div>{renderImageGallery(imagesToRender, item?.title || 'Зображення')}</div>
+    <div className="flex justify-center items-center w-full">
+      {renderImageGallery(imagesToRender, item?.title || 'Зображення')}
+    </div>
   );
 };
 
