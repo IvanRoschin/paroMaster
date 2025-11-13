@@ -12,6 +12,8 @@ export interface IToken extends Document {
   type: TokenType;
   used?: boolean;
   createdAt: Date;
+  refreshCreatedAt?: Date;
+  verificationCreatedAt?: Date;
 }
 
 const TokenSchema = new Schema<IToken>(
@@ -33,18 +35,18 @@ const TokenSchema = new Schema<IToken>(
   }
 );
 
-// TTL индекс для refresh токенов (30 дней)
+// TTL для REFRESH токенов (30 дней)
 TokenSchema.index(
-  { createdAt: 1 },
+  { refreshCreatedAt: 1 },
   {
     expireAfterSeconds: 60 * 60 * 24 * 30,
     partialFilterExpression: { type: TokenType.REFRESH },
   }
 );
 
-// TTL индекс для verification токенов (1 день)
+// TTL для VERIFICATION токенов (1 день)
 TokenSchema.index(
-  { createdAt: 1 },
+  { verificationCreatedAt: 1 },
   {
     expireAfterSeconds: 60 * 60 * 24,
     partialFilterExpression: { type: TokenType.VERIFICATION },

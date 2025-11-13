@@ -21,8 +21,8 @@ const Category: React.FC<CategoryProps> = ({ categories }) => {
   const pathname = usePathname();
 
   // Определяем активную категорию по URL
-  const activeCategorySlug = pathname.startsWith('/catalog/')
-    ? pathname.split('/catalog/')[1]
+  const activeCategorySlug = pathname.startsWith('/category/')
+    ? pathname.split('/category/')[1]
     : '';
 
   return (

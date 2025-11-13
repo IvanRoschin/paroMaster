@@ -5,7 +5,6 @@ import {
 } from '@tanstack/react-query';
 import { getServerSession } from 'next-auth';
 
-import { getAllBrands } from '@/app/actions/brands';
 import { getAllCategories, getCategoryBySlug } from '@/app/actions/categories';
 import { getGoodsByCategory } from '@/app/actions/goods';
 import { EmptyState } from '@/app/components';
@@ -73,28 +72,6 @@ export default async function CategoryPage({
   const goodsData = queryClient.getQueryData(['goods', slug]) as any;
   const goods = goodsData ?? [];
 
-  // 3️⃣ Получаем категории и бренды для фильтров
-  const [categoriesResponse, brandsResponse] = await Promise.all([
-    getAllCategories(search),
-    getAllBrands(search),
-  ]);
-
-  const categories = (categoriesResponse.categories ?? [])
-    .filter(c => c._id)
-    .map(c => ({
-      value: String(c._id),
-      label: c.name ?? 'Без назви',
-      slug: c.slug,
-      name: c.name,
-    }));
-
-  const brands = (brandsResponse.brands ?? [])
-    .filter(b => b._id)
-    .map(b => ({
-      value: String(b._id),
-      label: b.name ?? 'Без назви',
-    }));
-
   // 4️⃣ Роль пользователя
   const session = await getServerSession(authOptions);
   const role = session?.user?.role
@@ -107,7 +84,7 @@ export default async function CategoryPage({
       <EmptyState
         showReset
         title={`Відсутні товари у категорії "${category.name}"`}
-        actionHref="/catalog"
+        goHomeAfterReset
       />
     );
   }
@@ -119,8 +96,6 @@ export default async function CategoryPage({
         category={category}
         goods={goods}
         search={search}
-        categories={categories}
-        brands={brands}
         role={role}
       />
     </HydrationBoundary>

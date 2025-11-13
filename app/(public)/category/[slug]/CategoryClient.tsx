@@ -7,17 +7,9 @@ import { Breadcrumbs, CardView, ProductListSkeleton } from '@/app/components';
 import { IGoodUI, ISearchParams } from '@/types/index';
 import { UserRole } from '@/types/IUser';
 
-interface Option {
-  value: string;
-  label: string;
-  slug?: string;
-}
-
 interface CategoryClientProps {
   category: ICategorySerialized;
   goods: IGoodUI[];
-  categories: Option[];
-  brands: Option[];
   search: ISearchParams;
   role: UserRole;
 }
@@ -25,8 +17,6 @@ interface CategoryClientProps {
 const CategoryClient: React.FC<CategoryClientProps> = ({
   category,
   goods,
-  categories,
-  brands,
   search,
   role,
 }) => {
