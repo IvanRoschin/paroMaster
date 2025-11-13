@@ -1,3 +1,5 @@
+'use client';
+
 export { default as Button } from '@/components/ui/Button';
 export { ButtonAddGood } from '@/components/ui/ButtonAddGood';
 export {
@@ -15,6 +17,10 @@ export {
   ProductClient,
   ProductListSkeleton,
 } from '@/components/ui/ProductCard';
+export {
+  default as ProductFilters,
+  default as ProductFiltersState,
+} from '@/components/ui/ProductFilters';
 export { default as Rating } from '@/components/ui/Rating';
 export { default as SingOutButton } from '@/components/ui/SingOutButton';
 export { default as Switcher } from '@/components/ui/Switcher';
