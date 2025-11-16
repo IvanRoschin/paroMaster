@@ -1,8 +1,8 @@
 // utils/toPlain.ts
-export default function toPlain<T>(doc: any): T {
+export default function toPlain<T = any>(doc: any): T {
   if (!doc) return doc;
 
-  const obj = doc.toObject ? doc.toObject({ getters: true }) : { ...doc };
+  const obj: any = doc.toObject ? doc.toObject({ getters: true }) : { ...doc };
 
   if (obj._id) obj._id = obj._id.toString();
 
@@ -20,7 +20,7 @@ export default function toPlain<T>(doc: any): T {
     }
   }
 
-  return JSON.parse(JSON.stringify(obj));
+  return obj;
 }
 
 // export default function toPlain<T>(obj: any): T {

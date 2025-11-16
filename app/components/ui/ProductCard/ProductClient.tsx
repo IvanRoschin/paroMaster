@@ -2,7 +2,7 @@
 
 import { useShoppingCart } from 'app/context/ShoppingCartContext';
 
-import { getGoodById } from '@/actions/goods';
+import { getGoodByIdAction } from '@/actions/goods';
 import { Icon, ImagesBlock, Loader } from '@/components/index';
 import { useFetchDataById } from '@/hooks/index';
 
@@ -19,7 +19,7 @@ const ProductClient = ({ id }: { id: string }) => {
     isLoading,
     isError,
     error,
-  } = useFetchDataById(getGoodById, ['goodById'], id);
+  } = useFetchDataById(getGoodByIdAction, ['goodById'], id);
 
   if (isLoading || !good) return <Loader />;
   if (isError) {

@@ -1,16 +1,15 @@
-import { IGoodUI, ISearchParams, ITestimonial } from '@/types/index';
+import { IGoodUI, ISearchParams } from '@/types/index';
+import { IGetAllSlides } from '@/types/ISlider';
+import { IGetAllTestimonials, ITestimonial } from '@/types/ITestimonial';
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
 
-import { getAllGoods } from './actions/goods';
-import { getAllSlides, IGetAllSlides } from './actions/slider';
-import {
-  getAllTestimonials,
-  IGetAllTestimonials,
-} from './actions/testimonials';
+import { getAllGoodsAction } from './actions/goods';
+import { getAllSlidesAction } from './actions/slides';
+import { getAllTestimonialsAction } from './actions/testimonials';
 import {
   Advantages,
   Description,
@@ -49,20 +48,22 @@ export default async function Home({
 }) {
   const params = await searchParams;
   const queryClient = new QueryClient();
+  const dehydrated = dehydrate(queryClient);
+  const safeState = JSON.parse(JSON.stringify(dehydrated));
 
   // Prefetch данных с обработкой ошибок
   await Promise.allSettled([
     queryClient.prefetchQuery({
       queryKey: SLIDES_QUERY_KEY(params),
-      queryFn: () => getAllSlides(params),
+      queryFn: () => getAllSlidesAction(params),
     }),
     queryClient.prefetchQuery({
       queryKey: TESTIMONIALS_QUERY_KEY(params),
-      queryFn: () => getAllTestimonials(params),
+      queryFn: () => getAllTestimonialsAction(params),
     }),
     queryClient.prefetchQuery({
       queryKey: GOODS_QUERY_KEY(4),
-      queryFn: () => getAllGoods({ limit: '4' }),
+      queryFn: () => getAllGoodsAction({ limit: '4' }),
     }),
   ]);
 
@@ -70,7 +71,7 @@ export default async function Home({
   const goodsData = queryClient.getQueryData<GoodsData>(GOODS_QUERY_KEY(4));
   const goods = goodsData?.goods ?? [];
 
-  const slidesData = queryClient.getQueryData<IGetAllSlides>(
+  const slidesDataRaw = queryClient.getQueryData<IGetAllSlides>(
     SLIDES_QUERY_KEY(params)
   );
   const testimonialsDataRaw = queryClient.getQueryData<IGetAllTestimonials>(
@@ -81,14 +82,21 @@ export default async function Home({
   const testimonialsData = testimonialsDataRaw
     ? {
         ...testimonialsDataRaw,
-        testimonials: testimonialsDataRaw.testimonials.filter(
-          (t: ITestimonial) => t.isActive
-        ),
+        testimonials: testimonialsDataRaw.testimonials
+          .filter((t: ITestimonial) => t.isActive)
+          .map(t => JSON.parse(JSON.stringify(t))),
+      }
+    : null;
+
+  const slidesData = slidesDataRaw
+    ? {
+        ...slidesDataRaw,
+        slides: slidesDataRaw.slides.map(s => JSON.parse(JSON.stringify(s))),
       }
     : null;
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
+    <HydrationBoundary state={safeState}>
       <div className="container">
         {slidesData && testimonialsData && (
           <section className="hidden lg:block">

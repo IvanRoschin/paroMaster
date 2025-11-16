@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
 
-import { addNewLead } from '@/actions/leads';
+import { addNewLeadAction } from '@/actions/leads';
 import { LeadForm } from '@/components/forms';
 import { EmptyState, Logo, Socials } from '@/components/index';
 import { useMediaQuery } from '@/hooks/index';
@@ -259,7 +259,10 @@ const FooterClient = ({ categories }: { categories: ICategory[] }) => {
           )}
         </div>
         <div id="contactForm" className={`${isMobile ? 'mb-4' : 'mb-0'}`}>
-          <LeadForm action={addNewLead} title="Замовити зворотній дзвінок" />
+          <LeadForm
+            action={addNewLeadAction}
+            title="Замовити зворотній дзвінок"
+          />
         </div>
       </div>
       {!isMobile && <div className="border-b border-primaryAccentColor mb-5" />}

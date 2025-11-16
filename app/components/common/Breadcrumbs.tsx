@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { FaChevronRight } from 'react-icons/fa';
 
-import { getGoodById } from '@/actions/goods';
+import { getGoodByIdAction } from '@/actions/goods';
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -64,7 +64,7 @@ const Breadcrumbs = () => {
 
     (async () => {
       try {
-        const good = await getGoodById(lastSegment);
+        const good = await getGoodByIdAction(lastSegment);
         if (!isMounted || !good) return;
 
         const brand = typeof good.brand === 'object' ? good.brand?.name : '';

@@ -4,7 +4,9 @@ import { toast } from 'sonner';
 
 import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
 
-type DeleteAction = (id: string) => Promise<void>;
+type DeleteAction = (
+  id: string
+) => Promise<{ success: boolean; message: string }>;
 
 const useDeleteData = (action: DeleteAction, key: QueryKey) => {
   const queryClient = useQueryClient();

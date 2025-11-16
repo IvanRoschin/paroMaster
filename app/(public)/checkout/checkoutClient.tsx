@@ -9,13 +9,13 @@ import { toast } from 'sonner';
 
 import { addCustomer } from '@/actions/customers';
 import { addOrder } from '@/actions/orders';
+import { addUser } from '@/actions/users';
+import PublicOfferSummary from '@/app/(public)/publicoffer/PublicOfferSummary';
 import {
   IOrderedGoodSnapshot,
   sendAdminEmail,
   sendCustomerEmail,
-} from '@/actions/sendNodeMailer';
-import { addUser } from '@/actions/users';
-import PublicOfferSummary from '@/app/(public)/publicoffer/PublicOfferSummary';
+} from '@/app/services/sendNodeMailer';
 import { Breadcrumbs, Button } from '@/components/index';
 import { customerFormSchema, storageKeys } from '@/helpers/index';
 import { ICartItem, IOrder } from '@/types/index';
@@ -37,7 +37,7 @@ export interface ICustomerFormValues {
   payment: PaymentMethod;
 }
 
-interface CheckoutClient {
+export interface CheckoutClient {
   user?: SessionUser;
 }
 

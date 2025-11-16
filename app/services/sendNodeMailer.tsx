@@ -37,6 +37,11 @@ export interface IUserVerificationCredentials {
   token: TokenType;
 }
 
+export interface IUserChangeLetterCredentials {
+  newEmail: string;
+  token: string;
+}
+
 function validateOrderData(order: IOrder) {
   const customer = order.customerSnapshot;
 
@@ -115,6 +120,53 @@ export async function sendMail({
   return result;
 }
 
+// Отправка письма для верификации смены е-мейл
+export async function sendEmailChangeLetter({
+  newEmail,
+  token,
+}: IUserChangeLetterCredentials) {
+  if (!newEmail || !token) {
+    return {
+      success: false,
+      error: 'sendEmailChangeLetter Error: Missing newEmail or token.',
+    };
+  }
+
+  const verificationUrl = `${baseUrl}${routes.publicRoutes.auth.verifyEmail}?token=${encodeURIComponent(token)}`;
+
+  const emailContent = `
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif; background-color: #f9f9f9; border-radius: 10px; color: #333;">
+      <h2>Привіт!</h2>
+      <p>Для зміни e-mail, перейдіть за посиланням:</p>
+      <p><strong><a href="${verificationUrl}" style="color: #2196F3; text-decoration: none;">Підтвердити зміну e-mail </a></strong></p>
+      <p>Бажаємо приємних покупок 🚀</p>
+    </div>
+  `;
+
+  try {
+    await sendMail({
+      to: newEmail,
+      from: {
+        email: 'no-reply@paromaster.com',
+        name: 'Магазин запчастин ParoMaster',
+      },
+      subject: 'Запит на зміну e-mail',
+      body: emailContent,
+    });
+    console.log('✅ Email Change Letter successfully sent.');
+    return { success: true };
+  } catch (error: any) {
+    console.error(
+      '❌ Error sending Email Change Letter:',
+      error.message || error
+    );
+    return {
+      success: false,
+      error: error.message || 'Unknown error occurred.',
+    };
+  }
+}
+
 // Отправка письма для верификации пользователя
 export async function sendVerificationLetter({
   email,
@@ -134,7 +186,7 @@ export async function sendVerificationLetter({
     <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif; background-color: #f9f9f9; border-radius: 10px; color: #333;">
       <h2>Привіт, ${name}!</h2>
       <p>Ви зробили замовлення на сайті магазину запчастин <strong>ParoMaster</strong>.</p>
-      <p>Щоб активувати особистий кабінет та отримувати спеціальні пропозиції, перейдіть за посиланням:</p>
+      <p>Щоб активувати Ваш обліковий запис, отримати доступ до особистого кабінету та отримувати спеціальні пропозиції, перейдіть за посиланням:</p>
       <p><strong><a href="${verificationUrl}" style="color: #2196F3; text-decoration: none;">Підтвердити реєстрацію</a></strong></p>
       <p>Бажаємо приємних покупок 🚀</p>
     </div>
@@ -183,7 +235,7 @@ export async function sendUserCredentialsEmail({
   const emailContent = `
     <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif; background-color: #f9f9f9; border-radius: 10px; color: #333;">
       <h2>Привіт, ${name}!</h2>
-      <p>Ваш особистий кабінет активовано на сайті магазину запчастин <strong>ParoMaster</strong>.</p>
+      <p>Ваш обліковий запис активовано на сайті магазину запчастин <strong>ParoMaster</strong>.</p>
       <p><strong>Логін:</strong> ${login}</p>
       <p><strong>Пароль:</strong> ${password}</p>
       <p>Радимо змінити пароль після першого входу або за посиланням 
@@ -238,7 +290,6 @@ export async function sendAdminEmail(
     await sendMail({
       to: fromEmail,
       from: { email: 'no-reply@paromaster.com', name: 'ParoMaster Admin' },
-      name: 'ParoMaster Admin',
       subject: `Нове замовлення №${order.number} від ${customer.user.name}`,
       body: emailContent,
     });

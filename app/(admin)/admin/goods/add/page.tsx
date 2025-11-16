@@ -1,15 +1,15 @@
 // app/(admin)/goods/add/page.tsx
 
-import { getAllBrands } from '@/actions/brands';
-import { getAllCategories } from '@/actions/categories';
-import { addGood, getGoodsByBrand } from '@/actions/goods';
+import { getAllBrandsAction } from '@/actions/brands';
+import { getAllCategoriesAction } from '@/actions/categories';
+import { addGoodAction, getGoodsByBrandAction } from '@/actions/goods';
 import { GoodForm } from '@/app/(admin)/components';
 import { IGoodUI } from '@/types/index';
 
 export default async function AddGoodPage() {
   const [categoriesResponse, brandsResponse] = await Promise.all([
-    getAllCategories(),
-    getAllBrands(),
+    getAllCategoriesAction(),
+    getAllBrandsAction(),
   ]);
 
   const categories = categoriesResponse.categories ?? [];
@@ -19,7 +19,7 @@ export default async function AddGoodPage() {
   let goodsByBrand: IGoodUI[] = [];
 
   if (defaultBrandId) {
-    goodsByBrand = (await getGoodsByBrand(
+    goodsByBrand = (await getGoodsByBrandAction(
       defaultBrandId
     )) as unknown as IGoodUI[];
   }
@@ -30,7 +30,7 @@ export default async function AddGoodPage() {
         <h2 className="subtitle text-center">🛍️ Додати новий товар</h2>
         <GoodForm
           title=""
-          action={addGood}
+          action={addGoodAction}
           allowedCategories={categories}
           allowedBrands={brands}
           goodsByBrand={goodsByBrand}

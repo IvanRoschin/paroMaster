@@ -4,6 +4,8 @@ export const routes = {
     auth: {
       verifyEmail: '/auth/verify-email',
       signIn: '/auth/signin',
+      forgotPassword: '/auth/forgot-password',
+      restorePassword: '/auth/restore-password',
     },
     catalog: '/catalog',
     ourworks: '/works',

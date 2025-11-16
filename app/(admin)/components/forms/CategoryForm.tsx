@@ -4,44 +4,47 @@ import { Form, Formik, FormikState } from 'formik';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
+import slugify from 'slugify';
 import { toast } from 'sonner';
 
 import {
   CustomButton,
   FormField,
   ImageUploadCloudinary,
-  Switcher,
 } from '@/components/index';
 import { useAddData, useUpdateData } from '@/hooks/index';
-import { ISlider } from '@/types/index';
+import { ICategory } from '@/types/index';
 
-interface InitialStateType extends Omit<ISlider, '_id'> {}
+interface InitialStateType extends Omit<ICategory, '_id'> {}
 
 interface ResetFormProps {
   resetForm: (nextState?: Partial<FormikState<InitialStateType>>) => void;
 }
 
-interface SliderFormProps {
-  category?: ISlider;
+interface CategoryFormProps {
+  category?: ICategory;
   title?: string;
-  action: (data: FormData) => Promise<{ success: boolean; message: string }>;
+  action: (values: ICategory) => Promise<{ success: boolean; message: string }>;
 }
 
-const SlideForm: React.FC<SliderFormProps> = ({ category, title, action }) => {
+const CategoryForm: React.FC<CategoryFormProps> = ({
+  category,
+  title,
+  action,
+}) => {
   const { push } = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   const isUpdating = Boolean(category?._id);
 
   const initialValues: InitialStateType = {
-    src: Array.isArray(category?.src) ? category.src : [category?.src || ''],
-    title: category?.title || '',
-    desc: category?.desc || '',
-    isActive: category?.isActive || false,
+    src: category?.src || '',
+    name: category?.name || '',
+    slug: category?.slug || '',
   };
 
-  const addSlideMutation = useAddData(action, ['slides']);
-  const updateSlideMutation = useUpdateData(action, ['slides']);
+  const addCategoryMutation = useAddData(action, ['categories']);
+  const updateCategoryMutation = useUpdateData(action, ['categories']);
 
   const handleSubmit = async (
     values: InitialStateType,
@@ -50,18 +53,14 @@ const SlideForm: React.FC<SliderFormProps> = ({ category, title, action }) => {
     try {
       setIsLoading(true);
 
-      const formData = new FormData();
-      Object.entries(values).forEach(([key, value]) => {
-        if (Array.isArray(value))
-          value.forEach(val => formData.append(key, val));
-        else formData.append(key, String(value));
-      });
-
-      if (isUpdating && category?._id) formData.append('id', category._id);
+      const payload = {
+        ...values,
+        slug: slugify(values.name, { lower: true, strict: true }),
+      };
 
       const result = isUpdating
-        ? await updateSlideMutation.mutateAsync(formData)
-        : await addSlideMutation.mutateAsync(formData);
+        ? await updateCategoryMutation.mutateAsync(payload)
+        : await addCategoryMutation.mutateAsync(payload);
 
       if (!result.success) throw new Error(result.message);
 
@@ -72,9 +71,8 @@ const SlideForm: React.FC<SliderFormProps> = ({ category, title, action }) => {
       resetForm();
       push('/admin/categories');
     } catch (error) {
-      if (error instanceof Error) toast.error(error.message);
-      else toast.error('Невідома помилка');
       console.error(error);
+      toast.error(error instanceof Error ? error.message : 'Невідома помилка');
     } finally {
       setIsLoading(false);
     }
@@ -113,45 +111,12 @@ const SlideForm: React.FC<SliderFormProps> = ({ category, title, action }) => {
                 <FormField
                   item={{
                     id: 'title',
-                    label: 'Заголовок слайду',
+                    label: 'Назва категорії',
                     type: 'text',
                     required: true,
                   }}
                   setFieldValue={setFieldValue}
                   errors={errors}
-                />
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <FormField
-                  item={{
-                    id: 'desc',
-                    label: 'Опис слайду',
-                    type: 'textarea',
-                    required: true,
-                    style: { height: '100px', overflowY: 'auto' },
-                  }}
-                  setFieldValue={setFieldValue}
-                  errors={errors}
-                />
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25 }}
-              >
-                <Switcher
-                  id="isActive"
-                  label="Публікується?"
-                  checked={values.isActive}
-                  onChange={(checked: boolean) =>
-                    setFieldValue('isActive', checked)
-                  }
                 />
               </motion.div>
 
@@ -189,4 +154,4 @@ const SlideForm: React.FC<SliderFormProps> = ({ category, title, action }) => {
   );
 };
 
-export default SlideForm;
+export default CategoryForm;

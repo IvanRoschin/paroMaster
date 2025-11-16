@@ -5,7 +5,7 @@ import { useInView } from 'react-intersection-observer';
 import { TailSpin } from 'react-loader-spinner';
 import { useContextSelector } from 'use-context-selector';
 
-import { getAllGoods } from '@/actions/goods';
+import { getAllGoodsAction } from '@/actions/goods';
 import { GoodsSection } from '@/app/(admin)/components';
 import { FiltersContext } from '@/context/FiltersContext';
 import { IGoodUI } from '@/types/IGood';
@@ -60,7 +60,7 @@ export default function InfiniteScroll({
     const handler = setTimeout(async () => {
       setIsFetchingMore(true);
 
-      const filteredGoods = await getAllGoods({
+      const filteredGoods = await getAllGoodsAction({
         ...searchParams,
         page: '1',
         low: minPrice?.toString(),
@@ -98,7 +98,7 @@ export default function InfiniteScroll({
     setIsFetchingMore(true);
 
     const nextPage = pagesLoaded + 1;
-    const newGoods = await getAllGoods({
+    const newGoods = await getAllGoodsAction({
       ...searchParams,
       page: nextPage.toString(),
       low: minPrice?.toString(),

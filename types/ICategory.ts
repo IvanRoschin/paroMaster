@@ -6,3 +6,9 @@ export interface ICategory {
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+export type GetAllCategoriesResponse = {
+  success: boolean;
+  categories: ICategory[];
+  count: number;
+};

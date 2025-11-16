@@ -41,7 +41,8 @@
       "@/lib/*": ["./app/lib/*"],
       "@/lib": ["./app/lib/index"],
       "@/admin/*": ["app/(admin)/*"],
-      "@/customer/*": ["app/(customer)/*"]
+      "@/customer/*": ["app/(customer)/*"],
+      "@/services/*": ["app/services/*"]
     },
     "skipLibCheck": true
   },
@@ -53,7 +54,8 @@
     "next-env.d.ts",
     ".next/types/**/*.ts",
     "app/helpers/server/jwt.ts.",
-    "tailwind.config.ts"
+    "tailwind.config.ts",
+    "app/services"
   ],
   "exclude": ["node_modules"]
 }

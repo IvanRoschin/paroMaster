@@ -1,5 +1,5 @@
-import { getAllSlides } from '@/actions/slider';
 import { Slides } from '@/app/(admin)/components';
+import { getAllSlides } from '@/app/actions/slides';
 import prefetchData from '@/hooks/usePrefetchData';
 import { ISearchParams } from '@/types/searchParams';
 import {

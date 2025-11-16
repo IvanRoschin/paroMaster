@@ -3,8 +3,8 @@
 import { useMemo, useState } from 'react';
 import { useContextSelector } from 'use-context-selector';
 
-import { getAllBrands } from '@/app/actions/brands';
-import { getAllCategories } from '@/app/actions/categories';
+import { getAllBrandsAction } from '@/app/actions/brands';
+import { getAllCategoriesAction } from '@/app/actions/categories';
 import { useFetchData } from '@/app/hooks';
 import {
   ButtonAddGood,
@@ -20,6 +20,8 @@ import {
 } from '@/components';
 import { FiltersContext } from '@/context/FiltersContext';
 import { IGoodUI } from '@/types';
+import { GetAllBrandsResponse } from '@/types/IBrand';
+import { GetAllCategoriesResponse } from '@/types/ICategory';
 import { UserRole } from '@/types/IUser';
 import { ISearchParams } from '@/types/searchParams';
 
@@ -40,14 +42,12 @@ export default function GoodsSection({
   searchParams,
   role,
 }: GoodsSectionProps) {
-  const { data: categoriesData, isLoading: catLoading } = useFetchData(
-    getAllCategories,
-    ['categories']
-  );
-  const { data: brandsData, isLoading: brandLoading } = useFetchData(
-    getAllBrands,
-    ['brands']
-  );
+  const { data: categoriesData, isLoading: catLoading } =
+    useFetchData<GetAllCategoriesResponse>(getAllCategoriesAction, [
+      'categories',
+    ]);
+  const { data: brandsData, isLoading: brandLoading } =
+    useFetchData<GetAllBrandsResponse>(getAllBrandsAction, ['brands']);
 
   const [view, setView] = useState<'table' | 'card' | 'list'>('card');
 
@@ -80,7 +80,7 @@ export default function GoodsSection({
     .map(b => ({
       value: String(b._id),
       label: b.name ?? 'Без назви',
-      slug: b.slug, // ✅ добавляем slug
+      slug: b.slug,
       src: b.src || '',
     }));
 

@@ -11,3 +11,9 @@ export interface IGetAllSlidersResponse {
   count: number;
   sliders: ISlider[];
 }
+
+export interface IGetAllSlides {
+  success: boolean;
+  slides: ISlider[];
+  count: number;
+}

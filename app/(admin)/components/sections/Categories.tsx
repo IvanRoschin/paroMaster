@@ -4,7 +4,10 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { FaPen, FaSortAlphaDown, FaSortAlphaUp, FaTrash } from 'react-icons/fa';
 
-import { deleteCategory, getAllCategories } from '@/actions/categories';
+import {
+  deleteCategoryAction,
+  getAllCategoriesAction,
+} from '@/actions/categories';
 import {
   Breadcrumbs,
   Button,
@@ -31,14 +34,14 @@ export default function Categories({
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   const { data, isLoading, isError, error } = useFetchData(
-    getAllCategories,
+    getAllCategoriesAction,
     ['categories'],
     searchParams
   );
 
   const deleteModal = useDeleteModal();
 
-  const { mutate: deleteCategoryById } = useDeleteData(deleteCategory, [
+  const { mutate: deleteCategoryById } = useDeleteData(deleteCategoryAction, [
     'categories',
     categoryToDelete?.id,
   ]);

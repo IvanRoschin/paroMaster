@@ -1,84 +1,52 @@
-import mongoose from 'mongoose';
+import mongoose, { HydratedDocument, Schema, Types } from 'mongoose';
 
-const { Schema } = mongoose;
+export interface IGoodDB {
+  _id: Types.ObjectId;
+  title: string;
+  description: string;
+  price: number;
+  discountPrice?: number;
+  src: string[];
+  category: Types.ObjectId;
+  brand: Types.ObjectId;
+  model: string;
+  sku: string;
+  isNew: boolean;
+  isAvailable: boolean;
+  isDailyDeal: boolean;
+  isCompatible: boolean;
+  compatibleGoods: Types.ObjectId[];
+  averageRating?: number;
+  ratingCount?: number;
+  dealExpiresAt?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
-const goodSchema = new Schema(
+export type GoodDocument = HydratedDocument<IGoodDB>;
+
+const GoodSchema = new Schema<IGoodDB>(
   {
-    category: {
-      type: Schema.Types.ObjectId,
-      ref: 'Category',
-      required: true,
-    },
-    title: {
-      type: String,
-      required: true,
-    },
-    description: {
-      type: String,
-      required: true,
-    },
-    src: {
-      type: [String],
-      required: true,
-    },
-    brand: {
-      type: Schema.Types.ObjectId,
-      ref: 'Brand',
-      required: true,
-    },
-    model: {
-      type: String,
-      required: true,
-    },
-    sku: {
-      type: String,
-      required: true,
-    },
-    price: {
-      type: Number,
-      required: true,
-    },
-    discountPrice: {
-      type: Number,
-    },
-    isNew: {
-      type: Boolean,
-      required: true,
-    },
-    isAvailable: {
-      type: Boolean,
-      required: true,
-    },
-
-    isDailyDeal: {
-      type: Boolean,
-      required: true,
-    },
-    dealExpiresAt: {
-      type: Date,
-    },
-    isCompatible: {
-      type: Boolean,
-      required: true,
-    },
-    compatibleGoods: {
-      type: [String],
-      default: [],
-    },
-    averageRating: {
-      type: Number,
-    },
-    ratingCount: {
-      type: Number,
-    },
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    price: { type: Number, required: true },
+    discountPrice: { type: Number, default: 0 },
+    src: { type: [String], default: [] },
+    category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
+    brand: { type: Schema.Types.ObjectId, ref: 'Brand', required: true },
+    model: { type: String, required: true },
+    sku: { type: String, required: true, unique: true },
+    isNew: { type: Boolean, default: false },
+    isAvailable: { type: Boolean, default: true },
+    isDailyDeal: { type: Boolean, default: false },
+    isCompatible: { type: Boolean, default: false },
+    compatibleGoods: [{ type: Schema.Types.ObjectId, ref: 'Good' }],
+    averageRating: { type: Number, default: 0 },
+    ratingCount: { type: Number, default: 0 },
+    dealExpiresAt: { type: String },
   },
-  {
-    versionKey: false,
-    timestamps: true,
-    suppressReservedKeysWarning: true,
-  }
+  { timestamps: true }
 );
 
-goodSchema.index({ '$**': 'text' });
-
-export default mongoose.models.Good || mongoose.model('Good', goodSchema);
+export default mongoose.models.Good ||
+  mongoose.model<IGoodDB>('Good', GoodSchema);

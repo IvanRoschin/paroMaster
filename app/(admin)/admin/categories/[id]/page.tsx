@@ -1,4 +1,7 @@
-import { getCategoryById, updateCategory } from '@/actions/categories';
+import {
+  getCategoryByIdAction,
+  updateCategoryAction,
+} from '@/actions/categories';
 import { CategoryForm } from '@/app/(admin)/components';
 
 export type paramsType = Promise<{ id: string }>;
@@ -8,13 +11,13 @@ export default async function SingleCategoryPage(props: {
 }) {
   const { id } = await props.params;
 
-  const category = await getCategoryById(id);
+  const category = await getCategoryByIdAction(id);
   return (
     <div className="mb-20">
       <CategoryForm
         title={'Редагувати категорію'}
         category={category}
-        action={updateCategory}
+        action={values => updateCategoryAction(category._id, values)}
       />
     </div>
   );

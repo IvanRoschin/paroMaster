@@ -1,7 +1,8 @@
-import { getAllBrands } from '@/actions/brands';
-import { getAllCategories } from '@/actions/categories';
-import { getMinMaxPrice } from '@/actions/goods';
+import { getAllBrandsAction } from '@/actions/brands';
+import { getAllCategoriesAction } from '@/actions/categories';
+import { getMinMaxPriceAction } from '@/actions/goods';
 import { ISearchParams } from '@/types/index';
+
 import PublicSidebar from './PublicSidebar';
 
 interface SidebarServerProps {
@@ -12,9 +13,9 @@ export default async function PublicSidebarServer({
   searchParams,
 }: SidebarServerProps) {
   const [pricesData, categoriesResponse, brandsResponse] = await Promise.all([
-    getMinMaxPrice(),
-    getAllCategories(searchParams ?? {}),
-    getAllBrands(searchParams ?? {}),
+    getMinMaxPriceAction(),
+    getAllCategoriesAction(searchParams ?? {}),
+    getAllBrandsAction(searchParams ?? {}),
   ]);
 
   return (

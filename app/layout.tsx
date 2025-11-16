@@ -18,8 +18,8 @@ import CustomerLayout from '@/components/layouts/CustomerLayout';
 import PublicLayout from '@/components/layouts/PublicLayout';
 import { SessionUser, UserRole } from '@/types/IUser';
 import PublicSidebarServer from './(public)/components/PublicSidebarSidebarServer';
-import { getAllBrands } from './actions/brands';
-import { getAllCategories } from './actions/categories';
+import { getAllBrandsAction } from './actions/brands';
+import { getAllCategoriesAction } from './actions/categories';
 import FooterServer from './components/sections/FooterServer';
 import { authOptions } from './config/authOptions';
 import { routes } from './helpers/routes';
@@ -70,11 +70,11 @@ export default async function RootLayout({
   await Promise.all([
     queryClient.prefetchQuery({
       queryKey: ['categories'],
-      queryFn: () => getAllCategories(),
+      queryFn: () => getAllCategoriesAction(),
     }),
     queryClient.prefetchQuery({
       queryKey: ['brands'],
-      queryFn: () => getAllBrands(),
+      queryFn: () => getAllBrandsAction(),
     }),
   ]);
 

@@ -57,11 +57,7 @@ export default async function CategoryPage({
   const category = await getCategoryBySlug(slug);
   if (!category) {
     return (
-      <EmptyState
-        showReset
-        title="Категорію не знайдено"
-        actionHref="/catalog"
-      />
+      <EmptyState showReset title="Категорію не знайдено" goHomeAfterReset />
     );
   }
 

@@ -3,8 +3,8 @@ import Image from 'next/image';
 import { useCallback, useEffect, useState } from 'react';
 import { IoIosArrowDropleft, IoIosArrowDropright } from 'react-icons/io';
 
-import { IGetAllSlides } from '@/actions/slider';
 import { IGetAllTestimonials } from '@/actions/testimonials';
+import { IGetAllSlides } from '@/app/actions/slides';
 import { EmptyState, Loader } from '@/components/common';
 import { Testimonial } from '@/components/index';
 

@@ -10,6 +10,7 @@ export { default as useDeleteModal } from '@/hooks/useDeleteModal';
 export { default as useFetchData } from '@/hooks/useFetchData';
 export { default as useFetchDataById } from '@/hooks/useFetchDataById';
 export { default as useMediaQuery } from '@/hooks/useMediaQuery';
+export { default as useNotificationModal } from '@/hooks/useNotificationModal';
 export { default as usePrefetchData } from '@/hooks/usePrefetchData';
 export { default as useTestimonialModal } from '@/hooks/useTestimonialsModal';
 export { default as useUpdateData } from '@/hooks/useUpdateData';

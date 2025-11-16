@@ -1,4 +1,4 @@
-import { IOrderedGoodSnapshot } from '@/app/actions/sendNodeMailer';
+import { IOrderedGoodSnapshot } from '@/app/services/sendNodeMailer';
 import { IOrder } from '@/types/index';
 
 export function generateCustomerEmailContent(

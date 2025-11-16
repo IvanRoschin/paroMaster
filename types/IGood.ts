@@ -2,6 +2,12 @@ import { IBrand } from './IBrand';
 import { ICategory } from './ICategory';
 import { ITestimonial } from './ITestimonial';
 
+export interface IGetAllGoods {
+  success: boolean;
+  goods: IGoodUI[];
+  count: number;
+}
+
 export interface IGoodBase {
   _id: string;
   src: string[];

@@ -11,7 +11,7 @@ import {
 } from 'react';
 import { toast } from 'sonner';
 
-import { getGoodById } from '@/actions/goods';
+import { getGoodByIdAction } from '@/actions/goods';
 import { storageKeys } from '@/helpers/index';
 import { ICartItem } from '@/types/index';
 
@@ -113,7 +113,7 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
 
   // Добавление товара с оптимистичным апдейтом
   const increaseCartQuantity = useCallback((id: string) => {
-    getGoodById(id)
+    getGoodByIdAction(id)
       .then(newGood => {
         if (!newGood) {
           toast.error('Товар не знайдено');

@@ -9,6 +9,7 @@ export { default as InfiniteScroll } from '@/components/common/InfiniteScroll';
 export { ListView } from '@/components/common/ListView';
 export { default as Loader } from '@/components/common/Loader';
 export { default as Logo } from '@/components/common/Logo';
+export { default as ModalNotification } from '@/components/common/ModalNotification';
 export { default as NextImage } from '@/components/common/NextImage';
 export { default as Pagination } from '@/components/common/Pagination';
 export { default as Search } from '@/components/common/Search';

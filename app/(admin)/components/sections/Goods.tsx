@@ -5,13 +5,14 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { FaPen, FaPlus, FaTrash } from 'react-icons/fa';
 
-import { deleteGood, getAllGoods, IGetAllGoods } from '@/actions/goods';
+import { deleteGoodAction, getAllGoodsAction } from '@/actions/goods';
 import { EmptyState } from '@/components/common';
 import DeleteConfirmation from '@/components/common/DeleteConfirmation';
 import { Button, Modal } from '@/components/ui';
 import useDeleteData from '@/hooks/useDeleteData';
 import useDeleteModal from '@/hooks/useDeleteModal';
 import useFetchData from '@/hooks/useFetchData';
+import { IGetAllGoods } from '@/types/IGood';
 
 import {
   Input,
@@ -50,12 +51,12 @@ export default function Goods({
   } | null>(null);
 
   const { data, isLoading, isError } = useFetchData<IGetAllGoods>(
-    getAllGoods,
+    getAllGoodsAction,
     ['goods'],
     searchParams
   );
 
-  const { mutate: deleteGoodById } = useDeleteData(deleteGood, [
+  const { mutate: deleteGoodById } = useDeleteData(deleteGoodAction, [
     'goods',
     goodToDelete?.id,
   ]);

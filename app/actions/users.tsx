@@ -2,6 +2,7 @@
 
 import mongoose from 'mongoose';
 
+import { createTokenAction as createTokenForUser } from '@/app/actions/token';
 import Customer from '@/models/Customer';
 import Order from '@/models/Order';
 import Token, { TokenType } from '@/models/Token';
@@ -10,8 +11,12 @@ import { IUser } from '@/types/index';
 import { UserRole } from '@/types/IUser';
 import { connectToDB } from '@/utils/dbConnect';
 
+import toPlain from '../helpers/server/toPlain';
 import { generateRandomPassword, serializeDoc } from '../lib';
-import { sendVerificationLetter } from './sendNodeMailer';
+import {
+  sendEmailChangeLetter,
+  sendVerificationLetter,
+} from '../services/sendNodeMailer';
 
 export async function addUser(values: Partial<IUser>): Promise<{
   success: boolean;
@@ -105,7 +110,7 @@ export async function getUserById(id: string): Promise<IUser | null> {
   try {
     await connectToDB();
     const user = await User.findById(id);
-    return user ? serializeDoc<IUser>(user) : null;
+    return user ? toPlain<IUser>(user) : null;
   } catch (error) {
     console.error('Error fetching user by ID:', error);
     throw new Error(
@@ -115,51 +120,78 @@ export async function getUserById(id: string): Promise<IUser | null> {
   }
 }
 
-export async function updateUser(
-  values: Partial<IUser> & { _id: string }
-): Promise<{
-  success: boolean;
-  message: string;
-  user?: IUser;
-}> {
-  if (!values._id) throw new Error('No ID provided');
-
+export async function updateUserFieldAction(
+  userId: string,
+  field: 'name' | 'surname' | 'email' | 'phone',
+  value: string
+) {
   try {
+    if (!userId) {
+      return { success: false, message: 'Користувач не авторизований' };
+    }
+
     await connectToDB();
 
-    // Убираем _id из обновляемых полей
-    const updateFields = Object.fromEntries(
-      Object.entries(values).filter(
-        ([key, value]) => key !== '_id' && value !== undefined
-      )
-    );
+    const user = await User.findById(userId);
+    if (!user) return { success: false, message: 'Користувача не знайдено' };
 
-    if (Object.keys(updateFields).length === 0) {
-      return { success: false, message: 'No valid fields to update.' };
+    // Проверяем уникальность email
+    if (field === 'email') {
+      const existing = await User.findOne({ email: value });
+      if (existing && existing._id.toString() !== userId) {
+        return {
+          success: false,
+          message: 'Цей email вже використовується іншим користувачем',
+        };
+      }
     }
 
-    const updatedUser = await User.findByIdAndUpdate(
-      values._id,
-      { $set: updateFields },
-      { new: true }
-    );
+    user[field] = value;
+    await user.save();
 
-    if (!updatedUser) {
-      return { success: false, message: 'User not found.' };
-    }
+    // Возвращаем актуальные данные пользователя
+    const updatedUser: IUser = toPlain(user);
 
     return {
       success: true,
-      message: 'User updated successfully',
-      user: serializeDoc<IUser>(updatedUser),
+      message: 'Дані успішно оновлено',
+      user: updatedUser,
     };
-  } catch (error) {
-    console.error('Error updating user:', error);
-    throw new Error(
-      'Failed to update user: ' +
-        (error instanceof Error ? error.message : 'Unknown error')
-    );
+  } catch (e: any) {
+    console.error('updateUserFieldAction:', e);
+    return { success: false, message: e.message || 'Помилка сервера' };
   }
+}
+
+export async function requestEmailChange(userId: string, newEmail: string) {
+  await connectToDB();
+
+  const user = await User.findById(userId);
+  if (!user) return { success: false, message: 'Користувача не знайдено' };
+
+  const existing = await User.findOne({ email: newEmail });
+  if (existing)
+    return { success: false, message: 'Цей email вже використовується' };
+
+  // revoke previous email change tokens for this user
+  await Token.updateMany(
+    { userId, type: TokenType.EMAIL_CHANGE },
+    { used: true }
+  );
+
+  const tokenDoc = await createTokenForUser({
+    userId,
+    type: TokenType.EMAIL_CHANGE,
+    email: newEmail,
+  });
+
+  await sendEmailChangeLetter({ newEmail, token: tokenDoc.token });
+
+  return {
+    success: true,
+    message:
+      'На новий email відправлено лист з підтвердженням. Перевірте пошту.',
+  };
 }
 
 export async function deleteUser(

@@ -4,7 +4,7 @@ import {
   QueryClient,
 } from '@tanstack/react-query';
 
-import { getAllGoods } from '@/actions/goods';
+import { getAllGoodsAction } from '@/actions/goods';
 import { Breadcrumbs, GoodsSection, InfiniteScroll } from '@/components';
 import prefetchData from '@/hooks/usePrefetchData';
 import { IGoodUI, ISearchParams } from '@/types/index';
@@ -29,7 +29,7 @@ export default async function CatalogPage({
 
   const limit = role === UserRole.ADMIN ? 4 : 8;
 
-  await prefetchData(queryClient, getAllGoods, goodsKey, {
+  await prefetchData(queryClient, getAllGoodsAction, goodsKey, {
     ...params,
     limit,
   });

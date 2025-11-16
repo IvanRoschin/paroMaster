@@ -1,12 +1,13 @@
-import { getAllCategories } from '@/actions/categories';
-import Categories from '@/app/(admin)/components/sections/Categories';
-import prefetchData from '@/hooks/usePrefetchData';
-import { ISearchParams } from '@/types/index';
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
+
+import { ISearchParams } from '@/types/index';
+import prefetchData from '@/hooks/usePrefetchData';
+import { getAllCategoriesAction } from '@/actions/categories';
+import Categories from '@/app/(admin)/components/sections/Categories';
 
 export default async function CategoriesPage({
   searchParams,
@@ -17,7 +18,12 @@ export default async function CategoriesPage({
 
   const queryClient = new QueryClient();
 
-  await prefetchData(queryClient, getAllCategories, ['categories'], params);
+  await prefetchData(
+    queryClient,
+    getAllCategoriesAction,
+    ['categories'],
+    params
+  );
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
