@@ -1,180 +1,120 @@
-@import url(https://fonts.googleapis.com/css2?family=Poppins&display=swap>);
-
-/* * {
-	margin: 0;
-	padding: 0;
-	box-sizing: border-box;
-}
-
-body {
-	height: 100vh;
-	display: grid;
-	background-color: #0b0f19;
-	place-items: center;
-	font-family: 'Poppins', sans-serif;
-} */
-
-/* .slider {
-	width: 100%;
-	height: 2px;
-	background-color: #cdd9ed;
-	margin-top: 60px;
-}
-
-.slider .thumb {
-	width: 23px;
-	height: 23px;
-	cursor: grab;
-	background-color: #fff;
-	border-radius: 50%;
-	border: 2px solid black;
-	top: -10px;
-}
-
-.track-1 {
-	background-color: #ea580c;
-} */
-
 .double-slider-box {
   background-color: #fff;
-  border-radius: 10px;
-  max-width: 250px;
+  border-radius: 12px;
+  padding: 16px;
   margin-bottom: 16px;
-  margin-right: 16px;
+  width: 100%;
 }
 
 .range-slider {
   position: relative;
   width: 100%;
-  height: 5px;
-  margin: 50px 0;
-  background-color: #8a8a8a;
+  height: 6px;
+  margin: 40px 0 50px;
+  background: #e4e4e4;
+  border-radius: 4px;
 }
 
 .slider-track {
-  height: 100%;
   position: absolute;
-  background-color: #fe696a;
-  margin-right: 30px;
+  height: 100%;
+  background-color: #ff5722;
+  border-radius: 4px;
 }
 
-.range-slider input {
+.range-slider input[type='range'] {
   position: absolute;
   width: 100%;
-  background: none;
-  pointer-events: none;
+  height: 6px;
   top: 50%;
   transform: translateY(-50%);
+  pointer-events: none;
   appearance: none;
+  background: none;
 }
 
+/* --- Бегунок --- */
 input[type='range']::-webkit-slider-thumb {
-  height: 25px;
-  width: 25px;
-  border-radius: 50%;
-  border: 3px solid #fff;
-  background: black;
   pointer-events: auto;
   appearance: none;
+  width: 22px;
+  height: 22px;
+  background: #fff;
+  border: 3px solid #ff5722;
+  border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 0.125rem 0.5635rem -0.125rem rgba(0, 0, 0, 0.25);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 input[type='range']::-moz-range-thumb {
-  height: 25px;
-  width: 25px;
-  border-radius: 50%;
-  border: 3px solid #fff;
-  background: black;
   pointer-events: auto;
-  -moz-appearance: none;
+  width: 22px;
+  height: 22px;
+  background: #fff;
+  border: 3px solid #ff5722;
+  border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 0.125rem 0.5635rem -0.125rem rgba(0, 0, 0, 0.25);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
+/* --- Тултипы значений --- */
 .tooltip {
-  padding: 4px 5px;
-  border: 0;
-  background: #373f50;
-  color: #fff;
-  font-size: 0.75rem;
-  line-height: 1.2;
-  border-radius: 0.25rem;
-  bottom: 120%;
-  display: block;
   position: absolute;
-  text-align: center;
+  bottom: -32px;
+  padding: 3px 8px;
+  background: #373f50;
+  color: white;
+  font-size: 12px;
+  border-radius: 4px;
   white-space: nowrap;
+  transform: translateX(-50%);
+  z-index: 5;
 }
 
+/* Позиция будет двигаться JS-ом через left/right */
 .min-tooltip {
-  left: 13%;
-  transform: translateX(-50%) translateY(-100%);
-  z-index: 5;
+  left: 10%;
 }
 
 .max-tooltip {
-  right: 13%;
-  transform: translateX(50%) translateY(-100%);
-  z-index: 5;
+  left: 100%;
+  transform: translateX(-100%);
 }
 
+/* --- Поля для ручного ввода — если будут --- */
 .input-box {
   display: flex;
-}
-
-.min-box,
-.max-box {
-  width: 50%;
-}
-
-.min-box {
-  padding-right: 0.5rem;
-  margin-right: 0.5rem;
+  gap: 10px;
+  margin-top: 10px;
 }
 
 .input-wrap {
   position: relative;
   display: flex;
-  flex-wrap: wrap;
-  align-items: stretch;
   width: 100%;
 }
 
 .input-addon {
-  display: flex;
-  align-items: center;
-  padding: 0.2rem 0.2rem;
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 1.5;
-  color: #4b566b;
-  text-align: center;
-  white-space: nowrap;
-  background-color: #fff;
+  padding: 4px 6px;
+  background: #fff;
   border: 1px solid #d4d7e5;
-  border-radius: 0.25rem;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
+  color: #4b566b;
+  border-right: 0;
+  border-radius: 6px 0 0 6px;
+  font-size: 12px;
 }
 
 .input-field {
-  margin-left: -1px;
-  padding: 0.2rem 0.5rem;
-  font-size: 0.8125rem;
-  border-radius: 0.25rem;
-  position: relative;
-  flex: 1 1 auto;
-  width: 50px !important;
-  min-width: 0;
-  color: #4b566b;
-  background-color: #fff;
-  background-clip: padding-box;
+  flex: 1;
+  padding: 4px 6px;
   border: 1px solid #d4d7e5;
-  border-top-left-radius: 0;
-  border-bottom-right-radius: 0;
+  border-left: 0;
+  border-radius: 0 6px 6px 0;
+  font-size: 12px;
+  color: #4b566b;
 }
 
-.input-filed:focus {
+.input-field:focus {
   outline: none;
+  border-color: #ff5722;
 }

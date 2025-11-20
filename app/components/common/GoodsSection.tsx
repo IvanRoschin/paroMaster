@@ -102,8 +102,8 @@ export default function GoodsSection({
 
         const matchCondition =
           filters.condition === 'all' ||
-          (filters.condition === 'new' && g.isNew) ||
-          (filters.condition === 'used' && !g.isNew);
+          (filters.condition === 'new' && !g.isUsed) ||
+          (filters.condition === 'used' && g.isUsed);
 
         const matchSearch =
           !filters.search ||
@@ -126,8 +126,6 @@ export default function GoodsSection({
   }, [goods, filters, selectedBrands]);
 
   if (catLoading || brandLoading) return <Loader />;
-
-  console.log('goods', goods);
 
   return (
     <div className="space-y-6">

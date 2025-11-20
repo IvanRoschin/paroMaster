@@ -30,7 +30,7 @@ export const CardView = ({
     useGoodDelete(refetch, ['goods', searchParams]);
 
   return (
-    <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-fr">
       {goods.map((good, i) => (
         <div key={good._id || i}>
           {role === UserRole.ADMIN ? (

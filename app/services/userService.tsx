@@ -16,7 +16,7 @@ import {
   sendEmailChangeLetter,
   sendVerificationLetter,
 } from './sendNodeMailer';
-import { createToken as createTokenForUser } from './tokenService';
+import { createTokenService as createTokenForUser } from './tokenService';
 
 export async function addUserService(values: Partial<IUser>): Promise<{
   success: boolean;

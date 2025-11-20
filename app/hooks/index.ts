@@ -7,6 +7,7 @@ export { useCitySelection } from '@/hooks/useCitySelection';
 export { default as useDeleteData } from '@/hooks/useDeleteData';
 export { useGoodDelete } from '@/hooks/useDeleteGood';
 export { default as useDeleteModal } from '@/hooks/useDeleteModal';
+export { default as useFavoriteModal } from '@/hooks/useFavoriteModal';
 export { default as useFetchData } from '@/hooks/useFetchData';
 export { default as useFetchDataById } from '@/hooks/useFetchDataById';
 export { default as useMediaQuery } from '@/hooks/useMediaQuery';

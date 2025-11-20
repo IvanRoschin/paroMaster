@@ -16,6 +16,9 @@ import {
 } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
+import { CompareProvider } from '../context/CompareContext';
+import { FavoritesProvider } from '../context/FavoritesContext';
+
 interface ProvidersProps {
   children: React.ReactNode;
   dehydratedState?: DehydratedState;
@@ -27,18 +30,22 @@ export function Providers({ children, dehydratedState }: ProvidersProps) {
   return (
     <SessionProvider>
       <FiltersProvider>
-        <ShoppingCartProvider>
-          <Suspense fallback={<Loader />}>
-            <PreloadedResourses />
-            <QueryClientProvider client={queryClient}>
-              <HydrationBoundary state={dehydratedState}>
-                {children}
-              </HydrationBoundary>
-              <ReactQueryDevtools initialIsOpen={false} />
-            </QueryClientProvider>
-            <Toaster position="top-right" richColors />
-          </Suspense>
-        </ShoppingCartProvider>
+        <CompareProvider>
+          <FavoritesProvider>
+            <ShoppingCartProvider>
+              <Suspense fallback={<Loader />}>
+                <PreloadedResourses />
+                <QueryClientProvider client={queryClient}>
+                  <HydrationBoundary state={dehydratedState}>
+                    {children}
+                  </HydrationBoundary>
+                  <ReactQueryDevtools initialIsOpen={false} />
+                </QueryClientProvider>
+                <Toaster position="top-right" richColors />
+              </Suspense>
+            </ShoppingCartProvider>
+          </FavoritesProvider>
+        </CompareProvider>
       </FiltersProvider>
     </SessionProvider>
   );

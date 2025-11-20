@@ -6,8 +6,8 @@ import {
 import { getServerSession } from 'next-auth';
 import { notFound } from 'next/navigation';
 
-import { getGoodById } from '@/actions/goods';
-import { getGoodTestimonials } from '@/actions/testimonials';
+import { getGoodByIdAction } from '@/actions/goods';
+import { getGoodTestimonialsAction } from '@/actions/testimonials';
 import { authOptions } from '@/app/config/authOptions';
 import prefetchData from '@/hooks/usePrefetchData';
 import { UserRole } from '@/types/IUser';
@@ -21,7 +21,7 @@ export type paramsType = Promise<{ id: string }>;
 export async function generateMetadata(props: { params: paramsType }) {
   const { id } = await props.params;
 
-  const good = await getGoodById(id);
+  const good = await getGoodByIdAction(id);
 
   if (!good) {
     return {
@@ -53,7 +53,7 @@ export async function generateMetadata(props: { params: paramsType }) {
 export default async function GoodPage(props: { params: paramsType }) {
   const { id } = await props.params;
 
-  const good = await getGoodById(id);
+  const good = await getGoodByIdAction(id);
   if (!good) notFound();
 
   const session = await getServerSession(authOptions);
@@ -64,7 +64,7 @@ export default async function GoodPage(props: { params: paramsType }) {
   const queryClient = new QueryClient();
   await prefetchData(
     queryClient,
-    getGoodTestimonials,
+    getGoodTestimonialsAction,
     ['testimonials', good._id],
     good._id
   );

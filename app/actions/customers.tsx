@@ -8,6 +8,8 @@ import {
   getAllCustomersService,
   getCustomerByIdService,
   getCustomerByUserService,
+  toggleFavoriteService,
+  updateCustomerFieldService,
   updateCustomerService,
 } from '@/app/services/customerService';
 import { ICustomer, ISearchParams } from '@/types';
@@ -43,6 +45,19 @@ export async function updateCustomerAction(
   const result = await updateCustomerService(id, values);
   revalidatePath('/admin/customers');
   return result;
+}
+
+export async function updateCustomerFieldAction(
+  customerId: string,
+  field: 'city' | 'warehouse' | 'payment',
+  value: string
+) {
+  const result = await updateCustomerFieldService(customerId, field, value);
+  return result;
+}
+
+export async function toggleFavoriteAction(goodId: string) {
+  return toggleFavoriteService(goodId);
 }
 
 // 'use server';

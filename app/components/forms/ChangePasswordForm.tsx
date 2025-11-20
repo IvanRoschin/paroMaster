@@ -18,9 +18,11 @@ interface InitialStateType {
 }
 
 const ChangePasswordForm = ({ userId }: { userId?: string }) => {
-  const [showPassword1, setShowPassword1] = useState(false);
-  const [showPassword2, setShowPassword2] = useState(false);
-  const [showPassword3, setShowPassword3] = useState(false);
+  const [showPassword, setShowPassword] = useState({
+    old: false,
+    new: false,
+    confirm: false,
+  });
 
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -33,12 +35,29 @@ const ChangePasswordForm = ({ userId }: { userId?: string }) => {
     confirmNewPassword: '',
   };
 
+  // --- Early return ---
   if (!userId) {
-    setMessage('Користувач не авторизований');
-    notificationModal.onOpen();
-    setIsLoading(false);
-    return;
+    return (
+      <>
+        <Modal
+          body={
+            <ModalNotification
+              title="Повідомлення"
+              message="Користувач не авторизований"
+              onConfirm={notificationModal.onClose}
+            />
+          }
+          isOpen={true}
+          onClose={notificationModal.onClose}
+        />
+      </>
+    );
   }
+
+  // --- Handlers ---
+  const togglePassword = (key: 'old' | 'new' | 'confirm') => {
+    setShowPassword(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
   const handleSubmit = async (
     values: InitialStateType,
@@ -48,9 +67,9 @@ const ChangePasswordForm = ({ userId }: { userId?: string }) => {
 
     const res = await changePasswordAction(
       userId,
-      values.oldPassword, // oldPassword
-      values.newPassword, // newPassword
-      values.confirmNewPassword // confirmNewPassword
+      values.oldPassword,
+      values.newPassword,
+      values.confirmNewPassword
     );
 
     setMessage(res.message);
@@ -59,6 +78,34 @@ const ChangePasswordForm = ({ userId }: { userId?: string }) => {
     setIsLoading(false);
     resetForm();
   };
+
+  // --- UI ---
+  const renderPasswordField = (
+    label: string,
+    id: keyof InitialStateType,
+    showKey: 'old' | 'new' | 'confirm'
+  ) => (
+    <div className="relative">
+      <FormField
+        item={{
+          label,
+          type: showPassword[showKey] ? 'text' : 'password',
+          id,
+          required: true,
+        }}
+        errors={{}}
+      />
+
+      <button
+        type="button"
+        onClick={() => togglePassword(showKey)}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+        tabIndex={-1}
+      >
+        {showPassword[showKey] ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+      </button>
+    </div>
+  );
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4">
@@ -76,100 +123,30 @@ const ChangePasswordForm = ({ userId }: { userId?: string }) => {
             initialValues={initialValues}
             onSubmit={handleSubmit}
             validationSchema={changePasswordFormSchema}
-            enableReinitialize
           >
-            {({ errors }) => (
-              <Form className="flex flex-col gap-5">
-                {/* Old password */}
-                <div className="relative">
-                  <FormField
-                    item={{
-                      label: 'Старий пароль',
-                      type: showPassword1 ? 'text' : 'password',
-                      id: 'oldPassword',
-                      required: true,
-                    }}
-                    errors={errors}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword1(prev => !prev)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                    tabIndex={-1}
-                  >
-                    {showPassword1 ? (
-                      <FiEyeOff size={20} />
-                    ) : (
-                      <FiEye size={20} />
-                    )}
-                  </button>
-                </div>
+            <Form className="flex flex-col gap-5">
+              {renderPasswordField('Старий пароль', 'oldPassword', 'old')}
+              {renderPasswordField('Новий пароль', 'newPassword', 'new')}
+              {renderPasswordField(
+                'Повторіть пароль',
+                'confirmNewPassword',
+                'confirm'
+              )}
 
-                {/* New password */}
-                <div className="relative">
-                  <FormField
-                    item={{
-                      label: 'Новий пароль',
-                      type: showPassword1 ? 'text' : 'password',
-                      id: 'newPassword',
-                      required: true,
-                    }}
-                    errors={errors}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword2(prev => !prev)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                    tabIndex={-1}
-                  >
-                    {showPassword2 ? (
-                      <FiEyeOff size={20} />
-                    ) : (
-                      <FiEye size={20} />
-                    )}
-                  </button>
-                </div>
-
-                {/* Confirm password */}
-                <div className="relative">
-                  <FormField
-                    item={{
-                      label: 'Повторіть пароль',
-                      type: showPassword2 ? 'text' : 'password',
-                      id: 'confirmNewPassword',
-                      required: true,
-                    }}
-                    errors={errors}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword3(prev => !prev)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                    tabIndex={-1}
-                  >
-                    {showPassword3 ? (
-                      <FiEyeOff size={20} />
-                    ) : (
-                      <FiEye size={20} />
-                    )}
-                  </button>
-                </div>
-
-                <motion.div
-                  whileHover={{
-                    scale: 1.02,
-                    boxShadow: '0px 0px 12px rgba(59,130,246,0.5)',
-                  }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  <Button
-                    type="submit"
-                    label={isLoading ? 'Завантаження...' : 'Змінити пароль'}
-                    disabled={isLoading}
-                  />
-                </motion.div>
-              </Form>
-            )}
+              <motion.div
+                whileHover={{
+                  scale: 1.02,
+                  boxShadow: '0px 0px 12px rgba(59,130,246,0.5)',
+                }}
+                whileTap={{ scale: 0.97 }}
+              >
+                <Button
+                  type="submit"
+                  label={isLoading ? 'Завантаження...' : 'Змінити пароль'}
+                  disabled={isLoading}
+                />
+              </motion.div>
+            </Form>
           </Formik>
         </motion.div>
       </div>

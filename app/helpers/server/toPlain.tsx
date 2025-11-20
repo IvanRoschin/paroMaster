@@ -1,50 +1,49 @@
-// utils/toPlain.ts
-export default function toPlain<T = any>(doc: any): T {
-  if (!doc) return doc;
+import mongoose from 'mongoose';
 
-  const obj: any = doc.toObject ? doc.toObject({ getters: true }) : { ...doc };
+const toPlain = <T = any,>(doc: any): T => {
+  if (doc == null) return doc as any; // null или undefined
 
-  if (obj._id) obj._id = obj._id.toString();
-
-  for (const key in obj) {
-    const val = obj[key];
-    if (Array.isArray(val)) {
-      obj[key] = val.map(v => {
-        if (v && typeof v === 'object' && '_id' in v) {
-          return { ...v, _id: v._id.toString() };
-        }
-        return v;
-      });
-    } else if (val && typeof val === 'object' && '_id' in val) {
-      obj[key] = { ...val, _id: val._id.toString() };
-    }
+  // Массив — обрабатываем сразу
+  if (Array.isArray(doc)) {
+    return doc.map(toPlain) as any;
   }
 
-  return obj;
-}
+  // Mongoose-документ — сначала превращаем в объект
+  if (typeof (doc as any).toObject === 'function') {
+    doc = (doc as any).toObject({
+      versionKey: false,
+      flattenMaps: true,
+      // flattenObjectIds: true, // можно оставить, но мы и так вручную обработаем
+    });
+  }
 
-// export default function toPlain<T>(obj: any): T {
-//   if (!obj) return obj;
-//   if (Array.isArray(obj)) return obj.map(toPlain) as any;
+  // Теперь doc — точно объект (или примитив)
+  if (doc && typeof doc === 'object') {
+    const plainObj: any = {};
 
-//   if (typeof obj !== 'object') return obj;
+    for (const key in doc) {
+      if (!Object.prototype.hasOwnProperty.call(doc, key)) continue;
 
-//   const clone: any = {};
-//   for (const key in obj) {
-//     if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;
-//     const val = obj[key];
+      let value = doc[key];
 
-//     if (val?._bsontype === 'ObjectID') {
-//       clone[key] = val.toString(); // ObjectId → string
-//     } else if (val instanceof Date) {
-//       clone[key] = val.toISOString();
-//     } else if (Buffer.isBuffer(val)) {
-//       clone[key] = val.toString('base64'); // Buffer → base64 string
-//     } else if (val && typeof val === 'object') {
-//       clone[key] = toPlain(val); // рекурсивно
-//     } else {
-//       clone[key] = val;
-//     }
-//   }
-//   return clone as T;
-// }
+      // === КЛЮЧЕВОЙ БЛОК: ловим ВСЕ возможные варианты ObjectId ===
+      if (
+        value instanceof mongoose.Types.ObjectId ||
+        (value && (value as any)._bsontype === 'ObjectID') ||
+        (value && Buffer.isBuffer((value as any).buffer || (value as any).id)) // редкий кейс
+      ) {
+        value = value.toString();
+      }
+      // =================================================
+
+      plainObj[key] = toPlain(value); // рекурсия
+    }
+
+    return plainObj as T;
+  }
+
+  // Примитивы (строки, числа, boolean и т.д.)
+  return doc as T;
+};
+
+export default toPlain;

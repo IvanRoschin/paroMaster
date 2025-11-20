@@ -6,7 +6,7 @@ import { getSession, signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { FcGoogle } from 'react-icons/fc';
-import { FiEye, FiEyeOff } from 'react-icons/fi'; // 👈 добавляем иконки глазика
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { toast } from 'sonner';
 
 import { routes } from '@/app/helpers/routes';
@@ -22,7 +22,7 @@ interface InitialStateType {
 
 const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // 👈 состояние для показа пароля
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const initialValues: InitialStateType = {

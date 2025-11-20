@@ -1,12 +1,13 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { getAllCategories } from '@/app/actions/categories';
+import { getAllCategoriesAction } from '@/app/actions/categories';
+import { ICategory } from '@/types/ICategory';
 
 // app/(public)/category/page.tsx
 
 export default async function CategoriesPage() {
-  const { categories } = await getAllCategories({});
+  const { categories } = await getAllCategoriesAction({});
 
   if (!categories || categories.length === 0) {
     return (
@@ -21,7 +22,7 @@ export default async function CategoriesPage() {
       <h1 className="subtitle text-center mb-8">Категорії товарів</h1>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-        {categories.map(c => (
+        {categories.map((c: ICategory) => (
           <Link
             key={c._id}
             href={`/category/${c.slug}`}

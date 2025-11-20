@@ -34,15 +34,16 @@
       "@/types*": ["./types/index"],
       "@/models/*": ["./models/*"],
       "@/helpers/*": ["./app/helpers/*"],
-      "@/helpers/": ["./app/helpers/index*"],
+      "@/helpers/": ["./app/helpers/index"],
       "@/hooks/*": ["./app/hooks/*"],
+      "@/services/*": ["./app/services/*"],
+      "@/services/": ["./app/services/index"],
       "@/hooks/": ["./app/hooks/index"],
       "@/config/*": ["./app/config/*"],
       "@/lib/*": ["./app/lib/*"],
       "@/lib": ["./app/lib/index"],
       "@/admin/*": ["app/(admin)/*"],
-      "@/customer/*": ["app/(customer)/*"],
-      "@/services/*": ["app/services/*"]
+      "@/customer/*": ["app/(customer)/*"]
     },
     "skipLibCheck": true
   },

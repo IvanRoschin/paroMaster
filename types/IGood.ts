@@ -16,7 +16,7 @@ export interface IGoodBase {
   title: string;
   description: string;
   price: number;
-  isNew: boolean;
+  isUsed: boolean;
   isAvailable: boolean;
   isCompatible: boolean;
   quantity?: number;
@@ -41,6 +41,7 @@ export interface IGoodUI extends IGoodBase {
   discountPrice?: number;
   compatibleGoods?: (string | IGoodUI)[];
   testimonials?: ITestimonial[];
+  isFavorite?: boolean;
 }
 
 export interface IBaseGoodResponse {

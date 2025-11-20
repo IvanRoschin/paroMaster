@@ -17,8 +17,6 @@ export const CartClient = ({
 }) => {
   const { cart } = useShoppingCart();
 
-  console.log('cart:', cart);
-
   const totalPrice = useMemo(
     () =>
       cart.reduce(

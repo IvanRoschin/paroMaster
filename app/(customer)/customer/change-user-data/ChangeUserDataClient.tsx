@@ -3,7 +3,9 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 
-import { Loader } from '@/app/components';
+import { Loader, ModalNotification } from '@/app/components';
+import { useNotificationModal } from '@/app/hooks';
+import { Modal } from '@/components/ui';
 import { IUser } from '@/types/IUser';
 
 import { EditableField } from './EditableField';
@@ -14,6 +16,10 @@ export interface ChangeUserDataClient {
 
 const ChangeUserDataClient: React.FC<ChangeUserDataClient> = ({ user }) => {
   const [profile, setProfile] = useState(user);
+  const [message, setMessage] = useState('');
+
+  const notificationModal = useNotificationModal();
+
   if (!profile || !profile._id) return <Loader />;
 
   return (
@@ -33,7 +39,10 @@ const ChangeUserDataClient: React.FC<ChangeUserDataClient> = ({ user }) => {
               label="Ім'я"
               field="name"
               value={profile.name ?? ''}
-              userId={profile._id}
+              entityId={profile._id}
+              entityType="user"
+              setMessage={setMessage}
+              notificationModal={notificationModal}
               onUpdated={val => setProfile({ ...profile, name: val })}
             />
 
@@ -41,7 +50,10 @@ const ChangeUserDataClient: React.FC<ChangeUserDataClient> = ({ user }) => {
               label="Прізвище"
               field="surname"
               value={profile.surname ?? ''}
-              userId={profile._id}
+              entityId={profile._id}
+              entityType="user"
+              setMessage={setMessage}
+              notificationModal={notificationModal}
               onUpdated={val => setProfile({ ...profile, surname: val })}
             />
 
@@ -49,7 +61,10 @@ const ChangeUserDataClient: React.FC<ChangeUserDataClient> = ({ user }) => {
               label="Email"
               field="email"
               value={profile.email ?? ''}
-              userId={profile._id}
+              entityId={profile._id}
+              entityType="user"
+              setMessage={setMessage}
+              notificationModal={notificationModal}
               onUpdated={val => setProfile({ ...profile, email: val })}
             />
 
@@ -57,12 +72,28 @@ const ChangeUserDataClient: React.FC<ChangeUserDataClient> = ({ user }) => {
               label="Телефон"
               field="phone"
               value={profile.phone || ''}
-              userId={profile._id}
+              entityId={profile._id}
+              entityType="user"
+              setMessage={setMessage}
+              notificationModal={notificationModal}
               onUpdated={val => setProfile({ ...profile, phone: val })}
             />
           </motion.div>
         </div>
       </div>
+
+      {/* ОДНА МОДАЛКА НА ВСЮ СТРАНИЦУ */}
+      <Modal
+        body={
+          <ModalNotification
+            title="Повідомлення"
+            message={message}
+            onConfirm={notificationModal.onClose}
+          />
+        }
+        isOpen={notificationModal.isOpen}
+        onClose={notificationModal.onClose}
+      />
     </>
   );
 };

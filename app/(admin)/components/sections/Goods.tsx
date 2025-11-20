@@ -97,8 +97,8 @@ export default function Goods({
         (selectedAvailability === 'unavailable' && !g.isAvailable);
       const matchCondition =
         selectedCondition === 'all' ||
-        (selectedCondition === 'new' && g.isNew === g.isNew) ||
-        (selectedCondition === 'used' && g.isNew === !g.isNew);
+        (selectedCondition === 'new' && g.isUsed === g.isUsed) ||
+        (selectedCondition === 'used' && g.isUsed === !g.isUsed);
       const matchSearch =
         !search || g.sku?.toLowerCase().includes(search.toLowerCase());
 
@@ -266,15 +266,15 @@ export default function Goods({
                   Артикул: {good.sku || '-'}
                 </p>
                 {/* ✅ отображение состояния */}
-                {good.isNew !== undefined && (
+                {good.isUsed !== undefined && (
                   <span
                     className={`inline-block mt-2 text-xs font-medium px-2 py-1 rounded-full w-fit ${
-                      good.isNew
+                      good.isUsed
                         ? 'bg-green-100 text-green-700'
                         : 'bg-yellow-100 text-yellow-700'
                     }`}
                   >
-                    {good.isNew ? 'Новий' : 'Б/у'}
+                    {good.isUsed ? 'Новий' : 'Б/у'}
                   </span>
                 )}
                 <div className="mt-auto">

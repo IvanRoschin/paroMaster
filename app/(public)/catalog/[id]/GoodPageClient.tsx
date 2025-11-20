@@ -11,7 +11,11 @@ import {
   FaTrash,
 } from 'react-icons/fa';
 
-import { deleteTestimonial, getGoodTestimonials } from '@/actions/testimonials';
+import {
+  deleteTestimonialAction,
+  getGoodTestimonialsAction,
+} from '@/actions/testimonials';
+import { formatCurrency } from '@/app/utils/formatCurrency';
 import {
   Breadcrumbs,
   Button,
@@ -55,12 +59,16 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
     isLoading: isTestimonialsLoading,
     isError: isTestimonialsError,
     error: testimonialsError,
-  } = useFetchData(getGoodTestimonials, ['testimonials', productId], productId);
+  } = useFetchData(
+    getGoodTestimonialsAction,
+    ['testimonials', productId],
+    productId
+  );
 
-  const { mutate: deleteTestimonialById } = useDeleteData(deleteTestimonial, [
-    'testimonials',
-    productId,
-  ]);
+  const { mutate: deleteTestimonialById } = useDeleteData(
+    deleteTestimonialAction,
+    ['testimonials', productId]
+  );
 
   useEffect(() => {
     if (!good) return;
@@ -121,12 +129,14 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
             {good.discountPrice ? (
               <>
                 <span className="line-through text-gray-400 mr-2">
-                  {good.price} грн
+                  {formatCurrency(good.price, 'uk-UA', 'UAH')}
                 </span>
-                <span>{good.discountPrice} грн</span>
+                <span>
+                  {formatCurrency(good.discountPrice, 'uk-UA', 'UAH')}
+                </span>
               </>
             ) : (
-              `${good.price} грн`
+              `${formatCurrency(good.price, 'uk-UA', 'UAH')}`
             )}
           </p>
 
@@ -335,7 +345,7 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
 
                   return (
                     <Link
-                      key={id}
+                      key={i}
                       href={`/catalog/${id}`}
                       className="flex-shrink-0 w-40 flex flex-col items-center gap-2 p-2 border rounded hover:shadow-lg transition-shadow"
                     >

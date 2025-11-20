@@ -148,7 +148,7 @@ export async function sendEmailChangeLetter({
       to: newEmail,
       from: {
         email: 'no-reply@paromaster.com',
-        name: 'Магазин запчастин ParoMaster',
+        name: 'ParoMaster - магазин запчастин',
       },
       subject: 'Запит на зміну e-mail',
       body: emailContent,
@@ -197,7 +197,7 @@ export async function sendVerificationLetter({
       to: email,
       from: {
         email: 'no-reply@paromaster.com',
-        name: 'Магазин запчастин ParoMaster',
+        name: 'ParoMaster - магазин запчастин',
       },
       subject: 'Підтвердження реєстрації на ParoMaster',
       body: emailContent,
@@ -249,7 +249,7 @@ export async function sendUserCredentialsEmail({
       to: email,
       from: {
         email: 'no-reply@paromaster.com',
-        name: 'Магазин запчастин ParoMaster',
+        name: 'ParoMaster - магазин запчастин',
       },
       name,
       subject: 'Ваші дані для входу на ParoMaster',
@@ -326,7 +326,7 @@ export async function sendCustomerEmail(
       to: customer.user.email,
       from: {
         email: 'no-reply@paromaster.com',
-        name: 'Магазин запчастин ParoMaster',
+        name: 'ParoMaster - магазин запчастин',
       },
       name: customer.user.name,
       subject: `Ваше замовлення на сайті ParoMaster`,
@@ -348,7 +348,7 @@ export async function sendCustomerEmail(
 export async function sendEmailToLid(data: FieldValues) {
   const { email, name, phone } = data;
   if (!email || !name || !phone)
-    return { success: false, error: 'Error: not all data passed' };
+    return { success: false, error: 'Помилка: не передані всі дані' };
 
   const emailContent = generateLidEmailContent({
     email,

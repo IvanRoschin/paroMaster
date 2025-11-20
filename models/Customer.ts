@@ -1,5 +1,5 @@
 // models/Customer.ts
-import mongoose from 'mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
 
 import { ICustomer } from '@/types/ICustomer';
 import { PaymentMethod } from '@/types/paymentMethod';
@@ -16,12 +16,16 @@ const customerSchema = new Schema<ICustomer>(
       enum: Object.values(PaymentMethod),
       required: true,
     },
+    favorites: [{ type: Schema.Types.ObjectId, ref: 'Good', default: [] }],
     orders: [{ type: Schema.Types.ObjectId, ref: 'Order', default: [] }],
   },
   { timestamps: true, versionKey: false }
 );
 
-customerSchema.index({ '$**': 'text' });
+export type CustomerDocument = HydratedDocument<ICustomer>;
 
-export default mongoose.models.Customer ||
-  mongoose.model('Customer', customerSchema);
+const Customer =
+  mongoose.models.Customer ||
+  mongoose.model<ICustomer>('Customer', customerSchema);
+
+export default Customer;

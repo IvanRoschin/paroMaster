@@ -9,24 +9,6 @@ const emailRegex =
 const phoneRegex = /^\+380\d{9}$/;
 
 const customerFormSchema = Yup.object().shape({
-  name: Yup.string()
-    .matches(nameRegex, 'Тільки українські букви без пробілів')
-    .min(3, 'Мінімум 3 букви')
-    .max(20, 'Максимум 20 букв')
-    .required("Обов'язкове поле"),
-  surname: Yup.string()
-    .matches(nameRegex, 'Тільки українські букви без пробілів')
-    .min(3, 'Мінімум 3 букви')
-    .max(20, 'Максимум 20 букв')
-    .required("Обов'язкове поле"),
-  phone: Yup.string()
-    .matches(phoneRegex, 'Має починатись на +380 та містити 9 цифр')
-    .required("Обов'язкове поле"),
-  email: Yup.string()
-    .matches(emailRegex, 'Некоректний email')
-    .max(63, 'Максимум 63 символи')
-    .min(3, 'Мінімум 3 символи')
-    .required("Обов'язкове поле"),
   city: Yup.string()
     .matches(cityRegex, 'Оберіть місто зі списку')
     .min(3, 'Мінімум 3 символи')

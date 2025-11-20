@@ -1,17 +1,9 @@
-'use client';
+export * from '@/components/modal/index';
+export * from '@/components/ui/Buttons/index';
 
-export { default as Button } from '@/components/ui/Button';
-export { ButtonAddGood } from '@/components/ui/ButtonAddGood';
-export {
-  CartButton,
-  CartClient,
-  CartItem,
-  ShoppingCart,
-} from '@/components/ui/Cart';
-export { default as CustomButton } from '@/components/ui/CustomFormikButton';
+export { CartClient, CartItem, ShoppingCart } from '@/components/ui/Cart';
 export { default as ErrorMessage } from '@/components/ui/ErrorMessage';
 export { default as Icon } from '@/components/ui/Icon';
-export { default as Modal } from '@/components/ui/Modal';
 export {
   ProductCard,
   ProductClient,

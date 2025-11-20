@@ -6,36 +6,46 @@ import { useSession } from 'next-auth/react';
 import { useState } from 'react';
 import { FiCheck, FiEdit2, FiX } from 'react-icons/fi';
 
+import { updateCustomerFieldAction } from '@/app/actions/customers';
 import {
-  getUserById,
-  requestEmailChange,
+  getUserByIdAction,
+  requestEmailChangeAction,
   updateUserFieldAction,
 } from '@/app/actions/users';
-import { FormField, ModalNotification } from '@/app/components';
+import { FormField } from '@/app/components';
 import { changeUserSchemas } from '@/app/helpers/validationSchemas/changeUserSchemas';
-import { useNotificationModal } from '@/app/hooks';
-import { Button, Modal } from '@/components/ui';
+import { NotificationModalStore } from '@/app/hooks/useNotificationModal';
+import { Button } from '@/components/ui';
+
+type EntityType = 'user' | 'customer';
+type UserEditableFields = 'name' | 'surname' | 'email' | 'phone';
+type CustomerEditableFields = 'city' | 'warehouse' | 'payment';
+
+type EntityField = UserEditableFields | CustomerEditableFields;
 
 interface EditableFieldProps {
   label: string;
-  field: 'name' | 'surname' | 'email' | 'phone';
+  field: EntityField;
   value: string;
-  userId: string;
+  entityId: string;
+  entityType: EntityType;
   onUpdated: (newValue: string) => void;
+  setMessage: (msg: string) => void;
+  notificationModal: NotificationModalStore;
 }
 
 export const EditableField: React.FC<EditableFieldProps> = ({
   label,
   field,
   value,
-  userId,
+  entityId,
+  entityType,
   onUpdated,
+  setMessage,
+  notificationModal,
 }) => {
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-
-  const notificationModal = useNotificationModal();
   const { update } = useSession();
 
   const handleSubmit = async (
@@ -49,39 +59,56 @@ export const EditableField: React.FC<EditableFieldProps> = ({
 
     setLoading(true);
 
-    // ----------------------------------------------------
-    //  📧 1) ЛОГИКА СМЕНЫ EMAIL
-    // ----------------------------------------------------
-    if (field === 'email') {
-      const res = await requestEmailChange(userId, values.value);
-      setLoading(false);
-      console.log('res:', res);
+    try {
+      if (entityType === 'user') {
+        const userField = field as UserEditableFields;
 
-      setMessage(res.message);
-      notificationModal.onOpen();
+        if (userField === 'email') {
+          const res = await requestEmailChangeAction(entityId, values.value);
+          setMessage(res.message ?? 'Запит оброблено');
+          notificationModal.onOpen();
+          setEditing(false);
+          return;
+        }
 
-      // ❗Email НЕ обновляем локально — он сменится только после клика в письме
-      setEditing(false);
-      return;
-    }
+        const res = await updateUserFieldAction(
+          entityId,
+          userField,
+          values.value
+        );
+        if (res.success && res.user) {
+          const newVal = res.user[field];
+          onUpdated(newVal);
+          resetForm({ values: { value: newVal } });
 
-    // ----------------------------------------------------
-    //  ✏️ 2) Обычные поля: name, surname, phone
-    // ----------------------------------------------------
-    const res = await updateUserFieldAction(userId, field, values.value);
-    setLoading(false);
+          if (update) {
+            const freshUser = await getUserByIdAction(entityId);
+            update(freshUser);
+          }
+        } else {
+          setMessage(res.message ?? 'Помилка');
+          notificationModal.onOpen();
+        }
+      } else if (entityType === 'customer') {
+        const customerField = field as CustomerEditableFields;
 
-    if (res.success && res.user) {
-      onUpdated(res.user[field]);
-      resetForm({ values: { value: res.user[field] } });
-      setEditing(false);
-
-      if (update) {
-        const freshUser = await getUserById(userId);
-        update(freshUser);
+        const res = await updateCustomerFieldAction(
+          entityId,
+          customerField,
+          values.value
+        );
+        if (res.success && res.customer) {
+          const newVal = res.customer[field];
+          onUpdated(newVal);
+          resetForm({ values: { value: newVal } });
+        } else {
+          setMessage(res.message ?? 'Помилка');
+          notificationModal.onOpen();
+        }
       }
-    } else {
-      alert(res.message);
+    } finally {
+      setLoading(false);
+      setEditing(false);
     }
   };
 
@@ -95,7 +122,7 @@ export const EditableField: React.FC<EditableFieldProps> = ({
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="text-primaryAccentColor hover:primaryAccentColor-800"
+            className="text-primaryAccentColor hover:text-primaryAccentColor-700"
           >
             <FiEdit2 size={18} />
           </button>
@@ -103,9 +130,9 @@ export const EditableField: React.FC<EditableFieldProps> = ({
       ) : (
         <Formik
           initialValues={{ value }}
-          onSubmit={handleSubmit}
-          validationSchema={changeUserSchemas[field]}
           enableReinitialize
+          validationSchema={changeUserSchemas[field]}
+          onSubmit={handleSubmit}
         >
           {({ setFieldValue, handleSubmit, errors, touched }) => (
             <Form className="flex items-center gap-2 mt-1 w-full">
@@ -126,10 +153,9 @@ export const EditableField: React.FC<EditableFieldProps> = ({
                   type="button"
                   onClick={() => handleSubmit()}
                   disabled={loading}
-                  className="text-green-600 hover:text-green-800"
+                  className="text-green-600"
                   icon={FiCheck}
                 />
-
                 <button
                   type="button"
                   onClick={() => setEditing(false)}
@@ -142,18 +168,6 @@ export const EditableField: React.FC<EditableFieldProps> = ({
           )}
         </Formik>
       )}
-
-      <Modal
-        body={
-          <ModalNotification
-            title="Повідомлення"
-            message={message}
-            onConfirm={notificationModal.onClose}
-          />
-        }
-        isOpen={notificationModal.isOpen}
-        onClose={notificationModal.onClose}
-      />
     </div>
   );
 };

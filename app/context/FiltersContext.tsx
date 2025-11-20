@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
+import { ReactNode, useMemo, useState } from 'react';
 import { createContext } from 'use-context-selector';
 
 export interface Option {
@@ -17,7 +17,7 @@ interface FiltersContextType {
   setMaxPrice: (value: number | null) => void;
 
   selectedBrands: Option[];
-  setSelectedBrands: (brands: Option[]) => void;
+  setSelectedBrands: React.Dispatch<React.SetStateAction<Option[]>>;
 
   selectedCategory: string;
   setCategory: (slug: string) => void;
@@ -35,18 +35,21 @@ export const FiltersProvider = ({ children }: { children: ReactNode }) => {
   const [selectedCategory, setCategory] = useState<string>('');
   const [sort, setSort] = useState<'asc' | 'desc' | ''>('');
 
-  const value: FiltersContextType = {
-    minPrice,
-    maxPrice,
-    setMinPrice,
-    setMaxPrice,
-    selectedBrands,
-    setSelectedBrands,
-    selectedCategory,
-    setCategory,
-    sort,
-    setSort,
-  };
+  const value = useMemo(
+    () => ({
+      minPrice,
+      maxPrice,
+      setMinPrice,
+      setMaxPrice,
+      selectedBrands,
+      setSelectedBrands,
+      selectedCategory,
+      setCategory,
+      sort,
+      setSort,
+    }),
+    [minPrice, maxPrice, selectedBrands, selectedCategory, sort]
+  );
 
   return (
     <FiltersContext.Provider value={value}>{children}</FiltersContext.Provider>

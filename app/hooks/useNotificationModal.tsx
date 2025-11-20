@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 
-interface NotificationModalStore {
+export interface NotificationModalStore {
   isOpen: boolean;
   onOpen: () => void;
   onClose: () => void;

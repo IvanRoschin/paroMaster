@@ -5,7 +5,7 @@ import {
 } from '@tanstack/react-query';
 import { getServerSession } from 'next-auth';
 
-import { getMostPopularGoods } from '@/actions/goods';
+import { getMostPopularGoodsAction } from '@/actions/goods';
 import { authOptions } from '@/app/config/authOptions';
 import { Breadcrumbs, InfiniteScroll } from '@/components/index';
 import prefetchData from '@/hooks/usePrefetchData';
@@ -31,7 +31,7 @@ export default async function MostPopularGoodsPage({
   const queryClient = new QueryClient();
   const goodsKey = ['popularGoods', params];
 
-  await prefetchData(queryClient, getMostPopularGoods, goodsKey, {
+  await prefetchData(queryClient, getMostPopularGoodsAction, goodsKey, {
     ...params,
     limit: 8,
   });

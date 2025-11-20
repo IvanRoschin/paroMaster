@@ -1,10 +1,25 @@
 'use server';
 
+import mongoose from 'mongoose';
+import { getServerSession } from 'next-auth';
+
 import { buildPagination } from '@/helpers/index';
 import toPlain from '@/helpers/server/toPlain';
 import Customer from '@/models/Customer';
+import Good from '@/models/Good';
 import { ICustomer, ISearchParams } from '@/types';
 import { connectToDB } from '@/utils/dbConnect';
+
+import { authOptions } from '../config/authOptions';
+
+export interface IGoodWithFavorite {
+  _id: string;
+  title: string;
+  price: number;
+  brand?: { _id: string; name: string; slug?: string };
+  src?: string[];
+  isFavorite: boolean;
+}
 
 export async function addCustomerService(values: Partial<ICustomer>) {
   await connectToDB();
@@ -116,9 +131,92 @@ export async function updateCustomerService(
   };
 }
 
+export async function updateCustomerFieldService(
+  customerId: string,
+  field: 'city' | 'warehouse' | 'payment',
+  value: string
+) {
+  if (!customerId)
+    return { success: false, message: 'Користувач не авторизований' };
+  await connectToDB();
+
+  const customer = await Customer.findById(customerId);
+  if (!customer) return { success: false, message: 'Користувача не знайдено' };
+
+  customer[field] = value;
+  await customer.save();
+
+  return {
+    success: true,
+    message: 'Дані успішно оновлено',
+    customer: toPlain(customer),
+  };
+}
+
 export async function getCustomerByUserService(userId: string) {
   await connectToDB();
 
   const doc = await Customer.findOne({ user: userId }).populate('user');
   return doc ? toPlain(doc) : null;
+}
+
+export async function toggleFavoriteService(goodId: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user)
+    return {
+      success: false,
+      message:
+        'Тільки авторизовані користувачі можуть додавати Товари до улюблених',
+    };
+
+  const { _id } = session.user;
+  await connectToDB();
+
+  const customer = await Customer.findOne({ user: _id });
+
+  if (!customer) throw new Error('Customer not found');
+
+  const isFav = customer.favorites.some(
+    (f: mongoose.Types.ObjectId) => f.toString() === goodId
+  );
+
+  const update = isFav
+    ? { $pull: { favorites: goodId } }
+    : { $addToSet: { favorites: goodId } };
+
+  const updated = await Customer.findOneAndUpdate({ user: _id }, update, {
+    new: true,
+  });
+
+  const favoritesStrings = updated!.favorites.map(
+    (f: mongoose.Types.ObjectId) => f.toString()
+  );
+
+  return { favorites: favoritesStrings };
+}
+
+export async function getGoodsWithFavoriteService() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) throw new Error('Unauthorized');
+
+  await connectToDB();
+
+  // получаем пользователя/клиента
+  const customerDoc = await Customer.findOne({ user: session.user._id });
+  const favorites =
+    customerDoc?.favorites.map((f: mongoose.Types.ObjectId) => f.toString()) ||
+    [];
+
+  // получаем все товары
+  const goodsDocs = await Good.find().populate('brand', 'name slug').lean();
+
+  // преобразуем в обычные объекты и добавляем isFavorite
+  const goods: IGoodWithFavorite[] = goodsDocs.map(g => ({
+    ...toPlain(g),
+    isFavorite: favorites.includes(
+      (g._id as mongoose.Types.ObjectId).toString()
+    ),
+  }));
+
+  return goods;
 }

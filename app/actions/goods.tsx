@@ -6,7 +6,9 @@ import {
   getAllGoodsService,
   getGoodByIdService,
   getGoodsByBrandService,
+  getGoodsByCategoryService,
   getMinMaxPriceService,
+  getMostPopularGoodsService,
   updateGoodService,
 } from '@/app/services/goodsService';
 import { IGoodUI, ISearchParams } from '@/types/index';
@@ -37,6 +39,13 @@ export async function getGoodsByBrandAction(
   return getGoodsByBrandService(brandSlug, excludeId);
 }
 
+export async function getGoodsByCategoryAction(
+  categorySlug: string,
+  excludeId?: string
+): Promise<IGoodUI[]> {
+  return getGoodsByCategoryService(categorySlug, excludeId);
+}
+
 export async function addGoodAction(values: Partial<any>) {
   return addGoodService(values);
 }
@@ -48,6 +57,12 @@ export async function updateGoodAction(id: string, values: Partial<any>) {
 export async function deleteGoodAction(id: string) {
   if (!id) return { success: false, message: 'ID не передано' };
   return deleteGoodService(id);
+}
+
+export async function getMostPopularGoodsAction(
+  limit = 10
+): Promise<IGoodUI[]> {
+  return getMostPopularGoodsService(limit);
 }
 
 export async function getMinMaxPriceAction() {

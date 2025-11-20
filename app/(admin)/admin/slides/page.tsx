@@ -1,12 +1,13 @@
-import { Slides } from '@/app/(admin)/components';
-import { getAllSlides } from '@/app/actions/slides';
-import prefetchData from '@/hooks/usePrefetchData';
-import { ISearchParams } from '@/types/searchParams';
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
+
+import { Slides } from '@/app/(admin)/components';
+import { getAllSlidesAction } from '@/app/actions/slides';
+import prefetchData from '@/hooks/usePrefetchData';
+import { ISearchParams } from '@/types/searchParams';
 
 export default async function SlidesPage({
   searchParams,
@@ -17,7 +18,7 @@ export default async function SlidesPage({
 
   const queryClient = new QueryClient();
 
-  await prefetchData(queryClient, getAllSlides, ['slides'], params);
+  await prefetchData(queryClient, getAllSlidesAction, ['slides'], params);
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

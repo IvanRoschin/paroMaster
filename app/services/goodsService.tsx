@@ -4,10 +4,11 @@ import mongoose from 'mongoose';
 
 import toPlain from '@/app/helpers/server/toPlain';
 import Brand from '@/models/Brand';
-import Good, { GoodDocument, IGoodDB } from '@/models/Good';
+import Category from '@/models/Category';
+import Good, { IGoodDB } from '@/models/Good';
 import Testimonial from '@/models/Testimonial';
 import { IBrand, IBrandLean } from '@/types/IBrand';
-import { ICategory } from '@/types/ICategory';
+import { ICategory, ICategoryLean } from '@/types/ICategory';
 import { IMinMaxPriceResponse } from '@/types/index';
 import { connectToDB } from '@/utils/dbConnect';
 
@@ -21,14 +22,6 @@ export interface IGoodUI extends Omit<IGoodPopulated, '_id'> {
   testimonials: any[];
   compatibleGoods: any[];
 }
-/**
- * Синхронизация двусторонней совместимости товаров.
- * Обеспечивает корректное добавление и удаление связей между товарами.
- *
- * @param currentGoodId - ID текущего товара
- * @param newIds - новые ID совместимых товаров (строки)
- * @param oldIds - старые ID совместимых товаров (строки)
- */
 export async function syncCompatibilityRelations(
   currentGoodId: string,
   newIds: string[] = [],
@@ -37,34 +30,41 @@ export async function syncCompatibilityRelations(
   const added = newIds.filter(id => !oldIds.includes(id));
   const removed = oldIds.filter(id => !newIds.includes(id));
 
-  await Promise.all([
-    // ➕ Добавленные связи
-    ...added.map(async (cgId: string) => {
-      const g: GoodDocument | null = await Good.findById(cgId);
-      if (!g) return;
-
-      // Преобразуем ObjectId в строки
-      const gIds: string[] = g.compatibleGoods.map(id => id.toString());
-      if (!gIds.includes(currentGoodId)) {
-        g.compatibleGoods.push(new mongoose.Types.ObjectId(currentGoodId));
-      }
-      g.isCompatible = g.compatibleGoods.length > 0;
-      await g.save();
-    }),
-
-    // ➖ Удалённые связи
-    ...removed.map(async (cgId: string) => {
-      const g: GoodDocument | null = await Good.findById(cgId);
-      if (!g) return;
-
-      // Фильтруем удаляемый ID
-      g.compatibleGoods = g.compatibleGoods.filter(
-        (id: mongoose.Types.ObjectId) => id.toString() !== currentGoodId
+  // ➕ Добавленные связи
+  await Promise.all(
+    added.map(async (cgId: string) => {
+      // Добавляем текущий товар в compatibleGoods другого товара, если его там нет
+      await Good.updateOne(
+        { _id: cgId, compatibleGoods: { $ne: currentGoodId } },
+        {
+          $push: { compatibleGoods: currentGoodId },
+          $set: { isCompatible: true },
+        }
       );
-      g.isCompatible = g.compatibleGoods.length > 0;
-      await g.save();
-    }),
-  ]);
+    })
+  );
+
+  // ➖ Удалённые связи
+  await Promise.all(
+    removed.map(async (cgId: string) => {
+      const updated = await Good.findByIdAndUpdate(
+        cgId,
+        {
+          $pull: { compatibleGoods: currentGoodId },
+        },
+        { new: true } // возвращает обновлённый документ
+      );
+
+      if (!updated) return;
+
+      // Обновляем isCompatible
+      const hasCompatibles = updated.compatibleGoods.length > 0;
+      if (updated.isCompatible !== hasCompatibles) {
+        updated.isCompatible = hasCompatibles;
+        await updated.save();
+      }
+    })
+  );
 }
 
 // ===== Получение всех товаров =====
@@ -86,9 +86,11 @@ export async function getAllGoodsService(
 
   const count = await Good.countDocuments(filter);
 
+  const plianGoods = goods.map(toPlain);
+
   return {
     success: true,
-    goods: goods.map(g => toPlain(g)),
+    goods: plianGoods,
     count,
   };
 }
@@ -99,29 +101,23 @@ export async function getGoodByIdService(id: string): Promise<IGoodUI | null> {
   const good = await Good.findById(id)
     .populate('category', 'name slug')
     .populate('brand', 'name slug')
-    .lean<IGoodPopulated>();
+    .exec();
 
   if (!good) return null;
 
-  const testimonials = await Testimonial.find({
-    product: id,
-    isActive: true,
-  }).lean();
-
-  const compatibleGoodsRecords = await Good.find({
-    _id: { $in: good.compatibleGoods },
-  })
-    .populate('brand', 'name slug')
-    .populate('category', 'name slug')
-    .lean<IGoodPopulated[]>();
+  const [testimonialsRaw, compatibleGoodsRaw] = await Promise.all([
+    Testimonial.find({ product: id, isActive: true }).lean().exec(),
+    Good.find({ _id: { $in: good.compatibleGoods } })
+      .populate('brand', 'name slug')
+      .populate('category', 'name slug')
+      .lean()
+      .exec(),
+  ]);
 
   const result: IGoodUI = {
-    ...toPlain<IGoodPopulated>(good),
-    _id: good._id.toString(),
-    testimonials,
-    compatibleGoods: compatibleGoodsRecords.map(g =>
-      toPlain<IGoodPopulated>(g)
-    ),
+    ...toPlain(good),
+    testimonials: testimonialsRaw.map(toPlain),
+    compatibleGoods: compatibleGoodsRaw.map(toPlain),
   };
 
   return result;
@@ -153,6 +149,38 @@ export async function getGoodsByBrandService(
     .lean<IGoodUI[]>();
 
   // Сериализуем, чтобы избежать Mongoose-specific свойств
+  const serializedGoods = goods.map(g => toPlain<IGoodUI>(g));
+
+  return serializedGoods;
+}
+
+// ===== Получение товара по категории =====
+export async function getGoodsByCategoryService(
+  categorySlug: string,
+  excludeId?: string
+): Promise<IGoodUI[]> {
+  await connectToDB();
+
+  // Находим категорию по slug
+  const category = await Category.findOne({
+    slug: categorySlug,
+  }).lean<ICategoryLean>();
+  if (!category?._id) return [];
+
+  // Формируем запрос по ObjectId категории
+  const query: Record<string, unknown> = {
+    category: new mongoose.Types.ObjectId(String(category._id)),
+  };
+  if (excludeId)
+    query._id = { $ne: new mongoose.Types.ObjectId(String(excludeId)) };
+
+  // Ищем товары с этой категорией
+  const goods = await Good.find(query)
+    .populate('brand')
+    .populate('category')
+    .lean<IGoodUI[]>();
+
+  // Сериализуем результаты
   const serializedGoods = goods.map(g => toPlain<IGoodUI>(g));
 
   return serializedGoods;
@@ -242,6 +270,26 @@ export async function deleteGoodService(id: string) {
   await Testimonial.deleteMany({ product: id });
   await Good.findByIdAndDelete(id);
   return { success: true, message: 'Товар видалено' };
+}
+
+// ===== Получения cписка наиболее популярных товаров =====
+export async function getMostPopularGoodsService(
+  limit = 10
+): Promise<IGoodUI[]> {
+  try {
+    await connectToDB();
+    const popularGoods = await Good.find({ isAvailable: true })
+      .sort({ averageRating: -1, ratingCount: -1 })
+      .limit(limit)
+      .populate('category', 'name slug src')
+      .populate('brand', 'name slug src country website')
+      .exec();
+    const serializedGoods: IGoodUI[] = popularGoods.map(toPlain);
+    return serializedGoods;
+  } catch (error) {
+    console.error('Error fetching most popular goods:', error);
+    return [];
+  }
 }
 
 // ===== Получения минимальной и максимальной цены товара =====

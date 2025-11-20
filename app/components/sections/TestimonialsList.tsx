@@ -1,5 +1,5 @@
-import { IGetAllTestimonials } from '@/actions/testimonials';
 import { Slider } from '@/components/index';
+import { IGetAllTestimonials } from '@/types/ITestimonial';
 
 const TestimonialsList = ({
   testimonialsData,

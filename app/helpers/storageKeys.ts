@@ -3,6 +3,7 @@ const storageKeys = {
   totalPrice: 'totalPrice',
   customer: 'customer',
   good: 'good',
+  favorites: 'favorites',
 };
 
 export default storageKeys;

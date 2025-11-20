@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 
-import { resetPasswordAction } from '@/app/actions/&&&auth.server';
+import { resetPasswordAction } from '@/app/actions/auth';
 import { restorePasswordFormSchema } from '@/app/helpers/validationSchemas';
 import { useNotificationModal } from '@/app/hooks';
 import { FormField, ModalNotification } from '@/components/common';

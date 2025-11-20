@@ -35,7 +35,7 @@ export const PriceFilter: React.FC<PriceFilterProps> = ({
     (maxPrice ?? maxPriceFromDB).toString(),
   ]);
 
-  const step = 500;
+  const step = 200;
   const roundToStep = (value: number, step: number) =>
     Math.round(value / step) * step;
 

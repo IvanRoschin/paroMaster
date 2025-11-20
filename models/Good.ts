@@ -11,7 +11,7 @@ export interface IGoodDB {
   brand: Types.ObjectId;
   model: string;
   sku: string;
-  isNew: boolean;
+  isUsed: boolean;
   isAvailable: boolean;
   isDailyDeal: boolean;
   isCompatible: boolean;
@@ -19,12 +19,11 @@ export interface IGoodDB {
   averageRating?: number;
   ratingCount?: number;
   dealExpiresAt?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export type GoodDocument = HydratedDocument<IGoodDB>;
-
+// --- Схема ---
 const GoodSchema = new Schema<IGoodDB>(
   {
     title: { type: String, required: true },
@@ -36,7 +35,7 @@ const GoodSchema = new Schema<IGoodDB>(
     brand: { type: Schema.Types.ObjectId, ref: 'Brand', required: true },
     model: { type: String, required: true },
     sku: { type: String, required: true, unique: true },
-    isNew: { type: Boolean, default: false },
+    isUsed: { type: Boolean, default: false },
     isAvailable: { type: Boolean, default: true },
     isDailyDeal: { type: Boolean, default: false },
     isCompatible: { type: Boolean, default: false },
@@ -48,5 +47,11 @@ const GoodSchema = new Schema<IGoodDB>(
   { timestamps: true }
 );
 
-export default mongoose.models.Good ||
-  mongoose.model<IGoodDB>('Good', GoodSchema);
+// --- Тип документа ---
+export type GoodDocument = HydratedDocument<IGoodDB>;
+
+// --- Модель ---
+const Good =
+  mongoose.models.Good || mongoose.model<IGoodDB>('Good', GoodSchema);
+
+export default Good;

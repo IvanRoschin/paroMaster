@@ -12,3 +12,10 @@ export type GetAllCategoriesResponse = {
   categories: ICategory[];
   count: number;
 };
+
+export interface ICategoryLean {
+  _id: string;
+  slug: string;
+  name: string;
+  src?: string;
+}
