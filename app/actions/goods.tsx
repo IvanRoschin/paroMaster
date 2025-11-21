@@ -11,19 +11,37 @@ import {
   getMostPopularGoodsService,
   updateGoodService,
 } from '@/app/services/goodsService';
-import { IGoodUI, ISearchParams } from '@/types/index';
-
-import { buildFilter } from '../helpers';
+import { IGoodUI } from '@/types/index';
 
 // ======================= ACTIONS =======================
 
-export async function getAllGoodsAction(searchParams: ISearchParams = {}) {
-  const page = Number(searchParams.page) || 1;
-  const limit = Number(searchParams.limit) || 20;
+export interface Option {
+  value: string;
+  label: string;
+  slug?: string;
+  src?: string;
+}
 
-  const filter = await buildFilter(searchParams);
+export interface IGetAllGoods {
+  success: boolean;
+  goods: IGoodUI[];
+  count: number;
+}
 
-  return getAllGoodsService(filter, page, limit);
+export interface GoodsFilters {
+  brands?: string[];
+  category?: string;
+  low?: number | null;
+  high?: number | null;
+  sort?: '' | 'asc' | 'desc';
+  page?: string | number;
+  limit?: string | number;
+}
+
+export async function getAllGoodsAction(
+  filters: GoodsFilters
+): Promise<IGetAllGoods> {
+  return getAllGoodsService(filters);
 }
 
 export async function getGoodByIdAction(id: string): Promise<IGoodUI | null> {

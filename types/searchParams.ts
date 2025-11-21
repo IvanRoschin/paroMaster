@@ -1,8 +1,8 @@
 export interface FilterParams {
   q?: string;
   status?: string | null;
-  brand?: string;
-  category?: string;
+  brand?: string | string[];
+  category?: string | string[];
   low?: string;
   high?: string;
   page?: string;
@@ -14,8 +14,8 @@ export interface FilterParams {
 export interface ISearchParams {
   q?: string;
   status?: string | null;
-  brand?: string;
-  category?: string;
+  brand?: string | string[];
+  category?: string | string[];
   low?: string;
   high?: string;
   page?: string;

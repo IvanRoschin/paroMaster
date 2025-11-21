@@ -31,6 +31,18 @@ const customNames: Record<string, string> = {
   customers: 'Замовник',
   search: 'Пошук',
   brands: 'Бренди',
+  'korpus-stanciyi': 'Корпус станції',
+  'korpus-dlya-prasok': 'Корпус для прасок',
+  'pidoshvi-dlya-prasok': 'Підошви для прасок',
+  'plati-keruvannya': 'Плати керування',
+  boyleri: 'Бойлери',
+  elektroklapani: 'Електроклапани',
+  nasosipompi: 'Насоси(помпи)',
+  'rezervuari-dlya-vodi': 'Резервуари для води',
+  'provoda-ta-shlangi': 'Провода та шланги',
+  'aksesuari-ta-komplektuyuchi': 'Аксесуари та комплектуючі',
+  'praski-z-parogeneratorami': 'Праски з парогенераторами',
+  filtri: 'Фільтри',
 };
 
 const Breadcrumbs = () => {

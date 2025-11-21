@@ -12,6 +12,9 @@ import { ICategory, ICategoryLean } from '@/types/ICategory';
 import { IMinMaxPriceResponse } from '@/types/index';
 import { connectToDB } from '@/utils/dbConnect';
 
+import { GoodsFilters } from '../actions';
+import buildFilterFromContext from '../helpers/server/buildFilter';
+
 export interface IGoodPopulated extends Omit<IGoodDB, 'brand' | 'category'> {
   brand: IBrand;
   category: ICategory;
@@ -68,18 +71,19 @@ export async function syncCompatibilityRelations(
 }
 
 // ===== Получение всех товаров =====
-export async function getAllGoodsService(
-  filter: any = {},
-  page = 1,
-  limit = 20
-) {
+export async function getAllGoodsService(filters: GoodsFilters) {
   await connectToDB();
+
+  const page = Number(filters.page) || 1;
+  const limit = Number(filters.limit) || 20;
   const skip = (page - 1) * limit;
+
+  const { filter, sortOption } = await buildFilterFromContext(filters);
 
   const goods = await Good.find(filter)
     .populate('category', 'name slug')
     .populate('brand', 'name slug')
-    .sort({ createdAt: -1 })
+    .sort(sortOption)
     .skip(skip)
     .limit(limit)
     .lean<IGoodPopulated[]>();
