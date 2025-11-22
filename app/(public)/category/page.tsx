@@ -1,7 +1,7 @@
-import Image from 'next/image';
 import Link from 'next/link';
 
 import { getAllCategoriesAction } from '@/app/actions/categories';
+import { NextImage } from '@/app/components';
 import { ICategory } from '@/types/ICategory';
 
 // app/(public)/category/page.tsx
@@ -29,7 +29,7 @@ export default async function CategoriesPage() {
             className="block bg-secondaryBackground rounded-xl p-4 text-center shadow-sm hover:shadow-md transition"
           >
             <div className="w-20 h-20 mx-auto mb-3">
-              <Image
+              <NextImage
                 src={c.src || '/placeholder.svg'}
                 alt={c.name}
                 width={80}

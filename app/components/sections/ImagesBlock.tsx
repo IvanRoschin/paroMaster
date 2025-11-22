@@ -21,18 +21,19 @@ const ImagesBlock: React.FC<ImagesBlockProps> = ({ item, values }) => {
     return (
       <div className="w-full flex flex-col items-center pb-6 sm:pb-8">
         {/* 🔹 Главное изображение */}
-        <div className="w-full max-w-[360px] sm:max-w-[420px] md:max-w-[450px] mb-4 relative">
+        <div className="w-full max-w-[300px] sm:max-w-[360px] md:max-w-[400px] mb-4 relative mx-auto">
           <div className="w-full aspect-square bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
             <NextImage
               useSkeleton
               src={images[safeIndex]}
               alt={altText}
-              width={400}
-              height={400}
+              width={350}
+              height={350}
+              priority
               classNames={{
                 wrapper: 'w-full h-full',
                 image:
-                  'object-contain w-full h-full max-h-[70vh] p-2 sm:p-3 mx-auto',
+                  'object-contain w-full h-full max-h-[60vh] p-1 sm:p-1.5 mx-auto',
               }}
             />
           </div>
@@ -77,7 +78,7 @@ const ImagesBlock: React.FC<ImagesBlockProps> = ({ item, values }) => {
   if (imagesToRender.length === 0) return null;
 
   return (
-    <div className="flex justify-center items-center w-full overflow-hidden">
+    <div className="flex justify-center items-start w-full overflow-hidden">
       {renderImageGallery(imagesToRender, item?.title || 'Зображення')}
     </div>
   );

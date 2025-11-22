@@ -1,12 +1,11 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { FaPen, FaPlus, FaTrash } from 'react-icons/fa';
 
 import { deleteGoodAction, getAllGoodsAction } from '@/actions/goods';
-import { EmptyState } from '@/components/common';
+import { EmptyState, NextImage } from '@/components/common';
 import DeleteConfirmation from '@/components/common/DeleteConfirmation';
 import { Button, Modal } from '@/components/ui';
 import useDeleteData from '@/hooks/useDeleteData';
@@ -240,13 +239,12 @@ export default function Goods({
               {/* изображение */}
               {good.src?.length > 0 && (
                 <div className="relative h-48 bg-gray-50 flex items-center justify-center">
-                  <Image
+                  <NextImage
+                    useSkeleton
                     src={good.src[0]}
                     alt={good.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw,
-             (max-width: 1200px) 50vw,
-             25vw"
+                    width={300}
+                    height={300}
                     className="object-contain p-2"
                   />
                 </div>

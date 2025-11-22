@@ -1,9 +1,8 @@
 'use client';
-import Image from 'next/image';
 import { useCallback, useEffect, useState } from 'react';
 import { IoIosArrowDropleft, IoIosArrowDropright } from 'react-icons/io';
 
-import { EmptyState, Loader } from '@/components/common';
+import { EmptyState, Loader, NextImage } from '@/components/common';
 import { Testimonial } from '@/components/index';
 import { IGetAllSlides } from '@/types/ISlider';
 import { IGetAllTestimonials } from '@/types/ITestimonial';
@@ -81,7 +80,8 @@ const Slider: React.FC<SliderProps> = ({
                 stars={slide.rating}
               />
             ) : (
-              <Image
+              <NextImage
+                useSkeleton
                 src={slide.src[0]}
                 alt={slide.title}
                 width={400}

@@ -48,6 +48,7 @@ const CartItem: React.FC<CartItemProps> = ({ good, quantity }) => {
             useSkeleton
             src={src[0] ?? '/placeholder.png'}
             alt={good.title}
+            sizes="120px"
             classNames={{
               wrapper: 'w-full h-full bg-gray-50 rounded-lg overflow-hidden',
               image: 'object-contain p-2',

@@ -1,5 +1,4 @@
 'use client';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { FaPen, FaSortAlphaDown, FaSortAlphaUp, FaTrash } from 'react-icons/fa';
@@ -16,6 +15,7 @@ import {
   ErrorMessage,
   Loader,
   Modal,
+  NextImage,
   Pagination,
 } from '@/components/index';
 import { useDeleteData, useDeleteModal, useFetchData } from '@/hooks/index';
@@ -149,7 +149,7 @@ export default function Categories({
               <td className="p-2 border-r-2 text-start">{category.name}</td>
               <td className="p-2 border-r-2 text-start">
                 <div className="flex justify-center">
-                  <Image
+                  <NextImage
                     src={category.src}
                     alt={category.name}
                     width={24}

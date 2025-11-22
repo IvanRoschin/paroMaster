@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { FaPen, FaTrash } from 'react-icons/fa';
@@ -19,6 +18,7 @@ import {
   ErrorMessage,
   Loader,
   Modal,
+  NextImage,
   Pagination,
   Switcher,
 } from '@/components/index';
@@ -153,7 +153,8 @@ export default function Slides({
               <td className="p-2 border-r-2 text-start">{slide.desc}</td>
               <td className="p-2 border-r-2">
                 <div className="flex justify-center">
-                  <Image
+                  <NextImage
+                    useSkeleton
                     src={slide.src[0]}
                     alt={slide.title}
                     width={100}

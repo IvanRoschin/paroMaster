@@ -5,9 +5,9 @@ import { SessionProvider } from 'next-auth/react';
 import { Suspense, useState } from 'react';
 import { Toaster } from 'sonner';
 
+import PreloadedResources from '@/app/utils/PreloadedResources';
 import { Loader } from '@/components';
 import { FiltersProvider } from '@/context/FiltersContext';
-import PreloadedResourses from '@/utils/preloadedResourses';
 import {
   DehydratedState,
   HydrationBoundary,
@@ -34,7 +34,7 @@ export function Providers({ children, dehydratedState }: ProvidersProps) {
           <FavoritesProvider>
             <ShoppingCartProvider>
               <Suspense fallback={<Loader />}>
-                <PreloadedResourses />
+                <PreloadedResources />
                 <QueryClientProvider client={queryClient}>
                   <HydrationBoundary state={dehydratedState}>
                     {children}

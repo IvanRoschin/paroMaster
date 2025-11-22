@@ -57,10 +57,12 @@ const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
       <div className="relative w-full h-[200px] mb-3 rounded-lg overflow-hidden">
         <Link href={`/catalog/${good._id}`}>
           <NextImage
+            priority
             src={good.src?.[0] || '/placeholder.png'}
             alt={good.title}
             useSkeleton
             fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="bg-gray-50 rounded-lg"
             classNames={{
               wrapper: 'w-full h-full bg-gray-100 rounded-lg overflow-hidden',
