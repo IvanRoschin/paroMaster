@@ -1,10 +1,12 @@
 // models/Customer.ts
-import mongoose, { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument, Model } from 'mongoose';
 
 import { ICustomer } from '@/types/ICustomer';
 import { PaymentMethod } from '@/types/paymentMethod';
 
 const { Schema } = mongoose;
+
+type CustomerModel = Model<ICustomer>;
 
 const customerSchema = new Schema<ICustomer>(
   {
@@ -24,8 +26,5 @@ const customerSchema = new Schema<ICustomer>(
 
 export type CustomerDocument = HydratedDocument<ICustomer>;
 
-const Customer =
-  mongoose.models.Customer ||
-  mongoose.model<ICustomer>('Customer', customerSchema);
-
-export default Customer;
+export default (mongoose.models.Customer as CustomerModel) ||
+  mongoose.model<ICustomer, CustomerModel>('Customer', customerSchema);

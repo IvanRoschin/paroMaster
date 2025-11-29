@@ -1,18 +1,12 @@
 'use client';
 
-import { useShoppingCart } from 'app/context/ShoppingCartContext';
-
 import { getGoodByIdAction } from '@/actions/goods';
+import { useAppStore } from '@/app/store/appStore';
 import { Icon, ImagesBlock, Loader } from '@/components/index';
 import { useFetchDataById } from '@/hooks/index';
 
 const ProductClient = ({ id }: { id: string }) => {
-  const {
-    getItemQuantity,
-    increaseCartQuantity,
-    decreaseCartQuantity,
-    removeFromCart,
-  } = useShoppingCart();
+  const { cart } = useAppStore();
 
   const {
     data: good,
@@ -31,7 +25,7 @@ const ProductClient = ({ id }: { id: string }) => {
     );
   }
 
-  const quantity = getItemQuantity(good._id);
+  const quantity = cart.getItemQuantity(good._id);
 
   return (
     good && (
@@ -54,7 +48,7 @@ const ProductClient = ({ id }: { id: string }) => {
                   type="button"
                   className="p-4 w-full mb-[20px] bg-orange-600 hover:bg-orange-700 focus:bg-orange-700 text-white transition-all font-semibold text-lg
 									rounded-md"
-                  onClick={() => increaseCartQuantity(good._id)}
+                  onClick={() => cart.increaseCartQuantity(good._id)}
                 >
                   Купити
                 </button>
@@ -63,7 +57,7 @@ const ProductClient = ({ id }: { id: string }) => {
                   <div className="flex items-center justify-center">
                     <button
                       className="w-[20px] mb-[10px] mr-[10px] bg-orange-600 hover:bg-orange-700 focus:bg-orange-700 text-white transition-all text-lg rounded-md"
-                      onClick={() => decreaseCartQuantity(good._id)}
+                      onClick={() => cart.decreaseCartQuantity(good._id)}
                     >
                       -
                     </button>
@@ -72,7 +66,7 @@ const ProductClient = ({ id }: { id: string }) => {
                     </div>{' '}
                     <button
                       className="w-[20px] mb-[10px] ml-[10px] bg-orange-600 hover:bg-orange-700 focus:bg-orange-700 text-white transition-all text-lg rounded-md"
-                      onClick={() => increaseCartQuantity(good._id)}
+                      onClick={() => cart.increaseCartQuantity(good._id)}
                     >
                       +
                     </button>
@@ -83,7 +77,7 @@ const ProductClient = ({ id }: { id: string }) => {
 										items-center 
 										justify-center
 										w-[50%] mb-[10px] mr-[10px] bg-red-600 hover:bg-red-700 focus:bg-red-700 text-white transition-all text-sm rounded-md py-2 px-3"
-                    onClick={() => removeFromCart(good._id)}
+                    onClick={() => cart.removeFromCart(good._id)}
                   >
                     <Icon
                       name="icon_trash"

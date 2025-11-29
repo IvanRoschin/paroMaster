@@ -5,7 +5,7 @@ export interface ChangePasswordClient {
   user?: SessionUser;
 }
 const ChangePasswordClient: React.FC<ChangePasswordClient> = ({ user }) => {
-  return <ChangePasswordForm userId={user?._id} />;
+  return <ChangePasswordForm user={user} />;
 };
 
 export default ChangePasswordClient;

@@ -1,8 +1,8 @@
 'use client';
 
-import { useShoppingCart } from 'app/context/ShoppingCartContext';
 import { useEffect, useMemo } from 'react';
 
+import { useAppStore } from '@/app/store/appStore';
 import { formatCurrency } from '@/app/utils/formatCurrency';
 import { Button, CartItem } from '@/components/ui';
 import { storageKeys } from '@/helpers/index';
@@ -15,11 +15,12 @@ export const CartClient = ({
   onCancel: () => void;
   title?: string;
 }) => {
-  const { cart } = useShoppingCart();
+  // const { cart } = useShoppingCart();
+  const { cart } = useAppStore();
 
   const totalPrice = useMemo(
     () =>
-      cart.reduce(
+      cart.cart.reduce(
         (acc, item) => acc + (item.good.price || 0) * (item.quantity || 1),
         0
       ),
@@ -37,7 +38,7 @@ export const CartClient = ({
       </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {cart.map((item, indx) => (
+        {cart.cart.map((item, indx) => (
           <CartItem key={indx} quantity={item.quantity} good={item.good} />
         ))}
       </div>

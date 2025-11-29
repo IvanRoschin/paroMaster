@@ -1,5 +1,7 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
+
 import { IUser } from '@/types/index';
 
 import {
@@ -36,7 +38,11 @@ export async function updateUserFieldAction(
   field: 'name' | 'surname' | 'email' | 'phone',
   value: string
 ) {
-  return updateUserFieldService(userId, field, value);
+  const res = await updateUserFieldService(userId, field, value);
+  if (res.success) {
+    revalidatePath('/profile');
+  }
+  return res;
 }
 
 export async function requestEmailChangeAction(

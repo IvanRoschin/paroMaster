@@ -1,12 +1,10 @@
 'use client';
 
-import { useShoppingCart } from 'app/context/ShoppingCartContext';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 
-import { useCompare } from '@/app/context/CompareContext';
-import { useFavorites } from '@/app/context/FavoritesContext';
+import { useAppStore } from '@/app/store/appStore';
 import { formatCurrency } from '@/app/utils/formatCurrency';
 import { Button, NextImage } from '@/components/index';
 import { IGoodUI } from '@/types/IGood';
@@ -24,21 +22,23 @@ const FavoriteButtonClient = dynamic(
 );
 
 const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
-  const {
-    getItemQuantity,
-    increaseCartQuantity,
-    decreaseCartQuantity,
-    removeFromCart,
-  } = useShoppingCart();
+  // const {
+  //   getItemQuantity,
+  //   increaseCartQuantity,
+  //   decreaseCartQuantity,
+  //   removeFromCart,
+  // } = useShoppingCart();
+  const { cart, compare, favorites } = useAppStore();
 
   const [quantity, setQuantity] = useState(0);
-  const { items: compareItems } = useCompare();
-  const { isFavorite } = useFavorites();
-  const isInCompare = compareItems.some(i => i._id === good._id);
+
+  // const { items: compareItems } = useCompare();
+  // const { isFavorite } = useFavorites();
+  const isInCompare = compare.items.some(i => i._id === good._id);
 
   useEffect(() => {
-    setQuantity(getItemQuantity(good._id));
-  }, [getItemQuantity, good._id]);
+    setQuantity(cart.getItemQuantity(good._id));
+  }, [cart, good._id]);
 
   const { displayPrice, discountPercent } = useMemo(() => {
     const hasDiscount = good.discountPrice && good.discountPrice < good.price;
@@ -116,7 +116,7 @@ const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
                   У порівнянні
                 </span>
               )}
-              {isFavorite(good._id) && (
+              {favorites.isFavorite(good._id) && (
                 <span className="text-xs text-red-500 font-semibold">
                   Улюблений
                 </span>
@@ -147,9 +147,9 @@ const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
           isAvailable={good.isAvailable}
           itemId={good._id}
           quantity={quantity}
-          increaseCartQuantity={increaseCartQuantity}
-          decreaseCartQuantity={decreaseCartQuantity}
-          removeFromCart={removeFromCart}
+          increaseCartQuantity={cart.increaseCartQuantity}
+          decreaseCartQuantity={cart.decreaseCartQuantity}
+          removeFromCart={cart.removeFromCart}
         />
       </div>
     </li>

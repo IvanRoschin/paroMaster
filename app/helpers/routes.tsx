@@ -20,7 +20,8 @@ export const routes = {
     changePassword: '/customer/auth/change-password',
     changeUserData: '/customer/change-user-data',
     changeDeliveryAddress: '/customer/change-delivery-address',
-    ordersHistroy: 'customer/orders-history',
+    favorites: '/customer/favorites',
+    ordersHistroy: '/customer/orders-history',
   },
   adminRoutes: {
     dashboard: '/admin',

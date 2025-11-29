@@ -4,7 +4,9 @@ import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { FaBalanceScale } from 'react-icons/fa';
 
-import { useCompare } from '@/context/CompareContext';
+import { useAppStore } from '@/app/store/appStore';
+
+// import { useCompare } from '@/context/CompareContext';
 
 const CompareModalClient = dynamic(
   () => import('@/components/modal/CompareModal'),
@@ -12,10 +14,13 @@ const CompareModalClient = dynamic(
 );
 
 export default function CompareHeaderBtn() {
-  const { items } = useCompare();
+  // const { items } = useCompare();
+
+  const { compare } = useAppStore();
+
   const [open, setOpen] = useState(false);
 
-  if (items.length === 0) return null;
+  if (compare.items.length === 0) return null;
 
   return (
     <>
@@ -25,7 +30,7 @@ export default function CompareHeaderBtn() {
       >
         <FaBalanceScale className="w-7 h-7" />
         <span className="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center rounded-full bg-primaryAccentColor text-white text-[10px] font-semibold">
-          {items.length}
+          {compare.items.length}
         </span>
       </button>
 

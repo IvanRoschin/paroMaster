@@ -2,7 +2,7 @@
 
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 
-import { useFavorites } from '@/context/FavoritesContext';
+import { useAppStore } from '@/app/store/appStore';
 import { IGoodUI } from '@/types/IGood';
 
 interface FavoriteButtonProps {
@@ -10,12 +10,14 @@ interface FavoriteButtonProps {
 }
 
 export default function FavoriteButton({ good }: FavoriteButtonProps) {
-  const { isFavorite, toggleFavorite } = useFavorites();
-  const favorite = isFavorite(good._id);
+  // const { isFavorite, toggleFavorite } = useFavorites();
+  const { favorites } = useAppStore();
+
+  const favorite = favorites.isFavorite(good._id);
 
   return (
     <button
-      onClick={() => toggleFavorite(good)}
+      onClick={() => favorites.toggleFavorite(good)}
       className={`
         p-2 rounded-md transition-colors
         ${favorite ? ' text-red-500 ' : ' hover:text-red-500'}

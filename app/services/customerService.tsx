@@ -8,9 +8,12 @@ import toPlain from '@/helpers/server/toPlain';
 import Customer from '@/models/Customer';
 import Good from '@/models/Good';
 import { ICustomer, ISearchParams } from '@/types';
+import { PaymentMethod } from '@/types/paymentMethod';
 import { connectToDB } from '@/utils/dbConnect';
 
 import { authOptions } from '../config/authOptions';
+import convertObjectIds from '../helpers/server/convertObjectIds';
+import { serializeForClient } from '../helpers/server/serializeForClient';
 
 export interface IGoodWithFavorite {
   _id: string;
@@ -90,7 +93,7 @@ export async function getCustomerByIdService(id: string) {
   await connectToDB();
   const doc = await Customer.findById(id).populate('user');
 
-  return doc ? toPlain(doc) : null;
+  return doc ? convertObjectIds(doc) : null;
 }
 
 export async function deleteCustomerService(id: string) {
@@ -133,7 +136,7 @@ export async function updateCustomerService(
 
 export async function updateCustomerFieldService(
   customerId: string,
-  field: 'city' | 'warehouse' | 'payment',
+  customerField: 'city' | 'warehouse' | 'payment',
   value: string
 ) {
   if (!customerId)
@@ -143,7 +146,11 @@ export async function updateCustomerFieldService(
   const customer = await Customer.findById(customerId);
   if (!customer) return { success: false, message: 'Користувача не знайдено' };
 
-  customer[field] = value;
+  if (customerField === 'payment') {
+    customer.payment = value as PaymentMethod; // ✔️ enum cast
+  } else {
+    customer[customerField] = value; // ✔️ обычная строка
+  }
   await customer.save();
 
   return {
@@ -157,7 +164,12 @@ export async function getCustomerByUserService(userId: string) {
   await connectToDB();
 
   const doc = await Customer.findOne({ user: userId }).populate('user');
-  return doc ? toPlain(doc) : null;
+
+  if (!doc) return null;
+  const serializedDoc = serializeForClient(doc);
+  console.log('serializedDoc', serializedDoc);
+
+  return serializedDoc;
 }
 
 export async function toggleFavoriteService(goodId: string) {
@@ -169,28 +181,24 @@ export async function toggleFavoriteService(goodId: string) {
         'Тільки авторизовані користувачі можуть додавати Товари до улюблених',
     };
 
-  const { _id } = session.user;
+  const { id } = session.user;
   await connectToDB();
 
-  const customer = await Customer.findOne({ user: _id });
+  const customer = await Customer.findOne({ user: id });
 
   if (!customer) throw new Error('Customer not found');
 
-  const isFav = customer.favorites.some(
-    (f: mongoose.Types.ObjectId) => f.toString() === goodId
-  );
+  const isFav = customer.favorites?.some(f => f.toString() === goodId);
 
   const update = isFav
     ? { $pull: { favorites: goodId } }
     : { $addToSet: { favorites: goodId } };
 
-  const updated = await Customer.findOneAndUpdate({ user: _id }, update, {
+  const updated = await Customer.findOneAndUpdate({ user: id }, update, {
     new: true,
   });
 
-  const favoritesStrings = updated!.favorites.map(
-    (f: mongoose.Types.ObjectId) => f.toString()
-  );
+  const favoritesStrings = updated!.favorites?.map(f => f.toString());
 
   return { favorites: favoritesStrings };
 }
@@ -202,10 +210,8 @@ export async function getGoodsWithFavoriteService() {
   await connectToDB();
 
   // получаем пользователя/клиента
-  const customerDoc = await Customer.findOne({ user: session.user._id });
-  const favorites =
-    customerDoc?.favorites.map((f: mongoose.Types.ObjectId) => f.toString()) ||
-    [];
+  const customerDoc = await Customer.findOne({ user: session.user.id });
+  const favorites = customerDoc?.favorites?.map(f => f.toString()) || [];
 
   // получаем все товары
   const goodsDocs = await Good.find().populate('brand', 'name slug').lean();

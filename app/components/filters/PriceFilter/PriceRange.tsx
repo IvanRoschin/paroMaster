@@ -5,9 +5,8 @@ import './PriceRange.css';
 
 import { useState } from 'react';
 import RangeSlider from 'react-range-slider-input';
-import { useContextSelector } from 'use-context-selector';
 
-import { FiltersContext } from '@/context/FiltersContext';
+import { useAppStore } from '@/app/store/appStore';
 
 interface PriceRangeProps {
   minPriceFromDB: number;
@@ -20,23 +19,12 @@ const PriceRange: React.FC<PriceRangeProps> = ({
   maxPriceFromDB,
   currencySymbol = '₴',
 }) => {
+  const { filters } = useAppStore();
   // Подписываемся на значения из контекста
-  const minPrice = useContextSelector(
-    FiltersContext,
-    ctx => ctx?.minPrice ?? minPriceFromDB
-  );
-  const maxPrice = useContextSelector(
-    FiltersContext,
-    ctx => ctx?.maxPrice ?? maxPriceFromDB
-  );
-  const setMinPrice = useContextSelector(
-    FiltersContext,
-    ctx => ctx?.setMinPrice
-  );
-  const setMaxPrice = useContextSelector(
-    FiltersContext,
-    ctx => ctx?.setMaxPrice
-  );
+  const minPrice = filters.minPrice;
+  const maxPrice = filters.maxPrice;
+  const setMinPrice = filters.setMinPrice;
+  const setMaxPrice = filters.setMaxPrice;
 
   const [value, setValue] = useState<[number, number]>([
     minPrice ?? minPriceFromDB,

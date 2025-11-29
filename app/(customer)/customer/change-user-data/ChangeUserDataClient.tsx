@@ -8,19 +8,33 @@ import { useNotificationModal } from '@/app/hooks';
 import { Modal } from '@/components/ui';
 import { IUser } from '@/types/IUser';
 
-import { EditableField } from './EditableField';
+import { EditableField } from '../components/EditableField';
 
-export interface ChangeUserDataClient {
+export interface ChangeUserDataClientProps {
   user?: IUser;
 }
 
-const ChangeUserDataClient: React.FC<ChangeUserDataClient> = ({ user }) => {
+const ChangeUserDataClient: React.FC<ChangeUserDataClientProps> = ({
+  user,
+}) => {
   const [profile, setProfile] = useState(user);
   const [message, setMessage] = useState('');
 
   const notificationModal = useNotificationModal();
 
   if (!profile || !profile._id) return <Loader />;
+
+  // Определяем список полей для редактирования
+  const editableFields: Array<{
+    label: string;
+    field: 'name' | 'surname' | 'email' | 'phone';
+    value: string;
+  }> = [
+    { label: "Ім'я", field: 'name', value: profile.name ?? '' },
+    { label: 'Прізвище', field: 'surname', value: profile.surname ?? '' },
+    { label: 'Email', field: 'email', value: profile.email ?? '' },
+    { label: 'Телефон', field: 'phone', value: profile.phone ?? '' },
+  ];
 
   return (
     <>
@@ -31,58 +45,29 @@ const ChangeUserDataClient: React.FC<ChangeUserDataClient> = ({ user }) => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.4, ease: 'easeOut' }}
           >
-            <h2 className="text-center text-2xl md:text-3xl font-bold text-gray-800 mb-6">
-              Зміна даних про користувача
-            </h2>
+            <h2 className="subtitle mb-6">Змінити дані користувача</h2>
 
-            <EditableField
-              label="Ім'я"
-              field="name"
-              value={profile.name ?? ''}
-              entityId={profile._id}
-              entityType="user"
-              setMessage={setMessage}
-              notificationModal={notificationModal}
-              onUpdated={val => setProfile({ ...profile, name: val })}
-            />
-
-            <EditableField
-              label="Прізвище"
-              field="surname"
-              value={profile.surname ?? ''}
-              entityId={profile._id}
-              entityType="user"
-              setMessage={setMessage}
-              notificationModal={notificationModal}
-              onUpdated={val => setProfile({ ...profile, surname: val })}
-            />
-
-            <EditableField
-              label="Email"
-              field="email"
-              value={profile.email ?? ''}
-              entityId={profile._id}
-              entityType="user"
-              setMessage={setMessage}
-              notificationModal={notificationModal}
-              onUpdated={val => setProfile({ ...profile, email: val })}
-            />
-
-            <EditableField
-              label="Телефон"
-              field="phone"
-              value={profile.phone || ''}
-              entityId={profile._id}
-              entityType="user"
-              setMessage={setMessage}
-              notificationModal={notificationModal}
-              onUpdated={val => setProfile({ ...profile, phone: val })}
-            />
+            {editableFields.map(({ label, field, value }) => (
+              <EditableField
+                editor={{ type: 'input' }}
+                key={field}
+                label={label}
+                field={field}
+                value={value}
+                entityId={profile._id?.toString() || ''}
+                entityType="user"
+                setMessage={setMessage}
+                notificationModal={notificationModal}
+                onUpdated={val =>
+                  setProfile(prev => ({ ...prev!, [field]: val }))
+                }
+              />
+            ))}
           </motion.div>
         </div>
       </div>
 
-      {/* ОДНА МОДАЛКА НА ВСЮ СТРАНИЦУ */}
+      {/* Универсальная модалка */}
       <Modal
         body={
           <ModalNotification

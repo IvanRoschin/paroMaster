@@ -6,7 +6,7 @@ import { PaymentMethod } from './paymentMethod';
 
 export interface ICustomer {
   _id?: string;
-  user: Types.ObjectId;
+  user?: Types.ObjectId;
   city: string;
   warehouse: string;
   payment: PaymentMethod;

@@ -1,13 +1,11 @@
 'use client';
 
-import { ShoppingCartProvider } from 'app/context/ShoppingCartContext';
 import { SessionProvider } from 'next-auth/react';
 import { Suspense, useState } from 'react';
 import { Toaster } from 'sonner';
 
 import PreloadedResources from '@/app/utils/PreloadedResources';
 import { Loader } from '@/components';
-import { FiltersProvider } from '@/context/FiltersContext';
 import {
   DehydratedState,
   HydrationBoundary,
@@ -15,9 +13,6 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-
-import { CompareProvider } from '../context/CompareContext';
-import { FavoritesProvider } from '../context/FavoritesContext';
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -29,24 +24,24 @@ export function Providers({ children, dehydratedState }: ProvidersProps) {
 
   return (
     <SessionProvider>
-      <FiltersProvider>
+      {/* <FiltersProvider>
         <CompareProvider>
           <FavoritesProvider>
-            <ShoppingCartProvider>
-              <Suspense fallback={<Loader />}>
-                <PreloadedResources />
-                <QueryClientProvider client={queryClient}>
-                  <HydrationBoundary state={dehydratedState}>
-                    {children}
-                  </HydrationBoundary>
-                  <ReactQueryDevtools initialIsOpen={false} />
-                </QueryClientProvider>
-                <Toaster position="top-right" richColors />
-              </Suspense>
-            </ShoppingCartProvider>
+            <ShoppingCartProvider> */}
+      <Suspense fallback={<Loader />}>
+        <PreloadedResources />
+        <QueryClientProvider client={queryClient}>
+          <HydrationBoundary state={dehydratedState}>
+            {children}
+          </HydrationBoundary>
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+        <Toaster position="top-right" richColors />
+      </Suspense>
+      {/* </ShoppingCartProvider>
           </FavoritesProvider>
         </CompareProvider>
-      </FiltersProvider>
+      </FiltersProvider> */}
     </SessionProvider>
   );
 }

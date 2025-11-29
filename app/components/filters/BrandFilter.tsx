@@ -1,31 +1,27 @@
 'use client';
 
-import { useContextSelector } from 'use-context-selector';
-
-import { FiltersContext, Option } from '@/context/FiltersContext';
+import { useAppStore } from '@/app/store/appStore';
 import { useMediaQuery } from '@/hooks/index';
+
+export interface Option {
+  value: string;
+  label: string;
+  slug?: string;
+}
 
 const BrandFilter = ({ brands }: { brands: Option[] }) => {
   const isMobile = useMediaQuery('(max-width: 767px)');
+  const { filters } = useAppStore();
 
-  const selectedBrands = useContextSelector(
-    FiltersContext,
-    ctx => ctx?.selectedBrands ?? []
-  );
-
-  const setSelectedBrands = useContextSelector(
-    FiltersContext,
-    ctx => ctx?.setSelectedBrands
-  );
+  const selectedBrands = filters.selectedBrands;
+  const setSelectedBrands = filters.setSelectedBrands;
 
   const handleBrandClick = (brand: Option) => {
     if (!setSelectedBrands) return;
-
-    setSelectedBrands(prev =>
-      prev.some(b => b.slug === brand.slug)
-        ? prev.filter(b => b.slug !== brand.slug)
-        : [...prev, brand]
-    );
+    const newSelectedBrands = selectedBrands.some(b => b.slug === brand.slug)
+      ? selectedBrands.filter(b => b.slug !== brand.slug)
+      : [...selectedBrands, brand];
+    setSelectedBrands(newSelectedBrands);
   };
 
   return (

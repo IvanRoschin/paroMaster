@@ -10,6 +10,7 @@ import { changePasswordFormSchema } from '@/app/helpers/validationSchemas';
 import { useNotificationModal } from '@/app/hooks';
 import { FormField, ModalNotification } from '@/components/common';
 import { Button, Modal } from '@/components/ui';
+import { SessionUser } from '@/types/IUser';
 
 interface InitialStateType {
   oldPassword: string;
@@ -17,7 +18,7 @@ interface InitialStateType {
   confirmNewPassword: string;
 }
 
-const ChangePasswordForm = ({ userId }: { userId?: string }) => {
+const ChangePasswordForm = ({ user }: { user?: SessionUser }) => {
   const [showPassword, setShowPassword] = useState({
     old: false,
     new: false,
@@ -36,7 +37,7 @@ const ChangePasswordForm = ({ userId }: { userId?: string }) => {
   };
 
   // --- Early return ---
-  if (!userId) {
+  if (!user?.id) {
     return (
       <>
         <Modal
@@ -66,7 +67,7 @@ const ChangePasswordForm = ({ userId }: { userId?: string }) => {
     setIsLoading(true);
 
     const res = await changePasswordAction(
-      userId,
+      user.id,
       values.oldPassword,
       values.newPassword,
       values.confirmNewPassword
@@ -92,6 +93,8 @@ const ChangePasswordForm = ({ userId }: { userId?: string }) => {
           type: showPassword[showKey] ? 'text' : 'password',
           id,
           required: true,
+          autoComplete:
+            id === 'oldPassword' ? 'current-password' : 'new-password',
         }}
         errors={{}}
       />
@@ -115,9 +118,7 @@ const ChangePasswordForm = ({ userId }: { userId?: string }) => {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.4, ease: 'easeOut' }}
         >
-          <h2 className="text-center text-2xl md:text-3xl font-bold text-gray-800 mb-6">
-            Сторінка зміни паролю
-          </h2>
+          <h2 className="subtitle mb-6">Змінити пароль</h2>
 
           <Formik
             initialValues={initialValues}
@@ -125,6 +126,14 @@ const ChangePasswordForm = ({ userId }: { userId?: string }) => {
             validationSchema={changePasswordFormSchema}
           >
             <Form className="flex flex-col gap-5">
+              <input
+                type="email"
+                name="username"
+                defaultValue={user.email || ''}
+                autoComplete="username"
+                className="hidden"
+              />
+
               {renderPasswordField('Старий пароль', 'oldPassword', 'old')}
               {renderPasswordField('Новий пароль', 'newPassword', 'new')}
               {renderPasswordField(

@@ -52,9 +52,7 @@ const ForgotPasswordForm = () => {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.4, ease: 'easeOut' }}
         >
-          <h2 className="text-center text-2xl md:text-3xl font-bold text-gray-800 mb-6">
-            Відновлення паролю
-          </h2>
+          <h2 className="subtitle mb-6">Відновлення паролю</h2>
           <Formik
             initialValues={initialValues}
             onSubmit={handleSubmit}

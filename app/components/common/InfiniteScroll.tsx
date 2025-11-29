@@ -3,11 +3,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { TailSpin } from 'react-loader-spinner';
-import { useContextSelector } from 'use-context-selector';
 
 import { getAllGoodsAction } from '@/actions/goods';
 import { GoodsSection } from '@/app/(admin)/components';
-import { FiltersContext } from '@/context/FiltersContext';
+import { useAppStore } from '@/app/store/appStore';
 import { IGoodUI } from '@/types/IGood';
 import { UserRole } from '@/types/IUser';
 import { ISearchParams } from '@/types/searchParams';
@@ -30,21 +29,16 @@ export default function InfiniteScroll({
   const [allGoodsLoaded, setAllGoodsLoaded] = useState(false);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [firstLoadDone, setFirstLoadDone] = useState(false);
+  const { filters } = useAppStore();
 
   const { ref, inView } = useInView({ threshold: 0.5 });
 
   // Подписка на фильтры
-  const minPrice = useContextSelector(FiltersContext, ctx => ctx?.minPrice);
-  const maxPrice = useContextSelector(FiltersContext, ctx => ctx?.maxPrice);
-  const selectedBrands = useContextSelector(
-    FiltersContext,
-    ctx => ctx?.selectedBrands
-  );
-  const selectedCategory = useContextSelector(
-    FiltersContext,
-    ctx => ctx?.selectedCategory
-  );
-  const sort = useContextSelector(FiltersContext, ctx => ctx?.sort);
+  const minPrice = filters.minPrice;
+  const maxPrice = filters.maxPrice;
+  const selectedBrands = filters.selectedBrands;
+  const selectedCategory = filters.selectedCategory;
+  const sort = filters.sort;
 
   // Массив _id брендов для фильтрации
   const brandIds = useMemo(

@@ -1,13 +1,12 @@
 'use client';
 
-import { useContextSelector } from 'use-context-selector';
-
-import { FiltersContext } from '@/context/FiltersContext';
+import { useAppStore } from '@/app/store/appStore';
 
 export const Sort = () => {
+  const { filters } = useAppStore();
   // ✅ подписываемся только на нужные части контекста
-  const sort = useContextSelector(FiltersContext, ctx => ctx?.sort);
-  const setSort = useContextSelector(FiltersContext, ctx => ctx?.setSort);
+  const sort = filters.sort;
+  const setSort = filters.setSort;
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-3 container md:w-[250px]">

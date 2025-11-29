@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from '../ui';
 
-interface Option {
+export interface Option {
   value: string;
   label: string;
 }

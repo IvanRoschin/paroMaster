@@ -8,8 +8,8 @@ import ChangeUserDataClient from './ChangeUserDataClient';
 export default async function changeUserDataPage() {
   const session = await getServerSession(authOptions);
   let user: IUser | undefined = undefined;
-  if (session?.user?._id) {
-    user = (await getUserByIdAction(session.user._id)) || undefined;
+  if (session?.user?.id) {
+    user = (await getUserByIdAction(session.user.id)) || undefined;
   }
   return <ChangeUserDataClient user={user} />;
 }

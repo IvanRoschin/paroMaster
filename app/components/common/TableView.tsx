@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { FaPen, FaTrash } from 'react-icons/fa';
 
-import { useShoppingCart } from '@/app/context/ShoppingCartContext';
 import { useGoodDelete } from '@/app/hooks';
+import { useAppStore } from '@/app/store/appStore';
 import { formatCurrency } from '@/app/utils/formatCurrency';
 import { Button, DeleteConfirmation, Modal, NextImage } from '@/components';
 import { IGoodUI, ISearchParams } from '@/types';
@@ -27,22 +27,17 @@ export const TableView = ({
   const { goodToDelete, handleDelete, handleDeleteConfirm, deleteModal } =
     useGoodDelete(refetch, ['goods', searchParams]);
 
-  const {
-    getItemQuantity,
-    increaseCartQuantity,
-    decreaseCartQuantity,
-    removeFromCart,
-  } = useShoppingCart();
+  const { cart } = useAppStore();
 
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const newQuantities: Record<string, number> = {};
     goods.forEach(good => {
-      newQuantities[good._id] = getItemQuantity(good._id);
+      newQuantities[good._id] = cart.getItemQuantity(good._id);
     });
     setQuantities(newQuantities);
-  }, [goods, getItemQuantity]);
+  }, [goods, cart]);
 
   return (
     <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm bg-white">
@@ -153,9 +148,9 @@ export const TableView = ({
                       goodId={good._id}
                       isAvailable={good.isAvailable}
                       quantity={quantity}
-                      increaseCartQuantity={increaseCartQuantity}
-                      decreaseCartQuantity={decreaseCartQuantity}
-                      removeFromCart={removeFromCart}
+                      increaseCartQuantity={cart.increaseCartQuantity}
+                      decreaseCartQuantity={cart.decreaseCartQuantity}
+                      removeFromCart={cart.removeFromCart}
                     />
                   )}
                 </td>

@@ -1,11 +1,11 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useContextSelector } from 'use-context-selector';
 
 import { getAllBrandsAction } from '@/app/actions/brands';
 import { getAllCategoriesAction } from '@/app/actions/categories';
 import { useFetchData } from '@/app/hooks';
+import { useAppStore } from '@/app/store/appStore';
 import {
   ButtonAddGood,
   CardView,
@@ -17,7 +17,6 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components';
-import { FiltersContext } from '@/context/FiltersContext';
 import { IGoodUI } from '@/types';
 import { GetAllBrandsResponse } from '@/types/IBrand';
 import { GetAllCategoriesResponse } from '@/types/ICategory';
@@ -42,8 +41,6 @@ export default function GoodsSection({
   initialCategory,
   searchParams,
   role,
-  isLoading,
-  firstLoadDone,
 }: GoodsSectionProps) {
   const { data: categoriesData, isLoading: catLoading } =
     useFetchData<GetAllCategoriesResponse>(getAllCategoriesAction, [
@@ -54,13 +51,16 @@ export default function GoodsSection({
 
   const [view, setView] = useState<'table' | 'card' | 'list'>('card');
 
-  // Контекст для синхронизации брендов
-  const selectedBrands = useContextSelector(
-    FiltersContext,
-    c => c?.selectedBrands
-  );
+  const { filters } = useAppStore();
 
-  const [filters, setFilters] = useState<ProductFiltersState>({
+  // Контекст для синхронизации брендов
+  const selectedBrands = filters.selectedBrands;
+  // const selectedBrands = useContextSelector(
+  //   FiltersContext,
+  //   c => c?.selectedBrands
+  // );
+
+  const [filter, setFilter] = useState<ProductFiltersState>({
     category: initialCategory ?? 'all',
     brand: 'all',
     availability: 'all',
@@ -93,7 +93,7 @@ export default function GoodsSection({
     return goods
       .filter(g => {
         const matchCategory =
-          filters.category === 'all' || g.category?._id === filters.category;
+          filter.category === 'all' || g.category?._id === filter.category;
 
         // Берем первый выбранный бренд из контекста, если есть
         const matchBrand =
@@ -103,19 +103,19 @@ export default function GoodsSection({
             : false);
 
         const matchAvailability =
-          filters.availability === 'all' ||
-          (filters.availability === 'available' && g.isAvailable) ||
-          (filters.availability === 'unavailable' && !g.isAvailable);
+          filter.availability === 'all' ||
+          (filter.availability === 'available' && g.isAvailable) ||
+          (filter.availability === 'unavailable' && !g.isAvailable);
 
         const matchCondition =
-          filters.condition === 'all' ||
-          (filters.condition === 'new' && !g.isUsed) ||
-          (filters.condition === 'used' && g.isUsed);
+          filter.condition === 'all' ||
+          (filter.condition === 'new' && !g.isUsed) ||
+          (filter.condition === 'used' && g.isUsed);
 
         const matchSearch =
-          !filters.search ||
-          g.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-          g.sku?.toLowerCase().includes(filters.search.toLowerCase());
+          !filter.search ||
+          g.title.toLowerCase().includes(filter.search.toLowerCase()) ||
+          g.sku?.toLowerCase().includes(filter.search.toLowerCase());
 
         return (
           matchCategory &&
@@ -126,11 +126,11 @@ export default function GoodsSection({
         );
       })
       .sort((a, b) => {
-        if (filters.sortPrice === 'asc') return a.price - b.price;
-        if (filters.sortPrice === 'desc') return b.price - a.price;
+        if (filter.sortPrice === 'asc') return a.price - b.price;
+        if (filter.sortPrice === 'desc') return b.price - a.price;
         return 0;
       });
-  }, [goods, filters, selectedBrands]);
+  }, [goods, filter, selectedBrands]);
 
   if (catLoading || brandLoading) return <Loader />;
 
@@ -157,7 +157,7 @@ export default function GoodsSection({
       <ProductFilters
         categories={categories}
         brands={brands}
-        onChange={setFilters}
+        onChange={setFilter}
       />
 
       <>

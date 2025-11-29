@@ -1,6 +1,5 @@
 'use client';
 
-import { useShoppingCart } from 'app/context/ShoppingCartContext';
 import { createWayForPayInvoice } from 'app/lib/wayforpay';
 import { Form, Formik } from 'formik';
 import { useRouter } from 'next/navigation';
@@ -16,6 +15,7 @@ import {
   sendAdminEmail,
   sendCustomerEmail,
 } from '@/app/services/sendNodeMailer';
+import { useAppStore } from '@/app/store/appStore';
 import { Breadcrumbs, Button } from '@/components/index';
 import { customerFormSchema, storageKeys } from '@/helpers/index';
 import { ICartItem, IOrder } from '@/types/index';
@@ -43,7 +43,7 @@ export interface CheckoutClient {
 
 const CheckoutClient: React.FC<CheckoutClient> = ({ user }) => {
   const { push } = useRouter();
-  const { cart, resetCart } = useShoppingCart();
+  const { cart } = useAppStore();
 
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckboxChecked, setIsCheckboxChecked] = useState(false);
@@ -89,7 +89,7 @@ const CheckoutClient: React.FC<CheckoutClient> = ({ user }) => {
 
   const totalPrice = useMemo(
     () =>
-      cart.reduce(
+      cart.cart.reduce(
         (acc, item: ICartItem) =>
           acc + (item.good.price || 0) * (item.quantity || 1),
         0
@@ -104,7 +104,7 @@ const CheckoutClient: React.FC<CheckoutClient> = ({ user }) => {
       return toast.error('Будь ласка, погодьтесь із публічною офертою');
     if (!values.city || !values.warehouse)
       return toast.error('Будь ласка, виберіть місто та відділення');
-    if (cart.length === 0) return toast.error('Кошик порожній.');
+    if (cart.cart.length === 0) return toast.error('Кошик порожній.');
 
     try {
       setIsLoading(true);
@@ -112,8 +112,8 @@ const CheckoutClient: React.FC<CheckoutClient> = ({ user }) => {
       let userId: string;
 
       // === 1. Пользователь ===
-      if (user?._id) {
-        userId = user._id;
+      if (user?.id) {
+        userId = user.id;
       } else {
         const userRes = await addUserAction({
           name: values.name,
@@ -144,7 +144,7 @@ const CheckoutClient: React.FC<CheckoutClient> = ({ user }) => {
         throw new Error('Не вдалося створити замовника');
 
       // === 3. Order ===
-      const orderedGoods = cart.map(item => ({
+      const orderedGoods = cart.cart.map(item => ({
         good: item.good._id,
         quantity: item.quantity,
         price: item.good.price,
@@ -172,17 +172,19 @@ const CheckoutClient: React.FC<CheckoutClient> = ({ user }) => {
       const orderRes = await addOrderAction(orderData);
       if (!orderRes.success) throw new Error('Не вдалося створити замовлення');
 
-      const orderedGoodsSnapshot: IOrderedGoodSnapshot[] = cart.map(item => ({
-        good: {
-          _id: item.good._id,
-          title: item.good.title,
-          brand: item.good.brand?.name || '-',
-          model: item.good.model,
-          sku: item.good.sku,
-        },
-        quantity: item.quantity,
-        price: item.good.price,
-      }));
+      const orderedGoodsSnapshot: IOrderedGoodSnapshot[] = cart.cart.map(
+        item => ({
+          good: {
+            _id: item.good._id,
+            title: item.good.title,
+            brand: item.good.brand?.name || '-',
+            model: item.good.model,
+            sku: item.good.sku,
+          },
+          quantity: item.quantity,
+          price: item.good.price,
+        })
+      );
 
       await Promise.all([
         sendAdminEmail(orderData, orderedGoodsSnapshot),
@@ -190,7 +192,7 @@ const CheckoutClient: React.FC<CheckoutClient> = ({ user }) => {
       ]);
 
       toast.success('Замовлення успішно створено! 🚀');
-      resetCart();
+      cart.resetCart();
       sessionStorage.removeItem(storageKeys.customer);
       localStorage.clear();
 
@@ -284,8 +286,8 @@ const CheckoutClient: React.FC<CheckoutClient> = ({ user }) => {
           {/* Кошик */}
           <div className="w-full lg:w-1/3 flex flex-col gap-4">
             <h3 className="text-2xl font-semibold mb-4">Ваші товари</h3>
-            {cart.length > 0 ? (
-              cart.map((item: ICartItem, i) => {
+            {cart.cart.length > 0 ? (
+              cart.cart.map((item: ICartItem, i) => {
                 return (
                   <OrderGood
                     key={item.good._id || i}

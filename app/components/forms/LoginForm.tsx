@@ -49,6 +49,8 @@ const LoginForm = () => {
       resetForm();
 
       const session = await getSession();
+
+      console.log('session', session);
       const role = session?.user?.role as UserRole;
 
       if (role === UserRole.ADMIN) router.replace('/admin');

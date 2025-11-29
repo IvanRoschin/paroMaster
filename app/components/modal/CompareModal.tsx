@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
+import { useAppStore } from '@/app/store/appStore';
 import { Button, Modal, NextImage } from '@/components';
-import { useCompare } from '@/context/CompareContext';
 
 const FIELDS_TO_COMPARE: { key: string; label: string }[] = [
   { key: 'price', label: 'Ціна' },
@@ -15,15 +15,17 @@ const FIELDS_TO_COMPARE: { key: string; label: string }[] = [
 ];
 
 export default function CompareModal({ onClose }: { onClose: () => void }) {
-  const { items, remove, clear } = useCompare();
+  // const { items, remove, clear } = useCompare();
+  const { compare } = useAppStore();
+
   const [mounted, setMounted] = useState(false);
 
   const differentFields = useMemo(() => {
     const diff = new Set<string>();
-    if (items.length <= 1) return diff;
+    if (compare.items.length <= 1) return diff;
 
     FIELDS_TO_COMPARE.forEach(field => {
-      const values = items.map(item => {
+      const values = compare.items.map(item => {
         const value = item[field.key];
         return typeof value === 'object' && value !== null
           ? JSON.stringify(value)
@@ -33,7 +35,7 @@ export default function CompareModal({ onClose }: { onClose: () => void }) {
     });
 
     return diff;
-  }, [items]);
+  }, [compare.items]);
 
   useEffect(() => setMounted(true), []);
 
@@ -48,13 +50,13 @@ export default function CompareModal({ onClose }: { onClose: () => void }) {
           <h2 className="text-2xl font-bold text-center">Порівняння товарів</h2>
 
           <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-            {items.map(item => (
+            {compare.items.map(item => (
               <div
                 key={item._id}
                 className="relative w-[160px] bg-white shadow rounded-xl p-4 border hover:shadow-lg transition-shadow flex-shrink-0"
               >
                 <button
-                  onClick={() => remove(item._id)}
+                  onClick={() => compare.remove(item._id)}
                   className="absolute right-3 top-3 text-gray-400 hover:text-red-500 text-lg font-bold transition"
                 >
                   ✕
@@ -98,7 +100,7 @@ export default function CompareModal({ onClose }: { onClose: () => void }) {
 
           <div className="flex justify-center">
             <Button
-              onClick={clear}
+              onClick={compare.clear}
               className="px-6 py-2 font-semibold rounded-lg w-[180px]"
             >
               Очистити

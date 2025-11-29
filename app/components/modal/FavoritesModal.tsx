@@ -1,7 +1,7 @@
 'use client';
 
+import { useAppStore } from '@/app/store/appStore';
 import { Button, ProductCard } from '@/components';
-import { useFavorites } from '@/context/FavoritesContext';
 
 import Modal from './Modal';
 
@@ -14,7 +14,8 @@ export const FavoritesModal: React.FC<FavoritesModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { favorites, toggleFavorite } = useFavorites();
+  // const { favorites, toggleFavorite } = useFavorites();
+  const { favorites } = useAppStore();
 
   return (
     <Modal
@@ -26,13 +27,13 @@ export const FavoritesModal: React.FC<FavoritesModalProps> = ({
             ❤️ Улюблені товари
           </h2>
 
-          {favorites.length === 0 ? (
+          {favorites.favorites.length === 0 ? (
             <p className="text-gray-500 text-center py-10">
               У вас ще немає улюблених товарів
             </p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {favorites.map(good => (
+              {favorites.favorites.map(good => (
                 <div key={good._id} className="relative">
                   <ProductCard good={good} />
                   <Button
@@ -40,7 +41,7 @@ export const FavoritesModal: React.FC<FavoritesModalProps> = ({
                     label="Видалити"
                     small
                     outline
-                    onClick={() => toggleFavorite(good)}
+                    onClick={() => favorites.toggleFavorite(good)}
                     className="absolute top-2 right-2"
                   />
                 </div>

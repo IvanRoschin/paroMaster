@@ -49,11 +49,18 @@ export async function updateCustomerAction(
 
 export async function updateCustomerFieldAction(
   customerId: string,
-  field: 'city' | 'warehouse' | 'payment',
+  customerField: 'city' | 'warehouse' | 'payment',
   value: string
 ) {
-  const result = await updateCustomerFieldService(customerId, field, value);
-  return result;
+  const res = await updateCustomerFieldService(
+    customerId,
+    customerField,
+    value
+  );
+  if (res.success) {
+    revalidatePath('/profile');
+  }
+  return res;
 }
 
 export async function toggleFavoriteAction(goodId: string) {

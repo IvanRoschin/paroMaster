@@ -1,6 +1,5 @@
 'use client';
 
-import { useShoppingCart } from 'app/context/ShoppingCartContext';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import {
@@ -15,6 +14,7 @@ import {
   deleteTestimonialAction,
   getGoodTestimonialsAction,
 } from '@/actions/testimonials';
+import { useAppStore } from '@/app/store/appStore';
 import { formatCurrency } from '@/app/utils/formatCurrency';
 import {
   Breadcrumbs,
@@ -41,13 +41,14 @@ interface GoodPageClientProps {
 const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
   const [testimonialToDelete, setTestimonialToDelete] = useState<string>('');
   const [, setAmount] = useState(0);
+  const { cart } = useAppStore();
 
-  const {
-    getItemQuantity,
-    increaseCartQuantity,
-    decreaseCartQuantity,
-    removeFromCart,
-  } = useShoppingCart();
+  // const {
+  //   getItemQuantity,
+  //   increaseCartQuantity,
+  //   decreaseCartQuantity,
+  //   removeFromCart,
+  // } = useShoppingCart();
 
   const productId = good?._id;
   const testimonialModal = useTestimonialModal();
@@ -72,10 +73,10 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
 
   useEffect(() => {
     if (!good) return;
-    const newAmount = good.price * getItemQuantity(good._id);
+    const newAmount = good.price * cart.getItemQuantity(good._id);
     setAmount(newAmount);
     localStorage.setItem(`amount-${good._id}`, JSON.stringify(newAmount));
-  }, [good, getItemQuantity]);
+  }, [good, cart]);
 
   const handleDelete = (id: string) => {
     setTestimonialToDelete(id);
@@ -93,7 +94,7 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
   if (!good || isTestimonialsLoading || !testimonials) return <Loader />;
   if (isTestimonialsError) return <ErrorMessage error={testimonialsError} />;
 
-  const quantity = getItemQuantity(good._id);
+  const quantity = cart.getItemQuantity(good._id);
 
   return (
     <div className="m-6">
@@ -147,7 +148,7 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
                 width="40"
                 type="button"
                 label="Купити"
-                onClick={() => increaseCartQuantity(good._id)}
+                onClick={() => cart.increaseCartQuantity(good._id)}
                 disabled={!good.isAvailable}
               />
             ) : (
@@ -156,7 +157,7 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
                   <Button
                     width="10"
                     label="-"
-                    onClick={() => decreaseCartQuantity(good._id)}
+                    onClick={() => cart.decreaseCartQuantity(good._id)}
                     small
                     outline
                   />
@@ -164,7 +165,7 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
                   <Button
                     width="10"
                     label="+"
-                    onClick={() => increaseCartQuantity(good._id)}
+                    onClick={() => cart.increaseCartQuantity(good._id)}
                     small
                     outline
                   />
@@ -173,7 +174,7 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
                   width="40"
                   label="Видалити"
                   onClick={() => {
-                    removeFromCart(good._id);
+                    cart.removeFromCart(good._id);
                     localStorage.removeItem(`amount-${good._id}`);
                   }}
                 />

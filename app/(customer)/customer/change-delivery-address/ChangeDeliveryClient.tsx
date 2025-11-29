@@ -1,9 +1,10 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Loader, ModalNotification } from '@/app/components';
+import { paymentMethods } from '@/app/config/constants';
 import {
   useCitySelection,
   useNotificationModal,
@@ -11,9 +12,12 @@ import {
 } from '@/app/hooks';
 import { Modal } from '@/components/ui';
 import { ICustomer } from '@/types/ICustomer';
-import { PaymentMethod } from '@/types/paymentMethod';
 
-import { EditableField } from '../change-user-data/EditableField';
+import {
+  CustomerEditableFields,
+  EditableField,
+  EditorType,
+} from '../components/EditableField';
 
 export interface ChangeDeliveryInfoClientProps {
   customer?: ICustomer;
@@ -28,6 +32,10 @@ const ChangeDeliveryInfoClient: React.FC<ChangeDeliveryInfoClientProps> = ({
   const notificationModal = useNotificationModal();
 
   const { warehouses, fetchWarehouses } = useWarehouses(profile?.city || '');
+
+  // -------------------------------
+  // ЛОГИКА ГОРОДА — как в checkout
+  // -------------------------------
   const {
     search,
     setSearch,
@@ -36,28 +44,72 @@ const ChangeDeliveryInfoClient: React.FC<ChangeDeliveryInfoClientProps> = ({
   } = useCitySelection(
     profile?.city || '',
     (_, city) =>
-      setProfile(prev => (prev ? { ...prev, city } : ({ city } as ICustomer))),
+      setProfile(prev =>
+        prev ? { ...prev, city, warehouse: '' } : ({ city } as ICustomer)
+      ),
     fetchWarehouses
   );
 
-  const prevWarehouseRef = useRef<string | null>(null);
+  const [showDropdown, setShowDropdown] = useState(false);
 
+  // Автоподстановка склада
   useEffect(() => {
     const firstWarehouse = warehouses[0]?.Description || '';
-    if (!firstWarehouse) return;
+    if (!firstWarehouse || !profile?.city) return;
 
-    if (!profile?.city) return;
-    if (profile.warehouse !== firstWarehouse) {
+    if (!profile.warehouse) {
       setProfile(prev =>
-        prev
-          ? { ...prev, warehouse: firstWarehouse }
-          : ({ ...(customer ?? {}), warehouse: firstWarehouse } as ICustomer)
+        prev ? { ...prev, warehouse: firstWarehouse } : prev
       );
-      prevWarehouseRef.current = firstWarehouse;
     }
-  }, [profile?.city, profile?.warehouse, warehouses, customer]);
+  }, [profile?.city, warehouses, profile?.warehouse, customer]);
 
   if (!profile || !profile._id) return <Loader />;
+
+  const getPaymentLabel = (id: string) => {
+    const method = paymentMethods.find(pm => pm.id === id);
+    return method ? method.label : id;
+  };
+
+  const fields: Array<{
+    label: string;
+    field: CustomerEditableFields;
+    editor: EditorType;
+    value: string;
+  }> = [
+    {
+      label: 'Місто',
+      field: 'city',
+      value: profile.city ?? '',
+      editor: {
+        type: 'city',
+        search,
+        setSearch,
+        filteredCities,
+        handleSelect: handleCitySelect,
+        showDropdown,
+        setShowDropdown,
+      },
+    },
+    {
+      label: 'Відділення',
+      field: 'warehouse',
+      value: profile.warehouse ?? '',
+      editor: { type: 'warehouse', warehouses },
+    },
+    {
+      label: 'Спосіб оплати',
+      field: 'payment',
+      value: getPaymentLabel(profile.payment ?? ''),
+      editor: {
+        type: 'select',
+        options: paymentMethods.map(pm => ({
+          value: pm.id,
+          label: pm.label,
+        })),
+      },
+    },
+  ];
 
   return (
     <>
@@ -68,64 +120,28 @@ const ChangeDeliveryInfoClient: React.FC<ChangeDeliveryInfoClientProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.4, ease: 'easeOut' }}
           >
-            <h2 className="text-center text-2xl md:text-3xl font-bold text-gray-800 mb-6">
-              Зміна даних отримувача
-            </h2>
-
-            {/* City selection */}
-            <div className="relative mb-4">
-              <input
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                onFocus={() => {}}
-                placeholder="Введіть назву міста"
-                className="w-full p-4 pt-6 border-2 rounded-md outline-none border-neutral-300 focus:border-green-500"
+            <h2 className="subtitle mb-6">Змінити адресу доставки</h2>
+            {fields.map(({ label, field, editor, value }) => (
+              <EditableField
+                key={field}
+                label={label}
+                field={field}
+                value={value}
+                entityId={profile._id || ''}
+                entityType="customer"
+                editor={editor}
+                setMessage={setMessage}
+                notificationModal={notificationModal}
+                onUpdated={val =>
+                  setProfile(prev => (prev ? { ...prev, [field]: val } : prev))
+                }
               />
-              {filteredCities.length > 0 && (
-                <div className="absolute z-10 w-full bg-white border rounded-md max-h-60 overflow-y-auto">
-                  {filteredCities.map((city, i) => (
-                    <div
-                      key={i}
-                      onMouseDown={() => handleCitySelect(city)}
-                      className="p-2 hover:bg-gray-200 cursor-pointer"
-                    >
-                      {city}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Warehouse */}
-            <EditableField
-              label="Відділення"
-              field="warehouse"
-              value={profile.warehouse ?? ''}
-              entityId={profile._id}
-              entityType="customer"
-              setMessage={setMessage}
-              notificationModal={notificationModal}
-              onUpdated={val => setProfile({ ...profile, warehouse: val })}
-            />
-
-            {/* Payment */}
-            <EditableField
-              label="Спосіб оплати"
-              field="payment"
-              value={profile.payment ?? ''}
-              entityId={profile._id}
-              entityType="customer"
-              setMessage={setMessage}
-              notificationModal={notificationModal}
-              onUpdated={val =>
-                setProfile({ ...profile, payment: val as PaymentMethod })
-              }
-            />
+            ))}
           </motion.div>
         </div>
       </div>
 
-      {/* Модалка уведомления */}
+      {/* Модалка */}
       <Modal
         body={
           <ModalNotification

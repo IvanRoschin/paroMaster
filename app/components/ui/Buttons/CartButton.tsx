@@ -1,16 +1,20 @@
 'use client';
 
-import { useShoppingCart } from 'app/context/ShoppingCartContext';
 import dynamic from 'next/dynamic';
 
+import { useCartStore } from '@/app/store/cartStore';
 import { Icon } from '@/components/ui';
 import { useCartModal } from '@/hooks/index';
 
 const CartButton = () => {
-  const { cartQuantity } = useShoppingCart();
+  const totalQuantity = useCartStore(state =>
+    state.cart.reduce((sum, i) => sum + i.quantity, 0)
+  );
+
+  // const { cartQuantity } = useShoppingCart();
   const cartModal = useCartModal();
 
-  if (cartQuantity === 0) return null;
+  if (totalQuantity === 0) return null;
 
   return (
     <button
@@ -31,7 +35,7 @@ const CartButton = () => {
           text-[10px] font-semibold
         "
       >
-        {cartQuantity}
+        {totalQuantity}
       </span>
     </button>
   );

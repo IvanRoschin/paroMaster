@@ -4,14 +4,17 @@ import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { FaHeart } from 'react-icons/fa';
 
+import { useAppStore } from '@/app/store/appStore';
 import { FavoritesModal } from '@/components/modal/FavoritesModal';
-import { useFavorites } from '@/context/FavoritesContext';
 
 const FavoritesHeaderButton = () => {
-  const { favorites } = useFavorites();
+  // const { favorites } = useFavorites();
+
+  const { favorites } = useAppStore();
+
   const [isOpen, setIsOpen] = useState(false);
 
-  if (favorites.length === 0) return null;
+  if (favorites.favorites.length === 0) return null;
 
   return (
     <>
@@ -30,7 +33,7 @@ const FavoritesHeaderButton = () => {
           text-[10px] font-semibold
         "
         >
-          {favorites.length}
+          {favorites.favorites.length}
         </span>
       </button>
       {isOpen && (

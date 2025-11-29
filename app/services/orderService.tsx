@@ -8,6 +8,7 @@ import Order from '@/models/Order';
 import { IOrder } from '@/types/index';
 import { connectToDB } from '@/utils/dbConnect';
 
+import convertObjectIds from '../helpers/server/convertObjectIds';
 import { serializeDoc } from '../lib';
 import { addCustomerService } from './customerService';
 import { addUserService } from './userService';
@@ -118,7 +119,9 @@ export async function getOrderByIdService(id: string): Promise<IOrder | null> {
     .populate('orderedGoods.good')
     .lean();
 
-  return order ? serializeDoc<IOrder>(order) : null;
+  if (!order) return null;
+
+  return convertObjectIds(order);
 }
 
 export async function updateOrderService(
