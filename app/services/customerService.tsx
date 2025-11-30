@@ -4,7 +4,6 @@ import mongoose from 'mongoose';
 import { getServerSession } from 'next-auth';
 
 import { buildPagination } from '@/helpers/index';
-import toPlain from '@/helpers/server/toPlain';
 import Customer from '@/models/Customer';
 import Good from '@/models/Good';
 import { ICustomer, ISearchParams } from '@/types';
@@ -45,7 +44,7 @@ export async function addCustomerService(values: Partial<ICustomer>) {
     return {
       success: true,
       message: 'Дані клієнта оновлено',
-      customer: toPlain(existing),
+      customer: serializeForClient(existing),
     };
   }
 
@@ -61,7 +60,7 @@ export async function addCustomerService(values: Partial<ICustomer>) {
   return {
     success: true,
     message: 'Клієнта додано успішно',
-    customer: toPlain(created),
+    customer: serializeForClient(created),
   };
 }
 
@@ -130,7 +129,7 @@ export async function updateCustomerService(
   return {
     success: true,
     message: 'Дані клієнта оновлено',
-    customer: toPlain(doc),
+    customer: serializeForClient(doc),
   };
 }
 
@@ -156,7 +155,7 @@ export async function updateCustomerFieldService(
   return {
     success: true,
     message: 'Дані успішно оновлено',
-    customer: toPlain(customer),
+    customer: serializeForClient(customer),
   };
 }
 
@@ -166,10 +165,8 @@ export async function getCustomerByUserService(userId: string) {
   const doc = await Customer.findOne({ user: userId }).populate('user');
 
   if (!doc) return null;
-  const serializedDoc = serializeForClient(doc);
-  console.log('serializedDoc', serializedDoc);
 
-  return serializedDoc;
+  return serializeForClient(doc);
 }
 
 export async function toggleFavoriteService(goodId: string) {
@@ -218,7 +215,7 @@ export async function getGoodsWithFavoriteService() {
 
   // преобразуем в обычные объекты и добавляем isFavorite
   const goods: IGoodWithFavorite[] = goodsDocs.map(g => ({
-    ...toPlain(g),
+    ...serializeForClient(g),
     isFavorite: favorites.includes(
       (g._id as mongoose.Types.ObjectId).toString()
     ),

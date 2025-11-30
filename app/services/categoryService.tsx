@@ -1,11 +1,12 @@
 'use server';
 
 import { buildPagination } from '@/helpers/index';
-import toPlain from '@/helpers/server/toPlain';
 import { slugify } from '@/lib/slugify';
 import Category from '@/models/Category';
 import { ICategory, ISearchParams } from '@/types';
 import { connectToDB } from '@/utils/dbConnect';
+
+import { serializeForClient } from '../helpers/server/serializeForClient';
 
 export async function addCategoryService(values: Partial<ICategory>) {
   await connectToDB();
@@ -101,5 +102,5 @@ export async function getCategoryBySlugService(slug: string) {
   const doc = await Category.findOne({ slug }).lean();
   if (!doc) return null;
 
-  return toPlain(doc);
+  return serializeForClient(doc);
 }

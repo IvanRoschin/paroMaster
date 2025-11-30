@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import {
@@ -24,7 +25,6 @@ import {
   ImagesBlock,
   Loader,
   Modal,
-  NextImage,
   TestimonialForm,
 } from '@/components/index';
 import { useDeleteModal, useTestimonialModal } from '@/hooks/index';
@@ -32,6 +32,15 @@ import useDeleteData from '@/hooks/useDeleteData';
 import useFetchData from '@/hooks/useFetchData';
 import { IGoodUI } from '@/types/IGood';
 import { UserRole } from '@/types/IUser';
+
+const CompareButtonClient = dynamic(
+  () => import('@/components/ui/Buttons/CompareButton'),
+  { ssr: false }
+);
+const FavoriteButtonClient = dynamic(
+  () => import('@/components/ui/Buttons/FavoriteButton'),
+  { ssr: false }
+);
 
 interface GoodPageClientProps {
   good: IGoodUI;
@@ -41,20 +50,12 @@ interface GoodPageClientProps {
 const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
   const [testimonialToDelete, setTestimonialToDelete] = useState<string>('');
   const [, setAmount] = useState(0);
-  const { cart } = useAppStore();
-
-  // const {
-  //   getItemQuantity,
-  //   increaseCartQuantity,
-  //   decreaseCartQuantity,
-  //   removeFromCart,
-  // } = useShoppingCart();
+  const { cart, compare, favorites } = useAppStore();
 
   const productId = good?._id;
   const testimonialModal = useTestimonialModal();
   const deleteModal = useDeleteModal();
 
-  // Отзывы
   const {
     data: testimonials,
     isLoading: isTestimonialsLoading,
@@ -95,19 +96,21 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
   if (isTestimonialsError) return <ErrorMessage error={testimonialsError} />;
 
   const quantity = cart.getItemQuantity(good._id);
+  const isInCompare = compare.items.some(i => i._id === good._id);
+  const isFavorite = favorites.isFavorite(good._id);
 
   return (
     <div className="m-6">
       <Breadcrumbs />
 
-      <div className="flex flex-col justify-evenly lg:flex-row mb-4 lg:mb-0">
-        <ImagesBlock item={good} />
+      <div className="flex flex-col lg:flex-row gap-8">
+        <ImagesBlock className="pt-10 w-full lg:w-[45%]" item={good} />
 
-        <div className="pt-10 relative max-w-xl">
+        <div className="pt-10 relative max-w-xl flex-1 flex flex-col gap-6">
           {role === UserRole.ADMIN && (
             <Link
               href={`/admin/goods/${good._id}`}
-              className="absolute top-0 right-0 flex items-center justify-center"
+              className="absolute top-0 right-0"
             >
               <span className="cursor-pointer w-[30px] h-[30px] rounded-full bg-orange-600 flex justify-center items-center hover:opacity-80">
                 <FaPen size={12} color="white" />
@@ -115,18 +118,16 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
             </Link>
           )}
 
-          <h2 className="subtitle mb-[40px]">{good.title}</h2>
-          <p className="mb-[20px]">{good.description}</p>
+          <h2 className="subtitle mb-4">{good.title}</h2>
+          <p>{good.description}</p>
           <p
-            className={`mb-[30px] ${
-              good.isAvailable ? 'text-green-600' : 'text-red-600'
-            }`}
+            className={`mb-2 ${good.isAvailable ? 'text-green-600' : 'text-red-600'}`}
           >
             {good.isAvailable ? 'В наявності' : 'Немає в наявності'}
           </p>
 
-          <p className="mb-[10px]">Артикул: {good.sku}</p>
-          <p className="text-2xl font-bold mb-[30px]">
+          <p>Артикул: {good.sku}</p>
+          <p className="text-2xl font-bold mb-4">
             {good.discountPrice ? (
               <>
                 <span className="line-through text-gray-400 mr-2">
@@ -137,7 +138,7 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
                 </span>
               </>
             ) : (
-              `${formatCurrency(good.price, 'uk-UA', 'UAH')}`
+              formatCurrency(good.price, 'uk-UA', 'UAH')
             )}
           </p>
 
@@ -152,7 +153,7 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
                 disabled={!good.isAvailable}
               />
             ) : (
-              <div className="flex flex-col items-center gap-6">
+              <div className="flex flex-col items-center gap-4">
                 <div className="flex items-center gap-4">
                   <Button
                     width="10"
@@ -182,6 +183,23 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
             )}
           </div>
 
+          {/* Кнопки "Избранное" и "Сравнение" */}
+          <div className="flex items-center gap-4 mb-2">
+            <FavoriteButtonClient good={good} />
+            <CompareButtonClient good={good} />
+          </div>
+
+          {/* Метки состояния */}
+          <div className="flex gap-4">
+            {isInCompare && (
+              <span className="text-blue-600 font-semibold">У порівнянні</span>
+            )}
+            {isFavorite && (
+              <span className="text-red-500 font-semibold">Улюблений</span>
+            )}
+          </div>
+
+          {/* Детали товара */}
           <ItemDetails item={good} />
         </div>
       </div>
@@ -189,7 +207,6 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
       {/* Відгуки */}
       <div className="mt-10">
         <h3 className="subtitle">Відгуки</h3>
-
         {testimonials.length > 0 ? (
           <ul className="grid gap-4 md:gap-6">
             <div className="my-6">
@@ -217,13 +234,10 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
                       icon={FaTrash}
                       small
                       outline
-                      onClick={() =>
-                        review._id && handleDelete(review._id.toString())
-                      }
+                      onClick={() => review._id && handleDelete(review._id)}
                     />
                   </div>
                 )}
-
                 <li className="border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-center justify-between mb-2">
                     {Array.isArray(review.author)
@@ -273,7 +287,6 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
         onClose={testimonialModal.onClose}
         disabled={isTestimonialsLoading}
       />
-
       <Modal
         body={
           <DeleteConfirmation
@@ -301,7 +314,6 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
       item.category && typeof item.category === 'object'
         ? item.category.name
         : '—';
-
     const brandName =
       item.brand && typeof item.brand === 'object' ? item.brand.name : '—';
 
@@ -310,65 +322,16 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
         <p className="font-light text-gray-500">
           Категорія: <span className="font-bold">{categoryName}</span>
         </p>
-
         <p className="font-light text-gray-500">
           Виробник: <span className="font-bold">{brandName}</span>
         </p>
-
         <p className="font-light text-gray-500">
           Модель: <span className="font-bold">{item.model}</span>
         </p>
-
         <p className="font-light text-gray-500">
           Сумісність з іншими моделями:{' '}
           <span className="font-bold">{item.isCompatible ? 'так' : 'ні'}</span>
         </p>
-        {/* Сумісні товари - карусель */}
-        {Array.isArray(good.compatibleGoods) &&
-          good.compatibleGoods.length > 0 && (
-            <div className="mt-10">
-              <h3 className="subtitle mb-2">Сумісні товари</h3>
-              <div className="flex overflow-x-auto gap-4 py-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                {good.compatibleGoods.map((cg, i) => {
-                  // Если cg - объект, приводим _id к строке
-                  const id =
-                    typeof cg === 'string'
-                      ? cg
-                      : cg && cg._id
-                        ? cg._id.toString()
-                        : null;
-
-                  if (!id) return null; // если id нет — не рендерим
-
-                  const title =
-                    typeof cg === 'string' ? cg : cg.title || 'Без назви';
-                  const src = typeof cg === 'string' ? undefined : cg.src?.[0];
-
-                  return (
-                    <Link
-                      key={i}
-                      href={`/catalog/${id}`}
-                      className="flex-shrink-0 w-40 flex flex-col items-center gap-2 p-2 border rounded hover:shadow-lg transition-shadow"
-                    >
-                      {src && (
-                        <NextImage
-                          useSkeleton
-                          src={src}
-                          alt={title}
-                          width={120}
-                          height={120}
-                          className="object-cover rounded"
-                        />
-                      )}
-                      <span className="text-center text-sm font-medium">
-                        {title}
-                      </span>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          )}
       </div>
     );
   }

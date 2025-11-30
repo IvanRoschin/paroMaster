@@ -2,7 +2,6 @@
 
 import mongoose from 'mongoose';
 
-import toPlain from '@/app/helpers/server/toPlain';
 import Brand from '@/models/Brand';
 import Category from '@/models/Category';
 import Good, { IGoodDB } from '@/models/Good';
@@ -14,6 +13,7 @@ import { connectToDB } from '@/utils/dbConnect';
 
 import { GoodsFilters } from '../actions';
 import buildFilterFromContext from '../helpers/server/buildFilter';
+import { serializeForClient } from '../helpers/server/serializeForClient';
 
 export interface IGoodPopulated extends Omit<IGoodDB, 'brand' | 'category'> {
   brand: IBrand;
@@ -90,11 +90,11 @@ export async function getAllGoodsService(filters: GoodsFilters) {
 
   const count = await Good.countDocuments(filter);
 
-  const plianGoods = goods.map(toPlain);
+  const plainGoods = goods.map(good => serializeForClient(good));
 
   return {
     success: true,
-    goods: plianGoods,
+    goods: plainGoods,
     count,
   };
 }
@@ -119,9 +119,13 @@ export async function getGoodByIdService(id: string): Promise<IGoodUI | null> {
   ]);
 
   const result: IGoodUI = {
-    ...toPlain(good),
-    testimonials: testimonialsRaw.map(toPlain),
-    compatibleGoods: compatibleGoodsRaw.map(toPlain),
+    ...serializeForClient(good),
+    testimonials: testimonialsRaw.map(testimonial =>
+      serializeForClient(testimonial)
+    ),
+    compatibleGoods: compatibleGoodsRaw.map(compatibleGood =>
+      serializeForClient(compatibleGood)
+    ),
   };
 
   return result;
@@ -153,7 +157,7 @@ export async function getGoodsByBrandService(
     .lean<IGoodUI[]>();
 
   // Сериализуем, чтобы избежать Mongoose-specific свойств
-  const serializedGoods = goods.map(g => toPlain<IGoodUI>(g));
+  const serializedGoods = goods.map(g => serializeForClient(g));
 
   return serializedGoods;
 }
@@ -185,7 +189,7 @@ export async function getGoodsByCategoryService(
     .lean<IGoodUI[]>();
 
   // Сериализуем результаты
-  const serializedGoods = goods.map(g => toPlain<IGoodUI>(g));
+  const serializedGoods = goods.map(g => serializeForClient(g));
 
   return serializedGoods;
 }
@@ -230,12 +234,10 @@ export async function addGoodService(values: Partial<IGoodDB>) {
     );
   }
 
-  const serializedGood = toPlain(newGood);
-
   return {
     success: true,
     message: 'Товар додано',
-    good: serializedGood,
+    good: serializeForClient(newGood),
   };
 }
 
@@ -259,12 +261,10 @@ export async function updateGoodService(id: string, values: Partial<IGoodDB>) {
   // Синхронизация совместимости
   await syncCompatibilityRelations(id, newCompatibleGoods, oldCompatibleGoods);
 
-  const serializedGood = toPlain(existing);
-
   return {
     success: true,
     message: 'Товар оновлено',
-    good: serializedGood,
+    good: serializeForClient(existing),
   };
 }
 
@@ -288,7 +288,9 @@ export async function getMostPopularGoodsService(
       .populate('category', 'name slug src')
       .populate('brand', 'name slug src country website')
       .exec();
-    const serializedGoods: IGoodUI[] = popularGoods.map(toPlain);
+    const serializedGoods: IGoodUI[] = popularGoods.map(popularGood =>
+      serializeForClient(popularGood)
+    );
     return serializedGoods;
   } catch (error) {
     console.error('Error fetching most popular goods:', error);

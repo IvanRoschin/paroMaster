@@ -22,12 +22,6 @@ const FavoriteButtonClient = dynamic(
 );
 
 const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
-  // const {
-  //   getItemQuantity,
-  //   increaseCartQuantity,
-  //   decreaseCartQuantity,
-  //   removeFromCart,
-  // } = useShoppingCart();
   const { cart, compare, favorites } = useAppStore();
 
   const [quantity, setQuantity] = useState(0);

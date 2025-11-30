@@ -1,18 +1,20 @@
 import mongoose from 'mongoose';
 
-/**
- * Сериализует объект для передачи в Client Component:
- * - ObjectId → string
- * - Date → ISO string
- * - Массивы и вложенные объекты рекурсивно
- */
-export function serializeForClient(obj: any): any {
+export function serializeForClient(obj: any, seen = new WeakSet()): any {
   if (obj == null) return obj; // null или undefined
 
-  // Массив
-  if (Array.isArray(obj)) return obj.map(serializeForClient);
+  // Примитивы
+  if (typeof obj !== 'object') return obj;
 
-  // ObjectId (Mongoose)
+  // Циклическая ссылка
+  if (seen.has(obj)) return null;
+  seen.add(obj);
+
+  // Массив
+  if (Array.isArray(obj))
+    return obj.map(item => serializeForClient(item, seen));
+
+  // ObjectId
   if (obj instanceof mongoose.Types.ObjectId || obj?._bsontype === 'ObjectID') {
     return obj.toString();
   }
@@ -20,23 +22,22 @@ export function serializeForClient(obj: any): any {
   // Date
   if (obj instanceof Date) return obj.toISOString();
 
-  // Buffer — преобразуем в строку base64 (редко встречается)
+  // Buffer
   if (Buffer.isBuffer(obj)) return obj.toString('base64');
 
-  // Mongoose-документ или обычный объект
-  if (typeof obj === 'object') {
-    const result: any = {};
-    for (const key of Object.keys(obj)) {
-      try {
-        result[key] = serializeForClient(obj[key]);
-      } catch (e) {
-        // На случай циклических ссылок или странных объектов
-        result[key] = null;
-      }
-    }
-    return result;
+  // Mongoose-документ — превращаем в plain объект
+  if (typeof obj.toObject === 'function') {
+    obj = obj.toObject({ versionKey: false, flattenMaps: true });
   }
 
-  // Примитивы: string, number, boolean, null, undefined
-  return obj;
+  // Обычный объект
+  const plain: any = {};
+  for (const key of Object.keys(obj)) {
+    try {
+      plain[key] = serializeForClient(obj[key], seen);
+    } catch {
+      plain[key] = null;
+    }
+  }
+  return plain;
 }
