@@ -7,3 +7,9 @@ export interface ITestimonial {
   product?: string;
   createdAt: string | number | Date;
 }
+
+export interface IGetAllTestimonials {
+  success: boolean;
+  testimonials: ITestimonial[];
+  count: number;
+}

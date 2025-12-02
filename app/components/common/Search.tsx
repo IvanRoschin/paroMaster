@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { CiSearch } from 'react-icons/ci';
 import { useDebouncedCallback } from 'use-debounce';
 
-import { getAllGoods } from '@/actions/goods';
+import { getAllGoodsAction } from '@/actions/goods';
 import { Button, Icon } from '@/components/ui';
 import { useFetchData } from '@/hooks/index';
 import { IGoodUI } from '@/types/index';
@@ -20,7 +20,7 @@ const Search = ({ placeholder }: { placeholder: string }) => {
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const { data } = useFetchData(getAllGoods, ['goods'], searchParams);
+  const { data } = useFetchData(getAllGoodsAction, ['goods'], searchParams);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;

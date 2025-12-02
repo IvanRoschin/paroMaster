@@ -42,7 +42,7 @@ export const FormEffects = ({ values, setFieldValue }: FormEffectsProps) => {
     const timeoutId = setTimeout(() => {
       const plainValues = {
         ...values,
-        user: session?.user?._id || undefined,
+        user: session?.user?.id || undefined,
       };
       try {
         sessionStorage.setItem(

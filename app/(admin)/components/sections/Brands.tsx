@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { FaPen, FaSortAlphaDown, FaSortAlphaUp, FaTrash } from 'react-icons/fa';
 
-import { deleteBrand, getAllBrands } from '@/actions/brands';
+import { deleteBrandAction, getAllBrandsAction } from '@/actions/brands';
 import {
   Breadcrumbs,
   Button,
@@ -13,6 +13,7 @@ import {
   ErrorMessage,
   Loader,
   Modal,
+  NextImage,
   Pagination,
 } from '@/components/index';
 import { useDeleteData, useDeleteModal, useFetchData } from '@/hooks/index';
@@ -31,14 +32,14 @@ export default function Brands({
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   const { data, isLoading, isError, error } = useFetchData(
-    getAllBrands,
+    getAllBrandsAction,
     ['brands'],
     searchParams
   );
 
   const deleteModal = useDeleteModal();
 
-  const { mutate: deleteBrandById } = useDeleteData(deleteBrand, [
+  const { mutate: deleteBrandById } = useDeleteData(deleteBrandAction, [
     'brands',
     brandToDelete?.id,
   ]);
@@ -144,7 +145,7 @@ export default function Brands({
               <td className="p-2 border-r-2 text-start">
                 {brand.src && (
                   <div className="flex justify-center">
-                    <Image
+                    <NextImage
                       src={brand.src}
                       alt={brand.name}
                       width={40}

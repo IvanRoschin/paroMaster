@@ -1,6 +1,5 @@
 export { default as Sidebar } from '@/components/common/Sidebar';
 export { default as Advantages } from '@/components/sections/Advantages';
-export { default as Description } from '@/components/sections/Description';
 export { default as Footer } from '@/components/sections/FooterServer';
 export { default as Header } from '@/components/sections/Header';
 export { default as Heading } from '@/components/sections/Heading';
@@ -9,6 +8,5 @@ export { default as ImageUploadCloudinary } from '@/components/sections/ImageUpl
 export { default as Menu } from '@/components/sections/Menu';
 export { default as MobileMenu } from '@/components/sections/MobileMenu';
 export { default as ReviewList } from '@/components/sections/ReviewList';
-export { default as Slider } from '@/components/sections/Slider';
-export { default as Testimonial } from '@/components/sections/Testimonial';
-export { default as TestimonialsList } from '@/components/sections/TestimonialsList';
+export { default as BannerSlider } from '@/components/sections/Sliders/BannerSlider';
+export { default as TestimonialSlider } from '@/components/sections/Sliders/TestimonialSlider';

@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 
 import { authOptions } from '@/app/config/authOptions';
 import { generateMetadata } from '@/app/helpers/generateMetadata';
-
+import { SessionUser } from '@/types/IUser';
 import CheckoutClient from './checkoutClient';
 
 export const metadata = generateMetadata({
@@ -23,8 +23,7 @@ export const metadata = generateMetadata({
 
 export default async function Page() {
   const session = await getServerSession(authOptions);
-  const user = session?.user;
-  console.log('user:', user);
+  const user = session?.user as SessionUser;
 
   return <CheckoutClient user={user} />;
 }

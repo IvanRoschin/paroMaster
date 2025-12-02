@@ -1,9 +1,13 @@
 'use client';
 
 import { BrandFilter, Category, PriceFilter, Sort } from '@/components/index';
-import { Option } from '@/context/FiltersContext';
 import { IBrand, ICategory, IMinMaxPriceResponse } from '@/types/index';
 
+export interface Option {
+  value: string;
+  label: string;
+  slug?: string;
+}
 interface SidebarProps {
   pricesData: IMinMaxPriceResponse;
   categories: ICategory[];

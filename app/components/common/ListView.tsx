@@ -5,9 +5,16 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { FaPen, FaTrash } from 'react-icons/fa';
 
-import { Button, DeleteConfirmation, Modal, NextImage } from '@/app/components';
-import { useShoppingCart } from '@/app/context/ShoppingCartContext';
+import {
+  Button,
+  CompareButton,
+  DeleteConfirmation,
+  FavoriteButton,
+  Modal,
+  NextImage,
+} from '@/app/components';
 import { useGoodDelete } from '@/app/hooks';
+import { useAppStore } from '@/app/store/appStore';
 import { formatCurrency } from '@/app/utils/formatCurrency';
 import { IGoodUI, ISearchParams } from '@/types';
 import { UserRole } from '@/types/IUser';
@@ -28,20 +35,15 @@ export const ListView = ({
   const { goodToDelete, handleDelete, handleDeleteConfirm, deleteModal } =
     useGoodDelete(refetch, ['goods', searchParams]);
 
-  const {
-    getItemQuantity,
-    increaseCartQuantity,
-    decreaseCartQuantity,
-    removeFromCart,
-  } = useShoppingCart();
+  const { cart } = useAppStore();
 
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const q: Record<string, number> = {};
-    goods.forEach(g => (q[g._id] = getItemQuantity(g._id)));
+    goods.forEach(g => (q[g._id] = cart.getItemQuantity(g._id)));
     setQuantities(q);
-  }, [goods, getItemQuantity]);
+  }, [goods, cart]);
 
   return (
     <ul className="divide-y divide-gray-200">
@@ -131,14 +133,20 @@ export const ListView = ({
                     />
                   </>
                 ) : (
-                  <CartActions
-                    goodId={good._id}
-                    isAvailable={good.isAvailable}
-                    quantity={quantity}
-                    increaseCartQuantity={increaseCartQuantity}
-                    decreaseCartQuantity={decreaseCartQuantity}
-                    removeFromCart={removeFromCart}
-                  />
+                  <div className="shrink-0 flex flex-col items-center justify-center gap-1">
+                    <CartActions
+                      goodId={good._id}
+                      isAvailable={good.isAvailable}
+                      quantity={quantity}
+                      increaseCartQuantity={cart.increaseCartQuantity}
+                      decreaseCartQuantity={cart.decreaseCartQuantity}
+                      removeFromCart={cart.removeFromCart}
+                    />
+                    <div className="flex gap-1 mt-1">
+                      <FavoriteButton good={good} />
+                      <CompareButton good={good} />
+                    </div>
+                  </div>
                 )}
               </div>
             </motion.li>

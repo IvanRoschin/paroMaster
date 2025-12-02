@@ -6,9 +6,10 @@ import { getSession, signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { FcGoogle } from 'react-icons/fc';
-import { FiEye, FiEyeOff } from 'react-icons/fi'; // 👈 добавляем иконки глазика
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { toast } from 'sonner';
 
+import { routes } from '@/app/helpers/routes';
 import { FormField } from '@/components/common';
 import { Button } from '@/components/ui';
 import { userLoginSchema } from '@/helpers/index';
@@ -21,7 +22,7 @@ interface InitialStateType {
 
 const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // 👈 состояние для показа пароля
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const initialValues: InitialStateType = {
@@ -48,6 +49,8 @@ const LoginForm = () => {
       resetForm();
 
       const session = await getSession();
+
+      console.log('session', session);
       const role = session?.user?.role as UserRole;
 
       if (role === UserRole.ADMIN) router.replace('/admin');
@@ -128,6 +131,7 @@ const LoginForm = () => {
                     type="submit"
                     label={isLoading ? 'Завантаження...' : 'Увійти'}
                     disabled={isLoading}
+                    className="min-w-[120px] px-5 py-2 text-base md:min-w-[150px]"
                   />
                 </motion.div>
               </Form>
@@ -160,7 +164,7 @@ const LoginForm = () => {
           <p className="mt-8 text-center text-sm text-gray-500">
             Забули пароль?{' '}
             <a
-              href="/reset-password"
+              href={routes.publicRoutes.auth.forgotPassword}
               className="nav hover:text-gray-500 font-medium"
             >
               Відновити

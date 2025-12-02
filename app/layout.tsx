@@ -1,9 +1,9 @@
-import { Suspense } from 'react';
+import '@/app/ui/globals.css';
 
-import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import Script from 'next/script';
+import { Suspense } from 'react';
 
 import {
   eUkraine,
@@ -17,15 +17,15 @@ import AdminLayout from '@/components/layouts/AdminLayout';
 import CustomerLayout from '@/components/layouts/CustomerLayout';
 import PublicLayout from '@/components/layouts/PublicLayout';
 import { SessionUser, UserRole } from '@/types/IUser';
+import { dehydrate, QueryClient } from '@tanstack/react-query';
+
 import PublicSidebarServer from './(public)/components/PublicSidebarSidebarServer';
-import { getAllBrands } from './actions/brands';
-import { getAllCategories } from './actions/categories';
+import { getAllBrandsAction } from './actions/brands';
+import { getAllCategoriesAction } from './actions/categories';
 import FooterServer from './components/sections/FooterServer';
 import { authOptions } from './config/authOptions';
 import { routes } from './helpers/routes';
 import { Providers } from './providers/providers';
-
-import '@/app/ui/globals.css';
 
 // Шрифты (предполагаю, что ты их подключаешь где-то сверху)
 
@@ -38,7 +38,7 @@ export default async function RootLayout({
   const role = (session?.user?.role as UserRole) ?? UserRole.GUEST;
   // Унифицированный объект пользователя
   const user: SessionUser = {
-    _id: session?.user?._id ?? '',
+    id: session?.user?.id ?? '',
     name: session?.user?.name ?? 'Guest',
     email: session?.user?.email ?? '',
     image: session?.user?.image ?? `${process.env.PUBLIC_URL}/noavatar.png`,
@@ -70,11 +70,11 @@ export default async function RootLayout({
   await Promise.all([
     queryClient.prefetchQuery({
       queryKey: ['categories'],
-      queryFn: () => getAllCategories(),
+      queryFn: () => getAllCategoriesAction(),
     }),
     queryClient.prefetchQuery({
       queryKey: ['brands'],
-      queryFn: () => getAllBrands(),
+      queryFn: () => getAllBrandsAction(),
     }),
   ]);
 

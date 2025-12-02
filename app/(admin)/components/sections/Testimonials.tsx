@@ -7,9 +7,9 @@ import { FaPen, FaTrash } from 'react-icons/fa';
 import { toast } from 'sonner';
 
 import {
-  deleteTestimonial,
-  getAllTestimonials,
-  updateTestimonial,
+  deleteTestimonialAction,
+  getAllTestimonialsAction,
+  updateTestimonialAction,
 } from '@/actions/testimonials';
 import {
   Breadcrumbs,
@@ -39,14 +39,14 @@ export default function Testimonials() {
   const limit = parseInt(searchParams.get('limit') || '4');
 
   const { data, isLoading, isError, error, refetch } = useFetchData(
-    getAllTestimonials,
+    getAllTestimonialsAction,
     ['testimonials'],
     { limit, page, status: statusFilter }
   );
-  const { mutate: deleteTestimonialById } = useDeleteData(deleteTestimonial, [
-    'testimonials',
-    testimonialToDelete?.id,
-  ]);
+  const { mutate: deleteTestimonialById } = useDeleteData(
+    deleteTestimonialAction,
+    ['testimonials', testimonialToDelete?.id]
+  );
 
   const deleteModal = useDeleteModal();
 
@@ -76,7 +76,7 @@ export default function Testimonials() {
     }
     try {
       const values = { _id, isActive: !isActive };
-      await updateTestimonial(
+      await updateTestimonialAction(
         values as Partial<ITestimonial> & { _id: string }
       );
       refetch();

@@ -31,7 +31,7 @@ const iconComponents: { [key: string]: React.ElementType } = {
 
 const Advantages = ({ title }: { title?: string }) => {
   return (
-    <>
+    <section className="my-10 px-4 max-w-7xl mx-auto">
       <h2 className="subtitle-main">{title}</h2>
       <div className="flex flex-wrap justify-around">
         {advantages.map((item, index) => {
@@ -51,7 +51,7 @@ const Advantages = ({ title }: { title?: string }) => {
           );
         })}
       </div>
-    </>
+    </section>
   );
 };
 

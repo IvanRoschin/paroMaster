@@ -53,7 +53,7 @@ const goodFormSchema = Yup.object({
       }
     ),
 
-  isNew: Yup.boolean().default(true),
+  isUsed: Yup.boolean().default(false),
   isAvailable: Yup.boolean().default(true),
   isDailyDeal: Yup.boolean().default(false),
   isCompatible: Yup.boolean().default(false),

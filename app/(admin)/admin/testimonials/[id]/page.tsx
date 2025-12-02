@@ -1,4 +1,4 @@
-import { getTestimonialById } from '@/actions/testimonials';
+import { getTestimonialByIdAction } from '@/actions/testimonials';
 import { ISearchParams } from '@/types/searchParams';
 
 const SingleTestimonialPage = async ({
@@ -9,7 +9,7 @@ const SingleTestimonialPage = async ({
   const params = await searchParams;
 
   const { id } = params;
-  const testimonial = await getTestimonialById(id);
+  const testimonial = await getTestimonialByIdAction(id);
 
   return (
     <div className="mb-20">

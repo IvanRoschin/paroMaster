@@ -20,7 +20,7 @@ export interface IUser {
 }
 
 export interface SessionUser {
-  _id: string;
+  id: string;
   name?: string | null;
   surname?: string | null;
   email?: string | null;

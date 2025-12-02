@@ -1,9 +1,9 @@
 'use client';
 
-import { useShoppingCart } from 'app/context/ShoppingCartContext';
 import { motion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 
+import { useAppStore } from '@/app/store/appStore';
 import { formatCurrency } from '@/app/utils/formatCurrency';
 import { Button, Icon, NextImage } from '@/components/index';
 import { IGoodUI } from '@/types/index';
@@ -14,8 +14,7 @@ type CartItemProps = {
 };
 
 const CartItem: React.FC<CartItemProps> = ({ good, quantity }) => {
-  const { increaseCartQuantity, decreaseCartQuantity, removeFromCart } =
-    useShoppingCart();
+  const { cart } = useAppStore();
   const { _id, price, discountPrice, src } = good;
 
   const effectivePrice = useMemo(
@@ -48,6 +47,7 @@ const CartItem: React.FC<CartItemProps> = ({ good, quantity }) => {
             useSkeleton
             src={src[0] ?? '/placeholder.png'}
             alt={good.title}
+            sizes="120px"
             classNames={{
               wrapper: 'w-full h-full bg-gray-50 rounded-lg overflow-hidden',
               image: 'object-contain p-2',
@@ -63,7 +63,7 @@ const CartItem: React.FC<CartItemProps> = ({ good, quantity }) => {
           </h3>
           <button
             onClick={() => {
-              _id && removeFromCart(_id);
+              _id && cart.removeFromCart(_id);
               _id && sessionStorage.removeItem(`amount-${_id}`);
             }}
             className="absolute top-0 right-0 text-gray-400 hover:text-red-500 transition-colors"
@@ -76,7 +76,7 @@ const CartItem: React.FC<CartItemProps> = ({ good, quantity }) => {
         <div className="flex items-center justify-center gap-1 w-full">
           <Button
             label="-"
-            onClick={() => _id && decreaseCartQuantity(_id)}
+            onClick={() => _id && cart.decreaseCartQuantity(_id)}
             small
             outline
           />
@@ -85,7 +85,7 @@ const CartItem: React.FC<CartItemProps> = ({ good, quantity }) => {
           </span>
           <Button
             label="+"
-            onClick={() => _id && increaseCartQuantity(_id)}
+            onClick={() => _id && cart.increaseCartQuantity(_id)}
             small
             outline
           />

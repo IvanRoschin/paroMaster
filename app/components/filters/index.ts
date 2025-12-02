@@ -1,6 +1,6 @@
-import BrandFilter from './BrandFilter';
-import Category from './Category';
-import { PriceFilter } from './PriceFilter/PriceFilter';
-import { Sort } from './Sort';
+export { Sort } from './Sort';
 
-export { BrandFilter, Category, PriceFilter, Sort };
+export { default as Category } from './Category';
+
+export { default as BrandFilter } from './BrandFilter';
+export { PriceFilter } from './PriceFilter/PriceFilter';

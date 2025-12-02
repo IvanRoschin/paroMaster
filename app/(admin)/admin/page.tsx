@@ -12,7 +12,7 @@ import {
   MdStars,
 } from 'react-icons/md';
 
-import { getEntityCounts } from '@/app/actions/admin';
+import { getEntityCounts } from '@/app/services/adminService';
 import { useQuery } from '@tanstack/react-query';
 
 import { Card } from '../Card';

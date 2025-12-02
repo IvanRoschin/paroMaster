@@ -1,12 +1,15 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { FaPen, FaTrash } from 'react-icons/fa';
 import { toast } from 'sonner';
 
-import { deleteSlide, getAllSlides, updateSlide } from '@/actions/slider';
+import {
+  deleteSlideAction,
+  getAllSlidesAction,
+  updateSlideAction,
+} from '@/app/actions/slides';
 import {
   Breadcrumbs,
   Button,
@@ -15,11 +18,11 @@ import {
   ErrorMessage,
   Loader,
   Modal,
+  NextImage,
   Pagination,
   Switcher,
 } from '@/components/index';
 import { useDeleteData, useDeleteModal, useFetchData } from '@/hooks/index';
-import { ISlider } from '@/types/index';
 import { ISearchParams } from '@/types/searchParams';
 
 export default function Slides({
@@ -37,7 +40,7 @@ export default function Slides({
   const limit = Number(searchParams.limit) || 10;
 
   const { data, isLoading, isError, error, refetch } = useFetchData(
-    getAllSlides,
+    getAllSlidesAction,
     ['slides'],
     {
       ...searchParams,
@@ -45,7 +48,9 @@ export default function Slides({
     }
   );
 
-  const { mutate: deleteSliderById } = useDeleteData(deleteSlide, ['slides']);
+  const { mutate: deleteSliderById } = useDeleteData(deleteSlideAction, [
+    'slides',
+  ]);
 
   const deleteModal = useDeleteModal();
 
@@ -68,7 +73,7 @@ export default function Slides({
     if (!_id) return toast.error('Неправильний ID слайда.');
     try {
       const values = { _id, isActive: !isActive };
-      await updateSlide(values as Partial<ISlider> & { _id: string });
+      await updateSlideAction(values._id, values);
       toast.success('Статус слайду оновлено!');
       refetch();
     } catch (error) {
@@ -148,7 +153,8 @@ export default function Slides({
               <td className="p-2 border-r-2 text-start">{slide.desc}</td>
               <td className="p-2 border-r-2">
                 <div className="flex justify-center">
-                  <Image
+                  <NextImage
+                    useSkeleton
                     src={slide.src[0]}
                     alt={slide.title}
                     width={100}

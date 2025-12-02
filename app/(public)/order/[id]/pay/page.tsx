@@ -1,4 +1,4 @@
-import { getOrderById } from '@/actions/orders';
+import { getOrderByIdAction } from '@/actions/orders';
 import { generateSignature } from '@/app/lib';
 import { ISearchParams } from '@/types/searchParams';
 
@@ -11,7 +11,7 @@ export default async function OrderPayPage({
 }) {
   const params = await searchParams;
 
-  const order = await getOrderById(params.id);
+  const order = await getOrderByIdAction(params.id);
 
   if (!order) return <div>Замовлення не знайдено</div>;
 
