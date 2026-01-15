@@ -13,6 +13,7 @@ interface EmptyStateProps {
   actionLabel?: string;
   actionHref?: string;
   goHomeAfterReset?: boolean;
+  onReset?: () => void;
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
@@ -22,6 +23,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   actionLabel,
   actionHref,
   goHomeAfterReset = false,
+  onReset,
 }) => {
   const router = useRouter();
   const { filters } = useAppStore();
@@ -39,6 +41,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     setCategory?.('');
     setSort?.('');
     if (goHomeAfterReset) router.push('/catalog');
+    onReset?.();
   };
 
   return (

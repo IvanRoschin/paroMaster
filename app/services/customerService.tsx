@@ -6,12 +6,13 @@ import { getServerSession } from 'next-auth';
 import { buildPagination } from '@/helpers/index';
 import Customer from '@/models/Customer';
 import Good from '@/models/Good';
-import { ICustomer, ISearchParams } from '@/types';
+import { ICustomer } from '@/types';
 import { PaymentMethod } from '@/types/paymentMethod';
 import { connectToDB } from '@/utils/dbConnect';
 
+import { CustomerFilters } from '../actions';
 import { authOptions } from '../config/authOptions';
-import convertObjectIds from '../helpers/server/convertObjectIds';
+import buildFilterFromContext from '../helpers/server/buildFilter';
 import { serializeForClient } from '../helpers/server/serializeForClient';
 
 export interface IGoodWithFavorite {
@@ -30,58 +31,53 @@ export async function addCustomerService(values: Partial<ICustomer>) {
     return { success: false, message: `Поле 'user' обов'язкове` };
   }
 
-  // Проверяем, есть ли Customer по user
-  const existing = await Customer.findOne({ user: values.user });
-
-  if (existing) {
-    // Обновляем
-    if (values.city !== undefined) existing.city = values.city;
-    if (values.warehouse !== undefined) existing.warehouse = values.warehouse;
-    if (values.payment !== undefined) existing.payment = values.payment;
-
-    await existing.save();
-
-    return {
-      success: true,
-      message: 'Дані клієнта оновлено',
-      customer: serializeForClient(existing),
-    };
-  }
-
-  // Создаем нового
-  const created = await Customer.create({
-    user: values.user,
-    city: values.city,
-    warehouse: values.warehouse,
-    payment: values.payment,
-    orders: [],
-  });
+  const updatedCustomer = await Customer.findOneAndUpdate(
+    { user: values.user }, // ищем существующий
+    {
+      $set: {
+        city: values.city,
+        warehouse: values.warehouse,
+        payment: values.payment,
+      },
+      $setOnInsert: {
+        orders: [],
+        favorites: [],
+      },
+    },
+    { new: true, upsert: true } // если нет — создаем
+  );
 
   return {
     success: true,
-    message: 'Клієнта додано успішно',
-    customer: serializeForClient(created),
+    message: updatedCustomer
+      ? 'Дані клієнта оновлено/додано'
+      : 'Клієнта додано',
+    customer: serializeForClient(updatedCustomer!),
   };
 }
 
-export async function getAllCustomersService(searchParams: ISearchParams = {}) {
+export async function getAllCustomersService(filters: CustomerFilters = {}) {
   await connectToDB();
 
-  const count = await Customer.countDocuments();
+  const { filter = {}, sortOption = {} } =
+    await buildFilterFromContext(filters);
 
-  const query = Customer.find().populate('user');
+  const { skip, limit } = buildPagination(filters);
 
-  if (searchParams.page) {
-    const currentPage = Number(searchParams.page) || 1;
-    const { skip, limit } = buildPagination(searchParams, currentPage);
-    query.skip(skip).limit(limit);
-  }
+  const count = await Customer.countDocuments(filter);
 
-  const docs = await query.exec();
+  const docs = await Customer.find(filter)
+    .populate('user')
+    .sort(sortOption)
+    .skip(skip)
+    .limit(limit)
+    .exec();
+
+  const plainCustomers = docs.map(customer => serializeForClient(customer));
 
   return {
     success: true,
-    customers: JSON.parse(JSON.stringify(docs)),
+    customers: plainCustomers,
     count,
   };
 }
@@ -92,7 +88,7 @@ export async function getCustomerByIdService(id: string) {
   await connectToDB();
   const doc = await Customer.findById(id).populate('user');
 
-  return doc ? convertObjectIds(doc) : null;
+  return doc ? serializeForClient(doc) : null;
 }
 
 export async function deleteCustomerService(id: string) {

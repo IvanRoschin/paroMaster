@@ -127,6 +127,7 @@ export async function getGoodByIdService(id: string): Promise<IGoodUI | null> {
       serializeForClient(compatibleGood)
     ),
   };
+  console.log('result', result);
 
   return result;
 }

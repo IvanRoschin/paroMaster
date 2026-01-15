@@ -15,6 +15,7 @@ interface FormFieldProps {
     type?: string;
     value?: string;
     disabled?: boolean;
+    hidden?: boolean;
     required?: boolean;
     options?: Option[];
     autoComplete?: string;
@@ -58,6 +59,7 @@ const FormField: React.FC<FormFieldProps> = ({
         ${meta.error && meta.touched ? 'border-rose-500' : 'border-neutral-300'}
         ${meta.error && meta.touched ? 'focus:border-rose-500' : 'focus:border-green-500'}
         `}
+          autoComplete={item.autoComplete}
         />
         <label
           className="text-primaryTextColor absolute text-md duration-150 left-3 top-5 z-10 origin-[0] transform -translate-y-3
@@ -114,8 +116,8 @@ const FormField: React.FC<FormFieldProps> = ({
             className={`peer w-full p-4 font-light bg-white border-2 rounded-md outline-none transition
             ${meta.error && meta.touched ? 'border-rose-500' : 'border-neutral-300'}
             ${meta.error && meta.touched ? 'focus:border-rose-500' : 'focus:border-green-500'}
-            disabled:opacity-70 disabled:cursor-not-allowed resize-none`} // Added `resize-none` to prevent resizing
-            style={item.style} // Apply any additional styles from `item`
+            disabled:opacity-70 disabled:cursor-not-allowed resize-none`}
+            style={item.style}
           />
           <label
             className="text-primaryTextColor absolute text-md duration-150 left-3 top-3 z-10 origin-[0] transform -translate-y-3
@@ -131,6 +133,7 @@ const FormField: React.FC<FormFieldProps> = ({
             name={item.id}
             type={item.type}
             disabled={item.disabled}
+            hidden={item.hidden}
             autoComplete={item.autoComplete}
             value={value}
             // onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -143,8 +146,8 @@ const FormField: React.FC<FormFieldProps> = ({
   `}
           />
           <label
-            className="text-primaryTextColor absolute text-md duration-150 left-3 top-5 z-10 origin-[0] transform -translate-y-3
-            peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3"
+            className={`text-primaryTextColor absolute text-md duration-150 left-3 top-5 z-10 origin-[0] transform -translate-y-3
+            peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 ${item.hidden ? 'hidden' : ''} `}
           >
             {item.label}
           </label>

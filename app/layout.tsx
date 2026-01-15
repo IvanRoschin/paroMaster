@@ -1,9 +1,9 @@
-import '@/app/ui/globals.css';
+import { Suspense } from 'react';
 
+import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import Script from 'next/script';
-import { Suspense } from 'react';
 
 import {
   eUkraine,
@@ -12,13 +12,11 @@ import {
   geistSans,
   manrope,
 } from '@/app/ui/fonts';
-import { Header, Loader, Sidebar } from '@/components';
+import { Header, Loader, ShoppingCart, Sidebar } from '@/components';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import CustomerLayout from '@/components/layouts/CustomerLayout';
 import PublicLayout from '@/components/layouts/PublicLayout';
 import { SessionUser, UserRole } from '@/types/IUser';
-import { dehydrate, QueryClient } from '@tanstack/react-query';
-
 import PublicSidebarServer from './(public)/components/PublicSidebarSidebarServer';
 import { getAllBrandsAction } from './actions/brands';
 import { getAllCategoriesAction } from './actions/categories';
@@ -27,7 +25,7 @@ import { authOptions } from './config/authOptions';
 import { routes } from './helpers/routes';
 import { Providers } from './providers/providers';
 
-// Шрифты (предполагаю, что ты их подключаешь где-то сверху)
+import '@/app/ui/globals.css';
 
 export default async function RootLayout({
   children,
@@ -97,6 +95,7 @@ export default async function RootLayout({
           <section id="footer" className="snap-start px-4">
             <FooterServer />
           </section>
+          <ShoppingCart />
         </Providers>
 
         {/* Cloudinary Upload Widget */}

@@ -1,6 +1,5 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import {
@@ -15,32 +14,28 @@ import {
   deleteTestimonialAction,
   getGoodTestimonialsAction,
 } from '@/actions/testimonials';
+import { deleteGoodAction } from '@/app/actions';
+import { useModal } from '@/app/hooks/useModal';
 import { useAppStore } from '@/app/store/appStore';
 import { formatCurrency } from '@/app/utils/formatCurrency';
 import {
   Breadcrumbs,
   Button,
+  CompareButton,
   DeleteConfirmation,
   ErrorMessage,
+  FavoriteButton,
   ImagesBlock,
   Loader,
   Modal,
   TestimonialForm,
 } from '@/components/index';
-import { useDeleteModal, useTestimonialModal } from '@/hooks/index';
 import useDeleteData from '@/hooks/useDeleteData';
 import useFetchData from '@/hooks/useFetchData';
 import { IGoodUI } from '@/types/IGood';
 import { UserRole } from '@/types/IUser';
 
-const CompareButtonClient = dynamic(
-  () => import('@/components/ui/Buttons/CompareButton'),
-  { ssr: false }
-);
-const FavoriteButtonClient = dynamic(
-  () => import('@/components/ui/Buttons/FavoriteButton'),
-  { ssr: false }
-);
+type DeleteItem = { id: string; type: 'good' | 'testimonial' };
 
 interface GoodPageClientProps {
   good: IGoodUI;
@@ -48,13 +43,13 @@ interface GoodPageClientProps {
 }
 
 const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
-  const [testimonialToDelete, setTestimonialToDelete] = useState<string>('');
+  const [deleteItem, setDeleteItem] = useState<DeleteItem | null>(null);
   const [, setAmount] = useState(0);
   const { cart, compare, favorites } = useAppStore();
 
   const productId = good?._id;
-  const testimonialModal = useTestimonialModal();
-  const deleteModal = useDeleteModal();
+  const testimonialModal = useModal('testimonial');
+  const deleteModal = useModal('delete');
 
   const {
     data: testimonials,
@@ -72,6 +67,8 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
     ['testimonials', productId]
   );
 
+  const { mutate: deleteGoodById } = useDeleteData(deleteGoodAction, ['goods']);
+
   useEffect(() => {
     if (!good) return;
     const newAmount = good.price * cart.getItemQuantity(good._id);
@@ -79,17 +76,24 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
     localStorage.setItem(`amount-${good._id}`, JSON.stringify(newAmount));
   }, [good, cart]);
 
-  const handleDelete = (id: string) => {
-    setTestimonialToDelete(id);
-    deleteModal.onOpen();
+  const handleDeleteClick = (id: string, type: 'good' | 'testimonial') => {
+    setDeleteItem({ id, type });
+    deleteModal.open();
   };
 
-  const handleDeleteTestimonial = (id: string) => {
-    try {
-      deleteTestimonialById(id);
-    } catch (error) {
-      console.error('Error deleting testimonial:', error);
+  const handleDeleteConfirm = () => {
+    if (!deleteItem) return;
+
+    if (deleteItem.type === 'testimonial') {
+      deleteTestimonialById(deleteItem.id);
+    } else if (deleteItem.type === 'good') {
+      deleteGoodById(deleteItem.id);
+      cart.removeFromCart(deleteItem.id);
+      localStorage.removeItem(`amount-${deleteItem.id}`);
     }
+
+    deleteModal.close();
+    setDeleteItem(null);
   };
 
   if (!good || isTestimonialsLoading || !testimonials) return <Loader />;
@@ -108,14 +112,23 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
 
         <div className="pt-10 relative max-w-xl flex-1 flex flex-col gap-6">
           {role === UserRole.ADMIN && (
-            <Link
-              href={`/admin/goods/${good._id}`}
-              className="absolute top-0 right-0"
-            >
-              <span className="cursor-pointer w-[30px] h-[30px] rounded-full bg-orange-600 flex justify-center items-center hover:opacity-80">
-                <FaPen size={12} color="white" />
-              </span>
-            </Link>
+            <div className="absolute top-0 right-0 flex gap-2">
+              {/* Кнопка редактирования */}
+              <Link href={`/admin/goods/${good._id}`}>
+                <span className="cursor-pointer w-[30px] h-[30px] rounded-full bg-orange-600 flex justify-center items-center hover:opacity-80">
+                  <FaPen size={12} color="white" />
+                </span>
+              </Link>
+
+              {/* Кнопка удаления товара из базы */}
+              <Button
+                type="button"
+                icon={FaTrash}
+                small
+                outline
+                onClick={() => handleDeleteClick(good._id!, 'good')}
+              />
+            </div>
           )}
 
           <h2 className="subtitle mb-4">{good.title}</h2>
@@ -125,7 +138,6 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
           >
             {good.isAvailable ? 'В наявності' : 'Немає в наявності'}
           </p>
-
           <p>Артикул: {good.sku}</p>
           <p className="text-2xl font-bold mb-4">
             {good.discountPrice ? (
@@ -173,11 +185,8 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
                 </div>
                 <Button
                   width="40"
-                  label="Видалити"
-                  onClick={() => {
-                    cart.removeFromCart(good._id);
-                    localStorage.removeItem(`amount-${good._id}`);
-                  }}
+                  label="Видалити з корзини"
+                  onClick={() => cart.removeFromCart(good._id)}
                 />
               </div>
             )}
@@ -185,8 +194,8 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
 
           {/* Кнопки "Избранное" и "Сравнение" */}
           <div className="flex items-center gap-4 mb-2">
-            <FavoriteButtonClient good={good} />
-            <CompareButtonClient good={good} />
+            <FavoriteButton good={good} />
+            <CompareButton good={good} />
           </div>
 
           {/* Метки состояния */}
@@ -214,7 +223,7 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
                 width="40"
                 type="button"
                 label="Додати новий відгук"
-                onClick={() => testimonialModal.onOpen()}
+                onClick={() => testimonialModal.open()}
               />
             </div>
             {testimonials.map(review => (
@@ -234,7 +243,10 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
                       icon={FaTrash}
                       small
                       outline
-                      onClick={() => review._id && handleDelete(review._id)}
+                      onClick={() =>
+                        review._id &&
+                        handleDeleteClick(review._id, 'testimonial')
+                      }
                     />
                   </div>
                 )}
@@ -273,35 +285,31 @@ const GoodPageClient: React.FC<GoodPageClientProps> = ({ good, role }) => {
                 width="40"
                 type="button"
                 label="Додати перший відгук"
-                onClick={() => testimonialModal.onOpen()}
+                onClick={() => testimonialModal.open()}
               />
             </div>
           </>
         )}
       </div>
 
-      {/* Модалки */}
-      <Modal
-        body={<TestimonialForm productId={good._id} />}
-        isOpen={testimonialModal.isOpen}
-        onClose={testimonialModal.onClose}
-        disabled={isTestimonialsLoading}
-      />
+      {/* Универсальный модал удаления */}
       <Modal
         body={
           <DeleteConfirmation
-            onConfirm={() => {
-              if (testimonialToDelete) {
-                handleDeleteTestimonial(testimonialToDelete);
-                deleteModal.onClose();
-              }
-            }}
-            onCancel={() => deleteModal.onClose()}
-            title="відгук"
+            onConfirm={handleDeleteConfirm}
+            onCancel={deleteModal.close}
+            title={deleteItem?.type === 'good' ? 'товар' : 'відгук'}
           />
         }
         isOpen={deleteModal.isOpen}
-        onClose={deleteModal.onClose}
+        onClose={deleteModal.close}
+      />
+
+      {/* Модал для добавления отзыва */}
+      <Modal
+        body={<TestimonialForm productId={good._id} />}
+        isOpen={testimonialModal.isOpen}
+        onClose={testimonialModal.close}
         disabled={isTestimonialsLoading}
       />
     </div>

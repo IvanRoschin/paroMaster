@@ -47,14 +47,14 @@ export default function NextImage({
       )}
 
       <Image
-        {...(fill ? { fill: true } : { width, height })}
+        src={src}
+        alt={alt}
+        {...(fill ? { fill: true } : width && height ? { width, height } : {})}
         className={cn(
-          'transition-opacity duration-500 object-contain',
+          'object-contain transition-opacity duration-500',
           isLoading ? 'opacity-0' : 'opacity-100',
           classNames?.image
         )}
-        src={src}
-        alt={alt}
         onLoad={() => setIsLoading(false)}
         {...rest}
       />

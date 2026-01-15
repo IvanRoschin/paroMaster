@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { FaPen, FaTrash } from 'react-icons/fa';
 
 import { useGoodDelete } from '@/app/hooks';
+import { useModal } from '@/app/hooks/useModal';
 import { useAppStore } from '@/app/store/appStore';
 import { formatCurrency } from '@/app/utils/formatCurrency';
 import {
@@ -31,8 +32,11 @@ export const TableView = ({
   refetch,
   searchParams,
 }: TableViewProps) => {
-  const { goodToDelete, handleDelete, handleDeleteConfirm, deleteModal } =
-    useGoodDelete(refetch, ['goods', searchParams]);
+  const { goodToDelete, handleDelete, handleDeleteConfirm } = useGoodDelete(
+    refetch,
+    ['goods', searchParams]
+  );
+  const { isOpen, open, close } = useModal('delete');
 
   const { cart } = useAppStore();
   const [quantities, setQuantities] = useState<Record<string, number>>({});
@@ -185,12 +189,12 @@ export const TableView = ({
         body={
           <DeleteConfirmation
             onConfirm={() => handleDeleteConfirm(goodToDelete?.title || '')}
-            onCancel={() => deleteModal.onClose()}
+            onCancel={close}
             title={`товар: ${goodToDelete?.title}`}
           />
         }
-        isOpen={deleteModal.isOpen}
-        onClose={deleteModal.onClose}
+        isOpen={isOpen}
+        onClose={close}
       />
     </div>
   );

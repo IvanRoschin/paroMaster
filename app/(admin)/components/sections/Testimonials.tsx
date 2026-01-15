@@ -11,6 +11,7 @@ import {
   getAllTestimonialsAction,
   updateTestimonialAction,
 } from '@/actions/testimonials';
+import { useModal } from '@/app/hooks/useModal';
 import {
   Breadcrumbs,
   Button,
@@ -22,7 +23,7 @@ import {
   Pagination,
   Switcher,
 } from '@/components/index';
-import { useDeleteData, useDeleteModal, useFetchData } from '@/hooks/index';
+import { useDeleteData, useFetchData } from '@/hooks/index';
 import { ITestimonial } from '@/types/index';
 
 export default function Testimonials() {
@@ -48,23 +49,19 @@ export default function Testimonials() {
     ['testimonials', testimonialToDelete?.id]
   );
 
-  const deleteModal = useDeleteModal();
+  const { isOpen, open, close } = useModal('delete');
 
   const handleDelete = (id: string, author: string[], text: string) => {
     setTestimonialToDelete({ id, author, text });
-    deleteModal.onOpen();
+    open();
   };
 
   const handleDeleteConfirm = () => {
     if (testimonialToDelete?.id) {
       deleteTestimonialById(testimonialToDelete.id);
-      deleteModal.onClose();
+      close();
     }
   };
-
-  // const handleDelete = (id: string) => {
-  //   deleteTestimonialById(id);
-  // };
 
   const handleStatusToggle = async (
     _id: string | undefined,
@@ -226,12 +223,12 @@ export default function Testimonials() {
         body={
           <DeleteConfirmation
             onConfirm={handleDeleteConfirm}
-            onCancel={() => deleteModal.onClose()}
+            onCancel={close}
             title={`відгук aвтора ${testimonialToDelete?.author} &nbsp; текст: ${testimonialToDelete?.text} `}
           />
         }
-        isOpen={deleteModal.isOpen}
-        onClose={deleteModal.onClose}
+        isOpen={isOpen}
+        onClose={close}
       />
     </div>
   );

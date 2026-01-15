@@ -11,6 +11,7 @@ import {
   getUserByIdService,
   requestEmailChangeService,
   updateUserFieldService,
+  updateUserService,
 } from '../services/userService';
 
 export async function addUserAction(values: Partial<IUser>): Promise<{
@@ -50,6 +51,12 @@ export async function requestEmailChangeAction(
   newEmail: string
 ) {
   return requestEmailChangeService(userId, newEmail);
+}
+
+export async function updateUserAction(id: string, values: Partial<IUser>) {
+  const result = await updateUserService(id, values);
+  revalidatePath('/admin/users');
+  return result;
 }
 
 export async function deleteUserAction(

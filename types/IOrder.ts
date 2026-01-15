@@ -3,7 +3,15 @@ import { Types } from 'mongoose';
 import { PaymentMethod } from './paymentMethod';
 
 export interface IOrderGood {
-  good: string | Types.ObjectId;
+  good:
+    | string
+    | {
+        _id: string;
+        title: string;
+        price?: number;
+        discountPrice?: number;
+        src?: string[];
+      };
   quantity: number;
   price: number;
 }

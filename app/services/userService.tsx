@@ -10,6 +10,7 @@ import { IUser } from '@/types';
 import { UserRole } from '@/types/IUser';
 import { connectToDB } from '@/utils/dbConnect';
 
+import { serializeForClient } from '../helpers/server/serializeForClient';
 import toPlain from '../helpers/server/toPlain';
 import { generateRandomPassword, serializeDoc } from '../lib';
 import {
@@ -33,7 +34,7 @@ export async function addUserService(values: Partial<IUser>): Promise<{
     return {
       success: true,
       message: 'Користувач вже існує',
-      user: serializeDoc<IUser>(existingUser),
+      user: serializeForClient(existingUser),
     };
   }
 
@@ -162,6 +163,32 @@ export async function requestEmailChangeService(
     success: true,
     message:
       'На новий email відправлено лист з підтвердженням. Перевірте пошту.',
+  };
+}
+
+export async function updateUserService(id: string, values: Partial<IUser>) {
+  await connectToDB();
+
+  const updateFields = { ...values };
+
+  // Удаляем пустые поля
+  Object.keys(updateFields).forEach(key => {
+    const typedKey = key as keyof IUser;
+    const val = updateFields[typedKey];
+
+    if (val === '' || val === undefined) {
+      delete updateFields[typedKey];
+    }
+  });
+
+  const doc = await Customer.findByIdAndUpdate(id, updateFields, {
+    new: true,
+  });
+
+  return {
+    success: true,
+    message: 'Дані користувача оновлено',
+    customer: serializeForClient(doc),
   };
 }
 

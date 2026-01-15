@@ -2,9 +2,9 @@
 
 import dynamic from 'next/dynamic';
 
+import { useModal } from '@/app/hooks/useModal';
 import { useCartStore } from '@/app/store/cartStore';
 import { Icon } from '@/components/ui';
-import { useCartModal } from '@/hooks/index';
 
 const CartButton = () => {
   const totalQuantity = useCartStore(state =>
@@ -12,13 +12,13 @@ const CartButton = () => {
   );
 
   // const { cartQuantity } = useShoppingCart();
-  const cartModal = useCartModal();
+  const { open } = useModal('cart');
 
   if (totalQuantity === 0) return null;
 
   return (
     <button
-      onClick={cartModal.onOpen}
+      onClick={open}
       className="relative flex items-center justify-center"
     >
       <Icon

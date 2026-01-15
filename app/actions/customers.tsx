@@ -12,16 +12,32 @@ import {
   updateCustomerFieldService,
   updateCustomerService,
 } from '@/app/services/customerService';
-import { ICustomer, ISearchParams } from '@/types';
+import { ICustomer } from '@/types';
+import { ICustomerUI } from '@/types/ICustomer';
+
+export interface IGetAllCustomers {
+  success: boolean;
+  customers: ICustomerUI[];
+  count: number;
+}
+
+export interface CustomerFilters {
+  page?: string | number;
+  limit?: string | number;
+}
 
 export async function addCustomerAction(values: Partial<ICustomer>) {
+  console.log('valuse in action', values);
+
   const result = await addCustomerService(values);
   revalidatePath('/admin/customers');
   return result;
 }
 
-export async function getAllCustomersAction(searchParams: ISearchParams = {}) {
-  return getAllCustomersService(searchParams);
+export async function getAllCustomersAction(
+  filters: CustomerFilters = {}
+): Promise<IGetAllCustomers> {
+  return getAllCustomersService(filters);
 }
 
 export async function getCustomerByIdAction(id: string) {

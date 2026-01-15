@@ -1,3 +1,5 @@
+'use server';
+
 import { getAllBrandsAction } from '@/actions/brands';
 import { getAllCategoriesAction } from '@/actions/categories';
 import {

@@ -66,9 +66,10 @@ const Category: React.FC<CategoryProps> = ({ categories }) => {
                 <NextImage
                   useSkeleton
                   src={src || '/placeholder.svg'}
+                  fill
                   width={20}
                   height={20}
-                  className="w-5 h-5 mr-3 object-contain transition-filter duration-300 ease-in-out"
+                  className="w-5 h-5 mr-3  object-contain transition-filter duration-300 ease-in-out"
                   alt={label}
                   priority
                 />
