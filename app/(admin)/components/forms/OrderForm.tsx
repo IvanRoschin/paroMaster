@@ -11,6 +11,7 @@ import { orderStatus } from '@/config/constants';
 import { orderFormSchema } from '@/helpers/index';
 import { useCities, useWarehouses } from '@/hooks/index';
 import { IGoodUI, IOrder } from '@/types/index';
+import { ICustomerSnapshot } from '@/types/IOrder';
 import { OrderStatus } from '@/types/orderStatus';
 import { PaymentMethod } from '@/types/paymentMethod';
 
@@ -40,10 +41,12 @@ const OrderForm = ({ order, title, goods }: OrderFormProps) => {
   const initialValues: InitialStateType = {
     number: order?.number || '',
     customerSnapshot: {
-      name: name || '',
-      surname: surname || '',
-      email: order?.customerSnapshot.user.email || '',
-      phone: order?.customerSnapshot.user.phone || '+380',
+      user: {
+        name: name || '',
+        surname: surname || '',
+        phone: order?.customerSnapshot.user.phone || '+380',
+        email: order?.customerSnapshot.user.email || '',
+      },
       city: order?.customerSnapshot.city || 'Київ',
       warehouse: order?.customerSnapshot.warehouse || '',
       payment:
@@ -60,6 +63,7 @@ const OrderForm = ({ order, title, goods }: OrderFormProps) => {
 
       const preparedOrder: IOrder = {
         ...values,
+        customer: order?.customer ?? 'TEMP',
         customerSnapshot: { ...values.customerSnapshot },
       };
 
@@ -185,12 +189,12 @@ const useCitySelection = (
       const normalizedQuery = searchQuery.trim().toLowerCase();
       const filtered = allCities
         .filter(city =>
-          (city.Description || '')
+          (city.description || '')
             .trim()
             .toLowerCase()
             .includes(normalizedQuery)
         )
-        .map(city => city.Description || '');
+        .map(city => city.description || '');
       setFilteredCities(filtered);
     }, 300);
     return () => clearTimeout(timeoutId);
@@ -220,7 +224,7 @@ const CustomerFields = ({
   setFieldValue,
 }: CustomerFieldsProps) => {
   const { values } = useFormikContext<InitialStateType>();
-  const { warehouses, isWarehousesLoading } = useWarehouses(snapshot.city);
+  const { warehouses, isLoading } = useWarehouses(snapshot.city);
   const [showDropdown, setShowDropdown] = useState(false);
 
   const { filteredCities, searchQuery, setSearchQuery, handleSelectCity } =
@@ -328,7 +332,7 @@ const CustomerFields = ({
         <Field
           name="customerSnapshot.warehouse"
           as="select"
-          disabled={isWarehousesLoading}
+          disabled={isLoading}
           className={`text-primaryTextColor peer w-full p-4 pt-6 font-light bg-white border-2 rounded-md outline-none transition
           ${errors.customerSnapshot?.warehouse && touched.customerSnapshot?.warehouse ? 'border-rose-500' : 'border-neutral-300'}
           ${errors.customerSnapshot?.warehouse && touched.customerSnapshot?.warehouse ? 'focus:border-rose-500' : 'focus:border-green-500'}`}
