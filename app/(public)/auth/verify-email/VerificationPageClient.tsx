@@ -9,12 +9,12 @@ export default function VerificationPageClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token');
-  const [message, setMessage] = useState('Проверка...');
+  const [message, setMessage] = useState('Перевріка валідації...');
   const [success, setSuccess] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (!token) {
-      setMessage('Токен не найден.');
+      setMessage('Токен не знайдений.');
       setSuccess(false);
       return;
     }
@@ -47,7 +47,7 @@ export default function VerificationPageClient() {
       </h2>
       {success && (
         <p className="mt-2 text-gray-500">
-          Вы будете перенаправлены на страницу входа...
+          Ви будете перенаправлені на сторінку входу...
         </p>
       )}
     </div>

@@ -1,10 +1,10 @@
-import { getAllCategories } from '@/actions/categories';
+import { getAllCategoriesAction } from '@/actions/categories';
 import { useFetchData } from '@/hooks/index';
 import { ICategory } from '@/types/index';
 
 const useCategoriesEnum = () => {
   const { data, isLoading, isError } = useFetchData(
-    getAllCategories,
+    getAllCategoriesAction,
     ['categories'],
     {
       limit: 100,

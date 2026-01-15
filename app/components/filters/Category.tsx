@@ -41,12 +41,12 @@ const Category: React.FC<CategoryProps> = ({ categories }) => {
             }`}
           >
             <NextImage
+              alt="Всі товари"
               useSkeleton
               src="/goods.svg"
               width={20}
               height={20}
-              className="w-5 h-5 mr-3"
-              alt="Всі товари"
+              className="w-5 h-5 mr-3 object-contain transition-filter duration-300 ease-in-out"
               priority
             />
             Всі товари
@@ -68,7 +68,7 @@ const Category: React.FC<CategoryProps> = ({ categories }) => {
                   src={src || '/placeholder.svg'}
                   width={20}
                   height={20}
-                  className="w-5 h-5 mr-3"
+                  className="w-5 h-5 mr-3 object-contain transition-filter duration-300 ease-in-out"
                   alt={label}
                   priority
                 />

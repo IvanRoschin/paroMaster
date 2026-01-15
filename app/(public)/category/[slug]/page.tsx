@@ -5,11 +5,15 @@ import {
 } from '@tanstack/react-query';
 import { getServerSession } from 'next-auth';
 
-import { getAllCategories, getCategoryBySlug } from '@/app/actions/categories';
-import { getGoodsByCategory } from '@/app/actions/goods';
+import {
+  getAllCategoriesAction,
+  getCategoryBySlugAction,
+} from '@/app/actions/categories';
+import { getGoodsByCategoryAction } from '@/app/actions/goods';
 import { EmptyState } from '@/app/components';
 import { authOptions } from '@/app/config/authOptions';
 import prefetchData from '@/app/hooks/usePrefetchData';
+import { ICategoryLean } from '@/types/ICategory';
 import { UserRole } from '@/types/IUser';
 import { ISearchParams } from '@/types/searchParams';
 import CategoryClient from './CategoryClient';
@@ -21,20 +25,30 @@ interface CategoryPageProps {
   searchParams: Promise<ISearchParams>;
 }
 
+interface ICategoryOption {
+  value: string;
+  label: string;
+  slug: string;
+  name: string;
+}
+
 // ✅ Мета-теги (динамические)
 export async function generateMetadata({ searchParams }: CategoryPageProps) {
   const params = await searchParams;
 
-  const categoriesResponse = await getAllCategories(params);
-  const categories = (categoriesResponse.categories ?? []).map(c => ({
-    value: String(c._id),
-    label: c.name ?? 'Без назви',
-    slug: c.slug,
-    name: c.name,
-  }));
+  const categoriesResponse = await getAllCategoriesAction(params);
+  const categories = (categoriesResponse.categories ?? []).map(
+    (c: ICategoryLean) => ({
+      value: String(c._id),
+      label: c.name ?? 'Без назви',
+      slug: c.slug,
+      name: c.name,
+    })
+  );
 
   const currentCategory = categories.find(
-    c => c.slug === params.category || c.value === params.category
+    (c: ICategoryOption) =>
+      c.slug === params.category || c.value === params.category
   );
 
   const categoryName = currentCategory?.name ?? 'Категорія';
@@ -54,20 +68,21 @@ export default async function CategoryPage({
   const search = await searchParams;
 
   // 1️⃣ Категория по slug
-  const category = await getCategoryBySlug(slug);
+  const category = await getCategoryBySlugAction(slug);
   if (!category) {
     return (
-      <EmptyState
-        showReset
-        title="Категорію не знайдено"
-        actionHref="/catalog"
-      />
+      <EmptyState showReset title="Категорію не знайдено" goHomeAfterReset />
     );
   }
 
   // 2️⃣ Префетч товаров
   const queryClient = new QueryClient();
-  await prefetchData(queryClient, getGoodsByCategory, ['goods', slug], slug);
+  await prefetchData(
+    queryClient,
+    getGoodsByCategoryAction,
+    ['goods', slug],
+    slug
+  );
 
   const goodsData = queryClient.getQueryData(['goods', slug]) as any;
   const goods = goodsData ?? [];

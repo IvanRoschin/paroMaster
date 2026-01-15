@@ -1,6 +1,10 @@
-import { getAllBrands } from '@/actions/brands';
-import { getAllCategories } from '@/actions/categories';
-import { getGoodById, getGoodsByBrand, updateGood } from '@/actions/goods';
+import { getAllBrandsAction } from '@/actions/brands';
+import { getAllCategoriesAction } from '@/actions/categories';
+import {
+  getGoodByIdAction,
+  getGoodsByBrandAction,
+  updateGoodAction,
+} from '@/actions/goods';
 import { GoodForm } from '@/app/(admin)/components';
 import { IGoodUI } from '@/types/IGood';
 import { ISearchParams } from '@/types/index';
@@ -18,9 +22,9 @@ export default async function SingleGoodPage({
   const query = await searchParams;
 
   const [good, categoriesResponse, brandsResponse] = await Promise.all([
-    getGoodById(id),
-    getAllCategories(query),
-    getAllBrands(query),
+    getGoodByIdAction(id),
+    getAllCategoriesAction(query),
+    getAllBrandsAction(query),
   ]);
 
   const categories = categoriesResponse.categories ?? [];
@@ -40,10 +44,9 @@ export default async function SingleGoodPage({
 
   let goodsByBrand: IGoodUI[] = [];
   if (brandId) {
-    const rawGoods = await getGoodsByBrand(brandId, goodNotNull._id);
+    const rawGoods = await getGoodsByBrandAction(brandId, goodNotNull._id);
     goodsByBrand = rawGoods as unknown as IGoodUI[];
   }
-  console.log('goodsByBrand:', goodsByBrand);
 
   return (
     <div className="mb-20">
@@ -53,7 +56,7 @@ export default async function SingleGoodPage({
         goodsByBrand={goodsByBrand as IGoodUI[]}
         allowedCategories={categories}
         allowedBrands={brands}
-        action={updateGood}
+        action={values => updateGoodAction(goodNotNull._id, values)}
       />
     </div>
   );

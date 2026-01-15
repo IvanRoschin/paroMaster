@@ -1,17 +1,17 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { FaPen, FaPlus, FaTrash } from 'react-icons/fa';
 
-import { deleteGood, getAllGoods, IGetAllGoods } from '@/actions/goods';
-import { EmptyState } from '@/components/common';
+import { deleteGoodAction, getAllGoodsAction } from '@/actions/goods';
+import { EmptyState, NextImage } from '@/components/common';
 import DeleteConfirmation from '@/components/common/DeleteConfirmation';
 import { Button, Modal } from '@/components/ui';
 import useDeleteData from '@/hooks/useDeleteData';
 import useDeleteModal from '@/hooks/useDeleteModal';
 import useFetchData from '@/hooks/useFetchData';
+import { IGetAllGoods } from '@/types/IGood';
 
 import {
   Input,
@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from '../ui';
 
-interface Option {
+export interface Option {
   value: string;
   label: string;
 }
@@ -50,12 +50,12 @@ export default function Goods({
   } | null>(null);
 
   const { data, isLoading, isError } = useFetchData<IGetAllGoods>(
-    getAllGoods,
+    getAllGoodsAction,
     ['goods'],
     searchParams
   );
 
-  const { mutate: deleteGoodById } = useDeleteData(deleteGood, [
+  const { mutate: deleteGoodById } = useDeleteData(deleteGoodAction, [
     'goods',
     goodToDelete?.id,
   ]);
@@ -96,8 +96,8 @@ export default function Goods({
         (selectedAvailability === 'unavailable' && !g.isAvailable);
       const matchCondition =
         selectedCondition === 'all' ||
-        (selectedCondition === 'new' && g.isNew === g.isNew) ||
-        (selectedCondition === 'used' && g.isNew === !g.isNew);
+        (selectedCondition === 'new' && g.isUsed === g.isUsed) ||
+        (selectedCondition === 'used' && g.isUsed === !g.isUsed);
       const matchSearch =
         !search || g.sku?.toLowerCase().includes(search.toLowerCase());
 
@@ -239,13 +239,12 @@ export default function Goods({
               {/* изображение */}
               {good.src?.length > 0 && (
                 <div className="relative h-48 bg-gray-50 flex items-center justify-center">
-                  <Image
+                  <NextImage
+                    useSkeleton
                     src={good.src[0]}
                     alt={good.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw,
-             (max-width: 1200px) 50vw,
-             25vw"
+                    width={300}
+                    height={300}
                     className="object-contain p-2"
                   />
                 </div>
@@ -265,15 +264,15 @@ export default function Goods({
                   Артикул: {good.sku || '-'}
                 </p>
                 {/* ✅ отображение состояния */}
-                {good.isNew !== undefined && (
+                {good.isUsed !== undefined && (
                   <span
                     className={`inline-block mt-2 text-xs font-medium px-2 py-1 rounded-full w-fit ${
-                      good.isNew
+                      good.isUsed
                         ? 'bg-green-100 text-green-700'
                         : 'bg-yellow-100 text-yellow-700'
                     }`}
                   >
-                    {good.isNew ? 'Новий' : 'Б/у'}
+                    {good.isUsed ? 'Новий' : 'Б/у'}
                   </span>
                 )}
                 <div className="mt-auto">

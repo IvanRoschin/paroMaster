@@ -3,9 +3,8 @@
 import './PriceFilter.css';
 
 import { useEffect, useState } from 'react';
-import { useContextSelector } from 'use-context-selector';
 
-import { FiltersContext } from '@/context/FiltersContext';
+import { useAppStore } from '@/app/store/appStore';
 
 interface PriceFilterProps {
   currencySymbol?: string;
@@ -19,23 +18,30 @@ export const PriceFilter: React.FC<PriceFilterProps> = ({
   maxPriceFromDB,
 }) => {
   // ✅ подписываемся только на нужные поля контекста
-  const minPrice = useContextSelector(FiltersContext, ctx => ctx?.minPrice);
-  const maxPrice = useContextSelector(FiltersContext, ctx => ctx?.maxPrice);
-  const setMinPrice = useContextSelector(
-    FiltersContext,
-    ctx => ctx?.setMinPrice
-  );
-  const setMaxPrice = useContextSelector(
-    FiltersContext,
-    ctx => ctx?.setMaxPrice
-  );
+  const { filters } = useAppStore();
+  const minPrice = filters.minPrice;
+  const maxPrice = filters.maxPrice;
+
+  // const minPrice = useContextSelector(FiltersContext, ctx => ctx?.minPrice);
+  // const maxPrice = useContextSelector(FiltersContext, ctx => ctx?.maxPrice);
+
+  const setMinPrice = filters.setMinPrice;
+  const setMaxPrice = filters.setMaxPrice;
+  // const setMinPrice = useContextSelector(
+  //   FiltersContext,
+  //   ctx => ctx?.setMinPrice
+  // );
+  // const setMaxPrice = useContextSelector(
+  //   FiltersContext,
+  //   ctx => ctx?.setMaxPrice
+  // );
 
   const [values, setValues] = useState<string[]>([
     (minPrice ?? minPriceFromDB).toString(),
     (maxPrice ?? maxPriceFromDB).toString(),
   ]);
 
-  const step = 500;
+  const step = 200;
   const roundToStep = (value: number, step: number) =>
     Math.round(value / step) * step;
 

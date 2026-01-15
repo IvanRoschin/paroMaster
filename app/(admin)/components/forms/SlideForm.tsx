@@ -74,9 +74,9 @@ const SlideForm: React.FC<SliderFormProps> = ({ slide, title, action }) => {
     { resetForm }: ResetFormProps
   ) => {
     try {
-      const updateSliderData = isUpdating ? { ...values, _id: slide?._id } : {};
+      setIsLoading(true);
 
-      console.log('updateSliderData:', updateSliderData);
+      const updateSliderData = isUpdating ? { ...values, _id: slide?._id } : {};
 
       const result = isUpdating
         ? await updateSlideMutation.mutateAsync(updateSliderData)
@@ -84,14 +84,14 @@ const SlideForm: React.FC<SliderFormProps> = ({ slide, title, action }) => {
 
       if (!result.success) throw new Error(result.message);
 
-      if (result?.success === true) {
-        resetForm();
-        toast.success(isUpdating ? 'Слайд оновлено!!' : 'Новий слайд додано!');
-        push('/admin/slides');
-      }
+      resetForm();
+      toast.success(isUpdating ? 'Слайд оновлено!!' : 'Новий слайд додано!');
+      push('/admin/slides');
     } catch (error) {
       toast.error('Помилка!');
       console.error('Error submitting form:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 

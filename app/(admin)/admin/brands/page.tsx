@@ -1,12 +1,13 @@
-import { getAllBrands } from '@/actions/brands';
-import Brands from '@/app/(admin)/components/sections/Brands';
-import prefetchData from '@/hooks/usePrefetchData';
-import { ISearchParams } from '@/types/index';
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
+
+import { getAllBrandsAction } from '@/actions/brands';
+import Brands from '@/app/(admin)/components/sections/Brands';
+import prefetchData from '@/hooks/usePrefetchData';
+import { ISearchParams } from '@/types/index';
 
 export type paramsType = Promise<{ id: string }>;
 
@@ -19,7 +20,7 @@ export default async function BrandsPage({
 
   const queryClient = new QueryClient();
 
-  await prefetchData(queryClient, getAllBrands, ['brands'], params);
+  await prefetchData(queryClient, getAllBrandsAction, ['brands'], params);
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

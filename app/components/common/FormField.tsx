@@ -17,6 +17,7 @@ interface FormFieldProps {
     disabled?: boolean;
     required?: boolean;
     options?: Option[];
+    autoComplete?: string;
     style?: React.CSSProperties;
   };
   errors?: FormikErrors<any>;
@@ -82,6 +83,7 @@ const FormField: React.FC<FormFieldProps> = ({
           <Field
             as="select"
             name={item.id}
+            value={item.value}
             className={`peer w-full p-4 font-light bg-white border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed
             ${meta.error && meta.touched ? 'border-rose-500' : 'border-neutral-300'}
             ${meta.error && meta.touched ? 'focus:border-rose-500' : 'focus:border-green-500'}
@@ -129,6 +131,7 @@ const FormField: React.FC<FormFieldProps> = ({
             name={item.id}
             type={item.type}
             disabled={item.disabled}
+            autoComplete={item.autoComplete}
             value={value}
             // onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             //   const newValue = e.target.value;

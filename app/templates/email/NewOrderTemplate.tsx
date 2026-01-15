@@ -1,4 +1,4 @@
-import { IOrderedGoodSnapshot } from '@/actions/sendNodeMailer';
+import { IOrderedGoodSnapshot } from '@/app/services/sendNodeMailer';
 import { paymentMethods } from '@/config/constants';
 import { IOrder } from '@/types/index';
 

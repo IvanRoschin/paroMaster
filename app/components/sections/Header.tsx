@@ -2,14 +2,17 @@
 
 import {
   CartButton,
+  FavoritesHeaderButton,
   Logo,
   Menu,
   MobileMenu,
   Search,
   Socials,
-} from '@/components/index';
+} from '@/components';
 import { useMediaQuery } from '@/hooks/index';
 import { SessionUser } from '@/types/IUser';
+
+import CompareHeaderBtn from '../ui/Buttons/CompareHeaderBtn';
 
 interface HeaderProps {
   user?: SessionUser | null;
@@ -36,7 +39,11 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
       >
         <Logo />
         {!isMobile && <Search placeholder="Пошук товарів" />}
-        <CartButton />
+        <div className="flex gap-4">
+          <CartButton />
+          <FavoritesHeaderButton />
+          <CompareHeaderBtn />
+        </div>
       </div>
     </div>
   );

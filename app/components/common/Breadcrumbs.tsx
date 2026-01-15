@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { FaChevronRight } from 'react-icons/fa';
 
-import { getGoodById } from '@/actions/goods';
+import { getGoodByIdAction } from '@/actions/goods';
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -31,6 +31,18 @@ const customNames: Record<string, string> = {
   customers: 'Замовник',
   search: 'Пошук',
   brands: 'Бренди',
+  'korpus-stanciyi': 'Корпус станції',
+  'korpus-dlya-prasok': 'Корпус для прасок',
+  'pidoshvi-dlya-prasok': 'Підошви для прасок',
+  'plati-keruvannya': 'Плати керування',
+  boyleri: 'Бойлери',
+  elektroklapani: 'Електроклапани',
+  nasosipompi: 'Насоси(помпи)',
+  'rezervuari-dlya-vodi': 'Резервуари для води',
+  'provoda-ta-shlangi': 'Провода та шланги',
+  'aksesuari-ta-komplektuyuchi': 'Аксесуари та комплектуючі',
+  'praski-z-parogeneratorami': 'Праски з парогенераторами',
+  filtri: 'Фільтри',
 };
 
 const Breadcrumbs = () => {
@@ -64,7 +76,7 @@ const Breadcrumbs = () => {
 
     (async () => {
       try {
-        const good = await getGoodById(lastSegment);
+        const good = await getGoodByIdAction(lastSegment);
         if (!isMounted || !good) return;
 
         const brand = typeof good.brand === 'object' ? good.brand?.name : '';

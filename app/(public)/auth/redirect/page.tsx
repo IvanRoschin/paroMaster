@@ -6,18 +6,21 @@ import { routes } from '@/app/helpers/routes';
 
 export default async function AuthRedirectPage() {
   const session = await getServerSession(authOptions);
-  const callBackUrl = `${routes.publicRoutes.auth.signIn}`;
 
-  if (!session) {
-    redirect(callBackUrl);
+  if (!session?.user) {
+    return redirect(routes.publicRoutes.auth.signIn);
   }
 
-  switch (session.user.role) {
-    case 'admin':
-      redirect(`${routes.adminRoutes.dashboard}`);
-    case 'customer':
-      redirect(`${routes.customerRoutes.dashboard}`);
-    default:
-      redirect('/');
+  const role = session.user.role;
+
+  if (role === 'admin') {
+    return redirect(routes.adminRoutes.dashboard);
   }
+
+  if (role === 'customer') {
+    return redirect(routes.customerRoutes.dashboard);
+  }
+
+  // fallback
+  return redirect('/');
 }

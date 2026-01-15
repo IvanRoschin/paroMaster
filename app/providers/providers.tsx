@@ -1,13 +1,11 @@
 'use client';
 
-import { ShoppingCartProvider } from 'app/context/ShoppingCartContext';
 import { SessionProvider } from 'next-auth/react';
 import { Suspense, useState } from 'react';
 import { Toaster } from 'sonner';
 
+import PreloadedResources from '@/app/utils/PreloadedResources';
 import { Loader } from '@/components';
-import { FiltersProvider } from '@/context/FiltersContext';
-import PreloadedResourses from '@/utils/preloadedResourses';
 import {
   DehydratedState,
   HydrationBoundary,
@@ -26,20 +24,24 @@ export function Providers({ children, dehydratedState }: ProvidersProps) {
 
   return (
     <SessionProvider>
-      <FiltersProvider>
-        <ShoppingCartProvider>
-          <Suspense fallback={<Loader />}>
-            <PreloadedResourses />
-            <QueryClientProvider client={queryClient}>
-              <HydrationBoundary state={dehydratedState}>
-                {children}
-              </HydrationBoundary>
-              <ReactQueryDevtools initialIsOpen={false} />
-            </QueryClientProvider>
-            <Toaster position="top-right" richColors />
-          </Suspense>
-        </ShoppingCartProvider>
-      </FiltersProvider>
+      {/* <FiltersProvider>
+        <CompareProvider>
+          <FavoritesProvider>
+            <ShoppingCartProvider> */}
+      <Suspense fallback={<Loader />}>
+        <PreloadedResources />
+        <QueryClientProvider client={queryClient}>
+          <HydrationBoundary state={dehydratedState}>
+            {children}
+          </HydrationBoundary>
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+        <Toaster position="top-right" richColors />
+      </Suspense>
+      {/* </ShoppingCartProvider>
+          </FavoritesProvider>
+        </CompareProvider>
+      </FiltersProvider> */}
     </SessionProvider>
   );
 }

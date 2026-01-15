@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-import { deleteGood } from '@/app/actions/goods';
+import { deleteGoodAction } from '@/app/actions/goods';
 import { useDeleteData, useDeleteModal } from '@/app/hooks';
 
 export function useGoodDelete(refetch?: () => void, queryKey?: any) {
@@ -14,7 +14,7 @@ export function useGoodDelete(refetch?: () => void, queryKey?: any) {
   const deleteModal = useDeleteModal();
 
   const { mutate: deleteGoodById } = useDeleteData(
-    deleteGood,
+    deleteGoodAction,
     queryKey ?? ['goods']
   );
 

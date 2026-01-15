@@ -1,14 +1,13 @@
+import { getAllGoodsAction } from '@/actions/goods';
+import { Breadcrumbs, GoodsSection, InfiniteScroll } from '@/components';
+import prefetchData from '@/hooks/usePrefetchData';
+import { IGoodUI, ISearchParams } from '@/types/index';
+import { UserRole } from '@/types/IUser';
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
-
-import { getAllGoods } from '@/actions/goods';
-import { Breadcrumbs, GoodsSection, InfiniteScroll } from '@/components';
-import prefetchData from '@/hooks/usePrefetchData';
-import { IGoodUI, ISearchParams } from '@/types/index';
-import { UserRole } from '@/types/IUser';
 
 interface GoodsData {
   goods: IGoodUI[];
@@ -29,7 +28,7 @@ export default async function CatalogPage({
 
   const limit = role === UserRole.ADMIN ? 4 : 8;
 
-  await prefetchData(queryClient, getAllGoods, goodsKey, {
+  await prefetchData(queryClient, getAllGoodsAction, goodsKey, {
     ...params,
     limit,
   });

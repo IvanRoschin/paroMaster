@@ -1,32 +1,27 @@
 'use client';
 
-import { useContextSelector } from 'use-context-selector';
-
-import { FiltersContext, Option } from '@/context/FiltersContext';
+import { useAppStore } from '@/app/store/appStore';
 import { useMediaQuery } from '@/hooks/index';
+
+export interface Option {
+  value: string;
+  label: string;
+  slug?: string;
+}
 
 const BrandFilter = ({ brands }: { brands: Option[] }) => {
   const isMobile = useMediaQuery('(max-width: 767px)');
+  const { filters } = useAppStore();
 
-  // ✅ подписываемся только на нужные части контекста
-  const selectedBrands = useContextSelector(
-    FiltersContext,
-    ctx => ctx?.selectedBrands
-  );
-  const setSelectedBrands = useContextSelector(
-    FiltersContext,
-    ctx => ctx?.setSelectedBrands
-  );
+  const selectedBrands = filters.selectedBrands;
+  const setSelectedBrands = filters.setSelectedBrands;
 
   const handleBrandClick = (brand: Option) => {
-    if (!selectedBrands || !setSelectedBrands) return;
-
-    const exists = selectedBrands.some(b => b.slug === brand.slug);
-    if (exists) {
-      setSelectedBrands(selectedBrands.filter(b => b.slug !== brand.slug));
-    } else {
-      setSelectedBrands([...selectedBrands, brand]);
-    }
+    if (!setSelectedBrands) return;
+    const newSelectedBrands = selectedBrands.some(b => b.slug === brand.slug)
+      ? selectedBrands.filter(b => b.slug !== brand.slug)
+      : [...selectedBrands, brand];
+    setSelectedBrands(newSelectedBrands);
   };
 
   return (
@@ -35,39 +30,39 @@ const BrandFilter = ({ brands }: { brands: Option[] }) => {
 
       <ul
         className={`p-4 ${
-          isMobile
-            ? 'grid grid-cols-3 sm:grid-cols-4 gap-3 justify-items-center'
-            : 'space-y-2'
+          isMobile ? 'grid grid-cols-3 sm:grid-cols-4 gap-3' : 'space-y-2'
         }`}
       >
         {brands.map((brand, i) => {
-          const isChecked = selectedBrands?.some(b => b.slug === brand.slug);
+          const isChecked = selectedBrands.some(b => b.slug === brand.slug);
 
           return (
             <li
-              key={i}
-              className={`flex items-center justify-center ${
+              key={brand.slug ?? i}
+              className={`flex items-center cursor-pointer transition-all ${
                 isMobile
-                  ? 'flex-col w-full aspect-square bg-secondaryBackground rounded-lg text-center text-xs sm:text-sm p-2 select-none transition-all duration-200 cursor-pointer hover:shadow-md active:scale-95 ' +
-                    (isChecked ? 'ring-2 ring-primary font-semibold' : '')
+                  ? `flex-col w-full aspect-square bg-secondaryBackground rounded-lg 
+                     text-center text-xs sm:text-sm p-2 select-none hover:shadow-md active:scale-95
+                     ${isChecked ? 'ring-2 ring-primary font-semibold' : ''}`
                   : 'space-x-2'
               }`}
-              onClick={() => handleBrandClick(brand)}
+              onClick={() => handleBrandClick(brand)} // теперь одинаково для мобилки и десктопа
             >
               {!isMobile && (
                 <input
                   type="checkbox"
-                  checked={!!isChecked}
-                  onChange={() => handleBrandClick(brand)}
+                  checked={isChecked}
+                  readOnly // важный момент, чтобы React не ругался
                   className="custom-checkbox"
-                  id={`checkbox-${i}`}
+                  id={`brand-${i}`}
                 />
               )}
+
               <label
-                htmlFor={`checkbox-${i}`}
-                className={`cursor-pointer ${
-                  isMobile ? 'block w-full text-center' : ''
-                }`}
+                htmlFor={`brand-${i}`}
+                className={
+                  isMobile ? 'block w-full text-center' : 'cursor-pointer'
+                }
               >
                 {brand.label}
               </label>

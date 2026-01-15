@@ -7,7 +7,7 @@ import {
   FaTrash,
 } from 'react-icons/fa';
 
-import Button from '@/components/ui/Button'; // або свій компонент кнопки
+import Button from '@/app/components/ui/Buttons/Button'; // або свій компонент кнопки
 import { ITestimonial } from '@/types/index';
 
 type StarProps = {

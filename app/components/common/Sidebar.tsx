@@ -1,16 +1,22 @@
-'use client';
+'use server';
 
-import { useSession } from 'next-auth/react';
+import { getServerSession } from 'next-auth';
+import Image from 'next/image';
 import Link from 'next/link';
 
+import { getUserByIdAction } from '@/app/actions';
+import { authOptions } from '@/app/config/authOptions';
 import { getMenuItemsByRole } from '@/app/config/sidebarMenuConfig';
 import { UserRole } from '@/types/IUser';
 
-import NextImage from './NextImage';
+export default async function Sidebar() {
+  const session = await getServerSession(authOptions);
 
-const Sidebar = () => {
-  const { data: session } = useSession();
-  const role = (session?.user?.role as UserRole) ?? UserRole.GUEST;
+  const user = session?.user?.id
+    ? await getUserByIdAction(session.user.id)
+    : null;
+
+  const role = (user?.role as UserRole) ?? UserRole.GUEST;
 
   const isCustomer = role === UserRole.CUSTOMER;
   const menuItems = getMenuItemsByRole(
@@ -24,8 +30,7 @@ const Sidebar = () => {
       </h2>
 
       <div className="flex flex-col justify-center items-center mb-4">
-        <NextImage
-          useSkeleton
+        <Image
           src={session?.user?.image || '/noavatar.png'}
           alt="user photo"
           width={50}
@@ -34,7 +39,7 @@ const Sidebar = () => {
           priority
         />
         <span className="text-primaryAccentColor text-lg">
-          {session?.user?.name ?? 'Гість'}
+          {user?.name ?? 'Гість'}
         </span>
       </div>
 
@@ -50,6 +55,4 @@ const Sidebar = () => {
       </ul>
     </div>
   );
-};
-
-export default Sidebar;
+}

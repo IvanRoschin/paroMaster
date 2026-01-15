@@ -4,10 +4,17 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { FaPen, FaTrash } from 'react-icons/fa';
 
-import { useShoppingCart } from '@/app/context/ShoppingCartContext';
 import { useGoodDelete } from '@/app/hooks';
+import { useAppStore } from '@/app/store/appStore';
 import { formatCurrency } from '@/app/utils/formatCurrency';
-import { Button, DeleteConfirmation, Modal, NextImage } from '@/components';
+import {
+  Button,
+  CompareButton,
+  DeleteConfirmation,
+  FavoriteButton,
+  Modal,
+  NextImage,
+} from '@/components';
 import { IGoodUI, ISearchParams } from '@/types';
 import { UserRole } from '@/types/IUser';
 
@@ -27,64 +34,68 @@ export const TableView = ({
   const { goodToDelete, handleDelete, handleDeleteConfirm, deleteModal } =
     useGoodDelete(refetch, ['goods', searchParams]);
 
-  const {
-    getItemQuantity,
-    increaseCartQuantity,
-    decreaseCartQuantity,
-    removeFromCart,
-  } = useShoppingCart();
-
+  const { cart } = useAppStore();
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const newQuantities: Record<string, number> = {};
     goods.forEach(good => {
-      newQuantities[good._id] = getItemQuantity(good._id);
+      newQuantities[good._id] = cart.getItemQuantity(good._id);
     });
     setQuantities(newQuantities);
-  }, [goods, getItemQuantity]);
+  }, [goods, cart]);
 
   return (
     <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm bg-white">
       <table className="min-w-full text-sm text-gray-700">
         <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
           <tr>
-            <th className="p-3 font-medium">Фото</th>
-            <th className="p-3 font-medium">Назва</th>
-            <th className="p-3 font-medium">Категорія</th>
-            <th className="p-3 font-medium">Бренд</th>
-            <th className="p-3 text-right font-medium">Ціна</th>
-            <th className="p-3 text-center font-medium">Наявність</th>
-            <th className="p-3 text-center font-medium w-40">
+            <th className="p-2 font-medium">Фото</th>
+            <th className="p-2 font-medium">Назва</th>
+            <th className="p-2 font-medium">Категорія</th>
+            <th className="p-2 font-medium">Бренд</th>
+            <th className="p-2 text-right font-medium">Ціна</th>
+            <th className="p-2 text-center font-medium">Наявність</th>
+            <th className="p-2 text-center font-medium w-36">
               {role === UserRole.ADMIN ? 'Дії' : 'Покупка'}
             </th>
           </tr>
         </thead>
 
         <tbody>
+          {goods.length === 0 && (
+            <tr>
+              <td
+                colSpan={7}
+                className="p-6 text-center text-gray-500 italic bg-gray-50"
+              >
+                Немає товарів для відображення
+              </td>
+            </tr>
+          )}
+
           {goods.map(good => {
             const quantity = quantities[good._id] ?? 0;
+
             return (
               <tr
                 key={good._id}
                 className="border-t border-gray-100 hover:bg-gray-50 transition-colors"
               >
                 {/* Фото */}
-                <td className="p-3">
-                  <div className="relative">
-                    <NextImage
-                      width={40}
-                      height={40}
-                      useSkeleton
-                      src={good.src?.[0] || '/placeholder.png'}
-                      alt={good.title}
-                      className="object-contain rounded-md bg-gray-100"
-                    />
-                  </div>
+                <td className="p-2 w-12">
+                  <NextImage
+                    width={36}
+                    height={36}
+                    useSkeleton
+                    src={good.src?.[0] || '/placeholder.png'}
+                    alt={good.title}
+                    className="object-contain rounded-md bg-gray-100"
+                  />
                 </td>
 
                 {/* Назва */}
-                <td className="p-3 font-medium text-gray-800">
+                <td className="p-2 font-medium text-gray-800 max-w-[150px] truncate">
                   <Link
                     className="nav text-gray-600 hover:text-gray-600"
                     href={`/catalog/${good._id}`}
@@ -94,39 +105,38 @@ export const TableView = ({
                 </td>
 
                 {/* Категорія */}
-                <td className="p-3 text-gray-600">
+                <td className="p-2 text-gray-600 max-w-[120px] truncate">
                   {good.category?.name ?? '-'}
                 </td>
 
                 {/* Бренд */}
-                <td className="p-3 text-gray-600">{good.brand?.name ?? '-'}</td>
+                <td className="p-2 text-gray-600 max-w-[120px] truncate">
+                  {good.brand?.name ?? '-'}
+                </td>
 
                 {/* Ціна */}
-                <td className="p-3 text-right font-semibold">
+                <td className="p-2 text-right font-semibold">
                   {formatCurrency(good.price, 'uk-UA', 'UAH')}
                 </td>
 
                 {/* Наявність */}
-                <td className="p-3 text-center">
+                <td className="p-2 text-center">
                   {good.isAvailable ? (
-                    <span className="inline-block px-2 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-full">
+                    <span className="inline-flex items-center px-2 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full">
                       В наявності
                     </span>
                   ) : (
-                    <span className="inline-block px-2 py-1 text-xs font-medium bg-red-100 text-red-700 rounded-full">
+                    <span className="inline-flex items-center px-2 py-1 text-xs font-semibold bg-red-100 text-red-700 rounded-full">
                       Немає
                     </span>
                   )}
                 </td>
 
                 {/* Действия или корзина */}
-                <td className="p-3 text-center">
+                <td className="p-2 text-center">
                   {role === UserRole.ADMIN ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <Link
-                        href={`/admin/goods/${good._id}`}
-                        className="flex items-center justify-center"
-                      >
+                    <div className="flex items-center justify-center gap-1">
+                      <Link href={`/admin/goods/${good._id}`}>
                         <Button
                           type="button"
                           icon={FaPen}
@@ -135,7 +145,6 @@ export const TableView = ({
                           color="border-yellow-400"
                         />
                       </Link>
-
                       <Button
                         type="button"
                         icon={FaTrash}
@@ -149,34 +158,29 @@ export const TableView = ({
                       />
                     </div>
                   ) : (
-                    <CartActions
-                      goodId={good._id}
-                      isAvailable={good.isAvailable}
-                      quantity={quantity}
-                      increaseCartQuantity={increaseCartQuantity}
-                      decreaseCartQuantity={decreaseCartQuantity}
-                      removeFromCart={removeFromCart}
-                    />
+                    <div className="flex flex-col items-center gap-1">
+                      <CartActions
+                        goodId={good._id}
+                        isAvailable={good.isAvailable}
+                        quantity={quantity}
+                        increaseCartQuantity={cart.increaseCartQuantity}
+                        decreaseCartQuantity={cart.decreaseCartQuantity}
+                        removeFromCart={cart.removeFromCart}
+                      />
+                      <div className="flex gap-1 mt-1">
+                        <FavoriteButton good={good} />
+                        <CompareButton good={good} />
+                      </div>
+                    </div>
                   )}
                 </td>
               </tr>
             );
           })}
-
-          {goods.length === 0 && (
-            <tr>
-              <td
-                colSpan={7}
-                className="p-6 text-center text-gray-500 italic bg-gray-50"
-              >
-                Немає товарів для відображення
-              </td>
-            </tr>
-          )}
         </tbody>
       </table>
 
-      {/* Модалка для підтвердження видалення */}
+      {/* Модалка удаления */}
       <Modal
         body={
           <DeleteConfirmation
@@ -212,22 +216,23 @@ const CartActions = ({
 }: CartActionsProps) => {
   if (!isAvailable) {
     return (
-      <span className="text-sm text-gray-400 italic">Немає в наявності</span>
+      <span className="text-xs text-gray-400 italic">Немає в наявності</span>
     );
   }
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex flex-col items-center gap-1">
       {quantity === 0 ? (
         <Button
           type="button"
           label="Купити"
-          width="28"
+          width="24"
+          small
           onClick={() => increaseCartQuantity(goodId)}
         />
       ) : (
         <>
-          <div className="flex items-center gap-2 justify-center">
+          <div className="flex items-center gap-1 justify-center">
             <Button
               type="button"
               label="-"
@@ -235,7 +240,9 @@ const CartActions = ({
               outline
               onClick={() => decreaseCartQuantity(goodId)}
             />
-            <span className="w-5 text-center font-semibold">{quantity}</span>
+            <span className="w-5 text-center text-sm font-semibold">
+              {quantity}
+            </span>
             <Button
               type="button"
               label="+"
@@ -247,7 +254,8 @@ const CartActions = ({
           <Button
             type="button"
             label="Видалити"
-            width="28"
+            width="24"
+            small
             onClick={() => removeFromCart(goodId)}
           />
         </>

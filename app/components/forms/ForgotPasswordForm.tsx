@@ -1,113 +1,104 @@
 'use client';
 
-// import { getForgotPassFormSchema } from '@/schemas/forgotPasswordSchema'; // если есть
+import { Form, Formik, FormikHelpers } from 'formik';
+import { motion } from 'framer-motion';
+import { useState } from 'react';
 
-interface ForgotPasswordFormCreds {
+import { sendPasswordResetEmailAction } from '@/app/actions/auth';
+import { forgotPasswordFormSchema } from '@/app/helpers/validationSchemas';
+import { useNotificationModal } from '@/app/hooks';
+import { FormField, ModalNotification } from '@/components/common';
+import { Button, Modal } from '@/components/ui';
+
+interface InitialStateType {
   email: string;
 }
 
-// interface ForgotPasswordFormProps {
-//   onSuccess?: () => void;
-// }
+const ForgotPasswordForm = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState('');
 
-// const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
-//   onSuccess,
-// }) => {
-//   const [status, setStatus] = useState<
-//     'idle' | 'loading' | 'success' | 'error'
-//   >('idle');
-//   const [message, setMessage] = useState<string>('');
+  const notificationModal = useNotificationModal();
 
-//   const initialValues: ForgotPasswordFormCreds = { email: '' };
+  const initialValues: InitialStateType = {
+    email: '',
+  };
 
-//   const handleSubmit = async (
-//     values: ForgotPasswordFormCreds,
-//     { resetForm, setSubmitting }: FormikHelpers<ForgotPasswordFormCreds>
-//   ) => {
-//     setStatus('loading');
-//     setMessage('');
+  const handleSubmit = async (
+    values: InitialStateType,
+    { resetForm }: FormikHelpers<InitialStateType>
+  ) => {
+    setIsLoading(true);
+    setMessage('');
 
-//   //   try {
-//   //     const res = await fetch('/api/auth/forgot-password', {
-//   //       method: 'POST',
-//   //       headers: { 'Content-Type': 'application/json' },
-//   //       body: JSON.stringify(values),
-//   //     });
+    const res = await sendPasswordResetEmailAction(values.email);
 
-//   //     const data = await res.json();
+    setMessage(res.message);
+    notificationModal.onOpen(); // ← открыть модалку
 
-//   //     if (!res.ok || data.error) {
-//   //       throw new Error(data.message || 'Помилка при відправці листа');
-//   //     }
+    setIsLoading(false);
+    resetForm(); // ← вызвать resetForm
+  };
 
-//   //     setStatus('success');
-//   //     setMessage('Лист з інструкцією для відновлення паролю надіслано.');
-//   //     resetForm();
+  const inputs = [
+    { label: 'Email', type: 'text', id: 'email', required: true },
+  ];
 
-//   //     if (onSuccess) onSuccess();
-//   //   } catch (error: any) {
-//   //     setStatus('error');
-//   //     setMessage(error.message || 'Сталася помилка. Спробуйте ще раз.');
-//   //   } finally {
-//   //     setSubmitting(false);
-//   //   }
-//   // };
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4">
+      <div className="w-full max-w-md md:max-w-lg bg-white shadow-2xl rounded-2xl p-8 md:p-10">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: 'easeOut' }}
+        >
+          <h2 className="subtitle mb-6">Відновлення паролю</h2>
+          <Formik
+            initialValues={initialValues}
+            onSubmit={handleSubmit}
+            validationSchema={forgotPasswordFormSchema}
+            enableReinitialize
+          >
+            {({ errors }) => (
+              <Form className="flex flex-col gap-5">
+                <FormField item={inputs[0]} errors={errors} />
 
-//   return (
-//     <div className={s.wrapper}>
-//       <h1 className={s.title}>
-//         {status === 'success' ? 'Лист надіслано!' : 'Відновлення паролю'}
-//       </h1>
+                <motion.div
+                  whileHover={{
+                    scale: 1.02,
+                    boxShadow: '0px 0px 12px rgba(59,130,246,0.5)',
+                  }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ type: 'spring', stiffness: 300 }}
+                >
+                  <Button
+                    type="submit"
+                    label={
+                      isLoading ? 'Завантаження...' : 'Надіслати посилання'
+                    }
+                    disabled={isLoading}
+                    className="min-w-[120px] px-5 py-2 text-base md:min-w-[150px]"
+                  />
+                </motion.div>
+              </Form>
+            )}
+          </Formik>
+        </motion.div>
+      </div>
 
-//       <p className={s.description}>
-//         {status === 'success'
-//           ? 'Перевірте свою електронну пошту для подальших інструкцій.'
-//           : 'Введіть ваш email, щоб отримати посилання для відновлення паролю.'}
-//       </p>
+      <Modal
+        body={
+          <ModalNotification
+            title="Повідомлення"
+            message={message}
+            onConfirm={notificationModal.onClose}
+          />
+        }
+        isOpen={notificationModal.isOpen}
+        onClose={notificationModal.onClose}
+      />
+    </div>
+  );
+};
 
-//       {status === 'loading' && <Loader />}
-
-//       {status !== 'success' && (
-//         <Formik<ForgotPasswordFormCreds>
-//           onSubmit={handleSubmit}
-//           initialValues={initialValues}
-//           // validationSchema={getForgotPassFormSchema()}
-//         >
-//           {({ setFieldValue, isSubmitting, isValid, dirty }) => (
-//             <Form className={s.forgotPasswordForm}>
-//               <TextField
-//                 item={{
-//                   id: 'email',
-//                   label: 'Email',
-//                   type: 'email',
-//                   // placeholder: 'john@gmail.com',
-//                   required: true,
-//                 }}
-//               />
-
-//               <button
-//                 className={s.modalButton}
-//                 type="submit"
-//                 disabled={isSubmitting || !isValid || !dirty}
-//               >
-//                 {isSubmitting ? 'Надсилаємо...' : 'Надіслати'}
-//               </button>
-//             </Form>
-//           )}
-//         </Formik>
-//       )}
-
-//       {message && (
-//         <p
-//           className={`mt-4 text-center ${
-//             status === 'error' ? 'text-red-600' : 'text-green-600'
-//           }`}
-//         >
-//           {message}
-//         </p>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default ForgotPasswordForm;
+export default ForgotPasswordForm;

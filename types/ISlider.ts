@@ -6,8 +6,8 @@ export interface ISlider {
   isActive: boolean;
 }
 
-export interface IGetAllSlidersResponse {
+export interface IGetAllSlides {
   success: boolean;
+  slides: ISlider[];
   count: number;
-  sliders: ISlider[];
 }

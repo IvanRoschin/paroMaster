@@ -6,7 +6,7 @@ import { useState } from 'react';
 import ReactStars from 'react-stars';
 import { toast } from 'sonner';
 
-import { addTestimonial } from '@/actions/testimonials';
+import { addTestimonialAction } from '@/actions/testimonials';
 import { Button, FormField, Switcher } from '@/components/index';
 import { testimonialFormSchema } from '@/helpers/index';
 import { useAddData, useTestimonialModal } from '@/hooks/index';
@@ -25,7 +25,9 @@ const TestimonialForm = ({ productId, testimonial }: TestimonialFormProps) => {
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
 
-  const addTestimonialMutation = useAddData(addTestimonial, ['testimonials']);
+  const addTestimonialMutation = useAddData(addTestimonialAction, [
+    'testimonials',
+  ]);
   const testimonialModal = useTestimonialModal();
   const isAdmin = !!session?.user;
 

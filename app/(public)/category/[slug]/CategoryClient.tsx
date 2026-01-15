@@ -2,13 +2,12 @@
 
 import React, { Suspense } from 'react';
 
-import { ICategorySerialized } from '@/app/actions/categories';
 import { Breadcrumbs, CardView, ProductListSkeleton } from '@/app/components';
-import { IGoodUI, ISearchParams } from '@/types/index';
+import { ICategory, IGoodUI, ISearchParams } from '@/types/index';
 import { UserRole } from '@/types/IUser';
 
 interface CategoryClientProps {
-  category: ICategorySerialized;
+  category: ICategory;
   goods: IGoodUI[];
   search: ISearchParams;
   role: UserRole;

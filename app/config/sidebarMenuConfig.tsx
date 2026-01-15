@@ -1,4 +1,5 @@
 import { JSX } from 'react';
+import { LuFolderHeart } from 'react-icons/lu';
 import {
   MdBrandingWatermark,
   MdDashboard,
@@ -35,6 +36,7 @@ export const iconMap: Record<string, JSX.Element> = {
   changePassword: <MdVerifiedUser />,
   changeUserData: <MdSupervisedUserCircle />,
   changeDeliveryAddress: <TbCategoryPlus />,
+  favorites: <LuFolderHeart />,
   ordersHistroy: <MdShoppingBag />,
 };
 
@@ -57,6 +59,7 @@ export const titleMap: Record<string, string> = {
   changePassword: 'Змінити пароль',
   changeUserData: 'Змінити дані користувача',
   changeDeliveryAddress: 'Змінити адресу доставки',
+  favorites: 'Улюблені товари',
   ordersHistroy: 'Історія замовлень',
 };
 

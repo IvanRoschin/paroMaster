@@ -1,12 +1,13 @@
-import { getAllTestimonials } from '@/actions/testimonials';
-import Testimonials from '@/app/(admin)/components/sections/Testimonials';
-import prefetchData from '@/hooks/usePrefetchData';
-import { ISearchParams } from '@/types/searchParams';
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
+
+import { getAllTestimonialsAction } from '@/actions/testimonials';
+import Testimonials from '@/app/(admin)/components/sections/Testimonials';
+import prefetchData from '@/hooks/usePrefetchData';
+import { ISearchParams } from '@/types/searchParams';
 
 export default async function TestimonialsPage({
   searchParams,
@@ -16,7 +17,12 @@ export default async function TestimonialsPage({
   const params = await searchParams;
 
   const queryClient = new QueryClient();
-  await prefetchData(queryClient, getAllTestimonials, ['testimonials'], params);
+  await prefetchData(
+    queryClient,
+    getAllTestimonialsAction,
+    ['testimonials'],
+    params
+  );
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

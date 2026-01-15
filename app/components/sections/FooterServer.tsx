@@ -1,7 +1,6 @@
 // app/components/FooterServer.tsx
-import { getAllCategories } from '@/actions/categories';
+import { getAllCategoriesAction } from '@/actions/categories';
 import { ISearchParams } from '@/types/searchParams';
-
 import FooterClient from './FooterClient';
 
 interface FooterServerProps {
@@ -11,7 +10,7 @@ interface FooterServerProps {
 export default async function FooterServer({
   searchParams,
 }: FooterServerProps) {
-  const res = await getAllCategories(searchParams ?? {});
+  const res = await getAllCategoriesAction(searchParams ?? {});
   const categories = res?.categories ?? [];
 
   return <FooterClient categories={categories} />;

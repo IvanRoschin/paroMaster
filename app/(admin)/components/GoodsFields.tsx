@@ -1,11 +1,10 @@
 'use client';
 
 import { FieldArray, useFormikContext } from 'formik';
-import Image from 'next/image';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-import { Button } from '@/components/index';
+import { Button, NextImage } from '@/components/index';
 import { IGoodUI, IOrder } from '@/types/index';
 
 interface GoodsFieldsProps {
@@ -57,7 +56,7 @@ export const GoodsFields = ({
                   key={i}
                   className="border p-4 mb-4 flex items-center gap-4"
                 >
-                  <Image
+                  <NextImage
                     src={goodInfo?.src?.[0] || '/placeholder.png'}
                     alt={goodInfo?.title || 'item'}
                     width={150}

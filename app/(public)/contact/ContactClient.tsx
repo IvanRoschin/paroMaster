@@ -2,7 +2,7 @@
 
 import { FaCalendarAlt } from 'react-icons/fa';
 
-import { addNewLead } from '@/actions/leads';
+import { addNewLeadAction } from '@/actions/leads';
 import { Breadcrumbs, LeadForm } from '@/components';
 
 const containerStyle = {
@@ -81,10 +81,9 @@ export default function ContactClient() {
             </p>
           </div>
         </section>
-
         <section className="flex-1">
           <LeadForm
-            action={addNewLead}
+            action={addNewLeadAction}
             title="Замовити зворотній дзвінок"
             subtitle
           />

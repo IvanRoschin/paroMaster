@@ -1,23 +1,22 @@
-import { IGoodUI, ISearchParams, ITestimonial } from '@/types/index';
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
+import { getServerSession } from 'next-auth';
 
-import { getAllGoods } from './actions/goods';
-import { getAllSlides, IGetAllSlides } from './actions/slider';
-import {
-  getAllTestimonials,
-  IGetAllTestimonials,
-} from './actions/testimonials';
-import {
-  Advantages,
-  Description,
-  Slider,
-  TestimonialsList,
-} from './components';
+import { IGoodUI, ISearchParams } from '@/types/index';
+import { IGetAllSlides } from '@/types/ISlider';
+import { IGetAllTestimonials, ITestimonial } from '@/types/ITestimonial';
+import { UserRole } from '@/types/IUser';
+import { getAllGoodsAction } from './actions/goods';
+import { getAllSlidesAction } from './actions/slides';
+import { getAllTestimonialsAction } from './actions/testimonials';
+import { Advantages } from './components';
 import DailyDealsSection from './components/sections/DailyDealsSection';
+import BannerSlider from './components/sections/Sliders/BannerSlider';
+import TestimonialSlider from './components/sections/Sliders/TestimonialSlider';
+import { authOptions } from './config/authOptions';
 import { generateMetadata } from './helpers/generateMetadata';
 
 export const metadata = generateMetadata({
@@ -49,20 +48,23 @@ export default async function Home({
 }) {
   const params = await searchParams;
   const queryClient = new QueryClient();
-
+  const dehydrated = dehydrate(queryClient);
+  const safeState = JSON.parse(JSON.stringify(dehydrated));
+  const session = await getServerSession(authOptions);
+  const role = session?.user?.role as UserRole;
   // Prefetch данных с обработкой ошибок
   await Promise.allSettled([
     queryClient.prefetchQuery({
       queryKey: SLIDES_QUERY_KEY(params),
-      queryFn: () => getAllSlides(params),
+      queryFn: () => getAllSlidesAction(params),
     }),
     queryClient.prefetchQuery({
       queryKey: TESTIMONIALS_QUERY_KEY(params),
-      queryFn: () => getAllTestimonials(params),
+      queryFn: () => getAllTestimonialsAction(params),
     }),
     queryClient.prefetchQuery({
       queryKey: GOODS_QUERY_KEY(4),
-      queryFn: () => getAllGoods({ limit: '4' }),
+      queryFn: () => getAllGoodsAction({ limit: '4' }),
     }),
   ]);
 
@@ -70,7 +72,7 @@ export default async function Home({
   const goodsData = queryClient.getQueryData<GoodsData>(GOODS_QUERY_KEY(4));
   const goods = goodsData?.goods ?? [];
 
-  const slidesData = queryClient.getQueryData<IGetAllSlides>(
+  const slidesDataRaw = queryClient.getQueryData<IGetAllSlides>(
     SLIDES_QUERY_KEY(params)
   );
   const testimonialsDataRaw = queryClient.getQueryData<IGetAllTestimonials>(
@@ -81,22 +83,30 @@ export default async function Home({
   const testimonialsData = testimonialsDataRaw
     ? {
         ...testimonialsDataRaw,
-        testimonials: testimonialsDataRaw.testimonials.filter(
-          (t: ITestimonial) => t.isActive
-        ),
+        testimonials: testimonialsDataRaw.testimonials
+          .filter((t: ITestimonial) => t.isActive)
+          .map(t => JSON.parse(JSON.stringify(t))),
+      }
+    : null;
+
+  const slidesData = slidesDataRaw
+    ? {
+        ...slidesDataRaw,
+        slides: slidesDataRaw.slides.map(s => JSON.parse(JSON.stringify(s))),
       }
     : null;
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
+    <HydrationBoundary state={safeState}>
       <div className="container">
         {slidesData && testimonialsData && (
           <section className="hidden lg:block">
-            <Slider
+            <BannerSlider slides={slidesData.slides} role={role} />
+            {/* <Slider
               slidesData={slidesData}
               testimonialsData={testimonialsData}
               DescriptionComponent={Description}
-            />
+            /> */}
           </section>
         )}
         <section>
@@ -104,12 +114,13 @@ export default async function Home({
         </section>
         {testimonialsData && (
           <section>
-            <div className="flex flex-col">
+            <TestimonialSlider testimonials={testimonialsData.testimonials} />
+            {/* <div className="flex flex-col">
               <TestimonialsList
                 testimonialsData={testimonialsData}
                 title="Відгуки клієнтів"
               />
-            </div>
+            </div> */}
           </section>
         )}
         <section>

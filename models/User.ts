@@ -9,7 +9,7 @@ export interface IUserMethods {
 }
 
 type UserModel = Model<IUser, {}, IUserMethods>;
-type UserDocument = mongoose.HydratedDocument<IUser, IUserMethods>;
+export type UserDocument = mongoose.HydratedDocument<IUser, IUserMethods>;
 
 const userSchema = new mongoose.Schema<IUser, UserModel, IUserMethods>({
   name: { type: String, required: true },

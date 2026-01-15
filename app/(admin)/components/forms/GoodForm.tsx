@@ -225,7 +225,7 @@ const GoodFormContent: React.FC<{
         className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-3xl mx-auto mb-8"
       >
         {[
-          { id: 'isNew', label: 'Стан товару', labels: ['Б/У', 'Новий'] },
+          { id: 'isUsed', label: 'Стан товару', labels: ['Б/У', 'Новий'] },
           { id: 'isAvailable', label: 'Наявність', labels: ['Немає', 'Є'] },
           { id: 'isDailyDeal', label: 'Пропозиція дня', labels: ['Ні', 'Так'] },
         ].map(sw => (
@@ -362,7 +362,7 @@ const GoodForm: React.FC<GoodFormProps> = ({
     description: '',
     price: 0,
     discountPrice: 0,
-    isNew: true,
+    isUsed: false,
     isAvailable: true,
     isDailyDeal: false,
     dealExpiresAt: '',
@@ -400,7 +400,7 @@ const GoodForm: React.FC<GoodFormProps> = ({
         good?.discountPrice !== undefined && good?.discountPrice !== null
           ? good.discountPrice
           : (good?.price ?? 0),
-      isNew: good?.isNew ?? true,
+      isUsed: good?.isUsed ?? true,
       isAvailable: good?.isAvailable ?? true,
       isDailyDeal: good?.isDailyDeal ?? false,
       dealExpiresAt: good?.dealExpiresAt

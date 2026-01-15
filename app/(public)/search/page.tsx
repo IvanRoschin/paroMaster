@@ -6,7 +6,7 @@ import {
 import { Metadata, ResolvingMetadata } from 'next';
 import { getServerSession } from 'next-auth';
 
-import { getAllGoods } from '@/actions/goods';
+import { getAllGoodsAction } from '@/actions/goods';
 import { authOptions } from '@/app/config/authOptions';
 import prefetchData from '@/app/hooks/usePrefetchData';
 import { Breadcrumbs, EmptyState, InfiniteScroll } from '@/components/index';
@@ -77,7 +77,10 @@ export default async function SearchPage({
   const goodsKey = ['goods', params];
   const limit = role === UserRole.ADMIN ? 16 : 8;
 
-  await prefetchData(queryClient, getAllGoods, goodsKey, { ...params, limit });
+  await prefetchData(queryClient, getAllGoodsAction, goodsKey, {
+    ...params,
+    limit,
+  });
   const queryState = queryClient.getQueryState(goodsKey);
   const goods = (queryState?.data as { goods: IGoodUI[] })?.goods || [];
 

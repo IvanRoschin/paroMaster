@@ -26,7 +26,7 @@ interface ResetFormProps {
 interface BrandFormProps {
   brand?: IBrand;
   title?: string;
-  action: (data: FormData) => Promise<{
+  action: (values: IBrand) => Promise<{
     success: boolean;
     message: string;
     brand?: IBrand;
@@ -61,29 +61,21 @@ const BrandForm: React.FC<BrandFormProps> = ({ brand, title, action }) => {
     try {
       setIsLoading(true);
 
-      const formData = new FormData();
-      formData.append(
-        'slug',
-        slugify(values.name, { lower: true, strict: true })
-      );
+      // Формируем объект для отправки
+      const payload: Record<string, any> = {
+        ...values,
+        slug: slugify(values.name, { lower: true, strict: true }),
+      };
 
-      Object.keys(values).forEach(key => {
-        let value: any = (values as Record<string, any>)[key];
-        if (Array.isArray(value)) {
-          value.forEach(val => formData.append(key, val));
-        } else {
-          formData.append(key, value ?? '');
-        }
-      });
-
+      // Если обновляем, добавляем id
       if (isUpdating && brand?._id) {
-        formData.append('id', brand._id);
+        payload.id = brand._id;
       }
 
       if (isUpdating) {
-        await updateBrandMutation.mutateAsync(formData);
+        await updateBrandMutation.mutateAsync(payload);
       } else {
-        await addBrandMutation.mutateAsync(formData);
+        await addBrandMutation.mutateAsync(payload);
       }
 
       resetForm();
