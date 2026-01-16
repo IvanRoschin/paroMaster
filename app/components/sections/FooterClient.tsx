@@ -82,11 +82,12 @@ const FooterClient = ({ categories }: { categories: ICategory[] }) => {
           >
             <NextImage
               alt={name}
-              src={src}
-              width={20} // фиксированная ширина
-              height={20} // фиксированная высота
-              style={{ width: '20px', height: '20px', objectFit: 'contain' }} // CSS совпадает с пропсами
-              className="mr-4 transition-filter duration-300 ease-in-out group-hover:filter-primary filter-white"
+              useSkeleton
+              src={src || '/placeholder.svg'}
+              fill
+              width={20}
+              height={20}
+              className="w-5 h-5 mr-3  object-contain transition-filter duration-300 ease-in-out group-hover:filter-primary filter-white"
               priority
             />
             {name}

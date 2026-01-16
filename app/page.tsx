@@ -1,18 +1,19 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from '@tanstack/react-query';
 import { getServerSession } from 'next-auth';
 
 import { IGoodUI, ISearchParams } from '@/types/index';
 import { IGetAllSlides } from '@/types/ISlider';
 import { IGetAllTestimonials, ITestimonial } from '@/types/ITestimonial';
 import { UserRole } from '@/types/IUser';
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from '@tanstack/react-query';
+
 import { getAllGoodsAction } from './actions/goods';
 import { getAllSlidesAction } from './actions/slides';
 import { getAllTestimonialsAction } from './actions/testimonials';
-import { Advantages } from './components';
+import { Advantages, ShoppingCart } from './components';
 import DailyDealsSection from './components/sections/DailyDealsSection';
 import BannerSlider from './components/sections/Sliders/BannerSlider';
 import TestimonialSlider from './components/sections/Sliders/TestimonialSlider';
@@ -99,33 +100,12 @@ export default async function Home({
   return (
     <HydrationBoundary state={safeState}>
       <div className="container">
-        {slidesData && testimonialsData && (
-          <section className="hidden lg:block">
-            <BannerSlider slides={slidesData.slides} role={role} />
-            {/* <Slider
-              slidesData={slidesData}
-              testimonialsData={testimonialsData}
-              DescriptionComponent={Description}
-            /> */}
-          </section>
-        )}
-        <section>
-          <DailyDealsSection goods={goods} title="Пропозиції дня" />
-        </section>
+        {slidesData && <BannerSlider slides={slidesData.slides} role={role} />}
+        <DailyDealsSection goods={goods} title="Пропозиції дня" />
         {testimonialsData && (
-          <section>
-            <TestimonialSlider testimonials={testimonialsData.testimonials} />
-            {/* <div className="flex flex-col">
-              <TestimonialsList
-                testimonialsData={testimonialsData}
-                title="Відгуки клієнтів"
-              />
-            </div> */}
-          </section>
+          <TestimonialSlider testimonials={testimonialsData.testimonials} />
         )}
-        <section>
-          <Advantages title="Переваги" />
-        </section>
+        <Advantages title="Переваги" />
       </div>
     </HydrationBoundary>
   );

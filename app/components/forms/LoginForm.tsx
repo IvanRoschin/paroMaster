@@ -69,8 +69,20 @@ const LoginForm = () => {
   };
 
   const inputs = [
-    { label: 'Email', type: 'text', id: 'email', required: true },
-    { label: 'Password', type: 'password', id: 'password', required: true },
+    {
+      label: 'Email',
+      type: 'text',
+      id: 'email',
+      required: true,
+      autoComplete: 'username',
+    },
+    {
+      label: 'Password',
+      type: 'password',
+      id: 'password',
+      required: true,
+      autoComplete: 'current-password',
+    },
   ];
 
   return (

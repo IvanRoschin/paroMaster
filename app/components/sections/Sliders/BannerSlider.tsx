@@ -42,7 +42,7 @@ const BannerSlider: React.FC<BannerSliderProps> = ({
   const currentSlide = slides[activeIndex];
 
   return (
-    <section>
+    <section className="hidden lg:block">
       <div className="relative w-full max-w-5xl mx-auto rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-4 mt-10">
         {/* Слайд */}
         <div className="relative w-full h-[50vh] md:h-[60vh]">

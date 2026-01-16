@@ -1,5 +1,8 @@
 'use client';
 
+import { useEffect } from 'react';
+
+import { useAppStore } from '@/app/store/appStore';
 import {
   CartButton,
   FavoritesHeaderButton,
@@ -19,6 +22,26 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ user }) => {
+  const { favorites } = useAppStore();
+
+  const normalizeRole = (role: any): 'guest' | 'customer' | 'admin' => {
+    if (role === 'customer' || role === 'admin') return role;
+    return 'guest';
+  };
+  const setUserRole = favorites.setUserRole;
+  const clearFavorites = favorites.clearFavorites;
+
+  const rawRole = user?.role;
+  const userRole = normalizeRole(rawRole);
+
+  useEffect(() => {
+    setUserRole(userRole);
+
+    if (userRole === 'guest') {
+      clearFavorites;
+    }
+  }, [userRole, clearFavorites, setUserRole]);
+
   const isMobile = useMediaQuery('(max-width: 767px)');
   const isTablet = useMediaQuery('(min-width: 768px) and (max-width: 1024px)');
   const isDesktop = useMediaQuery('(min-width: 1025px)');
@@ -41,8 +64,7 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
         {!isMobile && <Search placeholder="Пошук товарів" />}
         <div className="flex gap-4">
           <CartButton />
-          <FavoritesHeaderButton />
-          <CompareHeaderBtn />
+          <FavoritesHeaderButton role={userRole} /> <CompareHeaderBtn />
         </div>
       </div>
     </div>

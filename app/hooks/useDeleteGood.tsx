@@ -3,7 +3,9 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { deleteGoodAction } from '@/app/actions/goods';
-import { useDeleteData, useDeleteModal } from '@/app/hooks';
+import { useDeleteData } from '@/app/hooks';
+
+import { useModal } from './useModal';
 
 export function useGoodDelete(refetch?: () => void, queryKey?: any) {
   const [goodToDelete, setGoodToDelete] = useState<{
@@ -11,7 +13,7 @@ export function useGoodDelete(refetch?: () => void, queryKey?: any) {
     title: string;
   } | null>(null);
 
-  const deleteModal = useDeleteModal();
+  const { isOpen, open, close } = useModal('delete');
 
   const { mutate: deleteGoodById } = useDeleteData(
     deleteGoodAction,
@@ -20,7 +22,7 @@ export function useGoodDelete(refetch?: () => void, queryKey?: any) {
 
   const handleDelete = (id: string, title: string) => {
     setGoodToDelete({ id, title });
-    deleteModal.onOpen();
+    open();
   };
 
   const handleDeleteConfirm = (title: string) => {
@@ -29,7 +31,7 @@ export function useGoodDelete(refetch?: () => void, queryKey?: any) {
     deleteGoodById(goodToDelete.id, {
       onSuccess: () => {
         toast.success(`Товар: ${title} видалено`);
-        deleteModal.onClose();
+        close();
         if (refetch) refetch();
       },
     });
@@ -39,6 +41,5 @@ export function useGoodDelete(refetch?: () => void, queryKey?: any) {
     goodToDelete,
     handleDelete,
     handleDeleteConfirm,
-    deleteModal,
   };
 }

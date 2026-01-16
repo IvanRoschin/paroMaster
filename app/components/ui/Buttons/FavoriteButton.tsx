@@ -10,9 +10,7 @@ interface FavoriteButtonProps {
 }
 
 export default function FavoriteButton({ good }: FavoriteButtonProps) {
-  // const { isFavorite, toggleFavorite } = useFavorites();
   const { favorites } = useAppStore();
-
   const favorite = favorites.isFavorite(good._id);
 
   return (

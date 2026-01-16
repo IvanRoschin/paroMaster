@@ -1,226 +1,236 @@
-type Props = {};
+'use client';
 
-const Users = (props: Props) => {
-  return <div>Users</div>;
-};
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { FaPen, FaTrash } from 'react-icons/fa';
+import { toast } from 'sonner';
 
-export default Users;
-// 'use client';
+import {
+  deleteUserAction,
+  getAllUsersAction,
+  updateUserAction,
+} from '@/actions/users';
+import { useModal } from '@/app/hooks/useModal';
+import {
+  Breadcrumbs,
+  Button,
+  DeleteConfirmation,
+  EmptyState,
+  ErrorMessage,
+  Loader,
+  Modal,
+  Pagination,
+  Switcher,
+} from '@/components/index';
+import { useDeleteData, useFetchData } from '@/hooks/index';
+import { ISearchParams, IUser } from '@/types/index';
+import { UserRole } from '@/types/IUser';
 
-// import Link from 'next/link';
-// import { useState } from 'react';
-// import { FaPen, FaTrash } from 'react-icons/fa';
-// import { toast } from 'sonner';
+export default function Users({
+  searchParams,
+}: {
+  searchParams: ISearchParams;
+}) {
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [userToDelete, setUserToDelete] = useState<{
+    id: string;
+    name: string;
+    surname: string;
+  } | null>(null);
 
-// import { deleteUser, getAllUsers, updateUser } from '@/actions/users';
-// import {
-//   Breadcrumbs,
-//   Button,
-//   DeleteConfirmation,
-//   EmptyState,
-//   ErrorMessage,
-//   Loader,
-//   Modal,
-//   Pagination,
-//   Switcher,
-// } from '@/components/index';
-// import { useDeleteData, useDeleteModal, useFetchData } from '@/hooks/index';
-// import { ISearchParams, IUser } from '@/types/index';
+  const { data, isLoading, isError, error, refetch } = useFetchData(
+    getAllUsersAction,
+    ['users'],
+    { status: statusFilter }
+  );
 
-// export default function Users({
-//   searchParams,
-// }: {
-//   searchParams: ISearchParams;
-// }) {
-//   const [statusFilter, setStatusFilter] = useState<string | null>(null);
-//   const [userToDelete, setUserToDelete] = useState<{
-//     id: string;
-//     name: string;
-//     surname: string;
-//   } | null>(null);
-//   const { data, isLoading, isError, error, refetch } = useFetchData(
-//     getAllUsers,
-//     ['users'],
-//     {
-//       status: statusFilter,
-//     }
-//   );
+  const [users, setUsers] = useState<IUser[]>([]);
 
-//   const { mutate: deleteUserById } = useDeleteData(deleteUser, [
-//     'users',
-//     userToDelete?.id,
-//   ]);
+  useEffect(() => {
+    if (data?.users) setUsers(data.users);
+  }, [data?.users]);
 
-//   const deleteModal = useDeleteModal();
+  const { mutate: deleteUserById } = useDeleteData(deleteUserAction, ['users']);
+  const { open, close, isOpen } = useModal('delete');
 
-//   const handleDelete = (id: string, name: string, surname: string) => {
-//     setUserToDelete({ id, name, surname });
-//     deleteModal.onOpen();
-//   };
+  const handleDelete = (id: string, name: string, surname: string) => {
+    setUserToDelete({ id, name, surname });
+    open();
+  };
 
-//   const handleDeleteConfirm = () => {
-//     if (userToDelete?.id) {
-//       deleteUserById(userToDelete.id);
-//       deleteModal.onClose();
-//     }
-//   };
+  const handleDeleteConfirm = () => {
+    if (userToDelete?.id) {
+      deleteUserById(userToDelete.id);
+      close();
+    }
+  };
 
-//   const handleStatusToggle = async (
-//     _id: string | undefined,
-//     isActive: boolean
-//   ) => {
-//     if (!_id) {
-//       toast.error('Invalid testimonial ID.');
-//       return;
-//     }
-//     try {
-//       const values = { _id, isActive: !isActive };
-//       await updateUser(values as Partial<IUser> & { _id: string });
-//       refetch();
-//       toast.success('Статус користувача змінено!');
-//     } catch (error) {
-//       toast.error('Unknown error occurred.');
-//       console.error('Error updating testimonial status:', error);
-//     }
-//   };
+  const handleStatusToggle = async (_id: string, isActive: boolean) => {
+    // Оптимистическое обновление
+    setUsers(prev =>
+      prev.map(u => (u._id === _id ? { ...u, isActive: !isActive } : u))
+    );
+    try {
+      await updateUserAction(_id, { isActive: !isActive });
+      toast.success(
+        `Статус користувача ${!isActive ? 'активний' : 'неактивний'}!`
+      );
+      refetch();
+    } catch (err) {
+      toast.error('Помилка при зміні статусу.');
+      console.error(err);
+    }
+  };
 
-//   if (isLoading) {
-//     return <Loader />;
-//   }
+  const handleRoleToggle = async (_id: string, role: UserRole) => {
+    const newRole: UserRole =
+      role === UserRole.ADMIN ? UserRole.CUSTOMER : UserRole.ADMIN;
+    setUsers(prev =>
+      prev.map(u => (u._id === _id ? { ...u, role: newRole } : u))
+    );
+    try {
+      await updateUserAction(_id, { role: newRole });
+      toast.success(`Роль змінена на ${newRole}!`);
+      refetch();
+    } catch (err) {
+      toast.error('Помилка при зміні ролі.');
+      console.error(err);
+    }
+  };
 
-//   if (isError) {
-//     return <ErrorMessage error={error} />;
-//   }
+  if (isLoading) return <Loader />;
+  if (isError) return <ErrorMessage error={error} />;
+  if (!users || users.length === 0) {
+    return (
+      <EmptyState
+        title="Користувачі відсутні"
+        actionLabel="Додати користувача"
+        actionHref="/admin/users/add"
+      />
+    );
+  }
 
-//   if (!data?.users || data.users.length === 0) {
-//     return (
-//       <EmptyState
-//         title="Адміни відсутні"
-//         actionLabel="Додати першого адміна"
-//         actionHref="/admin/users/add"
-//       />
-//     );
-//   }
+  const usersCount = data?.count || 0;
+  const page = searchParams.page ? Number(searchParams.page) : 1;
+  const limit = Number(searchParams.limit) || 10;
+  const totalPages = Math.ceil(usersCount / limit);
+  const pageNumbers: number[] = [];
+  const offsetNumber = 3;
+  for (let i = page - offsetNumber; i <= page + offsetNumber; i++) {
+    if (i >= 1 && i <= totalPages) pageNumbers.push(i);
+  }
 
-//   const usersCount = data?.count || 0;
+  return (
+    <div className="p-3 rounded-xl">
+      <Breadcrumbs />
 
-//   const page = searchParams.page ? Number(searchParams.page) : 1;
-//   const limit = Number(searchParams.limit) || 10;
-//   const totalPages = Math.ceil(usersCount / limit);
-//   const pageNumbers = [];
-//   const offsetNumber = 3;
+      <div className="flex items-center justify-between mb-8">
+        <p className="text-lg">
+          Додай нового{' '}
+          <span className="subtitle text-lg">користувача =&gt;</span>
+        </p>
+        <Link href="/admin/users/add">
+          <Button
+            type="submit"
+            label="Додати"
+            small
+            outline
+            color="border-green-400"
+          />
+        </Link>
+      </div>
 
-//   if (page) {
-//     for (let i = page - offsetNumber; i <= page + offsetNumber; i++) {
-//       if (i >= 1 && i <= totalPages) {
-//         pageNumbers.push(i);
-//       }
-//     }
-//   }
+      <table className="w-full text-xs">
+        <thead>
+          <tr className="bg-slate-300 font-semibold">
+            <td className="p-2 border-r-2 text-center">Ім&apos;я</td>
+            <td className="p-2 border-r-2 text-center">Email</td>
+            <td className="p-2 border-r-2 text-center">Телефон</td>
+            <td className="p-2 border-r-2 text-center">Створений</td>
+            <td className="p-2 border-r-2 text-center">Роль</td>
+            <td className="p-2 border-r-2 text-center">Статус</td>
+            <td className="p-2 border-r-2 text-center">Редагувати</td>
+            <td className="p-2 border-r-2 text-center">Видалити</td>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map(user => {
+            const rowClass = user.isActive ? '' : 'bg-gray-100 text-gray-400';
+            return (
+              <tr key={user._id} className={`border-b-2 ${rowClass}`}>
+                <td className="p-2 border-r-2 text-center">{user.name}</td>
+                <td className="p-2 border-r-2 text-center">{user.email}</td>
+                <td className="p-2 border-r-2 text-center">{user.phone}</td>
+                <td className="p-2 border-r-2 text-center">
+                  {user.createdAt
+                    ? new Date(user.createdAt).toLocaleDateString('uk-UA')
+                    : '-'}
+                </td>
+                <td className="p-2 border-r-2 text-center">
+                  <Switcher
+                    checked={user.role === 'admin'}
+                    onChange={() => handleRoleToggle(user._id!, user.role)}
+                    labels={['customer', 'admin']}
+                  />
+                </td>
+                <td className="p-2 border-r-2 text-center">
+                  <Switcher
+                    checked={user.isActive}
+                    onChange={() =>
+                      handleStatusToggle(user._id!, user.isActive)
+                    }
+                    labels={['неактивний', 'активний']}
+                  />
+                </td>
+                <td className="p-2 border-r-2 text-center">
+                  <Link
+                    href={`/admin/users/${user._id}`}
+                    className="flex items-center justify-center"
+                  >
+                    <Button
+                      type="submit"
+                      icon={FaPen}
+                      small
+                      outline
+                      color="border-yellow-400"
+                    />
+                  </Link>
+                </td>
+                <td className="p-2 text-center">
+                  <div className="flex justify-center">
+                    <Button
+                      type="button"
+                      icon={FaTrash}
+                      small
+                      outline
+                      color="border-red-400"
+                      onClick={() =>
+                        handleDelete(user._id!, user.name, user.surname)
+                      }
+                    />
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
 
-//   return (
-//     <div className="p-3 rounded-xl">
-//       <Breadcrumbs />
+      {totalPages > 1 && (
+        <Pagination count={usersCount} pageNumbers={pageNumbers} />
+      )}
 
-//       <div className="flex items-center justify-between mb-8">
-//         {/* <Search placeholder="Знайти товар" /> */}
-//         <p className=" text-lg">
-//           {' '}
-//           Додай нового <span className="subtitle text-lg">{'адміна =>'}</span>
-//         </p>{' '}
-//         <Link href="/admin/users/add">
-//           <Button
-//             type={'submit'}
-//             label="Додати"
-//             small
-//             outline
-//             color="border-green-400"
-//           />
-//         </Link>
-//       </div>
-//       <table className="w-full text-xs">
-//         <thead>
-//           <tr className="bg-slate-300 font-semibold">
-//             <td className="p-2 border-r-2 text-center">Ім&apos;я</td>
-//             <td className="p-2 border-r-2 text-center">Email</td>
-//             <td className="p-2 border-r-2 text-center">Телефон</td>
-//             <td className="p-2 border-r-2 text-center">Створений</td>
-//             <td className="p-2 border-r-2 text-center">Роль</td>
-//             <td className="p-2 border-r-2 text-center">Статус</td>
-//             <td className="p-2 border-r-2 text-center">Редагувати</td>
-//             <td className="p-2 border-r-2 text-center">Видалити</td>
-//           </tr>
-//         </thead>
-//         <tbody>
-//           {data.users.map((user: IUser) => {
-//             return (
-//               <tr key={user._id} className="border-b-2">
-//                 <td className="p-2 border-r-2 text-center">{user.name}</td>
-//                 <td className="p-2 border-r-2 text-center">{user.email}</td>
-//                 <td className="p-2 border-r-2 text-center">{user.phone}</td>
-//                 <td className="p-2 border-r-2 text-center">
-//                   {user.createdAt
-//                     ? new Date(user.createdAt).toLocaleDateString('uk-UA')
-//                     : '-'}
-//                 </td>
-//                 <td className="p-2 border-r-2 text-center">
-//                   {user.isAdmin ? 'admin' : 'user'}
-//                 </td>
-//                 <td className="p-2 border-r-2 text-center">
-//                   <Switcher
-//                     checked={user.isActive}
-//                     onChange={() =>
-//                       user._id && handleStatusToggle(user._id, user.isActive)
-//                     }
-//                   />
-//                 </td>
-//                 <td className="p-2 border-r-2 text-center">
-//                   <Link
-//                     href={`/admin/users/${user._id}`}
-//                     className="flex items-center justify-center"
-//                   >
-//                     <Button
-//                       type={'submit'}
-//                       icon={FaPen}
-//                       small
-//                       outline
-//                       color="border-yellow-400"
-//                     />
-//                   </Link>
-//                 </td>
-//                 <td className="p-2 text-center">
-//                   <Button
-//                     type="button"
-//                     icon={FaTrash}
-//                     small
-//                     outline
-//                     color="border-red-400"
-//                     onClick={() =>
-//                       user._id &&
-//                       handleDelete(user._id.toString(), user.name, user.surname)
-//                     }
-//                   />
-//                 </td>
-//               </tr>
-//             );
-//           })}
-//         </tbody>
-//       </table>
-//       {totalPages > 1 && (
-//         <Pagination count={usersCount} pageNumbers={pageNumbers} />
-//       )}
-//       {/* Модалка для підтвердження видалення */}
-//       <Modal
-//         body={
-//           <DeleteConfirmation
-//             onConfirm={handleDeleteConfirm}
-//             onCancel={() => deleteModal.onClose()}
-//             title={`адміна: ${userToDelete?.name} &nbsp; ${userToDelete?.surname}`}
-//           />
-//         }
-//         isOpen={deleteModal.isOpen}
-//         onClose={deleteModal.onClose}
-//       />
-//     </div>
-//   );
-// }
+      <Modal
+        body={
+          <DeleteConfirmation
+            onConfirm={handleDeleteConfirm}
+            onCancel={close}
+            title={`користувача: ${userToDelete?.name} ${userToDelete?.surname}`}
+          />
+        }
+        isOpen={isOpen}
+        onClose={close}
+      />
+    </div>
+  );
+}

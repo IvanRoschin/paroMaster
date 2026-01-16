@@ -14,6 +14,7 @@ import {
   NextImage,
 } from '@/app/components';
 import { useGoodDelete } from '@/app/hooks';
+import { useModal } from '@/app/hooks/useModal';
 import { useAppStore } from '@/app/store/appStore';
 import { formatCurrency } from '@/app/utils/formatCurrency';
 import { IGoodUI, ISearchParams } from '@/types';
@@ -32,8 +33,12 @@ export const ListView = ({
   refetch,
   searchParams,
 }: ListViewProps) => {
-  const { goodToDelete, handleDelete, handleDeleteConfirm, deleteModal } =
-    useGoodDelete(refetch, ['goods', searchParams]);
+  const { goodToDelete, handleDelete, handleDeleteConfirm } = useGoodDelete(
+    refetch,
+    ['goods', searchParams]
+  );
+
+  const { isOpen, open, close } = useModal('delete');
 
   const { cart } = useAppStore();
 
@@ -159,12 +164,12 @@ export const ListView = ({
         body={
           <DeleteConfirmation
             onConfirm={() => handleDeleteConfirm(goodToDelete?.title || '')}
-            onCancel={() => deleteModal.onClose()}
+            onCancel={close}
             title={`товар: ${goodToDelete?.title}`}
           />
         }
-        isOpen={deleteModal.isOpen}
-        onClose={deleteModal.onClose}
+        isOpen={isOpen}
+        onClose={close}
       />
     </ul>
   );

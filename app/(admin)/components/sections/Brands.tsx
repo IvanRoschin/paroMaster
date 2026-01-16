@@ -1,10 +1,10 @@
 'use client';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { FaPen, FaSortAlphaDown, FaSortAlphaUp, FaTrash } from 'react-icons/fa';
 
 import { deleteBrandAction, getAllBrandsAction } from '@/actions/brands';
+import { useModal } from '@/app/hooks/useModal';
 import {
   Breadcrumbs,
   Button,
@@ -16,7 +16,7 @@ import {
   NextImage,
   Pagination,
 } from '@/components/index';
-import { useDeleteData, useDeleteModal, useFetchData } from '@/hooks/index';
+import { useDeleteData, useFetchData } from '@/hooks/index';
 import { ISearchParams } from '@/types/index';
 
 export default function Brands({
@@ -36,23 +36,21 @@ export default function Brands({
     ['brands'],
     searchParams
   );
-
-  const deleteModal = useDeleteModal();
+  const { isOpen, open, close } = useModal('delete');
 
   const { mutate: deleteBrandById } = useDeleteData(deleteBrandAction, [
     'brands',
-    brandToDelete?.id,
   ]);
 
   const handleDelete = (id: string, name: string) => {
     setBrandToDelete({ id, name });
-    deleteModal.onOpen();
+    open();
   };
 
   const handleDeleteConfirm = () => {
     if (brandToDelete?.id) {
       deleteBrandById(brandToDelete.id);
-      deleteModal.onClose();
+      close();
     }
   };
 
@@ -170,16 +168,19 @@ export default function Brands({
                 </Link>
               </td>
               <td className="p-2 text-center">
-                <Button
-                  type="button"
-                  icon={FaTrash}
-                  small
-                  outline
-                  color="border-red-400"
-                  onClick={() =>
-                    brand._id && handleDelete(brand._id.toString(), brand.name)
-                  }
-                />
+                <div className="flex justify-center">
+                  <Button
+                    type="button"
+                    icon={FaTrash}
+                    small
+                    outline
+                    color="border-red-400"
+                    onClick={() =>
+                      brand._id &&
+                      handleDelete(brand._id.toString(), brand.name)
+                    }
+                  />
+                </div>
               </td>
             </tr>
           ))}
@@ -195,12 +196,12 @@ export default function Brands({
         body={
           <DeleteConfirmation
             onConfirm={handleDeleteConfirm}
-            onCancel={() => deleteModal.onClose()}
+            onCancel={close}
             title={`бренд: ${brandToDelete?.name}`}
           />
         }
-        isOpen={deleteModal.isOpen}
-        onClose={deleteModal.onClose}
+        isOpen={isOpen}
+        onClose={close}
       />
     </div>
   );
