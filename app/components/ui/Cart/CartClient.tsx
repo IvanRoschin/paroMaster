@@ -15,7 +15,6 @@ export const CartClient = ({
   onCancel: () => void;
   title?: string;
 }) => {
-  // const { cart } = useShoppingCart();
   const { cart } = useAppStore();
 
   const totalPrice = useMemo(
@@ -36,7 +35,6 @@ export const CartClient = ({
       <h2 className="text-xl font-semibold text-gray-800 border-b pb-4">
         🛍️ Товари у замовленні
       </h2>
-
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {cart.cart.map((item, indx) => (
           <CartItem key={indx} quantity={item.quantity} good={item.good} />

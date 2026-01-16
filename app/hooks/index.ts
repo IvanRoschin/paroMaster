@@ -1,13 +1,10 @@
 export { default as useAddData } from '@/hooks/useAddData';
 export { default as useBrandsEnum } from '@/hooks/useBrandsEnum';
-export { default as useCartModal } from '@/hooks/useCartModal';
 export { default as useCategoriesEnum } from '@/hooks/useCategoriesEnum';
 export { useCities } from '@/hooks/useCities';
 export { useCitySelection } from '@/hooks/useCitySelection';
 export { default as useDeleteData } from '@/hooks/useDeleteData';
 export { useGoodDelete } from '@/hooks/useDeleteGood';
-export { default as useDeleteModal } from '@/hooks/useDeleteModal';
-export { default as useFavoriteModal } from '@/hooks/useFavoriteModal';
 export { default as useFetchData } from '@/hooks/useFetchData';
 export { default as useFetchDataById } from '@/hooks/useFetchDataById';
 export { default as useMediaQuery } from '@/hooks/useMediaQuery';

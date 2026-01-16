@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { FaPen, FaTrash } from 'react-icons/fa';
 
 import { useGoodDelete } from '@/app/hooks';
+import { useModal } from '@/app/hooks/useModal';
 import { formatCurrency } from '@/app/utils/formatCurrency';
 import {
   Button,
@@ -26,8 +27,11 @@ export const CardView = ({
   refetch,
   searchParams,
 }: CardViewProps) => {
-  const { goodToDelete, handleDelete, handleDeleteConfirm, deleteModal } =
-    useGoodDelete(refetch, ['goods', searchParams]);
+  const { goodToDelete, handleDelete, handleDeleteConfirm } = useGoodDelete(
+    refetch,
+    ['goods', searchParams]
+  );
+  const { isOpen, open, close } = useModal('delete');
 
   return (
     <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-fr">
@@ -111,12 +115,12 @@ export const CardView = ({
         body={
           <DeleteConfirmation
             onConfirm={() => handleDeleteConfirm(goodToDelete?.title || '')}
-            onCancel={() => deleteModal.onClose()}
+            onCancel={close}
             title={`товар: ${goodToDelete?.title}`}
           />
         }
-        isOpen={deleteModal.isOpen}
-        onClose={deleteModal.onClose}
+        isOpen={isOpen}
+        onClose={close}
       />
     </div>
   );

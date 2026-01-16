@@ -5,11 +5,11 @@ import { useMemo, useState } from 'react';
 import { FaPen, FaPlus, FaTrash } from 'react-icons/fa';
 
 import { deleteGoodAction, getAllGoodsAction } from '@/actions/goods';
+import { useModal } from '@/app/hooks/useModal';
 import { EmptyState, NextImage } from '@/components/common';
 import DeleteConfirmation from '@/components/common/DeleteConfirmation';
 import { Button, Modal } from '@/components/ui';
 import useDeleteData from '@/hooks/useDeleteData';
-import useDeleteModal from '@/hooks/useDeleteModal';
 import useFetchData from '@/hooks/useFetchData';
 import { IGetAllGoods } from '@/types/IGood';
 
@@ -60,17 +60,17 @@ export default function Goods({
     goodToDelete?.id,
   ]);
 
-  const deleteModal = useDeleteModal();
+  const { isOpen, open, close } = useModal('delete');
 
   const handleDelete = (id: string, title: string) => {
     setGoodToDelete({ id, title });
-    deleteModal.onOpen();
+    open();
   };
 
   const handleDeleteConfirm = () => {
     if (goodToDelete?.id) {
       deleteGoodById(goodToDelete.id);
-      deleteModal.onClose();
+      close();
     }
   };
 
@@ -317,12 +317,12 @@ export default function Goods({
         body={
           <DeleteConfirmation
             onConfirm={handleDeleteConfirm}
-            onCancel={() => deleteModal.onClose()}
+            onCancel={close}
             title={`товар: ${goodToDelete?.title}`}
           />
         }
-        isOpen={deleteModal.isOpen}
-        onClose={deleteModal.onClose}
+        isOpen={isOpen}
+        onClose={close}
       />
     </div>
   );

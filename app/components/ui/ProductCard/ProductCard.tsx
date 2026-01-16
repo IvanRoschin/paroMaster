@@ -1,25 +1,21 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 
 import { useAppStore } from '@/app/store/appStore';
 import { formatCurrency } from '@/app/utils/formatCurrency';
-import { Button, NextImage } from '@/components/index';
+import {
+  Button,
+  CompareButton,
+  FavoriteButton,
+  NextImage,
+} from '@/components/index';
 import { IGoodUI } from '@/types/IGood';
 
 interface IProductCardProps {
   good: IGoodUI;
 }
-const CompareButtonClient = dynamic(
-  () => import('@/components/ui/Buttons/CompareButton'),
-  { ssr: false }
-);
-const FavoriteButtonClient = dynamic(
-  () => import('@/components/ui/Buttons/FavoriteButton'),
-  { ssr: false }
-);
 
 const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
   const { cart, compare, favorites } = useAppStore();
@@ -100,8 +96,8 @@ const ProductCard: React.FC<IProductCardProps> = ({ good }) => {
           {/* Блок кнопок сравнения и избранного + статусные метки */}
           <div className="flex flex-col items-end gap-1">
             <div className="flex gap-1">
-              <CompareButtonClient good={good} />
-              <FavoriteButtonClient good={good} />
+              <CompareButton good={good} />
+              <FavoriteButton good={good} />
             </div>
 
             <div className="flex flex-col">

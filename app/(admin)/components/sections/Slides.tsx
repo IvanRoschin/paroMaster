@@ -10,6 +10,7 @@ import {
   getAllSlidesAction,
   updateSlideAction,
 } from '@/app/actions/slides';
+import { useModal } from '@/app/hooks/useModal';
 import {
   Breadcrumbs,
   Button,
@@ -22,7 +23,7 @@ import {
   Pagination,
   Switcher,
 } from '@/components/index';
-import { useDeleteData, useDeleteModal, useFetchData } from '@/hooks/index';
+import { useDeleteData, useFetchData } from '@/hooks/index';
 import { ISearchParams } from '@/types/searchParams';
 
 export default function Slides({
@@ -52,17 +53,17 @@ export default function Slides({
     'slides',
   ]);
 
-  const deleteModal = useDeleteModal();
+  const { isOpen, open, close } = useModal('delete');
 
   const handleDelete = (id: string, title: string) => {
     setSlideToDelete({ id, title });
-    deleteModal.onOpen();
+    open();
   };
 
   const handleDeleteConfirm = () => {
     if (slideToDelete?.id) {
       deleteSliderById(slideToDelete.id);
-      deleteModal.onClose();
+      close();
     }
   };
 
@@ -208,12 +209,12 @@ export default function Slides({
         body={
           <DeleteConfirmation
             onConfirm={handleDeleteConfirm}
-            onCancel={() => deleteModal.onClose()}
+            onCancel={close}
             title={`слайд: ${slideToDelete?.title}`}
           />
         }
-        isOpen={deleteModal.isOpen}
-        onClose={deleteModal.onClose}
+        isOpen={isOpen}
+        onClose={close}
       />
     </div>
   );

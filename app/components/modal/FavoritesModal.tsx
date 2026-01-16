@@ -1,7 +1,7 @@
 'use client';
 
 import { useAppStore } from '@/app/store/appStore';
-import { Button, ProductCard } from '@/components';
+import { Button, ItemList } from '@/components';
 
 import Modal from './Modal';
 
@@ -14,7 +14,6 @@ export const FavoritesModal: React.FC<FavoritesModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  // const { favorites, toggleFavorite } = useFavorites();
   const { favorites } = useAppStore();
 
   return (
@@ -26,27 +25,30 @@ export const FavoritesModal: React.FC<FavoritesModalProps> = ({
           <h2 className="text-xl font-semibold text-gray-800 border-b pb-4">
             ❤️ Улюблені товари
           </h2>
-
           {favorites.favorites.length === 0 ? (
             <p className="text-gray-500 text-center py-10">
               У вас ще немає улюблених товарів
             </p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {favorites.favorites.map(good => (
-                <div key={good._id} className="relative">
-                  <ProductCard good={good} />
-                  <Button
-                    type="button"
-                    label="Видалити"
-                    small
-                    outline
-                    onClick={() => favorites.toggleFavorite(good)}
-                    className="absolute top-2 right-2"
-                  />
-                </div>
-              ))}
-            </div>
+            <ItemList
+              items={favorites.favorites}
+              onRemove={good => favorites.toggleFavorite(good)}
+            />
+            // <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            //   {favorites.favorites.map(good => (
+            //     <div key={good._id} className="relative">
+            //       <ProductCard good={good} />
+            //       <Button
+            //         type="button"
+            //         label="Видалити"
+            //         small
+            //         outline
+            //         onClick={() => favorites.toggleFavorite(good)}
+            //         className="absolute top-2 right-2"
+            //       />
+            //     </div>
+            //   ))}
+            // </div>
           )}
 
           <div className="flex justify-end pt-4">

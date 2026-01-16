@@ -9,6 +9,7 @@ import { IOrder } from '@/types/index';
 import { connectToDB } from '@/utils/dbConnect';
 
 import convertObjectIds from '../helpers/server/convertObjectIds';
+import { serializeForClient } from '../helpers/server/serializeForClient';
 import { serializeDoc } from '../lib';
 import { addCustomerService } from './customerService';
 import { addUserService } from './userService';
@@ -101,7 +102,7 @@ export async function getAllOrdersService(): Promise<{
 
   return {
     success: true,
-    orders: orders.map(o => serializeDoc<IOrder>(o)),
+    orders: orders.map(o => serializeForClient(o)),
     count,
   };
 }

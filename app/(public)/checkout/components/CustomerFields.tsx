@@ -16,6 +16,9 @@ interface CustomerFieldsProps {
   errors: any;
   touched: any;
   setFieldValue: (field: string, value: any) => void;
+  disabled?: boolean;
+  hidden?: boolean;
+  title?: string;
 }
 
 export const CustomerFields = ({
@@ -23,6 +26,9 @@ export const CustomerFields = ({
   errors,
   touched,
   setFieldValue,
+  disabled,
+  hidden,
+  title,
 }: CustomerFieldsProps) => {
   const {
     warehouses,
@@ -67,10 +73,31 @@ export const CustomerFields = ({
   };
 
   const customerInputs = [
-    { name: 'name', type: 'text', id: 'name', label: "Ім'я" },
-    { name: 'surname', type: 'text', id: 'surname', label: 'Прізвище' },
-    { name: 'email', type: 'email', id: 'email', label: 'Email' },
-    { name: 'phone', type: 'tel', id: 'phone', label: 'Телефон' },
+    { name: 'name', type: 'text', id: 'name', label: "Ім'я", disabled, hidden },
+    {
+      name: 'surname',
+      type: 'text',
+      id: 'surname',
+      label: 'Прізвище',
+      disabled,
+      hidden,
+    },
+    {
+      name: 'email',
+      type: 'email',
+      id: 'email',
+      label: 'Email',
+      disabled,
+      hidden,
+    },
+    {
+      name: 'phone',
+      type: 'tel',
+      id: 'phone',
+      label: 'Телефон',
+      disabled,
+      hidden,
+    },
     {
       id: 'payment',
       label: 'Оберіть спосіб оплати',
@@ -84,7 +111,7 @@ export const CustomerFields = ({
 
   return (
     <>
-      <h3 className="text-xl font-semibold">Замовник</h3>
+      <h3 className="text-xl subtitle font-semibold">{title || 'Замовник'}</h3>
       {customerInputs.map((input, i) => (
         <FormField
           key={i}

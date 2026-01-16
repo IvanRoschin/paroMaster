@@ -1,3 +1,4 @@
+export { default as ModalNotification } from '@/app/components/modal/ModalNotification';
 export { default as Breadcrumbs } from '@/components/common/Breadcrumbs';
 export { CardView } from '@/components/common/CardView';
 export { default as CatalogPage } from '@/components/common/CatalogPage';
@@ -6,10 +7,10 @@ export { default as EmptyState } from '@/components/common/EmptyState';
 export { default as FormField } from '@/components/common/FormField';
 export { default as GoodsSection } from '@/components/common/GoodsSection';
 export { default as InfiniteScroll } from '@/components/common/InfiniteScroll';
+export { default as ItemList } from '@/components/common/ItemsList';
 export { ListView } from '@/components/common/ListView';
 export { default as Loader } from '@/components/common/Loader';
 export { default as Logo } from '@/components/common/Logo';
-export { default as ModalNotification } from '@/app/components/modal/ModalNotification';
 export { default as NextImage } from '@/components/common/NextImage';
 export { default as Pagination } from '@/components/common/Pagination';
 export { default as Search } from '@/components/common/Search';

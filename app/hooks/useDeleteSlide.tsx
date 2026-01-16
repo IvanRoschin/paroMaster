@@ -3,7 +3,9 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { deleteSlideAction } from '@/app/actions/slides';
-import { useDeleteData, useDeleteModal } from '@/app/hooks';
+import { useDeleteData } from '@/app/hooks';
+
+import { useModal } from './useModal';
 
 export function useSlideDelete(refetch?: () => void, queryKey?: any) {
   const [slideToDelete, setSlideToDelete] = useState<{
@@ -11,7 +13,7 @@ export function useSlideDelete(refetch?: () => void, queryKey?: any) {
     title: string;
   } | null>(null);
 
-  const deleteModal = useDeleteModal();
+  const deleteModal = useModal('delete');
 
   const { mutate: deleteSlideById } = useDeleteData(
     deleteSlideAction,
@@ -20,7 +22,7 @@ export function useSlideDelete(refetch?: () => void, queryKey?: any) {
 
   const handleDelete = (id: string, title: string) => {
     setSlideToDelete({ id, title });
-    deleteModal.onOpen();
+    deleteModal.open();
   };
 
   const handleDeleteConfirm = (title: string) => {
@@ -29,7 +31,7 @@ export function useSlideDelete(refetch?: () => void, queryKey?: any) {
     deleteSlideById(slideToDelete.id, {
       onSuccess: () => {
         toast.success(`Слайд: ${title} видалено`);
-        deleteModal.onClose();
+        deleteModal.close();
         if (refetch) refetch();
       },
     });

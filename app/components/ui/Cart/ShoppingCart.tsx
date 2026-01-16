@@ -1,28 +1,22 @@
 'use client';
 import { useRouter } from 'next/navigation';
 
-import { CartClient, Modal } from '@/components/index';
-import { useCartModal } from '@/hooks/index';
+import { CartClient, Modal } from '@/components';
+import { useModal } from '@/hooks/useModal';
 
 export function ShoppingCart() {
-  const cartModal = useCartModal();
+  const { isOpen, close } = useModal('cart');
   const { push } = useRouter();
 
   const onConfirm = () => {
-    cartModal.onClose();
+    close();
     push('/checkout');
   };
-
   return (
     <Modal
-      isOpen={cartModal.isOpen}
-      onClose={cartModal.onClose}
-      body={
-        <CartClient
-          onConfirm={onConfirm}
-          onCancel={() => cartModal.onClose()}
-        />
-      }
+      isOpen={isOpen}
+      onClose={close}
+      body={<CartClient onConfirm={onConfirm} onCancel={close} />}
     />
   );
 }
